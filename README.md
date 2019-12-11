@@ -8,8 +8,7 @@ See <https://info.gbv.de/display/DiB/BARTOC-Import> for additional information (
 
 ## Requirements
 
-* Keep BARTOC URIs
+* Keep all BARTOC URIs and most URLs
 * Provide a nice web interface
 * Use JSKOS API (in particular DANTE) as backend
 * Serve HTML, JSKOS, and RDF
-

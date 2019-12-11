@@ -1,6 +1,32 @@
 {
   "verbosity": true,
   "port": 3880,
-  "title": "BARTOC.org",
-  "subtitle": "Bibliographic Register of Thesauri, Ontologies & Classifications"
+  "name": "BARTOC.org",
+  "fullname": "Basic Register of Thesauri, Ontologies & Classifications",
+  "menu": [
+    {
+      "url": "/about",
+      "prefLabel": { "en": "About" }
+    },
+    {
+      "url": "/contact",
+      "prefLabel": { "en": "Contact" }
+    },
+    {
+      "url": "/top-rated-points",
+      "prefLabel": { "en": "Top-rated content" }
+    },
+    {
+      "url": "/tracker",
+      "prefLabel": { "en": "Recent content" }
+    },
+    {
+      "url": "https://bartoc-fast.ub.unibas.ch/bartocfast",
+      "prefLabel": { "en": "Federated Search Tool" }
+    }
+  ],
+  "license": {
+    "name": "Public Domain Dedication and License v1.0",
+    "url": "http://www.opendatacommons.org/licenses/pddl/1.0/"
+  }
 }

@@ -1,0 +1,13 @@
+footer {
+  padding: 25px 0 55px 0;
+  margin-top: 2em;
+}
+footer a {
+  color: #fff;
+}
+header {
+  margin-bottom: 1.5em;
+}
+.bg-primary {
+  background-color: #961300!important;
+}
