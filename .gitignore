@@ -1,0 +1,20 @@
+.DS_Store
+node_modules/
+.env
+config*.json
+!config.default.json
+!config.test.json
+!config/config.default.json
+!config/config.test.json
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln

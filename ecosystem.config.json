@@ -1,0 +1,4 @@
+{
+  "name": "bartoc.org",
+  "script": "./server.js"
+}
