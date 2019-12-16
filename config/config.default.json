@@ -1,6 +1,6 @@
 {
   "verbosity": true,
-  "port": 3880,
+  "port": 3883,
   "name": "BARTOC.org",
   "fullname": "Basic Register of Thesauri, Ontologies & Classifications",
   "menu": [
