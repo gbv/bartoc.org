@@ -1,0 +1,39 @@
+<%- include('header') %>
+
+<% if (item.definition) { %>
+<!-- TODO: support raw HTML -->
+<p><%= item.definition.en %></p>
+<% } %>
+
+<dl>
+  <dt>Link</dt>
+  <dd><%- include('link', { url: item.url }) %></dd>
+  <% if (item.endpoint) { %>
+    <dt>API</dt>
+    <dd><%- include('link', { url: item.endpoint }) %></dd>
+  <% } %>
+  <% if (item.startDate) { %>
+    <dt>Created</dt>
+    <dd><%= item.startDate %></dd>
+  <% } %>
+  <% if (item.endDate) { %>
+    <dt>Dissolved</dt>
+    <dd><%= item.endDate %></dd>
+  <% } %>
+  <!-- TODO: Wikidata, DDC, Topic -->
+  <dt>Type</dt>
+  <dd>
+    <% if ((item.type || [])[1] === "http://bartoc.org/full-repository") { %>
+      <a href="/full-repository">
+         terminology
+         <%= item.endpoint ? "service" : "repository" %>
+      </a>
+    <% } else { %>
+      terminology registry
+    <% } %>
+  </dd>
+</dl>
+
+<!-- TODO: created, modified -->
+
+<%- include('footer') %>

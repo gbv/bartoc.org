@@ -1,0 +1,40 @@
+<%- include('header') %>
+<p>
+  BARTOC knows about <%= registries.registries.length %> terminology registries,
+  including itself. Some registries also provide access to full terminologies
+  either via an API (terminology <em>service</em>) or by other means
+  (terminology <em>repository</em>).
+</p>
+<table class="table table-borderless table-hover">
+  <thead class="thead-light">
+    <th>Name</th>
+    <th>Homepage</th>
+    <th></th>
+    <th>Type</th>
+  </thead>
+  <tbody>
+   <% registries.registries.forEach(item => { %>
+    <tr>
+      <td>
+        <a href="/en/node/<%= item.uri.split("/").pop() %>"><%= item.prefLabel.en %></a>
+      </td>
+      <td>
+       <% if (item.url) { %><%- include("link", item) %><% } %>
+      </td>
+      <td>
+       <% if (item.endpoint) { %>
+        <%- include('link', { url: item.endpoint, label: "API" }) %></dd>
+       <% } %>
+      </td>
+      <td>
+       <% if ((item.type || [])[1] === "http://bartoc.org/en/full-repository") { %>
+         <%= item.endpoint ? "service" : "repository" %>
+       <% } else { %>
+         registry
+       <% } %>
+      </td>
+    </tr>
+   <% }) %>
+  </tbody>
+</table>
+<%- include('footer') %>

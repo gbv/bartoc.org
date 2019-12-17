@@ -1,11 +1,26 @@
     </div>
+    <footer class="container-fluid bg-light clearfix" style="margin-top: 2em; padding: 1em">
+      <div class="container">
+        <a href="http://www.ub.unibas.ch/"><img src="/img/ub_logo_neu.png"></a>
+        <a href="https://coli-conc.gbv.de/"><img src="/img/coli-conc.png"></a>
+        <a href="http://www.isko.org/"><img src="/img/logo-isko.png"></a>
+        <a href="http://www.vocabularyserver.com/"><img src="/img/logo-tematres-home.png"></a>
+        <a href="https://dans.knaw.nl/en"><img src="/img/danslogo.png"></a>
+      </div>
+    </footer>
     <footer class="container-fluid text-secondary bg-dark clearfix">
       <div class="container">
-        <p>
-          <%= config.name %> data is made available under the
-          <a href="<%= config.license.url %>"><%= config.license.name %></a>
-          <br/><a href="/download">download</a>
-        </p>
+        <div class="row">
+          <div class="col-md-10">
+            <p>
+              <%= config.name %> data is made available under the
+              <a href="<%= config.license.url %>"><%= config.license.name %></a>
+            </p>
+          </div>
+          <div class="col-md-2">
+            <p class="text-right"><a href="/download">Download</a></p>
+          </div>
+        </div>
       </div>
     </footer>
   </body>

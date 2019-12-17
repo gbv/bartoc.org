@@ -13,6 +13,10 @@
       "prefLabel": { "en": "Contact" }
     },
     {
+      "url": "/terminology-registries",
+      "prefLabel": { "en": "Registries" }
+    },
+    {
       "url": "/top-rated-points",
       "prefLabel": { "en": "Top-rated content" }
     },
@@ -25,6 +29,11 @@
       "prefLabel": { "en": "Federated Search Tool" }
     }
   ],
+  "redirects": {
+    "/en/content/about": "/about",
+    "/en": "/",
+    "/Full-Repository/Full-terminology-repository-provides-terminology-content": "/full-repository"
+  },
   "license": {
     "name": "Public Domain Dedication and License v1.0",
     "url": "http://www.opendatacommons.org/licenses/pddl/1.0/"

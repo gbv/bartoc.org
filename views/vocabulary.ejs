@@ -1,5 +1,8 @@
 <%- include('header') %>
-<p>
-  This page should show the vocabulary <%= scheme.prefLabel.en %>
-</p>
+
+<% if (item.definition) { %>
+<!-- TODO: support raw HTML -->
+<p><%= item.definition.en %></p>
+<% } %>
+
 <%- include('footer') %>
