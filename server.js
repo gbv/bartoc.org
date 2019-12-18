@@ -2,9 +2,13 @@ const config = require("./config")
 const page = require('./routes/page')
 
 // static data
-const registries = require('./static/terminology-registries')
+const ndjson = require('./utils/ndjson')
+const csv = require('./utils/csv')
+const registries = ndjson('./data/registries.ndjson')
+const eurovoc = csv('./data/eurovoc-ids.csv')
 
 config.log(`Running in ${config.env} mode.`)
+config.log(`Read ${registries.length} registries.`)
 
 // Initialize express with settings
 const express = require("express")
@@ -18,15 +22,28 @@ app.set("view engine", "ejs")
 // static assets
 app.use(express.static('static'))
 
+// redirect old topic URLs to search page
+for (let [from, id] of eurovoc) {
+  const to = `/search?subject=http://eurovoc.europa.eu/${id}`
+  app.get(from, (req, res) => res.redirect(to))
+}
+
 // permanently moved URLs from legacy BARTOC.org
-for (const [from, to] of Object.entries(config.redirects)) {
-  app.get(from, (req, res) => { res.redirect(301, to) })
+for (let [from, to] of Object.entries(config.redirects)) {
+  app.get(from, (req, res) => res.redirect(301, to))
 }
 
 // root page
 app.get("/", (req, res) => {
   req.params = { page: 'index' }
   page(req, res)
+})
+
+// search
+app.get("/search", (req, res) => {
+  const { path, query } = req
+  const title = "Search"
+  res.render("search", { config, title, path, query })
 })
 
 // pages
@@ -38,20 +55,21 @@ app.get("/([a-z][a-z])/:page([a-z-]+)", (req, res) => {
 app.get("/terminology-registries", (req, res) => {
   res.setHeader("Content-Type", "text/html")
   const { path } = req
-  const title = registries.prefLabel.en
+  const title = "Terminology Registries"
   res.render("registries", { config, registries, title, path })
 })
 
 // BARTOC id
 app.get("/en/node/:id([0-9]+)", (req, res, next) => {
-  const { path } = req
+  var { path } = req
   const uri = 'http://bartoc.org/en/node/' + req.params.id
 
   // lookup URI as registry
-  var item = registries.registries.find(item => item.uri == uri)
+  var item = registries.find(item => item.uri == uri)
   if (item) {
     res.setHeader("Content-Type", "text/html")
     const title = item.prefLabel.en
+    path = "/terminology-registries"
     res.render("registry", { config, item, title, path })
   }
 

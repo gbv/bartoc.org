@@ -1,0 +1,11 @@
+<%- include('header') %>
+
+<p><em>not properly implemented yet!</em></p>
+
+<p>
+<% if (query.subject) { %>
+  subject=<%- include('link', { url: query.subject }) %>
+<% } %>
+</p>
+
+<%- include('footer') %>

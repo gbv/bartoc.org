@@ -1,25 +1,26 @@
 <%- include('header') %>
 <p>
-  BARTOC knows about <%= registries.registries.length %> terminology registries,
+  BARTOC knows about <b><%= registries.length %> terminology registries</b>,
   including itself. Some registries also provide access to full terminologies
-  either via an API (terminology <em>service</em>) or by other means
-  (terminology <em>repository</em>).
+  either via an API (terminology <b>service</b>) or by other means
+  (terminology <b>repository</b>).
 </p>
 <table class="table table-borderless table-hover">
   <thead class="thead-light">
     <th>Name</th>
-    <th>Homepage</th>
-    <th></th>
+    <th colspan="2">Links</th>
     <th>Type</th>
   </thead>
   <tbody>
-   <% registries.registries.forEach(item => { %>
+   <% registries.forEach(item => { %>
     <tr>
       <td>
         <a href="/en/node/<%= item.uri.split("/").pop() %>"><%= item.prefLabel.en %></a>
       </td>
       <td>
-       <% if (item.url) { %><%- include("link", item) %><% } %>
+       <% if (item.url) { %>
+        <a href="<%= item.url %>" title="homepage"><i class="fas fa-home"></i></a>
+        <% } %>
       </td>
       <td>
        <% if (item.endpoint) { %>
@@ -27,8 +28,8 @@
        <% } %>
       </td>
       <td>
-       <% if ((item.type || [])[1] === "http://bartoc.org/en/full-repository") { %>
-         <%= item.endpoint ? "service" : "repository" %>
+       <% if (item.type[1] == "http://bartoc.org/full-repository") { %>
+         <b><%= item.endpoint ? "service" : "repository" %></b>
        <% } else { %>
          registry
        <% } %>

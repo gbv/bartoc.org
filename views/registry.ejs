@@ -1,9 +1,5 @@
 <%- include('header') %>
-
-<% if (item.definition) { %>
-<!-- TODO: support raw HTML -->
-<p><%= item.definition.en %></p>
-<% } %>
+<%- include('definition') %>
 
 <dl>
   <dt>Link</dt>
@@ -20,7 +16,23 @@
     <dt>Dissolved</dt>
     <dd><%= item.endDate %></dd>
   <% } %>
-  <!-- TODO: Wikidata, DDC, Topic -->
+  <% wikidata = (item.identifier || []).filter(id => id.startsWith("http://www.wikidata.org/entity"))
+     if (wikidata.length) { %>
+    <dt>Wikidata</dt>
+    <dd><%- include('link', { url: wikidata[0] }) %></dd>
+  <% } %>
+  <% if (item.subject) { %>
+    <dt>Topic</dt>
+    <dd>
+      <ul>
+      <% for(let subject of item.subject) {
+          url = "/search?subject=" + encodeURI(subject.uri)
+        %>
+        <li><%- include('link', { url, label: subject.uri }) %></li>
+      <% } %>
+      </ul>
+    </dd>
+  <% } %>
   <dt>Type</dt>
   <dd>
     <% if ((item.type || [])[1] === "http://bartoc.org/full-repository") { %>
