@@ -9,7 +9,7 @@ This repository contains the new web interface of BARTOC.org, run at [VZG](https
 ## Functional Requirements
 
 * Keep all BARTOC URIs and most URLs
-* Provide a nice web interface
+* Provide a nice web interface, possibly multilingual
 * Use JSKOS API (in particular DANTE) as backend
 * Serve HTML, JSKOS, and RDF
 
@@ -48,6 +48,5 @@ Update an existing installation:
 ~~~sh
 git pull
 npm install
-pm2 restart bartoc
+pm2 restart bartoc.org
 ~~~
-
