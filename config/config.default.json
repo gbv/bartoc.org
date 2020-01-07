@@ -32,7 +32,10 @@
   "redirects": {
     "/en/content/about": "/about",
     "/en": "/",
-    "/Full-Repository/Full-terminology-repository-provides-terminology-content": "/full-repository"
+    "/Full-Repository/Full-terminology-repository-provides-terminology-content": "/full-repository",
+    "/en/search/basic": "/search",
+    "/en/title-finder": "/search",
+    "/en/browse": "/search"
   },
   "license": {
     "name": "Public Domain Dedication and License v1.0",

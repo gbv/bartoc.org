@@ -1,11 +1,23 @@
 <%- include('header') %>
 
-<p><em>not properly implemented yet!</em></p>
-
 <p>
 <% if (query.subject) { %>
   subject=<%- include('link', { url: query.subject }) %>
 <% } %>
 </p>
+
+<p><%- result.length %> records found</p>
+
+<hr>
+
+<% for (let item of result) { %>
+<%- include('vocabulary-short', { item }) %>
+<% } %>
+
+<% if (result.length < result.totalCount) { %>
+  <p>TODO: pagination (<%- result.totalCount %> total</p>
+<% } %>
+
+<hr>
 
 <%- include('footer') %>

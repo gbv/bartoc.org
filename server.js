@@ -1,5 +1,7 @@
 const config = require("./config")
 const page = require('./routes/page')
+const provider = require('./src/provider')()
+const utils = require('./src/utils')
 
 // static data
 const ndjson = require('./utils/ndjson')
@@ -51,10 +53,11 @@ app.get("/", (req, res) => {
 })
 
 // search
-app.get("/search", (req, res) => {
+app.get("/search", async (req, res) => {
   const { path, query } = req
   const title = "Search"
-  res.render("search", { config, title, path, query })
+  var result = await provider.getSchemes()
+  res.render("search", { config, title, path, query, result, utils })
 })
 
 // static pages
@@ -68,7 +71,7 @@ app.get("/terminology-registries", (req, res) => {
   res.setHeader("Content-Type", "text/html")
   const { path } = req
   const title = "Terminology Registries"
-  res.render("registries", { config, registries, title, path })
+  res.render("registries", { config, registries, title, path, utils })
 })
 
 // BARTOC id
@@ -82,16 +85,15 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   // lookup URI as registry
   var item = registries.find(item => item.uri == uri)
   if (item) {
-    title = item.prefLabel.en
+    title = utils.label(item.prefLabel).value
     path = "/terminology-registries"
     view = "registry"
   } else {
-      // TODO: lookup URI as terminology
-    item = {
-      prefLabel: { en: "Dummy record" },
-      definition: { en: ["this record is only shown for testing"] }
+    const result = await provider.getSchemes({ id: uri })
+    if (result.length) {
+      item = result[0]
+      title = utils.label(item.prefLabel).value
     }
-    title = item.prefLabel.en
   }
 
   if (item) {
@@ -102,15 +104,14 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
     } else if (query.format === "nt") {
       res.setHeader("Content-Type", "application/n-triples")
       const jsonld = require("jsonld")
-      
-      // TODO: catch and handle errors? 
+
+      // TODO: catch and handle errors?
       item["@context"] = require('./static/context.json')
       const ntriples = await jsonld.toRDF(item, {format: 'application/n-quads'})
 
       res.send(ntriples)
     } else {
-      res.setHeader("Content-Type", "text/html")
-      res.render(view, { config, item, title, path })
+      res.render(view, { config, item, title, path, utils })
     }
   } else {
     next()
@@ -129,7 +130,7 @@ app.use( (req, res, next) => {
     res.type("txt").send(title)
   } else {
     res.setHeader("Content-Type", "text/html")
-    res.render("404", { config, title, path })
+    res.render("404", { config, title, path, utils })
   }
 })
 

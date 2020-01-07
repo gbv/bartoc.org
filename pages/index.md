@@ -4,7 +4,7 @@ title:
 
 <img src="/img/bartoc-logo.svg" />
 
-<form class="main-form">
+<form class="main-form" action="/search">
   <div class="form-group">
     <label for="search-vocabulary">Search for vocabularies</label>
     <div class="row">

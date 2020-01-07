@@ -5,4 +5,66 @@
 <p><%= item.definition.en %></p>
 <% } %>
 
+<!-- TODO: merge with registry.ejs -->
+<p><%- item.notation[0] %></p>
+
+<dl>
+  <dt>URI</dt>
+  <dd><%- include('link', { url: item.uri }) %></dd>
+
+  <% if (item.url) { %>
+    <dt>Link</dt>
+    <dd><%- include('link', { url: item.url }) %></dd>
+  <% } %>
+  <% if (item.identifier) { %>
+    <dt>Identifier</dt>
+    <dd>
+     <ul>
+      <% for (let id of item.identifier) { %>
+        <li><%- id %></li>
+      <% } %>
+     </ul>
+    </dd>
+  <% } %>
+  <% if (item.languages) { %>
+    <dt>Languages</dt>
+    <dd>
+     <ul>
+      <% for (let lang of item.languages) { %>
+        <li><%- lang %></li>
+      <% } %>
+     </ul>
+    </dd>
+  <% } %>
+
+  <% if (item.startDate) { %>
+    <dt>Created</dt>
+    <dd><%= item.startDate %></dd>
+  <% } %>
+  <% if (item.endDate) { %>
+    <dt>Dissolved</dt>
+    <dd><%= item.endDate %></dd>
+  <% } %>
+  <% wikidata = (item.identifier || []).filter(id => id.startsWith("http://www.wikidata.org/entity"))
+     if (wikidata.length) { %>
+    <dt>Wikidata</dt>
+    <dd><%- include('link', { url: wikidata[0] }) %></dd>
+  <% } %>
+  <% if (item.subject) { %>
+    <dt>Topic</dt>
+    <dd>
+      <ul>
+      <% for(let subject of item.subject) {
+          url = "/search?subject=" + encodeURI(subject.uri)
+        %>
+        <li><%- include('link', { url, label: subject.uri }) %></li>
+      <% } %>
+      </ul>
+    </dd>
+  <% } %>
+</dl>
+
+<p>TODO: show created, modified, license, publisher...</p>
+
+
 <%- include('footer') %>
