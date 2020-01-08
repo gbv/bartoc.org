@@ -9,11 +9,11 @@
       "prefLabel": { "en": "About" }
     },
     {
-      "url": "/contact",
-      "prefLabel": { "en": "Contact" }
+      "url": "/vocabularies",
+      "prefLabel": { "en": "Vocabularies" }
     },
     {
-      "url": "/terminology-registries",
+      "url": "/registries",
       "prefLabel": { "en": "Registries" }
     },
     {
@@ -27,15 +27,21 @@
     {
       "url": "https://bartoc-fast.ub.unibas.ch/bartocfast",
       "prefLabel": { "en": "Federated Search Tool" }
+    },
+    {
+      "url": "/contact",
+      "prefLabel": { "en": "Contact" }
     }
   ],
   "redirects": {
-    "/en/content/about": "/about",
     "/en": "/",
-    "/Full-Repository/Full-terminology-repository-provides-terminology-content": "/full-repository",
-    "/en/search/basic": "/search",
-    "/en/title-finder": "/search",
-    "/en/browse": "/search"
+    "/en/content/about": "/about",
+    "/terminology-registries": "/registries",
+    "/en/search/basic": "/vocabularies",
+    "/en/title-finder": "/vocabularies",
+    "/en/browse": "/vocabularies",
+    "/Full-Repository/Full-terminology-repository-provides-terminology-content": "/registries?type=http://bartoc.org/full-repository",
+    "/full-repository": "/registries?type=http://bartoc.org/full-repository"
   },
   "license": {
     "name": "Public Domain Dedication and License v1.0",

@@ -1,8 +1,11 @@
 <%
 if (list && list.length) {
-  const escapeXML = s => String(s).replace(/[<>&"']/g, c => "&#" + c.charCodeAt(0) + ";")
-  let content = list.map(escapeXML).map(item => `<li>${item}</li>`).join("\n")
-  content = `<ul class="list-unstyled">${content}</ul>`
+  let style = locals.style || "list-unstyled"
+  let view = utils.escapeXML
+  let items = style === "list-inline"
+    ? list.map(view).map(item => `<li class="list-inline-item">${item}</li>`)
+    : list.map(view).map(item => `<li>${item}</li>`)
+  let content = `<ul class="${style}">${items.join("\n")}</ul>`
 %>
   <%- include('row', { content }) %>
 <% } %>

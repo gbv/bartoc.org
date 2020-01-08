@@ -1,0 +1,16 @@
+<%- include('header') %>
+
+<dl>
+  <dt>Vocabularies</dt>
+  <dd>...</dd>
+  <dt>Registries</dt>
+  <dd>
+    <a href="/registries"><%= registries.length %></a>
+    (<a href="/registries?type=http://bartoc.org/full-repository"><%= repositories.length %></a>
+    also being repositories or services)
+  </dd>
+</dl>
+
+TODO: Content by discipline: ...
+
+<%- include('footer') %>

@@ -10,7 +10,10 @@ const registries = ndjson('./data/registries.ndjson')
 const eurovoc = csv('./data/eurovoc-ids.csv')
 
 config.log(`Running in ${config.env} mode.`)
-config.log(`Read ${registries.length} registries.`)
+
+const repoType = "http://bartoc.org/full-repository"
+const repositories = registries.filter(item => item.type.find(type => type === repoType))
+config.log(`Read ${registries.length} registries, ${repositories.length} also being repositories or services.`)
 
 // Initialize express with settings
 const express = require("express")
@@ -41,7 +44,7 @@ app.get("/:lang([a-z][a-z])/node/:id([0-9]+)", (req, res, next) => {
 
 // redirect old topic URLs to search page
 for (let [from, id] of eurovoc) {
-  const to = `/search?subject=http://eurovoc.europa.eu/${id}`
+  const to = `/vocabulary?subject=http://eurovoc.europa.eu/${id}`
   app.get(from, (req, res) => res.redirect(to))
 }
 
@@ -53,11 +56,14 @@ app.get("/", (req, res) => {
 })
 
 // search
-app.get("/search", async (req, res) => {
-  const { path, query } = req
-  const title = "Search"
+app.get("/vocabularies", async (req, res) => {
   var result = await provider.getSchemes()
-  res.render("search", { config, title, path, query, result, utils })
+  render(req, res, "vocabularies", { title: "Vocabularies", result })
+})
+
+// Statistics
+app.get("/stats", async (req, res) => {
+  render(req, res, "stats", { title: "Statistics" })
 })
 
 // static pages
@@ -67,11 +73,8 @@ app.get("/([a-z][a-z])/:page([a-z-]+)", (req, res) => {
 })
 
 // list of terminology registries
-app.get("/terminology-registries", (req, res) => {
-  res.setHeader("Content-Type", "text/html")
-  const { path } = req
-  const title = "Terminology Registries"
-  res.render("registries", { config, registries, title, path, utils })
+app.get("/registries", (req, res) => {
+  render(req, res, "registries", { title: "Terminology Registries" })
 })
 
 // BARTOC id
@@ -81,7 +84,7 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
 
   var item = registries.find(item => item.uri == uri)
   if (item) {
-    path = "/terminology-registries"
+    path = "/registries"
   } else {
     item = (await provider.getSchemes({ id: uri }))[0]
   }
@@ -111,8 +114,16 @@ async function sendItem(res, item, format, path) {
     const view = item.type[0] === "http://www.w3.org/2004/02/skos/core#ConceptScheme" ? "vocabulary" : "registry"
     // http://purl.org/cld/cdtype/CatalogueOrIndex
     const title = utils.label(item.prefLabel).value
-    res.render(view, { config, item, title, path, utils })
+    render({ query: {}, path }, res, view, { item, title, path })
   }
+}
+
+function render(req, res, view, locals) {
+  const { query, path } = req
+  return res.render(view, {
+    config, query, path, utils, registries, repositories,
+    ...locals
+  })
 }
 
 /*
@@ -141,7 +152,7 @@ app.use( (req, res, next) => {
     res.type("txt").send(title)
   } else {
     res.setHeader("Content-Type", "text/html")
-    res.render("404", { config, title, path, utils })
+    render(req, res, "404", { title })
   }
 })
 

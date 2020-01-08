@@ -1,9 +1,14 @@
 <%- include('header') %>
+
+<% let items = query.type === "http://bartoc.org/full-repository" ? repositories : registries %>
 <p>
-  BARTOC knows about <b><%= registries.length %> terminology registries</b>,
-  including itself. Some registries also provide access to full terminologies
+  BARTOC knows about <a href="/registries"><%= registries.length %> terminology registries</a>,
+  including itself.
+  <a href="/registries?type=http://bartoc.org/full-repository">
+    <%= repositories.length %> registries</a>
+  also provide access to full terminologies
   either via an API (terminology <b>service</b>) or by other means
-  (terminology <b>repository</b>).
+  (terminology <b>repository</b>).<sup><a href="#poster">*</a></sup>
 </p>
 <table class="table table-borderless table-hover">
   <thead class="thead-light">
@@ -12,7 +17,7 @@
     <th>Type</th>
   </thead>
   <tbody>
-   <% registries.forEach(item => { %>
+   <% items.forEach(item => { %>
     <tr>
       <td>
         <a href="/en/node/<%= item.uri.split("/").pop() %>"><%= item.prefLabel.en %></a>
@@ -38,4 +43,15 @@
    <% }) %>
   </tbody>
 </table>
+
+<hr>
+<p id="poster">
+  <sup>*</sup> See also (and cite) our poster
+  <i>Terminology Registries and Services</i>
+  presented at
+  <a href="http://os.helmholtz.de/bewusstsein-schaerfen/workshops/rda-de-16/">Research Data Alliance Deutschland Treffen</a>
+  and at <a href="http://swib.org/swib16/">SWIB 2016</a>
+  <a href="https://doi.org/10.5281/zenodo.166717">https://doi.org/10.5281/zenodo.166717</a>.
+</p>
+
 <%- include('footer') %>

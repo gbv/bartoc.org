@@ -20,10 +20,13 @@ TODO: 3 definition
   <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
   <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
   <!-- TODO: access (free...) -->
-  <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages }) %>
+  <%- include('row-list', {
+        icon: 'language', label: 'Languages',
+        list: item.languages, style: 'list-inline'
+      }) %>
   <% if (item.subject) {
     let view = s => s
-    //url = "/search?subject=" + encodeURI(subject.uri)
+    //url = "/vocabulary?subject=" + encodeURI(subject.uri)
     // include('link', { url, label: subject.uri })
   %>
     <%- include('row-list', { label: 'Subject', list: subjects, view }) %>

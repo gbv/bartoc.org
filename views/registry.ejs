@@ -14,7 +14,7 @@
   <%- include('row-list', { icon: 'id', label: 'Languages', list: item.languages }) %>
   <% if (item.subject) {
     let view = s => s
-    //url = "/search?subject=" + encodeURI(subject.uri)
+    //url = "/registry?subject=" + encodeURI(subject.uri)
     // include('link', { url, label: subject.uri })
   %>
     <%- include('row-list', { label: 'Subject', list: item.subjects, view }) %>

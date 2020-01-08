@@ -12,5 +12,9 @@ module.exports = {
       }
     }
     return { value, code }
+  },
+
+  escapeXML(s) {
+    return String(s).replace(/[<>&"']/g, c => "&#" + c.charCodeAt(0) + ";")
   }
 }

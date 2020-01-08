@@ -4,7 +4,7 @@ title:
 
 <img src="/img/bartoc-logo.svg" />
 
-<form class="main-form" action="/search">
+<form class="main-form" action="/vocabularies">
   <div class="form-group">
     <label for="search-vocabulary">Search for vocabularies</label>
     <div class="row">
@@ -35,7 +35,8 @@ title:
   <div class="form-group">
     <label>Search in vocabularies</label>
     <small class="form-text text-muted label-help">
-      Several vocabularies can be searched via various terminology services
+      Several <a href="/registries?type=http://bartoc.org/full-repository">terminology services</a>
+      can be used to search in selected vocabularies
     </small>
     <form class="row" action="https://bartoc-fast.ub.unibas.ch/bartocfast/" method="get">
       <div class="col-md-2">
@@ -78,7 +79,7 @@ title:
 <div class="main-form">
   <div class="form-group">
     <label>Browse
-      <a href="/terminology-registries">terminology registries</a>
+      <a href="/registries">terminology registries</a>
     </label>
     <small class="form-text text-muted label-help">
       More registries, repositories and services of vocabularies
