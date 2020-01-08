@@ -1,0 +1,8 @@
+<%
+if (list && list.length) {
+  const escapeXML = s => String(s).replace(/[<>&"']/g, c => "&#" + c.charCodeAt(0) + ";")
+  let content = list.map(escapeXML).map(item => `<li>${item}</li>`).join("\n")
+  content = `<ul class="list-unstyled">${content}</ul>`
+%>
+  <%- include('row', { content }) %>
+<% } %>

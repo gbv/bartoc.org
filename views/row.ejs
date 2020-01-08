@@ -1,0 +1,13 @@
+<% if (content && content.trim()) { %>
+ <tr>
+  <td>
+   <% if (locals.icon) { %>
+    <i class="fas fa-<%- icon %>"></i>
+   <% } %>
+   <%- label %>
+  </td>
+  <td>
+   <%- content %>
+  </td>
+ </tr>
+<% } %>

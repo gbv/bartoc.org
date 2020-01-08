@@ -17,3 +17,9 @@ small.label-help {
   margin-top: -.5rem;
   margin-bottom: 0.25rem;
 }
+ul.list-inline > li.list-inline-item:not(:last-child)::after {
+  content: ","
+}
+ul.list-inline > li.list-inline-item:not(:last-child) {
+  margin-right: 0;
+}

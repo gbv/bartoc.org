@@ -1,0 +1,13 @@
+<% if (item.created || item.issued || item.modified) { %>
+  <ul class="list-inline text-right">
+   <% if (item.created) { %>
+    <li class="list-inline-item"><small>created <time><%= item.created %></time></small></li>
+   <% } %>
+   <% if (item.issued) { %>
+    <li class="list-inline-item"><small>issued <time><%= item.issued %></time></small></li>
+   <% } %>
+   <% if (item.modified) { %>
+    <li class="list-inline-item"><small>modified <time><%= item.modified %></time></small></li>
+   <% } %>
+  </ul>
+<% } %>

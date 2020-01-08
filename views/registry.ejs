@@ -1,40 +1,30 @@
 <%- include('header') %>
 <%- include('definition') %>
 
-<dl>
-  <dt>Link</dt>
-  <dd><%- include('link', { url: item.url }) %></dd>
-  <% if (item.endpoint) { %>
-    <dt>API</dt>
-    <dd><%- include('link', { url: item.endpoint }) %></dd>
+<table class="table">
+  <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
+  <%- include('row', { icon: 'cog', label: 'API', content: include('link', { url: item.endpoint })}) %>
+
+  <!-- TODO: alternative titles and English Title -->
+  <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
+  <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
+  <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
+  <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
+  <!-- TODO: access (free...) -->
+  <%- include('row-list', { icon: 'id', label: 'Languages', list: item.languages }) %>
+  <% if (item.subject) {
+    let view = s => s
+    //url = "/search?subject=" + encodeURI(subject.uri)
+    // include('link', { url, label: subject.uri })
+  %>
+    <%- include('row-list', { label: 'Subject', list: item.subjects, view }) %>
   <% } %>
-  <% if (item.startDate) { %>
-    <dt>Created</dt>
-    <dd><%= item.startDate %></dd>
-  <% } %>
-  <% if (item.endDate) { %>
-    <dt>Dissolved</dt>
-    <dd><%= item.endDate %></dd>
-  <% } %>
-  <% wikidata = (item.identifier || []).filter(id => id.startsWith("http://www.wikidata.org/entity"))
-     if (wikidata.length) { %>
-    <dt>Wikidata</dt>
-    <dd><%- include('link', { url: wikidata[0] }) %></dd>
-  <% } %>
-  <% if (item.subject) { %>
-    <dt>Topic</dt>
-    <dd>
-      <ul>
-      <% for(let subject of item.subject) {
-          url = "/search?subject=" + encodeURI(subject.uri)
-        %>
-        <li><%- include('link', { url, label: subject.uri }) %></li>
-      <% } %>
-      </ul>
-    </dd>
-  <% } %>
-  <dt>Type</dt>
-  <dd>
+  <%- include('row-list', { label: 'Publisher', list: item.publisher }) %>
+  <%- include('row-list', { label: 'License', list: item.license }) %>
+  <!-- TODO: Wikidata -->
+  <tr>
+  <td>Type</td>
+  <td>
     <% if ((item.type || [])[1] === "http://bartoc.org/full-repository") { %>
       <a href="/full-repository">
          terminology
@@ -43,9 +33,17 @@
     <% } else { %>
       terminology registry
     <% } %>
-  </dd>
-</dl>
+  </td>
+</table>
 
-<!-- TODO: created, modified -->
+<!--
+ wikidata = (item.identifier || []).filter(id => id.startsWith("http://www.wikidata.org/entity"))[0]
+ if (wikidata) { .. }
+
+-->
+
+
+
+<%- include('item-dates') %>
 
 <%- include('footer') %>

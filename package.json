@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npm run lint:ejs",
+    "lint:ejs": "ejslint views/*.ejs"
   },
   "author": "Jakob Voß",
   "license": "MIT",
@@ -27,6 +29,7 @@
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.12.0",
+    "ejs-lint": "gbv/ejs-lint",
     "nodemon": "^2.0.1"
   }
 }

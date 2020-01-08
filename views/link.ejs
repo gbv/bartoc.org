@@ -1,1 +1,1 @@
-<a href="<%= url %>"><%= locals.label ? label : url %></a>
+<% if (url) { %><a href="<%= url %>"><%= locals.label ? label : url %></a><% } %>

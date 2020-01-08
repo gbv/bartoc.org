@@ -77,46 +77,57 @@ app.get("/terminology-registries", (req, res) => {
 // BARTOC id
 app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   var { path, query } = req
-  const uri = 'http://bartoc.org/en/node/' + req.params.id
+  const uri = `http://bartoc.org/en/node/${req.params.id}`
 
-  var view = "vocabulary"
-  var title
-
-  // lookup URI as registry
   var item = registries.find(item => item.uri == uri)
   if (item) {
-    title = utils.label(item.prefLabel).value
     path = "/terminology-registries"
-    view = "registry"
   } else {
-    const result = await provider.getSchemes({ id: uri })
-    if (result.length) {
-      item = result[0]
-      title = utils.label(item.prefLabel).value
-    }
+    item = (await provider.getSchemes({ id: uri }))[0]
   }
 
   if (item) {
-    item["@context"] = "https://gbv.github.io/jskos/context.json"
-
-    if (query.format === "json") {
-      res.send([item])
-    } else if (query.format === "nt") {
-      res.setHeader("Content-Type", "application/n-triples")
-      const jsonld = require("jsonld")
-
-      // TODO: catch and handle errors?
-      item["@context"] = require('./static/context.json')
-      const ntriples = await jsonld.toRDF(item, {format: 'application/n-quads'})
-
-      res.send(ntriples)
-    } else {
-      res.render(view, { config, item, title, path, utils })
-    }
+    sendItem(res, item, query.format, path)
   } else {
     next()
   }
 })
+
+async function sendItem(res, item, format, path) {
+  item["@context"] = "https://gbv.github.io/jskos/context.json"
+
+  if (format === "json") {
+    res.send([item])
+  } else if (format === "nt") {
+    res.setHeader("Content-Type", "application/n-triples")
+    const jsonld = require("jsonld")
+
+    // TODO: catch and handle errors?
+    item["@context"] = require('./static/context.json')
+    const ntriples = await jsonld.toRDF(item, {format: 'application/n-quads'})
+
+    res.send(ntriples)
+  } else {
+    const view = item.type[0] === "http://www.w3.org/2004/02/skos/core#ConceptScheme" ? "vocabulary" : "registry"
+    // http://purl.org/cld/cdtype/CatalogueOrIndex
+    const title = utils.label(item.prefLabel).value
+    res.render(view, { config, item, title, path, utils })
+  }
+}
+
+/*
+// Format
+app.get("/en/Format/:format", async (req, res, next) => {
+  var { path, query } = req
+
+  const uri = `http://bartoc.org/en/node/${req.params.id}`
+
+  console.log(
+  next()
+
+  // e.g. http://bartoc.org/en/Format/Zthes
+})
+*/
 
 // handle 404 errors
 app.use( (req, res, next) => {
