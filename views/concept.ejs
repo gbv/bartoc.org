@@ -1,0 +1,27 @@
+<%- include('header') %>
+
+<table class="table">
+<% const scheme = (item.inScheme || [])[0]
+if (scheme) { %>
+  <%- include('row', {
+      label: 'Vocabulary',
+      content: include('item', { item: scheme, base: "/vocabularies" } )
+    }) %>
+<% } %>
+  <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
+  <%- include('row-list', { label: 'Notation', list: item.notation }) %>
+  <!-- TODO: alternative titles and English Title -->
+  <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
+  <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
+  <!-- TODO: extend -->
+  <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
+  <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
+  <%- include('row-list', { label: 'Publisher', list: item.publisher,
+              view: item => include('item', { item, base: '/publisher' }) })
+  %>
+  <%- include('row-list', { label: 'License', list: item.license,
+              view: item => include('item', { item, base: '/license' }) }) %>
+</table>
+
+<%- include('item-dates') %>
+<%- include('footer') %>

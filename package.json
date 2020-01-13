@@ -7,7 +7,9 @@
     "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npm run lint:ejs",
-    "lint:ejs": "ejslint views/*.ejs"
+    "lint:ejs": "ejslint views/*.ejs",
+    "cache": "mkdir -p cache; npm run cache:nkostype",
+    "cache:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top > cache/nkostype.json"
   },
   "author": "Jakob Voß",
   "license": "MIT",

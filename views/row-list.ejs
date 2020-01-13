@@ -1,11 +1,11 @@
 <%
 if (list && list.length) {
-  let style = locals.style || "list-unstyled"
-  let view = utils.escapeXML
-  let items = style === "list-inline"
+  let style = locals.style || "unstyled"
+  let view = locals.view || utils.escapeXML
+  let items = style === "inline"
     ? list.map(view).map(item => `<li class="list-inline-item">${item}</li>`)
     : list.map(view).map(item => `<li>${item}</li>`)
-  let content = `<ul class="${style}">${items.join("\n")}</ul>`
+  let content = `<ul class="list-${style}">${items.join("\n")}</ul>`
 %>
   <%- include('row', { content }) %>
 <% } %>

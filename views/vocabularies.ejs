@@ -10,9 +10,13 @@
 
 <hr>
 
+<ul>
 <% for (let item of result) { %>
-<%- include('vocabulary-short', { item }) %>
+<li>
+  <%- include('item', { item, base: '/vocabularies' }) %>
+</li>
 <% } %>
+</ul>
 
 <% if (result.length < result.totalCount) { %>
   <p>TODO: pagination (<%- result.totalCount %> total</p>

@@ -9,7 +9,8 @@ class Provider {
   constructor(registry = {}, options = {}) {
     this.http = options.http || axios
     this.registry = {
-      schemes: "http://api.dante.gbv.de/voc"
+      schemes: "http://api.dante.gbv.de/voc",
+      data: "http://api.dante.gbv.de/data"
     }
   }
 
@@ -24,17 +25,21 @@ class Provider {
         data.totalCount = parseInt(headers["x-total-count"])
         return data
       })
-      .then(data => data.map(extendScheme).filter(voc => isBartocUri(voc.uri)))
+      .then(data => data.map(extendScheme))//.filter(voc => isBartocUri(voc.uri)))
       // TODO: catch errors
+  }
+
+  async getConcept(params = {}) {
+    return this.get(this.registry.data, { params })
+      .then(({data, headers}) => data[0] )
   }
 }
 
-const bartocUri = new RegExp("^http://bartoc.org/en/node/[1-9][0-9]+$")
-const isBartocUri = id => id.match(bartocUri)
+const { isBartocUri } = require('./utils')
 
 function extendScheme(voc) {
   var { uri, identifier } = voc
-  if (identifier && !uri.match(bartocUri)) {
+  if (identifier && !isBartocUri(uri)) {
     const bartoc = identifier.find(isBartocUri)
     if (bartoc) {
       identifier = identifier.filter(id => !isBartocUri(id))

@@ -8,6 +8,8 @@ const ndjson = require('./utils/ndjson')
 const csv = require('./utils/csv')
 const registries = ndjson('./data/registries.ndjson')
 const eurovoc = csv('./data/eurovoc-ids.csv')
+const nkostypes = require('./cache/nkostype.json')
+  .reduce((map, obj) => { map[obj.uri] = obj ; return map },{})
 
 config.log(`Running in ${config.env} mode.`)
 
@@ -56,14 +58,51 @@ app.get("/", (req, res) => {
 })
 
 // search
-app.get("/vocabularies", async (req, res) => {
-  var result = await provider.getSchemes()
-  render(req, res, "vocabularies", { title: "Vocabularies", result })
+app.get("/vocabularies", async (req, res, next) => {
+  const { query } = req
+  if (query.uri) {
+    const item = (await provider.getSchemes({ uri: query.uri }))[0]
+    if (item) {
+      sendItem(res, item, query.format, "/vocabularies")
+    } else {
+      next()
+    }
+  } else {
+    var result = await provider.getSchemes()
+    render(req, res, "vocabularies", { title: "Vocabularies", result })
+  }
 })
+
+// TODO
+app.get("/license", async (req, res, next) => {
+  const { uri } = req.query
+  if (uri) {
+    const item = await provider.getConcept({uri})
+    if (item) {
+      sendItem(res, item, req.query.format, "/license")
+      return
+    }
+  }
+  next()
+})
+
+// app.get("/publisher", async (req, res, next) => { ... })
+// if (uri.startsWith("http://w3id.org/nkos/nkostype#")) {
 
 // Statistics
 app.get("/stats", async (req, res) => {
   render(req, res, "stats", { title: "Statistics" })
+})
+
+// format page
+app.get("/en/Format/:id", async (req, res, next) => {
+  const uri = `http://bartoc.org/en/Format/${req.params.id}`
+  const item = await provider.getConcept({uri})
+  if (item) {
+    sendItem(res, item, req.query.format, "/en/Format")
+  } else {
+    next()
+  }
 })
 
 // static pages
@@ -86,6 +125,7 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   if (item) {
     path = "/registries"
   } else {
+    path = "/vocabularies"
     item = (await provider.getSchemes({ id: uri }))[0]
   }
 
@@ -95,6 +135,12 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
     next()
   }
 })
+
+const viewsByType = {
+  "http://www.w3.org/2004/02/skos/core#Concept": "concept",
+  "http://www.w3.org/2004/02/skos/core#ConceptScheme": "vocabulary",
+  "http://purl.org/cld/cdtype/CatalogueOrIndex": "registry"
+}
 
 async function sendItem(res, item, format, path) {
   item["@context"] = "https://gbv.github.io/jskos/context.json"
@@ -111,8 +157,7 @@ async function sendItem(res, item, format, path) {
 
     res.send(ntriples)
   } else {
-    const view = item.type[0] === "http://www.w3.org/2004/02/skos/core#ConceptScheme" ? "vocabulary" : "registry"
-    // http://purl.org/cld/cdtype/CatalogueOrIndex
+    const view = viewsByType[item.type[0]]
     const title = utils.label(item.prefLabel).value
     render({ query: {}, path }, res, view, { item, title, path })
   }
@@ -121,7 +166,7 @@ async function sendItem(res, item, format, path) {
 function render(req, res, view, locals) {
   const { query, path } = req
   return res.render(view, {
-    config, query, path, utils, registries, repositories,
+    config, query, path, utils, registries, repositories, nkostypes,
     ...locals
   })
 }
@@ -155,6 +200,8 @@ app.use( (req, res, next) => {
     render(req, res, "404", { title })
   }
 })
+
+//const bartocFormats = registry
 
 // Start
 app.listen(config.port, () => {

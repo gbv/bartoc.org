@@ -17,16 +17,8 @@
       "prefLabel": { "en": "Registries" }
     },
     {
-      "url": "/top-rated-points",
-      "prefLabel": { "en": "Top-rated content" }
-    },
-    {
       "url": "/tracker",
       "prefLabel": { "en": "Recent content" }
-    },
-    {
-      "url": "https://bartoc-fast.ub.unibas.ch/bartocfast",
-      "prefLabel": { "en": "Federated Search Tool" }
     },
     {
       "url": "/contact",

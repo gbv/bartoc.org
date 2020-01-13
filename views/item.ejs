@@ -1,0 +1,23 @@
+<%# Show an item by its name and link to it's uri (requires "base") or url %>
+<% const { value, code } = utils.label(item.prefLabel, locals.language) %>
+<% var url = item.url
+   if (item.uri) {
+     if (utils.isBartocUri(item.uri)) {
+       url = "/en/node/" + item.uri.split("/").pop()
+     } else if (locals.base) {
+       var uri = escape(item.uri)
+       url = base + (base.endsWith("=") ? uri : `?uri=${uri}`)
+     } else {
+       url = item.uri
+     }
+  }
+%>
+<% if (url) { %>
+  <a href="<%= url %>" lang="<%= code %>">
+    <%= value || '?' %>
+  </a>
+<% } else { %>
+  <span lang="<%= code %>">
+    <%= value || '?' %>
+  </span>
+<% } %>
