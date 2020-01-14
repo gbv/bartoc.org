@@ -33,7 +33,8 @@
     "/en/title-finder": "/vocabularies",
     "/en/browse": "/vocabularies",
     "/Full-Repository/Full-terminology-repository-provides-terminology-content": "/registries?type=http://bartoc.org/full-repository",
-    "/full-repository": "/registries?type=http://bartoc.org/full-repository"
+    "/full-repository": "/registries?type=http://bartoc.org/full-repository",
+    "/en/Format": "/vocabularies?uri=http://uri.gbv.de/terminology/bartoc_formatcatalog/"
   },
   "license": {
     "name": "Public Domain Dedication and License v1.0",

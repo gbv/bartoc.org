@@ -6,38 +6,38 @@
 const axios = require('axios')
 
 class Provider {
-  constructor(registry = {}, options = {}) {
+  constructor (registry = {}, options = {}) {
     this.http = options.http || axios
     this.registry = {
-      schemes: "http://api.dante.gbv.de/voc",
-      data: "http://api.dante.gbv.de/data"
+      schemes: 'http://api.dante.gbv.de/voc',
+      data: 'http://api.dante.gbv.de/data'
     }
   }
 
-  async get(url, options) {
+  async get (url, options) {
     return this.http.get(url, options)
   }
 
-  async getSchemes(params = {}) {
+  async getSchemes (params = {}) {
     return this.get(this.registry.schemes, { params })
-      .then(({data, headers}) => {
+      .then(({ data, headers }) => {
         // FIXME: DANTE API returns wrong X-Total-Count and filtering changes result anyway
-        data.totalCount = parseInt(headers["x-total-count"])
+        data.totalCount = parseInt(headers['x-total-count'])
         return data
       })
-      .then(data => data.map(extendScheme))//.filter(voc => isBartocUri(voc.uri)))
+      .then(data => data.map(extendScheme))// .filter(voc => isBartocUri(voc.uri)))
       // TODO: catch errors
   }
 
-  async getConcept(params = {}) {
+  async getConcept (params = {}) {
     return this.get(this.registry.data, { params })
-      .then(({data, headers}) => data[0] )
+      .then(({ data, headers }) => data[0])
   }
 }
 
 const { isBartocUri } = require('./utils')
 
-function extendScheme(voc) {
+function extendScheme (voc) {
   var { uri, identifier } = voc
   if (identifier && !isBartocUri(uri)) {
     const bartoc = identifier.find(isBartocUri)

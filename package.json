@@ -6,8 +6,10 @@
   "scripts": {
     "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npm run lint:ejs",
+    "lint": "npm run lint:js; npm run lint:ejs",
+    "lint:js": "eslint *.js src/*.js",
     "lint:ejs": "ejslint views/*.ejs",
+    "fix": "eslint --fix *.js src/*.js",
     "cache": "mkdir -p cache; npm run cache:nkostype",
     "cache:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top > cache/nkostype.json"
   },
@@ -32,6 +34,13 @@
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.12.0",
     "ejs-lint": "gbv/ejs-lint",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "lint-staged": "^9.5.0",
     "nodemon": "^2.0.1"
   }
 }
