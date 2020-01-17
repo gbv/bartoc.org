@@ -1,6 +1,7 @@
 <%# Show an item by its name and link to it's uri (requires "base") or url %>
+<% if (item) { %>
 <% const { value, code } = utils.label(item.prefLabel, locals.language) %>
-<% var url = item.url
+<% var url = 'url' in locals ? locals.url : item.url
    if (item.uri) {
      if (utils.isBartocUri(item.uri)) {
        url = "/en/node/" + item.uri.split("/").pop()
@@ -21,3 +22,4 @@
     <%= value || '?' %>
   </span>
 <% } %>
+<% } else { %>?<% } %>

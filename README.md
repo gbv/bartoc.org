@@ -25,6 +25,7 @@ Requires at least Node.js 10. Additional dependencies are listed in `package.jso
 git clone https://github.com/gbv/bartoc.org.git
 cd bartoc.org
 npm install
+npm run cache
 ~~~
 
 ## Configuration

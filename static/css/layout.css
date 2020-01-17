@@ -23,3 +23,6 @@ ul.list-inline > li.list-inline-item:not(:last-child)::after {
 ul.list-inline > li.list-inline-item:not(:last-child) {
   margin-right: 0;
 }
+td > ul {
+  margin-bottom: 0;
+}

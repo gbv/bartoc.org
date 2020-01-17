@@ -25,6 +25,10 @@ class Provider {
         data.totalCount = parseInt(headers['x-total-count'])
         return data
       })
+      .then(data => data.filter(voc => {
+        // filter by type (TODO: do this in the backend)
+        return !params.type || voc.type.includes(params.type)
+      }))
       .then(data => data.map(extendScheme))// .filter(voc => isBartocUri(voc.uri)))
       // TODO: catch errors
   }

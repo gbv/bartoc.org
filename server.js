@@ -6,12 +6,9 @@ const jsonld = require('jsonld')
 const path = require('path')
 
 // static data
-const ndjson = require('./src/ndjson')
-const csv = require('./src/csv')
-const registries = ndjson('./data/registries.ndjson')
-const eurovoc = csv('./data/eurovoc-ids.csv')
+const registries = utils.readNdjson('./data/registries.ndjson')
+const eurovoc = utils.readCsv('./data/eurovoc-ids.csv')
 const nkostypes = require('./cache/nkostype.json')
-  .reduce((map, obj) => { map[obj.uri] = obj; return map }, {})
 
 config.log(`Running in ${config.env} mode.`)
 
@@ -69,7 +66,7 @@ app.get('/vocabularies', async (req, res, next) => {
       next()
     }
   } else {
-    var result = await provider.getSchemes()
+    var result = await provider.getSchemes(query)
     render(req, res, 'vocabularies', { title: 'Vocabularies', result })
   }
 })

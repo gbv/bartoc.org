@@ -17,7 +17,7 @@ are classified
 </p>
 <ul>
 <%# TODO: sort list %>
-<% for (let item of Object.values(nkostypes)) { %>
+<% for (let item of nkostypes) { %>
 <li>
   <%- include('item', { item , base: '/vocabularies?type='}) %>
 </li>
