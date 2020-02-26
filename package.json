@@ -11,7 +11,8 @@
     "lint:ejs": "ejslint views/*.ejs",
     "fix": "eslint --fix *.js src/*.js",
     "cache": "mkdir -p cache; npm run cache:nkostype; make -C bin",
-    "cache:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > cache/nkostype.ndjson"
+    "cache:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > cache/nkostype.ndjson",
+    "validate": "jskos-validate"
   },
   "author": "Jakob Voß",
   "license": "MIT",
@@ -27,6 +28,7 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "front-matter": "^3.0.2",
+    "jskos-cli": "^0.4.1",
     "jsonld": "^2.0.1",
     "lodash": "^4.17.15",
     "marked": "^0.7.0"
