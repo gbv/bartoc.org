@@ -8,7 +8,8 @@
   <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
   <%- include('row-list', { label: 'Notation', list: item.notation }) %>
   <%
-var titles = Object.values(item.prefLabel).concat(...Object.values(item.altLabel))
+var titles = Object.values(item.prefLabel || {})
+           .concat(...Object.values(item.altLabel || {}))
   %>
   <%- include('row-list', { label: 'Titles', list: titles }) %>
   <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>

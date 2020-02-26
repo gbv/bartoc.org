@@ -60,14 +60,15 @@ app.get('/', (req, res) => {
 app.get('/vocabularies', async (req, res, next) => {
   const { query } = req
   if (query.uri) {
-    const item = (await provider.getSchemes({ uri: query.uri }))[0]
+    const item = (await provider.getSchemes({ uri: query.uri }))[0] || cachedVocs[uri]
     if (item) {
       sendItem(req, res, item)
     } else {
       next()
     }
   } else {
-    var result = await provider.getSchemes(query)
+    // TODO: implement filter by query
+    var result = Object.values(cachedVocs).concat(await provider.getSchemes(query))
     render(req, res, 'vocabularies', { title: 'Vocabularies', result })
   }
 })
