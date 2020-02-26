@@ -6,14 +6,15 @@ const jsonld = require('jsonld')
 const path = require('path')
 
 // static data
-const registries = utils.readNdjson('./data/registries.ndjson')
+const registries = utils.indexByUri(utils.readNdjson('./data/registries.ndjson'))
+const nkostypes = utils.indexByUri(utils.readNdjson('./cache/nkostype.ndjson'))
 const eurovoc = utils.readCsv('./data/eurovoc-ids.csv')
-const nkostypes = require('./cache/nkostype.json')
+const cachedVocs = utils.indexByUri(utils.readNdjson('./cache/vocabularies.ndjson'))
 
 config.log(`Running in ${config.env} mode.`)
 
 const repoType = 'http://bartoc.org/full-repository'
-const repositories = registries.filter(item => item.type.find(type => type === repoType))
+const repositories = Object.values(registries).filter(item => item.type.find(type => type === repoType))
 config.log(`Read ${registries.length} registries, ${repositories.length} also being repositories or services.`)
 
 // Initialize express with settings
@@ -119,12 +120,16 @@ app.get('/en/node/:id([0-9]+)', async (req, res, next) => {
   const uri = `http://bartoc.org/en/node/${req.params.id}`
   var { path } = req
 
-  var item = registries.find(item => item.uri === uri)
+  var item = registries[uri]
   if (item) {
     path = '/registries'
   } else {
     path = '/vocabularies'
-    item = (await provider.getSchemes({ id: uri }))[0]
+    if (uri in cachedVocs) {
+      item = cachedVocs[uri]
+    } else {
+      item = (await provider.getSchemes({ id: uri }))[0]
+    }
   }
 
   if (item) {

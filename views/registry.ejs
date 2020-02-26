@@ -1,5 +1,6 @@
 <%- include('header') %>
-<%- include('definition') %>
+<%- include('abstract', { abstract: item.definition }) %>
+<%- include('abstract', { abstract: item.scopeNote }) %>
 
 <table class="table">
   <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>

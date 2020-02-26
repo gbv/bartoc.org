@@ -10,8 +10,8 @@
     "lint:js": "eslint *.js src/*.js",
     "lint:ejs": "ejslint views/*.ejs",
     "fix": "eslint --fix *.js src/*.js",
-    "cache": "mkdir -p cache; npm run cache:nkostype",
-    "cache:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top > cache/nkostype.json"
+    "cache": "mkdir -p cache; npm run cache:nkostype; make -C bin",
+    "cache:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > cache/nkostype.ndjson"
   },
   "author": "Jakob Voß",
   "license": "MIT",

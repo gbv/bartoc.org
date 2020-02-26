@@ -1,50 +1,47 @@
 <%- include('header') %>
-
-<% if (item.definition) { %>
-<!-- TODO: support raw HTML, add multilinigual descriptions, add scopeNote
-TODO: 3 definition
-     13 scopeNote
--->
-<p><%= item.definition.en %></p>
-<% } %>
+<%- include('abstract', { abstract: item.definition }) %>
+<%- include('abstract', { abstract: item.scopeNote }) %>
 
 <!-- TODO: merge with registry.ejs -->
 
 <table class="table">
   <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
   <%- include('row-list', { label: 'Notation', list: item.notation }) %>
-  <!-- TODO: alternative titles and English Title -->
+  <%
+var titles = Object.values(item.prefLabel).concat(...Object.values(item.altLabel))
+  %>
+  <%- include('row-list', { label: 'Titles', list: titles }) %>
   <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
   <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
-  <!-- TODO: extend -->
-  <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
-  <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
   <!-- TODO: access (free...) -->
   <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
-  <% if (item.subject) {
-    let view = s => s
-    //url = "/vocabulary?subject=" + encodeURI(subject.uri)
-    // include('link', { url, label: subject.uri })
-  %>
-    <%- include('row-list', { label: 'Subject', list: subjects, view }) %>
-  <% } %>
-  <%- include('row-list', { label: 'Publisher', list: item.publisher,
-              view: item => include('item', { item, base: '/publisher' }) })
-  %>
+  <%- include('row-list', { label: 'Subject', list: item.subject,
+        view: s => include('item', { item: s, base: '/vocabularies?subject=' })
+  }) %>
   <%- include('row-list', { label: 'License', list: item.license,
-              view: item => include('item', { item, base: '/license' }) }) %>
+              view: item => include('item', { item, base: '/license' })
+  }) %>
+  <%- include('row', { label: 'Size', content: item.extent } ) %>
+  <%- include('row-list', { label: 'Publisher', list: item.publisher,
+              view: item => include('item', { item })
+  } ) %>
+  <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
+  <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
   <!-- TODO: location -->
-  <!-- TODO: DDC -->
-  <!-- TODO: rating -->
+  <!-- TODO: format -->
+  <!-- TODO: access -->
   <%- include('row', { label: 'Namespace', content: item.namespace }) %>
   <%- include('row-list', { label: 'KOS Type', list: item.type.slice(1),
       view: item => include('item', { item: nkostypes[item], base: '/vocabularies?type=' }) }) %>
+  <!-- TODO: rating -->
 </table>
 
 <!--
+ // TODO: link to Wikipedia
  wikidata = (item.identifier || []).filter(id => id.startsWith("http://www.wikidata.org/entity"))[0]
  if (wikidata) { .. }
 
+ }
 -->
 
 <%- include('item-dates') %>
