@@ -14,7 +14,7 @@ const cachedVocs = utils.indexByUri(utils.readNdjson('./cache/vocabularies.ndjso
 config.log(`Running in ${config.env} mode.`)
 
 const repoType = 'http://bartoc.org/full-repository'
-const repositories = Object.values(registries).filter(item => item.type.find(type => type === repoType))
+const repositories = utils.indexByUri(Object.values(registries).filter(item => item.type.find(type => type === repoType)))
 config.log(`Read ${registries.length} registries, ${repositories.length} also being repositories or services.`)
 
 // Initialize express with settings

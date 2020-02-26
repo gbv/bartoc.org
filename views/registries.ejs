@@ -17,7 +17,7 @@
     <th>Type</th>
   </thead>
   <tbody>
-   <% items.forEach(item => { %>
+   <% Object.values(items).forEach(item => { %>
     <tr>
       <td>
         <a href="/en/node/<%= item.uri.split("/").pop() %>"><%= item.prefLabel.en %></a>

@@ -7,7 +7,7 @@ use JSON::PP;
 open my $fh, "<", "../data/eurovoc-ids.csv";
 my %eurovoc = map { chomp; split "," } <$fh>;
 
-for ( @{ decode_json( join "", <> ) } ) {
+for ( map { decode_json($_) } <> ) {
 
     $_->{"no name"} =~ /(\d+)">\s*([^<]+)/ or die;
     my %reg = (
@@ -17,7 +17,10 @@ for ( @{ decode_json( join "", <> ) } ) {
     );
     my @subject;
 
-    $reg{definition} = { en => [ $_->{Body} ] } if $_->{Body};
+    if ( $_->{Body} ) {
+        $_->{Body} =~ s!<p>|</p>!!g;
+        $reg{definition} = { en => [ $_->{Body} ] };
+    }
 
     $reg{identifier} = ["http://www.wikidata.org/entity/$1"]
       if $_->{Wikidata} =~ /(Q\d+)/;
