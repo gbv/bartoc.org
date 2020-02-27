@@ -17,15 +17,12 @@ var titles = Object.values(item.prefLabel || {})
   <!-- TODO: access (free...) -->
   <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
   <%- include('row-list', { label: 'Subject', list: item.subject,
-        view: s => include('item', { item: s, base: '/vocabularies?subject=' })
-  }) %>
+        view: s => include('item', { item: s, base: '/vocabularies?subject=' }) }) %>
   <%- include('row-list', { label: 'License', list: item.license,
-              view: item => include('item', { item, base: '/license' })
-  }) %>
+              view: item => include('item', { item, base: '/vocabulary?license=' }) }) %>
   <%- include('row', { label: 'Size', content: item.extent } ) %>
   <%- include('row-list', { label: 'Publisher', list: item.publisher,
-              view: item => include('item', { item })
-  } ) %>
+              view: item => include('item', { item }) }) %>
   <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
   <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
   <!-- TODO: location -->

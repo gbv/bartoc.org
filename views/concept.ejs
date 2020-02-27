@@ -20,7 +20,7 @@ if (scheme) { %>
               view: item => include('item', { item, base: '/publisher' }) })
   %>
   <%- include('row-list', { label: 'License', list: item.license,
-              view: item => include('item', { item, base: '/license' }) }) %>
+              view: item => include('item', { item, base: '/vocabulary?license=' }) }) %>
 </table>
 
 <%- include('item-dates') %>

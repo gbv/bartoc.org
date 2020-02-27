@@ -8,14 +8,15 @@ const path = require('path')
 // static data
 const registries = utils.indexByUri(utils.readNdjson('./data/registries.ndjson'))
 const nkostypes = utils.indexByUri(utils.readNdjson('./cache/nkostype.ndjson'))
-const eurovoc = utils.readCsv('./data/eurovoc-ids.csv')
+
 const cachedVocs = utils.indexByUri(utils.readNdjson('./cache/vocabularies.ndjson'))
+
 
 config.log(`Running in ${config.env} mode.`)
 
 const repoType = 'http://bartoc.org/full-repository'
 const repositories = utils.indexByUri(Object.values(registries).filter(item => item.type.find(type => type === repoType)))
-config.log(`Read ${registries.length} registries, ${repositories.length} also being repositories or services.`)
+config.log(`Read ${Object.keys(registries).length} registries, ${Object.keys(repositories).length} also being repositories or services.`)
 
 // Initialize express with settings
 const express = require('express')
@@ -44,11 +45,28 @@ app.get('/:lang([a-z][a-z])/node/:id([0-9]+)', (req, res, next) => {
   }
 })
 
-// redirect old topic URLs to search page
-for (const [from, id] of eurovoc) {
-  const to = `/vocabulary?subject=http://eurovoc.europa.eu/${id}`
-  app.get(from, (req, res) => res.redirect(to))
+// redirect old subject URLs to search page
+
+for (const [url, id] of utils.readCsv('./data/eurovoc-ids.csv')) {
+  app.get(url, (req, res) => res.redirect(`/vocabulary?subject=${uri}`))
 }
+
+for (const [url, uri] of utils.readCsv('./data/ddc-ids.csv')) {
+  app.get(url, (req, res) => res.redirect(`/vocabulary?subject=${uri}`))
+}
+
+for (const [url, code] of utils.readCsv('./data/language-ids.csv')) {
+  app.get(url, (req, res) => res.redirect(`/vocabulary?language=${code}`))
+}
+
+for (const [url, uri] of utils.readCsv('./data/kostype-ids.csv')) {
+  app.get(url, (req, res) => res.redirect(`/vocabulary?type=${uri}`))
+}
+
+for (const [url, uri] of utils.readCsv('./data/license-ids.csv')) {
+  app.get(url, (req, res) => res.redirect(`/vocabulary?license=${uri}`))
+}
+
 
 // root page
 app.get('/', (req, res) => {
@@ -73,21 +91,6 @@ app.get('/vocabularies', async (req, res, next) => {
   }
 })
 
-// TODO
-app.get('/license', async (req, res, next) => {
-  const { uri } = req.query
-  if (uri) {
-    const item = await provider.getConcept({ uri })
-    if (item) {
-      sendItem(req, res, item)
-      return
-    }
-  }
-  next()
-})
-
-// app.get("/publisher", async (req, res, next) => { ... })
-// if (uri.startsWith("http://w3id.org/nkos/nkostype#")) {
 
 // Statistics
 app.get('/stats', async (req, res) => {
@@ -171,19 +174,6 @@ function render (req, res, view, locals) {
   return res.render(view, { ...vars, ...locals })
 }
 
-/*
-// Format
-app.get("/en/Format/:format", async (req, res, next) => {
-  var { path, query } = req
-
-  const uri = `http://bartoc.org/en/node/${req.params.id}`
-
-  console.log(
-  next()
-
-  // e.g. http://bartoc.org/en/Format/Zthes
-})
-*/
 
 // Error handling
 app.use((req, res, next) => {

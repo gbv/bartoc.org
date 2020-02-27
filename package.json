@@ -10,7 +10,7 @@
     "lint:js": "eslint *.js src/*.js",
     "lint:ejs": "ejslint views/*.ejs",
     "fix": "eslint --fix *.js src/*.js",
-    "cache": "mkdir -p cache; npm run cache:nkostype; make -C bin",
+    "cache": "mkdir -p cache; npm run cache:nkostype; cd bin; make",
     "cache:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > cache/nkostype.ndjson",
     "validate": "jskos-validate"
   },
