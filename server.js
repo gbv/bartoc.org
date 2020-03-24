@@ -4,13 +4,11 @@ const provider = require('./src/provider')()
 const utils = require('./src/utils')
 const jsonld = require('jsonld')
 const path = require('path')
+const axios = require('axios')
 
 // static data
 const registries = utils.indexByUri(utils.readNdjson('./data/registries.ndjson'))
 const nkostypes = utils.indexByUri(utils.readNdjson('./cache/nkostype.ndjson'))
-
-const cachedVocs = utils.indexByUri(utils.readNdjson('./cache/vocabularies.ndjson'))
-
 
 config.log(`Running in ${config.env} mode.`)
 
@@ -67,7 +65,6 @@ for (const [url, uri] of utils.readCsv('./data/license-ids.csv')) {
   app.get(url, (req, res) => res.redirect(`/vocabulary?license=${uri}`))
 }
 
-
 // root page
 app.get('/', (req, res) => {
   req.params = { page: 'index' }
@@ -77,20 +74,22 @@ app.get('/', (req, res) => {
 // search
 app.get('/vocabularies', async (req, res, next) => {
   const { query } = req
-  if (query.uri) {
-    const item = (await provider.getSchemes({ uri: query.uri }))[0] || cachedVocs[uri]
-    if (item) {
-      sendItem(req, res, item)
-    } else {
-      next()
-    }
-  } else {
-    // TODO: implement filter by query
-    var result = Object.values(cachedVocs).concat(await provider.getSchemes(query))
-    render(req, res, 'vocabularies', { title: 'Vocabularies', result })
-  }
+  axios.get(config.backend.schemes, { params: query })
+    .then(response => {
+      if (query.uri) {
+        if (response.data.length) {
+          sendItem(req, res, response.data[0])
+        } else {
+          next()
+        }
+      } else {
+        // TODO: support pagination via response headers
+        const result = response.data
+        result.total = response.headers['x-total-count']
+        render(req, res, 'vocabularies', { title: 'Vocabularies', result })
+      }
+    })
 })
-
 
 // Statistics
 app.get('/stats', async (req, res) => {
@@ -129,11 +128,9 @@ app.get('/en/node/:id([0-9]+)', async (req, res, next) => {
     path = '/registries'
   } else {
     path = '/vocabularies'
-    if (uri in cachedVocs) {
-      item = cachedVocs[uri]
-    } else {
-      item = (await provider.getSchemes({ id: uri }))[0]
-    }
+    // TODO: what if BARTOC URI is secondary identifier?
+    item = await axios.get(config.backend.schemes, { params: { uri } })
+      .then(response => response.data[0])
   }
 
   if (item) {
@@ -173,7 +170,6 @@ function render (req, res, view, locals) {
   const vars = { config, query, path, utils, registries, repositories, nkostypes }
   return res.render(view, { ...vars, ...locals })
 }
-
 
 // Error handling
 app.use((req, res, next) => {

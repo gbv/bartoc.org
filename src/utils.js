@@ -13,13 +13,13 @@ module.exports = {
 
   escapeXML: s => String(s).replace(/[<>&"']/g, c => '&#' + c.charCodeAt(0) + ';'),
 
-  indexByUri: array => array.reduce( (obj, item) => { obj[item.uri] = item; return obj }, {}),
+  indexByUri: array => array.reduce((obj, item) => { obj[item.uri] = item; return obj }, {}),
 
   buildQuery: query => '?' + Object.keys(query)
     .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(query[key])).join('&'),
 
   // TODO: move utility function to jskos-tools
-  label (labels, language, fallback='') {
+  label (labels, language, fallback = '') {
     var value = fallback
     var code = language || 'en'
     labels = labels || {}

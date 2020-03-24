@@ -17,7 +17,7 @@ This repository contains the new web interface of BARTOC.org, run at [VZG](https
 
 ## Requirements
 
-Requires at least Node.js 10. Additional dependencies are listed in `package.json`.
+Requires at least Node.js 10 and an instance of [jskos-server](https://github.com/gbv/jskos-server) to connect to. Additional dependencies are listed in `package.json`.
 
 ## Install from sources
 
@@ -25,8 +25,15 @@ Requires at least Node.js 10. Additional dependencies are listed in `package.jso
 git clone https://github.com/gbv/bartoc.org.git
 cd bartoc.org
 npm install
+~~~
+
+Optionally transform the Drupal export to JSKOS format:
+
+~~~
 npm run cache
 ~~~
+
+Then import the resulting file `cache/vocabularies.ndjson` into your jskos-server instance.
 
 ## Configuration
 

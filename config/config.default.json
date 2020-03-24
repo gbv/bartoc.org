@@ -39,5 +39,8 @@
   "license": {
     "name": "Public Domain Dedication and License v1.0",
     "url": "http://www.opendatacommons.org/licenses/pddl/1.0/"
+  },
+  "backend": {
+    "schemes": "http://localhost:3000/voc"
   }
 }
