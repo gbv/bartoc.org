@@ -3,7 +3,7 @@ const page = require('./routes/page')
 const utils = require('./src/utils')
 const jsonld = require('jsonld')
 const path = require('path')
-const cdk = require("cocoda-sdk")
+const cdk = require('cocoda-sdk')
 
 const backend = cdk.initializeRegistry(config.backend)
 
@@ -44,26 +44,26 @@ app.get('/:lang([a-z][a-z])/node/:id([0-9]+)', (req, res, next) => {
   }
 })
 
-// redirect old subject URLs to search page
+// redirect old subject URLs to vocabulary search
 
 for (const [url, id] of utils.readCsv('./data/eurovoc-ids.csv')) {
-  app.get(url, (req, res) => res.redirect(`/vocabulary?subject=${uri}`))
+  app.get(url, (req, res) => res.redirect(`/vocabularies?subject=${uri}`))
 }
 
 for (const [url, uri] of utils.readCsv('./data/ddc-ids.csv')) {
-  app.get(url, (req, res) => res.redirect(`/vocabulary?subject=${uri}`))
+  app.get(url, (req, res) => res.redirect(`/vocabularies?subject=${uri}`))
 }
 
 for (const [url, code] of utils.readCsv('./data/language-ids.csv')) {
-  app.get(url, (req, res) => res.redirect(`/vocabulary?language=${code}`))
+  app.get(url, (req, res) => res.redirect(`/vocabularies?languages=${code}`))
 }
 
 for (const [url, uri] of utils.readCsv('./data/kostype-ids.csv')) {
-  app.get(url, (req, res) => res.redirect(`/vocabulary?type=${uri}`))
+  app.get(url, (req, res) => res.redirect(`/vocabularies?type=${uri}`))
 }
 
 for (const [url, uri] of utils.readCsv('./data/license-ids.csv')) {
-  app.get(url, (req, res) => res.redirect(`/vocabulary?license=${uri}`))
+  app.get(url, (req, res) => res.redirect(`/vocabularies?license=${uri}`))
 }
 
 // root page
@@ -72,24 +72,27 @@ app.get('/', (req, res) => {
   page(req, res)
 })
 
-// search
-app.get('/vocabularies', async (req, res, next) => {
+// vocabulary search
+app.get('/vocabularies', vocabulariesSearch)
+
+async function vocabulariesSearch (req, res, next) {
   const params = req.query
+  params.properties = '*' // TODO: supported in jskos-server?
   backend.getSchemes({ params }).then(result => {
     if (params.uri) {
+      console.log(result.length)
       if (result.length) {
         sendItem(req, res, result[0])
       } else {
         next()
       }
     } else {
-      // TODO: support pagination via response headers
       render(req, res, 'vocabularies', { title: 'Vocabularies', result })
     }
   }).catch(e => {
     next(e)
   })
-})
+}
 
 // Statistics
 app.get('/stats', async (req, res) => {
@@ -99,7 +102,7 @@ app.get('/stats', async (req, res) => {
 // format page
 app.get('/en/Format/:id', async (req, res, next) => {
   const uri = `http://bartoc.org/en/Format/${req.params.id}`
-  backend.getConcepts({ concepts: [{ uri }]})
+  backend.getConcepts({ concepts: [{ uri }] })
     .then(concepts => concepts.length ? sendItem(req, res, concepts[0]) : next())
     .catch(next)
 })
@@ -124,12 +127,15 @@ app.get('/en/node/:id([0-9]+)', async (req, res, next) => {
   if (item) {
     path = '/registries'
   } else {
-    path = '/vocabularies'
+    req.path = '/vocabularies'
+    req.query.uri = uri
+    return vocabulariesSearch(req, res, next)
+    /*    path = '/vocabularies'
     // TODO: what if BARTOC URI is secondary identifier?
     item = await backend.getSchemes({ params: { uri } })
       .then(result => result[0])
-      .catch(next)
-   }
+      .catch(next) */
+  }
 
   if (item) {
     sendItem(req, res, item, { path })
@@ -149,7 +155,7 @@ const jskosContext = require('./static/context.json')
 async function sendItem (req, res, item, vars = {}) {
   if (req.query.format === 'json') {
     item['@context'] = 'https://gbv.github.io/jskos/context.json'
-    Object.keys(item).filter(key => key[0] === "_").forEach(key => delete item[key])
+    Object.keys(item).filter(key => key[0] === '_').forEach(key => delete item[key])
     res.send([item])
   } else if (req.query.format === 'nt') {
     res.setHeader('Content-Type', 'application/n-triples')

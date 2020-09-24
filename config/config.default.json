@@ -13,10 +13,6 @@
       "prefLabel": { "en": "Registries" }
     },
     {
-      "url": "/tracker",
-      "prefLabel": { "en": "Recent content" }
-    },
-    {
       "url": "/about",
       "prefLabel": { "en": "About" }
     },

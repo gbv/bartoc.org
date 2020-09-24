@@ -4,32 +4,30 @@ title:
 
 <img src="/img/bartoc-logo.svg" />
 
-<form class="main-form" action="/vocabularies">
+<div class="main-form">
+  <div class="form-group">
+    <label for="browse-vocabulary">Browse vocabulary metadata</label>
+    <div class="row">
+      <div class="col">
+        See <a href="/vocabularies">all vocabularies</a>, by type, subject, language, license...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--form class="main-form" action="/vocabularies">
   <div class="form-group">
     <label for="search-vocabulary">Search for vocabularies</label>
     <div class="row">
       <div class="col-md-10">
-        <input type="text" class="form-control" id="search-vocabulary" disabled>
+        <input type="text" class="form-control" id="search-vocabulary">
       </div>
       <div class="col-md-2">
         <button type="submit" class="btn btn-primary">Search</button>
       </div>
     </div>
   </div>
-</form>
-
-<div class="main-form">
-  <div class="form-group">
-    <label for="browse-vocabulary">Browse vocabulary metadata</label>
-    <small class="form-text text-muted label-help">
-      Not implemented yet...
-    </small>
-    <div class="row">
-      <div class="col">
-      </div>
-    </div>
-  </div>
-</div>
+</form-->
 
 <div class="main-form">
   <div class="form-group">

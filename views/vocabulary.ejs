@@ -19,7 +19,7 @@ var titles = Object.values(item.prefLabel || {})
   <%- include('row-list', { label: 'Subject', list: item.subject,
         view: s => include('item', { item: s, base: '/vocabularies?subject=' }) }) %>
   <%- include('row-list', { label: 'License', list: item.license,
-              view: item => include('item', { item, base: '/vocabulary?license=' }) }) %>
+              view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
   <%- include('row', { label: 'Size', content: item.extent } ) %>
   <%- include('row-list', { label: 'Publisher', list: item.publisher,
               view: item => include('item', { item }) }) %>
