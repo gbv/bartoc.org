@@ -27,7 +27,7 @@ cd bartoc.org
 npm install
 ~~~
 
-Optionally transform the Drupal export to JSKOS format:
+Optionally transform the Drupal export to JSKOS format (requires Perl >= 5.14 without additional modules):
 
 ~~~
 npm run cache

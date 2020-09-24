@@ -2,13 +2,22 @@
 ## no critic
 use v5.14;
 use autodie;
-use JSON;
-use HTML::Entities;
+use JSON::PP;
 
 # convert Drupal JSON export of BARTOC.org vocabularies to JSKOS
 # Usage: vocabularies2jskos.pl < ../data/vocabularies-dump.ndjson
 
 my %R;
+
+sub decode_entities($) {    # dump only contains these entities
+    my $s = shift;
+    $s =~ s/&gt;/>/g;
+    $s =~ s/&lt;/>/g;
+    $s =~ s/&quot;/"/g;
+    $s =~ s/&#039;/'/g;
+    $s =~ s/&amp;/&/g;
+    return $s;
+}
 
 sub field ($) {
     return grep { $_ } map { s/^\s+|\s+$//g; decode_entities $_ } $R{ $_[0] };
@@ -26,7 +35,7 @@ sub dehtml {
     $_[0] =~ s!<i>|</i>! !g;
     $_[0] =~ s!^\s+|\s+$!!gs;
     $_[0] =~ s!\n\n+!\n\n!g;
-    return $_[0];
+    return decode_entities $_[0];
 }
 
 my $IDS;
