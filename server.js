@@ -1,10 +1,11 @@
 const config = require('./config')
 const page = require('./routes/page')
-const provider = require('./src/provider')()
 const utils = require('./src/utils')
 const jsonld = require('jsonld')
 const path = require('path')
-const axios = require('axios')
+const cdk = require("cocoda-sdk")
+
+const backend = cdk.initializeRegistry(config.backend)
 
 // static data
 const registries = utils.indexByUri(utils.readNdjson('./data/registries.ndjson'))
@@ -73,22 +74,21 @@ app.get('/', (req, res) => {
 
 // search
 app.get('/vocabularies', async (req, res, next) => {
-  const { query } = req
-  axios.get(config.backend.schemes, { params: query })
-    .then(response => {
-      if (query.uri) {
-        if (response.data.length) {
-          sendItem(req, res, response.data[0])
-        } else {
-          next()
-        }
+  const params = req.query
+  backend.getSchemes({ params }).then(result => {
+    if (params.uri) {
+      if (result.length) {
+        sendItem(req, res, result[0])
       } else {
-        // TODO: support pagination via response headers
-        const result = response.data
-        result.total = response.headers['x-total-count']
-        render(req, res, 'vocabularies', { title: 'Vocabularies', result })
+        next()
       }
-    })
+    } else {
+      // TODO: support pagination via response headers
+      render(req, res, 'vocabularies', { title: 'Vocabularies', result })
+    }
+  }).catch(e => {
+    next(e)
+  })
 })
 
 // Statistics
@@ -99,12 +99,9 @@ app.get('/stats', async (req, res) => {
 // format page
 app.get('/en/Format/:id', async (req, res, next) => {
   const uri = `http://bartoc.org/en/Format/${req.params.id}`
-  const item = await provider.getConcept({ uri })
-  if (item) {
-    sendItem(req, res, item)
-  } else {
-    next()
-  }
+  backend.getConcepts({ concepts: [{ uri }]})
+    .then(concepts => concepts.length ? sendItem(req, res, concepts[0]) : next())
+    .catch(next)
 })
 
 // static pages
@@ -129,9 +126,10 @@ app.get('/en/node/:id([0-9]+)', async (req, res, next) => {
   } else {
     path = '/vocabularies'
     // TODO: what if BARTOC URI is secondary identifier?
-    item = await axios.get(config.backend.schemes, { params: { uri } })
-      .then(response => response.data[0])
-  }
+    item = await backend.getSchemes({ params: { uri } })
+      .then(result => result[0])
+      .catch(next)
+   }
 
   if (item) {
     sendItem(req, res, item, { path })
@@ -151,6 +149,7 @@ const jskosContext = require('./static/context.json')
 async function sendItem (req, res, item, vars = {}) {
   if (req.query.format === 'json') {
     item['@context'] = 'https://gbv.github.io/jskos/context.json'
+    Object.keys(item).filter(key => key[0] === "_").forEach(key => delete item[key])
     res.send([item])
   } else if (req.query.format === 'nt') {
     res.setHeader('Content-Type', 'application/n-triples')
@@ -183,6 +182,11 @@ app.use((req, res, next) => {
   } else {
     render(req, res, '404', { title })
   }
+})
+
+// Problem with backend or simply a bug
+app.use((err, req, res, next) => {
+  render(req, res, '500', { title: err.message })
 })
 
 // Start

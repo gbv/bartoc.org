@@ -30,7 +30,7 @@
   </form>
 </p>
 
-<p><%- result.total %> records found, showing <%- result.length %></p>
+<p><%- result._totalCount %> records found, showing <%- result.length %></p>
 
 <hr>
 
@@ -42,8 +42,8 @@
 <% } %>
 </ul>
 
-<% if (result.length < result.totalCount) { %>
-  <p>TODO: pagination (<%- result.totalCount %> total</p>
+<% if (result.length < result._totalCount) { %>
+<p>TODO: pagination (<%- result._totalCount %> total</p>
 <% } %>
 
 <hr>

@@ -5,6 +5,20 @@ const isBartocUri = id => id.match(bartocUri)
 const readLines = file => readFileSync(file).toString()
   .split(/\n|\n\r/).filter(Boolean)
 
+// TODO: this is not used yet
+function extendScheme (voc) {
+  var { uri, identifier } = voc
+  if (identifier && !isBartocUri(uri)) {
+    const bartoc = identifier.find(isBartocUri)
+    if (bartoc) {
+      identifier = identifier.filter(id => !isBartocUri(id))
+      identifier.unshift(uri)
+      voc.uri = bartoc
+    }
+  }
+  return voc
+}
+
 module.exports = {
 
   readNdjson: file => readLines(file).map(JSON.parse),
