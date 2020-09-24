@@ -1,0 +1,17 @@
+<% if (result._totalCount > result.length) {
+  const total = result._totalCount
+  const limit = 500
+  const cur = Number(query.offset || 0)
+%>
+<ul class="pagination">
+  <% for (let offset=0; offset<result._totalCount; offset+=limit) { %>
+  <li<%= cur == offset ? " class=current-page" : "" %>>
+    <a href="<%= utils.buildQuery({ ...query, limit, offset }) %>">
+      <%= offset+1 %>...<%=
+        offset+limit > total ? total : offset+limit
+      %>
+    </a>
+  </li>
+  <% } %>
+</ul>
+<% } %>

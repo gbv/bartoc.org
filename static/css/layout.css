@@ -26,3 +26,9 @@ ul.list-inline > li.list-inline-item:not(:last-child) {
 td > ul {
   margin-bottom: 0;
 }
+ul.pagination > li:not(:last-child)::after {
+  content: "\00a0|\00a0";
+}
+li.current-page {
+  font-weight: bold;
+}

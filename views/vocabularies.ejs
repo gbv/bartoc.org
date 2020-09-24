@@ -30,10 +30,9 @@
   </form>
 </p>
 
-<p><%- result._totalCount %> records found, showing <%- result.length %></p>
-
 <hr>
 
+<%- include("pagination", { result, query }) %>
 <ul>
 <% for (let item of result) { %>
 <li>
@@ -41,10 +40,7 @@
 </li>
 <% } %>
 </ul>
-
-<% if (result.length < result._totalCount) { %>
-<p>TODO: pagination (<%- result._totalCount %> total</p>
-<% } %>
+<%- include("pagination", { result, query }) %>
 
 <hr>
 
