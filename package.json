@@ -24,7 +24,7 @@
     "node": ">=10.0"
   },
   "dependencies": {
-    "cocoda-sdk": "github:gbv/cocoda-sdk#71fca0d",
+    "cocoda-sdk": "github:gbv/cocoda-sdk#ed206bf",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
     "front-matter": "^3.2.1",
