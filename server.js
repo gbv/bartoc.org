@@ -72,6 +72,20 @@ app.get('/', (req, res) => {
   page(req, res)
 })
 
+app.get('/edit', async (req, res, next) => {
+  const { uri } = req.query
+  var item
+  var title = "Add vocabulary"
+
+  if (uri) {
+    item = await backend.getSchemes({ params: { uri } }).then(result => result[0])
+    title = "Edit vocabulary"
+    if (!item) next()
+  }
+
+  render(req, res, 'edit', { item, title })
+})
+
 // vocabulary search
 app.get('/vocabularies', vocabulariesSearch)
 

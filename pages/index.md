@@ -84,3 +84,7 @@ title:
     </small>
   </div>
 </div>
+
+<p v-cloak v-if="user">
+  <a class="btn btn-warning" href="/edit">add a vocabulary</a>
+</p>

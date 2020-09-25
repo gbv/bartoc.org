@@ -32,3 +32,5 @@ ul.pagination > li:not(:last-child)::after {
 li.current-page {
   font-weight: bold;
 }
+
+[v-cloak] { display: none; }

@@ -10,24 +10,30 @@
     <title><%= config.name %><%= title ? ": " + title : "" %></title>
   </head>
   <body>
-    <header class="navbar navbar-dark bg-primary navbar-expand-lg">
-      <div class="container">
-        <a class="navbar-brand" href="/"><%= config.name %></a>
-        <ul class="navbar-nav mr-auto">
-          <% config.menu.forEach( item => { %>
-          <li class="nav-item <%= item.url == path ? 'active' : '' %>">
-            <a class="nav-link" href="<%= item.url %>"><%= item.prefLabel.en %></a>
-          </li>
-          <% }) %>
+    <div id="app">
+      <header class="navbar navbar-dark bg-primary navbar-expand-lg">
+        <div class="container">
+          <a class="navbar-brand" href="/"><%= config.name %></a>
+          <ul class="navbar-nav mr-auto">
+            <% config.menu.forEach( item => { %>
+            <li class="nav-item <%= item.url == path ? 'active' : '' %>">
+              <a class="nav-link" href="<%= item.url %>"><%= item.prefLabel.en %></a>
+            </li>
+            <% }) %>
+          </ul>
         </div>
         <ul class="navbar-nav mr-auto">
           <li class="nav-item <%= path == '/stats' ? 'active' : '' %>">
             <a class="nav-link" href="/stats">Statistics</a>
           </li>
+          <li v-cloak>
+            <a class="nav-link">
+              <user-status :auth="auth"/>
+            </a>
+          </li>
         </ul>
-      </div>
-    </header>
-    <div class="container">
-      <% if(title) { %>
-      <h1><%= title %></h1>
-      <% } %>
+      </header>
+      <div class="container">
+        <% if(title) { %>
+        <h1><%= title %></h1>
+        <% } %>

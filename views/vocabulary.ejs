@@ -1,4 +1,9 @@
 <%- include('header') %>
+
+<p v-cloak v-if="user">
+  <a class="btn btn-warning" href="/edit?uri=<%= item.uri %>">edit this vocabulary</a>
+</p>
+
 <%- include('abstract', { abstract: item.definition }) %>
 <%- include('abstract', { abstract: item.scopeNote }) %>
 
