@@ -37,17 +37,35 @@ const UserStatus = {
   }
 }
 
+const FormRow = {
+  template: `
+    <div class="form-group row">
+      <label :for="id" class="col-form-label col-sm-2">{{label}}</label>
+      <div class="col-sm-10">
+        <slot/>
+      </div>
+    </div>`,
+  props: ["id", "label"]
+}
+
+/**
+ * Web form to modify and create vocabulary metadata.
+ */
 const ItemEditor = {
+  components: { FormRow },
   template: `
 <p>
   {{item}}
   <form>
-    <div class="form-group row">
-      <label for="type" class="col-form-label col-sm-2">Title</label>
-      <div class="col-sm-10">
-        <input type="text" id="title"/>
-      </div>
-    </div>
+    <form-row :id="'title'" :label="'Title'">
+      <input type="text" id="title" v-model="item.prefLabel.en"/>
+    </form-row>
+    <form-row :id="'languages'" :label="'Languages'">
+      <input type="text" id="languages" v-model="item.languages"/>
+    </form-row>
+    <form-row :id="'startDate'" :label="'Created'">
+      <input type="text" v-model="item.startDate"/>
+    </form-row>
     <div class="form-group row">
       <div class="col-sm-2"></div>
       <div class="col-sm-10">
@@ -72,8 +90,17 @@ const ItemEditor = {
     }
   },
   data () {
+    const item = this.currentItem || {}
+    item.prefLabel = item.prefLabel || {}
+
+    // TODO: use cdk instead. Catch error.
+    fetch("https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Furi.gbv.de%2Fterminology%2Flicense%2F").then(res => res.json())
+    .then(res => { this.licenses = res } )
+
     return {
-      item: this.currentItem
+      item,
+      kostypes: null,
+      licenses: null
     }
   },
   methods: {

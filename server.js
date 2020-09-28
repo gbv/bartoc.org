@@ -47,7 +47,7 @@ app.get('/:lang([a-z][a-z])/node/:id([0-9]+)', (req, res, next) => {
 
 // redirect old subject URLs to vocabulary search
 
-for (const [url, id] of utils.readCsv('./data/eurovoc-ids.csv')) {
+for (const [url, uri] of utils.readCsv('./data/eurovoc-ids.csv')) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?subject=${uri}`))
 }
 
