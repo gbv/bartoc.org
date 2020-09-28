@@ -13,9 +13,13 @@ Each BARTOC entry can be accessed in RDF N-Triples format by appending
 
 ## JSKOS format
 
-Each BARTOC entry can be accessed in [JSKOS format](https://gbv.github.io/jskos/) by appending 
+Each BARTOC entry can be accessed in [JSKOS format](https://gbv.github.io/jskos/) by appending
 `?format=json` to its URI. The footer contains a corresponding "JSON" link.
+
+## API
+
+BARTOC can be accessed at [https://bartoc.org/api/](/api/) via JSKOS API.
 
 ## Database dumps
 
-Will be made available after relaunch of BARTOC.org.
+Will be made available after relaunch of BARTOC.org. Meanwhile please use API.

@@ -27,9 +27,7 @@
             <a class="nav-link" href="/stats">Statistics</a>
           </li>
           <li v-cloak>
-            <a class="nav-link">
-              <user-status :auth="auth"/>
-            </a>
+            <user-status :auth="auth" @update:user="updateUser"/>
           </li>
         </ul>
       </header>

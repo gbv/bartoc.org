@@ -5,6 +5,7 @@ const jsonld = require('jsonld')
 const path = require('path')
 const cdk = require('cocoda-sdk')
 
+const proxy = require('express-http-proxy')
 const backend = cdk.initializeRegistry(config.backend)
 
 // static data
@@ -72,14 +73,17 @@ app.get('/', (req, res) => {
   page(req, res)
 })
 
+// backend
+app.use('/api/', proxy(config.backend.api))
+
 app.get('/edit', async (req, res, next) => {
   const { uri } = req.query
   var item
-  var title = "Add vocabulary"
+  var title = 'Add vocabulary'
 
   if (uri) {
     item = await backend.getSchemes({ params: { uri } }).then(result => result[0])
-    title = "Edit vocabulary"
+    title = 'Edit vocabulary'
     if (!item) next()
   }
 

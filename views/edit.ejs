@@ -1,0 +1,8 @@
+<%- include('header') %>
+
+<% item = { foo: 42 } %>
+
+<item-editor :user="user" :backend="'<%= config.backend.api %>'" <% if(item) { %>
+             :current='<%- JSON.stringify(item).replace(/'/g,"&apos;") %>'<% } %>/>
+
+<%- include('footer') %>
