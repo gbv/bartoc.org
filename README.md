@@ -37,7 +37,16 @@ Then import the resulting file `cache/vocabularies.ndjson` into your jskos-serve
 
 ## Configuration
 
-Basic configuration is located in `config/config.default.json`. Selected fields can be overridden in a local `config/config.json`.
+Basic configuration is located in `config/config.default.json`. Selected fields can be overridden in a local `config/config.json`. The latter should at least include a link to a JSKOS server instance, e.g.:
+
+~~~json
+{
+  "backend": {
+    "provider": "ConceptApi",
+    "api": "http://localhost:3011/"
+  }
+}
+~~~
 
 ## Run for testing
 
