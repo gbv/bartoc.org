@@ -13,7 +13,7 @@ const UserStatus = {
   },
   data () {
     return {
-      client: new LoginClient(this.auth, { ssl: true }),
+      client: new LoginClient(this.auth),
       connected: false,
       user: null
     }
@@ -66,6 +66,11 @@ const ItemEditor = {
     <form-row :id="'startDate'" :label="'Created'">
       <input type="text" v-model="item.startDate"/>
     </form-row>
+    <form-row :id="'license'" :label="'License'">
+      <select v-model="item.license" multiple :size="(licenses||[]).length">
+        <option v-for="l in licenses" v-bind:value="l.uri">{{prefLabel(l)}}</option>
+      </select>
+    </form-row>
     <div class="form-group row">
       <div class="col-sm-2"></div>
       <div class="col-sm-10">
@@ -104,6 +109,13 @@ const ItemEditor = {
     }
   },
   methods: {
+    prefLabel(item) {
+      if (item && item.prefLabel) {
+        if ("en" in item.prefLabel) return item.prefLabel.en
+        for (let lang in item.prefLabel) return item.prefLabel[lang]
+      }
+      return "???"
+    },
     saveItem () {
       console.log('saveItem')
     }
