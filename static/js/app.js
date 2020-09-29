@@ -21,7 +21,7 @@ const UserStatus = {
   },
   emits: ['update:user', 'update:auth'],
   created () {
-    const { connect, disconnect, login, logout, update, error, publicKey, token, about } = LoginClient.events
+    const { connect, disconnect, login, logout, update, error, token, about } = LoginClient.events
     this.client.addEventListener(about, ({ publicKey }) => { this.auth.publicKey = publicKey; this._updateAuth() })
     this.client.addEventListener(connect, () => { this.connected = true })
     this.client.addEventListener(disconnect, () => { this.connected = false })
@@ -89,7 +89,7 @@ const LabelEditor = {
     </tr>
     <tr>
       <td>
-        <button type="button" class="btn btn-outline-primary btn-sm" @click="add">+</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" @click="add()">+</button>
       </td>
     </tr>
   </table>`,
@@ -109,14 +109,14 @@ const LabelEditor = {
     }
     // this will move an altLabel to become a prefLabel when no prefLabel of its language exist!
     for (const language in this.altLabel) {
-      this.altLabel[language].forEach(label => this.add(label, language))
+      this.altLabel[language].forEach(label => this.add({ label, language }))
     }
     this.add()
-    this.$watch('labels', this.change, { deep: true })
+    this.$watch('labels', l => this.change(l), { deep: true })
   },
   methods: {
-    add (label = '', language = '') {
-      this.labels.push({ label, language })
+    add (label = { label: '', language: '' }) {
+      this.labels.push(label)
     },
     remove (i) {
       this.labels.splice(i, 1)
@@ -211,7 +211,7 @@ const ItemEditor = {
       <div class="col-sm-2"></div>
       <div class="col-sm-10">
         <button v-if="auth" class="btn btn-primary" @click="saveItem">Save</button>
-	<span v-else>authentification required</span>
+        <span v-else>authentification required!</span>
       </div>
     </div>
 </p>
@@ -264,7 +264,6 @@ const ItemEditor = {
     },
     saveItem () {
       if (!this.user || !this.auth) return
-      const api = '/api/voc'
       const method = this.item.uri ? 'PUT' : 'POST'
       const body = JSON.stringify(this.item)
       const token = this.auth.token
