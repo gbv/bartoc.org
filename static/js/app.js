@@ -3,34 +3,40 @@
  */
 const UserStatus = {
   template: `
-<a v-if="user" class="nav-link" :href="'https://' + auth">{{user.name}}</a>
-<a v-else-if="connected" class="nav-link" :href="'https://' + auth + 'login'">login</a>`,
+<a v-if="user" class="nav-link" :href="'https://' + login">{{user.name}}</a>
+<a v-else-if="connected" class="nav-link" :href="'https://' + login + 'login'">login</a>`,
   props: {
-    auth: {
+    login: {
       type: String,
       required: true
     }
   },
   data () {
     return {
-      client: new LoginClient(this.auth),
+      client: new LoginClient(this.login),
       connected: false,
-      user: null
+      user: null,
+      auth: {}
     }
   },
-  emits: ['update:user'],
+  emits: ['update:user', 'update:auth'],
   created () {
-    const { connect, disconnect, login, logout, update, error } = LoginClient.events
+    const { connect, disconnect, login, logout, update, error, publicKey, token, about } = LoginClient.events
+    this.client.addEventListener(about, ({ publicKey }) => { this.auth.publicKey = publicKey; this._updateAuth() })
     this.client.addEventListener(connect, () => { this.connected = true })
     this.client.addEventListener(disconnect, () => { this.connected = false })
-    this.client.addEventListener(login, ({ user }) => { this._updateUser(user) })
+    this.client.addEventListener(login, ({ user }) => { this._setUser(user) })
     this.client.addEventListener(update, ({ user }) => { this._updadeUser(user) })
-    this.client.addEventListener(logout, () => { this._updateUser(null) })
+    this.client.addEventListener(logout, () => { this._setUser(null) })
+    this.client.addEventListener(token, ({ token }) => { this.auth.token = token; this._updateAuth() })
     this.client.addEventListener(error, console.warn)
     this.client.connect()
   },
   methods: {
-    _updateUser (user) {
+    _updateAuth () {
+      this.$emit('update:auth', this.auth.token ? this.auth : null)
+    },
+    _setUser (user) {
       this.user = user
       this.$emit('update:user', user)
     }
@@ -61,7 +67,7 @@ const LanguageSelect = {
   <input v-else type="text" maxlength="3" size="3" :value="modelValue"
          @input="$emit('update:modelValue', $event.target.value)"/>`,
   props: {
-    modelValue: String,
+    modelValue: [String, Array],
     repeatable: Boolean
   }
 }
@@ -119,6 +125,7 @@ const LabelEditor = {
       const prefLabel = {}
       const altLabel = {}
       labels.forEach(({ label, language }) => {
+        if (!label || !language) return
         const code = language || 'und'
         label = label.trim()
         if (label === '') return
@@ -203,9 +210,8 @@ const ItemEditor = {
     <div class="form-group row">
       <div class="col-sm-2"></div>
       <div class="col-sm-10">
-        <button class="btn btn-primary" @click="saveItem">Save</button>
-        &nbsp;
-        <!--button class="btn btn-warning">Reset</button-->
+        <button v-if="auth" class="btn btn-primary" @click="saveItem">Save</button>
+	<span v-else>authentification required</span>
       </div>
     </div>
 </p>
@@ -214,12 +220,10 @@ const ItemEditor = {
 <p>Vocabularies are editable by <a href="/contact">the BARTOC.org editors</a>.</p>
 `,
   props: {
-    backend: {
-      type: String
-    },
     user: {
       type: Object
     },
+    auth: {},
     current: {
       type: Object
     }
@@ -229,8 +233,9 @@ const ItemEditor = {
     item.prefLabel = item.prefLabel || {}
     item.altLabel = item.altLabel || {}
     item.definition = item.definition || {}
+    item.license = item.license || []
 
-    // TODO: move non-english abstract to language code "und"
+    // make non-English abstract to language code "und"
     const code = Object.keys(item.definition).find(code => code !== 'en')
     if (code) {
       item.definition.und = item.definition[code]
@@ -258,10 +263,17 @@ const ItemEditor = {
       return '???'
     },
     saveItem () {
-      // TODO: send item to backend
-      // console.log(this.item)
-      console.log(this.user)
-      console.log(this.backend)
+      if (!this.user || !this.auth) return
+      const api = '/api/voc'
+      const method = this.item.uri ? 'PUT' : 'POST'
+      const body = JSON.stringify(this.item)
+      const token = this.auth.token
+      const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+      fetch('/api/voc', { method, body, headers }).then(res => {
+        console.log(res)
+      })
+      // status 422: invalid JSKOS?
+      // TODO: catch error and show message
     }
   }
 }
@@ -273,14 +285,16 @@ const app = {
   components: { UserStatus, ItemEditor },
   data () {
     return {
-      auth: 'coli-conc.gbv.de/login/',
-      user: null
+      login: 'coli-conc.gbv.de/login/',
+      user: null,
+      auth: null
     }
   },
   methods: {
     updateUser (user) {
       this.user = user
-    }
+    },
+    updateAuth (auth) { this.auth = auth }
   }
 }
 

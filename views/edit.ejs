@@ -1,6 +1,5 @@
 <%- include('header') %>
 
-<item-editor :user="user" :backend="'<%= config.backend.api %>'" <% if(item) { %>
-             :current='<%- JSON.stringify(item).replace(/'/g,"&apos;") %>'<% } %>/>
+<item-editor :user="user" :auth="auth" <% if(item) { %>:current='<%- JSON.stringify(item).replace(/'/g,"&apos;") %>'<% } %>/>
 
 <%- include('footer') %>
