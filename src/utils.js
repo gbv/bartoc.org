@@ -20,6 +20,10 @@ function extendScheme (voc) {
 }
 
 module.exports = {
+  cleanupItem: item => {
+    for (const key in item) { if (key[0] === '_') delete item[key] }
+    return item
+  },
 
   readNdjson: file => readLines(file).map(JSON.parse),
 

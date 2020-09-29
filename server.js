@@ -84,7 +84,13 @@ app.get('/edit', async (req, res, next) => {
   if (uri) {
     item = await backend.getSchemes({ params: { uri } }).then(result => result[0])
     title = 'Edit vocabulary'
-    if (!item) next()
+    if (item) {
+      utils.cleanupItem(item)
+      delete item.concepts
+      delete item.topConcepts
+    } else {
+      next()
+    }
   }
 
   render(req, res, 'edit', { item, title })
@@ -98,7 +104,6 @@ async function vocabulariesSearch (req, res, next) {
   params.properties = '*' // TODO: supported in jskos-server?
   backend.getSchemes({ params }).then(result => {
     if (params.uri) {
-      console.log(result.length)
       if (result.length) {
         sendItem(req, res, result[0])
       } else {
