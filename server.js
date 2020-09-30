@@ -74,7 +74,14 @@ app.get('/', (req, res) => {
 })
 
 // backend
-app.use('/api/', proxy(config.backend.api))
+app.use('/api', (req, res, next) => {
+  if (!req.originalUrl.startsWith('/api/')) {
+    const query = req.url.slice(req.path.length)
+    return res.redirect(301, `/api/${query}`)
+  } else {
+    return proxy(config.backend.api)(req, res, next)
+  }
+})
 
 app.get('/edit', async (req, res, next) => {
   const { uri } = req.query
@@ -215,6 +222,7 @@ app.use((req, res, next) => {
 
 // Problem with backend or simply a bug
 app.use((err, req, res, next) => {
+  // console.error(err)
   render(req, res, '500', { title: err.message })
 })
 
