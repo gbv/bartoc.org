@@ -2,9 +2,7 @@
  * Establish connection to login server and show logged in user or link to login.
  */
 const UserStatus = {
-  template: `
-<a v-if="user" class="nav-link" :href="'https://' + login">{{user.name}}</a>
-<a v-else-if="connected" class="nav-link" :href="'https://' + login + 'login'">login</a>`,
+  template: '<a v-if="connected" class="nav-link" :href="\'https://\'+login+\'account\'">{{user ? user.name : \'login\'}}</a>',
   props: {
     login: {
       type: String,
@@ -105,7 +103,7 @@ const LabelEditor = {
   },
   created () {
     for (const language in this.prefLabel) {
-      this.add(this.prefLabel[language], language)
+      this.add({ label: this.prefLabel[language], language })
     }
     // this will move an altLabel to become a prefLabel when no prefLabel of its language exist!
     for (const language in this.altLabel) {
@@ -143,11 +141,40 @@ const LabelEditor = {
   }
 }
 
+function prefLabel (item) {
+  if (item && item.prefLabel) {
+    if ('en' in item.prefLabel) return item.prefLabel.en
+    for (const lang in item.prefLabel) return item.prefLabel[lang]
+  }
+  return '???'
+}
+
+const SetSelect = {
+  template: `
+      <select v-model="set" multiple :size="(from||[]).length" class="form-control">
+        <option v-for="option in from" v-bind:value="{ uri: option.uri }">{{prefLabel(option)}}</option>
+      </select>
+`,
+  props: {
+    modelValue: Array,
+    from: Array
+  },
+  data () {
+    return { set: [] }
+  },
+  created () {
+    this.$watch('set', (set) => {
+      this.$emit('update:modelValue', set)
+    })
+  },
+  methods: { prefLabel }
+}
+
 /**
  * Web form to modify and create vocabulary metadata.
  */
 const ItemEditor = {
-  components: { FormRow, LabelEditor, LanguageSelect },
+  components: { FormRow, LabelEditor, LanguageSelect, SetSelect },
   template: `
 <p>
     <form-row :id="'title'" :label="'URI'" v-if="item.uri">
@@ -166,16 +193,13 @@ const ItemEditor = {
       <input type="text" class="form-control" v-model="item.extent"/>
     </form-row>
     <form-row :id="'license'" :label="'License'">
-      <select v-model="item.license" multiple :size="(licenses||[]).length" class="form-control">
-        <option v-for="l in licenses" v-bind:value="l.uri">{{prefLabel(l)}}</option>
-      </select>
+      <set-select v-model="item.license" :from="licenses" />
     </form-row>
     <form-row :id="'abstract-en'" :label="'English Abstract'">
-      <textarea id="abstract-en" class="form-control" v-model="item.definition.en"></textarea>
+      <textarea id="abstract-en" class="form-control" v-model="abstractEn"></textarea>
     </form-row>
     <form-row :id="'abstract'" :label="'Non-English Abstract'">
-      <textarea id="abstract" class="form-control" v-model="item.definition.und"></textarea>
-      <!-- TODO: select language of abstract -->
+      <textarea id="abstract" class="form-control" v-model="abstractUnd"></textarea>
     </form-row>
     <form-row :label="'KOS Types'">
       ...
@@ -210,13 +234,16 @@ const ItemEditor = {
     <div class="form-group row">
       <div class="col-sm-2"></div>
       <div class="col-sm-10">
-        <button v-if="auth" class="btn btn-primary" @click="saveItem">Save</button>
+        <button v-if="auth" class="btn btn-primary" @click="saveItem">save</button>
         <span v-else>authentification required!</span>
+	&nbsp;
+	<button class="btn btn-warning" onclick="location.reload()">reset</button>
+	<p v-if="'status' in status"><div :class="'alert alert-'+status.status">{{status.message || "!!"}}</div></p>
       </div>
     </div>
 </p>
 <button @click="displayJSON=!displayJSON">{{displayJSON ? 'hide JSON' : 'show JSON'}}</button>
-<pre v-show="displayJSON">{{item}}</pre>
+<pre v-show="displayJSON">{{cleanupItem(item)}}</pre>
 <p>Vocabularies are editable by <a href="/contact">the BARTOC.org editors</a>.</p>
 `,
   props: {
@@ -234,47 +261,71 @@ const ItemEditor = {
     item.altLabel = item.altLabel || {}
     item.definition = item.definition || {}
     item.license = item.license || []
+    item.type = item.type || ['http://www.w3.org/2004/02/skos/core#ConceptScheme']
+
+    var abstractEn = ''
+    var abstractUnd = ''
 
     // make non-English abstract to language code "und"
-    const code = Object.keys(item.definition).find(code => code !== 'en')
-    if (code) {
-      item.definition.und = item.definition[code]
-      delete item.definition[code]
+    for (const code in item.definition) {
+	    if (code === 'en') abstractEn = item.definition[code][0]
+	    else abstractUnd = item.definition[code][0]
     }
 
     // TODO: use cdk instead. Catch error.
     fetch('https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Furi.gbv.de%2Fterminology%2Flicense%2F').then(res => res.json())
       .then(res => { this.licenses = res })
-    // TODO: also load kostypes
+    fetch('https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Fw3id.org%2Fnkos%2Fnkostype').then(res => res.json())
+      .then(res => { this.kostypes = res })
 
     return {
       item,
+      abstractEn,
+      abstractUnd,
       kostypes: null,
       licenses: null,
+      status: { },
       displayJSON: false
     }
   },
+  watch: {
+    abstractEn: function (str) { this.item.definition.en = [str] },
+    abstractUnd: function (str) { this.item.definition.und = [str] }
+  },
   methods: {
-    prefLabel (item) {
-      if (item && item.prefLabel) {
-        if ('en' in item.prefLabel) return item.prefLabel.en
-        for (const lang in item.prefLabel) return item.prefLabel[lang]
-      }
-      return '???'
-    },
     saveItem () {
       if (!this.user || !this.auth) return
-      const method = this.item.uri ? 'PUT' : 'POST'
-      const body = JSON.stringify(this.item)
+      var uri = this.item.uri
+      const method = uri ? 'PUT' : 'POST'
+	    if (!uri) {
+		    // TODO: validate newUri
+		    uri = this.newUri
+		   }
+      const body = JSON.stringify(this.cleanupItem({ ...this.item, uri }))
       const token = this.auth.token
       const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       fetch('/api/voc', { method, body, headers }).then(res => {
-        console.log(res)
+	      if (res.ok) {
+          		      window.location.href = '/vocabularies?uri=' + encodeURIComponent(uri)
+		     }
+        Object.assign(this.status, { status: res.ok ? 'success' : 'warning', message: this.statusText })
       })
-      // status 422: invalid JSKOS?
-      // TODO: catch error and show message
+    },
+    cleanupItem (item) {
+      const clean = {}
+      for (const key in item) {
+        if (!isEmpty(item[key])) clean[key] = item[key]
+      }
+      return clean
     }
   }
+}
+
+function isEmpty (obj) {
+  if (obj === '' || obj === null || obj === undefined) return true
+  if (Array.isArray(obj)) return obj.every(isEmpty)
+  if (typeof obj === 'object') return Object.values(obj).every(isEmpty)
+  return false
 }
 
 /**
