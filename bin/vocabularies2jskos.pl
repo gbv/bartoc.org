@@ -5,7 +5,7 @@ use autodie;
 use JSON::PP;
 
 # convert Drupal JSON export of BARTOC.org vocabularies to JSKOS
-# Usage: vocabularies2jskos.pl < ../data/vocabularies-dump.ndjson
+# Usage: vocabularies2jskos.pl ../data/download.ndjson < ../data/vocabularies-dump.ndjson
 
 my %R;
 
@@ -38,6 +38,10 @@ sub dehtml {
     return decode_entities $_[0];
 }
 
+sub dehtmlist {
+    return grep { $_ ne "" } split /\s*,\s*/, dehtml @_;
+}
+
 my $IDS;
 
 for (qw(eurovoc ddc language license kostype)) {
@@ -51,14 +55,57 @@ sub mapid {
 
 ## use critic
 
+my %month = (
+    January   => '01',
+    February  => '02',
+    March     => '03',
+    April     => '04',
+    May       => '05',
+    June      => '06',
+    July      => '07',
+    August    => '08',
+    September => '09',
+    October   => '10',
+    November  => '11',
+    December  => '12'
+);
+
+sub date {
+    $_[0] =~
+      s/^.+? ([A-Z]+) (\d+), (\d{4})/"$3-".$month{$1}.sprintf("-%02d",$2)/ie;
+    $_[0] =~ s/ - /T/;
+    return "$_[0]:00Z";
+}
+
+open( my $fh, "<", shift @ARGV ) or die "failed to open download.ndjson";
+my %download = map {
+    my $r     = decode_json($_);
+    my $jskos = {
+        created  => date( $r->{'Post date'} ),
+        modified => date( $r->{'Updated date'} )
+    };
+    if ( $r->{Link} ) {
+        my @links = grep { $_ =~ qr{^https?//} } dehtmlist $r->{Link};
+        if ( @links eq 1 ) {
+            $jskos->{url} = $links[0];
+        }
+        else {
+            $jskos->{subjectOf} = [ map { { url => $_ } } @links ];
+        }
+    }
+    ( $r->{Nid} => $jskos );
+} <$fh>;
+close $fh;
+
 while (<>) {
     %R = %{ decode_json $_ };
 
-    $R{'no name'} =~ qr{<a href="(/en/node/\d+)">(.+)</a>};
+    $R{'no name'} =~ qr{<a href="/../node/(\d+)">(.+)</a>};
 
     my %jskos = (
-        uri       => "http://bartoc.org$1",
-        prefLabel => { und => decode_entities $2 }
+        uri       => "http://bartoc.org/en/node/$1",
+        prefLabel => { und => decode_entities $2 },
+        %{ $download{$1} }
     );
 
     $jskos{identifier} = ["http://www.wikidata.org/entity/$1"]
@@ -100,6 +147,9 @@ while (<>) {
     # TODO
     # push @subject, map { mapid( eurovoc => $_ ) } terms 'EuroVoc';
 
+    # TODO: ILC (repeatable)
+    # say STDERR $R{ILC} if $R{ILC};
+
     $jskos{subject} = [ map { { uri => $_ } } @subject ] if @subject;
 
     $jskos{type} = [
@@ -130,6 +180,8 @@ while (<>) {
         $jskos{publisher} = [$publisher];
     }
 
+    $jskos{CONTACT} = dehtml( $R{Contact} ) =~ s/^mailto://r if $R{Contact};
+
     # TODO:
     #    342 Address - Premise (i.e. Apartment / Suite number)
     #   2221 Address - Postal code
@@ -138,14 +190,29 @@ while (<>) {
     #   2428 Address
     #   2428 Address - Country
     #     5 Address - Dependent locality
-    #   2992 Location
 
-    # 252 ILC
-    #256 SKOS Vocabulary Service
-    #259 Contact
-    #2486 Access
-    #2490 Format
-    #816 Listed in
+    # TODO
+    # say STDERR $R{Location} if $R{Location};
+
+    if ( $R{'SKOS Vocabulary Service'} ) {
+        $jskos{SKOSMOS} =
+          [ dehtmlist $R{'SKOS Vocabulary Service'} ];
+    }
+
+    if ( $R{Format} ) {
+        $jskos{FORMAT} =
+          [ map { pop [ split "/", $_ ] } ( dehtmlist $R{Format} ) ];
+    }
+
+    if ( $R{'Listed in'} ) {
+        my @registries = map { { uri => "http://$_" } }
+          ( $R{'Listed in'} =~ qr{(bartoc.org/en/node/\d+)}m );
+        $jskos{partOf} = \@registries if @registries;
+    }
+
+    if ( $R{Access} ) {
+        $jskos{ACCESS} = [ dehtmlist $R{'Access'} ];
+    }
 
     say encode_json \%jskos;
 }
