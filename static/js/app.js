@@ -215,15 +215,15 @@ const ItemEditor = {
 <p>Basic information about the vocabulary:</p>
 <form-row :label="'URI'">
   <a v-if="item.uri" :href="item.uri">{{item.uri}}</a>
-  <div>
-    <input v-else type="text" v-model="uri" class="form-control"/>
-    Please leave empty to assign a BARTOC URI!
+  <div v-else>
+    <input type="text" v-model="uri" class="form-control"/>
+    Please leave empty to assign a BARTOC URI! <em>(not implemented yet)</em>
   </div>
 </form-row>
 <form-row :label="'Title'">
   <label-editor v-model:prefLabel="item.prefLabel" v-model:altLabel="item.altLabel"/>
-  The first title of each language code is used as preferred label, more titles as
-  alternative labels.
+  The first of each language code is used as preferred title, more as
+  alternative titles, translations, abbreviations...
 </form-row>
 <form-row :label="'Languages'">
   <language-select v-model="item.languages" class="form-control" :repeatable="true"/>
@@ -248,49 +248,56 @@ const ItemEditor = {
   </table>
   Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
 </form-row>
-<form-row :label="'Extent'">
+<form-row :label="'Size'">
   <input type="text" class="form-control" v-model="item.extent"/>
+  Number of classes, subclasses, taxa, terms, concepts etc. Please add date in parenthesis (YYYY-MM).
 </form-row>
 <form-row :label="'English Abstract'">
   <textarea id="abstract-en" class="form-control" v-model="abstractEn"></textarea>
 </form-row>
 <form-row :label="'Non-English Abstract'">
   <textarea id="abstract" class="form-control" v-model="abstractUnd"></textarea>
+  Use quotation marks and original language if copied from another source (e.g. homepage).
 </form-row>
 <form-row :label="'KOS Types'">
   <set-select :modelValue="item.type" @update:modelValue="item.type=$event.map(t=>t.uri)" :options="kostypes" />
 </form-row>
 <form-row :label="'Subjects'">
-  ...DDC Main Class, DDC, EuroVoc, ILC...
+  ...DDC Main Class (one or more), DDC (one or more), EuroVoc, ILC...
 </form-row>
 <hr>
 <p>Fields about how the vocabulary is made available:</p>
 <form-row :label="'Created'">
-  <input type="text" class="form-control" v-model="item.startDate"/>
+  <input type="text" class="form-control" v-model="item.startDate" maxlength="4"/>
+  The year when the KOS was first created (YYYY).
 </form-row>
 <form-row :label="'License'">
   <set-select v-model="item.license" :options="licenses" />
 </form-row>
-<form-row :label="'Formats'">
-  ...
-</form-row>
-<form-row :label="'Access'">
-  ...
-</form-row>
 <form-row :label="'Links'">
   ...
+  was repeatable on original BARTOC, now unique!
 </form-row>
 <form-row :label="'Publisher'">
   ...author, address, location, VIAF
+  Try to use an institution rather than a person. repeatable?
+</form-row>
+<form-row :label="'Formats'">
+  ...
+  Select the format(s) in which the KOS is available.
+</form-row>
+<form-row :label="'Access'">
+  ...
+  Do you have to register to take a look at the KOS, is it 'hidden' in a licensed database or is it free online?
 </form-row>
 <form-row :label="'Contact'">
   ...
 </form-row>
 <form-row :label="'Listed In'">
-  ...
+  ...repeatable
 </form-row>
 <form-row :label="'Vocabulary services'">
-  ...
+  ...repeatable
 </form-row>
 <hr>
 <p>
