@@ -201,7 +201,7 @@ while (<>) {
 
     if ( $R{Format} ) {
         $jskos{FORMAT} =
-          [ map { pop [ split "/", $_ ] } ( dehtmlist $R{Format} ) ];
+          [ map { pop @{ [ split "/", $_ ] } } ( dehtmlist $R{Format} ) ];
     }
 
     if ( $R{'Listed in'} ) {
