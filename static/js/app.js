@@ -198,7 +198,7 @@ const SetSelect = {
     options: Array
   },
   data () {
-    return { set: [] }
+    return { set: [...this.modelValue] }
   },
   created () {
     this.$watch('set', set => { this.$emit('update:modelValue', set) })
@@ -253,14 +253,14 @@ const ItemEditor = {
   Number of classes, subclasses, taxa, terms, concepts etc. Please add date in parenthesis (YYYY-MM).
 </form-row>
 <form-row :label="'English Abstract'">
-  <textarea id="abstract-en" class="form-control" v-model="abstractEn"></textarea>
+  <textarea id="abstract-en" class="form-control" v-model="abstractEn" rows="8"></textarea>
 </form-row>
 <form-row :label="'Non-English Abstract'">
-  <textarea id="abstract" class="form-control" v-model="abstractUnd"></textarea>
+  <textarea id="abstract" class="form-control" v-model="abstractUnd" rows="8"></textarea>
   Use quotation marks and original language if copied from another source (e.g. homepage).
 </form-row>
 <form-row :label="'KOS Types'">
-  <set-select :modelValue="item.type" @update:modelValue="item.type=$event.map(t=>t.uri)" :options="kostypes" />
+  <set-select :modelValue="type" @update:modelValue="item.type=$event.map(t=>t.uri)" :options="kostypes" />
 </form-row>
 <form-row :label="'Subjects'">
   ...DDC Main Class (one or more), DDC (one or more), EuroVoc, ILC...
@@ -274,9 +274,11 @@ const ItemEditor = {
 <form-row :label="'License'">
   <set-select v-model="item.license" :options="licenses" />
 </form-row>
-<form-row :label="'Links'">
+<form-row :label="'URL'">
+  <input type="text" class="form-control" v-model="item.url" />
+</form-row>
+<form-row :label="'Additional links'">
   ...
-  was repeatable on original BARTOC, now unique!
 </form-row>
 <form-row :label="'Publisher'">
   ...author, address, location, VIAF
@@ -393,6 +395,9 @@ const ItemEditor = {
       status: { },
       showJSKOS: false
     }
+  },
+  computed: {
+      type() { return this.item.type.map(uri => ({uri})) }
   },
   watch: {
     abstractEn: function (s) { this.item.definition.en = [s] },
