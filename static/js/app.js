@@ -71,6 +71,36 @@ const LanguageSelect = {
 }
 
 /**
+ * Edit an array list of strings.
+ */
+const ListEditor = {
+  template: `
+  <table>
+    <tr v-for="(entry,i) in list"><td>
+      <input type="text" class="form-control" v-model="entry"/></td><td>
+      <button type="button" class="btn btn-outline-primary btn-sm"
+              @click="list.splice(i,1)">x</button>
+      </td>
+    </tr>
+    <tr><td>
+    <button type="button" class="btn btn-outline-primary btn-sm"
+            @click="list.push('')">+</button>
+    </td></tr>
+  </table>`,
+  props: {
+    modelValue: Array
+  },
+  data () {
+    return {
+      list: [...(this.modelValue || [])]
+    }
+  },
+  created () {
+    this.$watch('list', a => this.$emit('update:modelValue', a), { deep: true })
+  }
+}
+
+/**
  * Edit prefLabel (first of each language) and alternativeLabel.
  */
 const LabelEditor = {
@@ -180,7 +210,7 @@ const SetSelect = {
  * Web form to modify and create vocabulary metadata.
  */
 const ItemEditor = {
-  components: { FormRow, LabelEditor, LanguageSelect, SetSelect },
+  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor },
   template: `
 <p>Basic information about the vocabulary:</p>
 <form-row :label="'URI'">
@@ -203,9 +233,20 @@ const ItemEditor = {
   <input type="text" class="form-control" v-model="item.notation[0]" />
   Common, unique acronym or abbreviation the vocabulary is known under.
 </form-row>
-<form-row :label="'identifier'">
-  ...
-  alternative URIs the vocabulary is identified by (e.g. Wikidata)
+<form-row :label="'Identifier'">
+  <table>
+    <tr v-for="(entry,i) in item.identifier" :key="i"><td>
+      <input type="text" class="form-control" v-model="item.identifier[i]"/></td><td>
+      <button type="button" class="btn btn-outline-primary btn-sm"
+              @click="item.identifier.splice(i,1)">x</button>
+      </td>
+    </tr>
+    <tr><td>
+    <button type="button" class="btn btn-outline-primary btn-sm"
+            @click="item.identifier.push('')">+</button>
+    </td></tr>
+  </table>
+  Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
 </form-row>
 <form-row :label="'Extent'">
   <input type="text" class="form-control" v-model="item.extent"/>
@@ -314,12 +355,9 @@ const ItemEditor = {
   },
   data () {
     const item = this.current || {}
-    item.prefLabel = item.prefLabel || {}
-    item.altLabel = item.altLabel || {}
-    item.definition = item.definition || {}
-    item.license = item.license || []
-    item.type = item.type || []
-    item.notation = item.notation || []
+    ;['prefLabel', 'altLabel', 'definition'].forEach(key => { if (!item[key]) item[key] = {} })
+    ;['notation', 'identifier', 'license', 'type'].forEach(key => { if (!item[key]) item[key] = [] })
+
     const examples = (item.EXAMPLES || []).join(', ')
 
     var abstractEn = ''
