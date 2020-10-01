@@ -43,7 +43,7 @@ Basic configuration is located in `config/config.default.json`. Selected fields 
 {
   "backend": {
     "provider": "ConceptApi",
-    "api": "http://localhost:3011/"
+    "api": "http://localhost:3000/"
   }
 }
 ~~~

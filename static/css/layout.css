@@ -33,4 +33,5 @@ li.current-page {
   font-weight: bold;
 }
 
+label { font-weight: bold; }
 [v-cloak] { display: none; }

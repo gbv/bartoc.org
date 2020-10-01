@@ -47,12 +47,12 @@ const UserStatus = {
 const FormRow = {
   template: `
     <div class="form-group row">
-      <label :for="id" class="col-form-label col-sm-2">{{label}}</label>
+      <label class="col-form-label col-sm-2">{{label}}</label>
       <div class="col-sm-10">
         <slot/>
       </div>
     </div>`,
-  props: ['id', 'label']
+  props: ['label']
 }
 
 /**
@@ -149,23 +149,24 @@ function prefLabel (item) {
   return '???'
 }
 
+/**
+ * Select from multiple options.
+ */
 const SetSelect = {
   template: `
-      <select v-model="set" multiple :size="(from||[]).length" class="form-control">
-        <option v-for="option in from" v-bind:value="{ uri: option.uri }">{{prefLabel(option)}}</option>
+      <select v-model="set" multiple :size="options.length" class="form-control">
+        <option v-for="opt in options" v-bind:value="{ uri: opt.uri }">{{prefLabel(opt)}}</option>
       </select>
 `,
   props: {
     modelValue: Array,
-    from: Array
+    options: Array
   },
   data () {
     return { set: [] }
   },
   created () {
-    this.$watch('set', (set) => {
-      this.$emit('update:modelValue', set)
-    })
+    this.$watch('set', set => { this.$emit('update:modelValue', set) })
   },
   methods: { prefLabel }
 }
@@ -176,75 +177,120 @@ const SetSelect = {
 const ItemEditor = {
   components: { FormRow, LabelEditor, LanguageSelect, SetSelect },
   template: `
-<p>
-    <form-row :id="'title'" :label="'URI'" v-if="item.uri">
-      <a :href="item.uri">{{item.uri}}</a>
-    </form-row>
-    <form-row :id="'title'" :label="'Title'">
-      <label-editor v-model:prefLabel="item.prefLabel" v-model:altLabel="item.altLabel"/>
-    </form-row>
-    <form-row :id="'languages'" :label="'Languages'">
-      <language-select v-model="item.languages" class="form-control" :repeatable="true"/>
-    </form-row>
-    <form-row :id="'startDate'" :label="'Created'">
-      <input type="text" class="form-control" v-model="item.startDate"/>
-    </form-row>
-    <form-row :id="'extent'" :label="'Extent'">
-      <input type="text" class="form-control" v-model="item.extent"/>
-    </form-row>
-    <form-row :id="'license'" :label="'License'">
-      <set-select v-model="item.license" :from="licenses" />
-    </form-row>
-    <form-row :id="'abstract-en'" :label="'English Abstract'">
-      <textarea id="abstract-en" class="form-control" v-model="abstractEn"></textarea>
-    </form-row>
-    <form-row :id="'abstract'" :label="'Non-English Abstract'">
-      <textarea id="abstract" class="form-control" v-model="abstractUnd"></textarea>
-    </form-row>
-    <form-row :label="'KOS Types'">
-      ...
-    </form-row>
-    <form-row :label="'Subjects'">
-      ...DDC Main Class, DDC, EuroVoc, ILC...
-    </form-row>
-    <form-row :label="'Formats'">
-      ...
-    </form-row>
-    <form-row :label="'Access'">
-      ...
-    </form-row>
-    <form-row :label="'Wikidata'">
-      ...
-    </form-row>
-    <form-row :label="'Links'">
-      ...
-    </form-row>
-    <form-row :label="'Publisher'">
-      ...author, address, location, VIAF
-    </form-row>
-    <form-row :label="'Contact'">
-      ...
-    </form-row>
-    <form-row :label="'Listed In'">
-      ...
-    </form-row>
-    <form-row :label="'Vocabulary services'">
-      ...
-    </form-row>
-    <div class="form-group row">
-      <div class="col-sm-2"></div>
-      <div class="col-sm-10">
-        <button v-if="auth" class="btn btn-primary" @click="saveItem">save</button>
-        <span v-else>authentification required!</span>
-	&nbsp;
-	<button class="btn btn-warning" onclick="location.reload()">reset</button>
-	<p v-if="'status' in status"><div :class="'alert alert-'+status.status">{{status.message || "!!"}}</div></p>
-      </div>
-    </div>
+<p>Basic information about the vocabulary:</p>
+<form-row :label="'URI'">
+  <a v-if="item.uri" :href="item.uri">{{item.uri}}</a>
+  <input v-else type="text" v-model="uri" class="form-control"/>
+</form-row>
+<form-row :label="'Title'">
+  <label-editor v-model:prefLabel="item.prefLabel" v-model:altLabel="item.altLabel"/>
+</form-row>
+<form-row :label="'Notation'">
+  <input type="text" class="form-control" v-model="item.notation[0]" />
+  <p>common, unique acronym or abbreviation the vocabulary is known under</p>
+</form-row>
+<form-row :label="'Languages'">
+  <language-select v-model="item.languages" class="form-control" :repeatable="true"/>
+</form-row>
+<form-row :label="'identifier'">
+  ...
+  alternative URIs the vocabulary is identified by (e.g. Wikidata)
+</form-row>
+<form-row :label="'Extent'">
+  <input type="text" class="form-control" v-model="item.extent"/>
+</form-row>
+<form-row :label="'English Abstract'">
+  <textarea id="abstract-en" class="form-control" v-model="abstractEn"></textarea>
+</form-row>
+<form-row :label="'Non-English Abstract'">
+  <textarea id="abstract" class="form-control" v-model="abstractUnd"></textarea>
+</form-row>
+<form-row :label="'KOS Types'">
+  <set-select :modelValue="item.type" @update:modelValue="item.type=$event.map(t=>t.uri)" :options="kostypes" />
+</form-row>
+<form-row :label="'Subjects'">
+  ...DDC Main Class, DDC, EuroVoc, ILC...
+</form-row>
+<hr>
+<p>Fields about how the vocabulary is made available:</p>
+<form-row :label="'Created'">
+  <input type="text" class="form-control" v-model="item.startDate"/>
+</form-row>
+<form-row :label="'License'">
+  <set-select v-model="item.license" :options="licenses" />
+</form-row>
+<form-row :label="'Formats'">
+  ...
+</form-row>
+<form-row :label="'Access'">
+  ...
+</form-row>
+<form-row :label="'Links'">
+  ...
+</form-row>
+<form-row :label="'Publisher'">
+  ...author, address, location, VIAF
+</form-row>
+<form-row :label="'Contact'">
+  ...
+</form-row>
+<form-row :label="'Listed In'">
+  ...
+</form-row>
+<form-row :label="'Vocabulary services'">
+  ...
+</form-row>
+<hr>
+<p> 
+  Fields required only if concept notations are mapped to concept URIs:
 </p>
-<button @click="displayJSON=!displayJSON">{{displayJSON ? 'hide JSON' : 'show JSON'}}</button>
-<pre v-show="displayJSON">{{cleanupItem(item)}}</pre>
-<p>Vocabularies are editable by <a href="/contact">the BARTOC.org editors</a>.</p>
+<form-row :label="'namespace'">
+  <input type="text" class="form-control" v-model="item.namespace"/>
+</form-row>
+<form-row :label="'notation pattern'">
+  <input type="text" class="form-control" v-model="item.notationPattern"/>
+</form-row>
+<form-row :label="'URI pattern'">
+  <input type="text" class="form-control" v-model="item.uriPattern"/>
+</form-row>
+<form-row :label="'example notations'">
+  <input type="text" class="form-control" v-model="examples"/>
+</form-row>
+<hr>
+<p> 
+  Fields required only for vocabularies used in PICA or MARC databases:
+</p>
+<form-row :label="'PICA path'">
+  <input type="text" class="form-control" v-model="item.PICAPATH"/>
+</form-row>
+<form-row :label="'CQL key'">
+  <input type="text" class="form-control" v-model="item.CQLKEY"/>
+</form-row>
+<hr>
+<p>
+ By saving you agree to publish the vocabulary metadata as public domain.
+ All metadata is editable by the community of 
+ <a href="/contact">the BARTOC.org editors</a>.
+</p>
+<div class="form-group row">
+  <div class="col-sm-2"></div>
+  <div class="col-sm-4">
+    <button v-if="auth" class="btn btn-primary" @click="saveItem">save</button>
+    <span v-else>authentification required!</span>
+&nbsp;
+<button class="btn btn-warning" onclick="location.reload()">reset</button>
+  </div>
+  <div class="col-sm-4">
+   <input type="checkbox" id="showJSKOS" v-model="showJSKOS">&nbsp;<label for="showJSKOS">show JSKOS record</label>
+  </div>
+</div>
+<div class="form-group row" v-if="'status' in status">
+  <div class="col-sm-2"></div>
+  <div class="col-sm-8">
+    <div :class="'alert alert-'+status.status">{{status.message || "!!"}}</div>
+  </div>
+</div>
+<pre v-show="showJSKOS">{{cleanupItem(item)}}</pre>
 `,
   props: {
     user: {
@@ -261,7 +307,9 @@ const ItemEditor = {
     item.altLabel = item.altLabel || {}
     item.definition = item.definition || {}
     item.license = item.license || []
-    item.type = item.type || ['http://www.w3.org/2004/02/skos/core#ConceptScheme']
+    item.type = item.type || []
+    item.notation = item.notation || []
+    const examples = (item.EXAMPLES || []).join(', ')
 
     var abstractEn = ''
     var abstractUnd = ''
@@ -280,17 +328,22 @@ const ItemEditor = {
 
     return {
       item,
+      uri: null, // for new items
+      examples,
       abstractEn,
       abstractUnd,
-      kostypes: null,
-      licenses: null,
+      kostypes: [],
+      licenses: [],
       status: { },
-      displayJSON: false
+      showJSKOS: false
     }
   },
   watch: {
-    abstractEn: function (str) { this.item.definition.en = [str] },
-    abstractUnd: function (str) { this.item.definition.und = [str] }
+    abstractEn: function (s) { this.item.definition.en = [s] },
+    abstractUnd: function (s) { this.item.definition.und = [s] },
+    examples: function (s) {
+      this.item.EXAMPLES = s.split(',').map(s => s.trim()).filter(s => s !== '')
+    }
   },
   methods: {
     saveItem () {
@@ -298,12 +351,13 @@ const ItemEditor = {
       var uri = this.item.uri
       const method = uri ? 'PUT' : 'POST'
 	    if (!uri) {
-		    // TODO: validate newUri
-		    uri = this.newUri
+		    // TODO: validate uri
+		    uri = this.uri
 		   }
       const body = JSON.stringify(this.cleanupItem({ ...this.item, uri }))
       const token = this.auth.token
       const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+      // TODO: don't call if no uri exists or trying to create with existing URI
       fetch('/api/voc', { method, body, headers }).then(res => {
 	      if (res.ok) {
           		      window.location.href = '/vocabularies?uri=' + encodeURIComponent(uri)
@@ -313,6 +367,8 @@ const ItemEditor = {
     },
     cleanupItem (item) {
       const clean = {}
+      const type = 'http://www.w3.org/2004/02/skos/core#ConceptScheme'
+      if (item.type[0] !== type) item.type.unshift(type)
       for (const key in item) {
         if (!isEmpty(item[key])) clean[key] = item[key]
       }
