@@ -48,7 +48,7 @@ const FormRow = {
   template: `
     <div class="form-group row">
       <label class="col-form-label col-sm-2">{{label}}</label>
-      <div class="col-sm-10">
+      <div class="col-sm-10" class="font-weight-light">
         <slot/>
       </div>
     </div>`,
@@ -76,18 +76,23 @@ const LanguageSelect = {
 const LabelEditor = {
   components: { LanguageSelect },
   template: `<table>
+    <tr><th>title</th><th>language code</th></tr>
     <tr v-for="(label,i) in labels">
       <td>
         <input type="text" class="form-control" v-model="label.label"/>
       </td>
-      <td>
-        <language-select v-model="label.language"/>
+      <td class="form-inline">
+        <language-select v-model="label.language" class="form-control"/>
+        &nbsp;
         <button type="button" class="btn btn-outline-primary btn-sm" @click="remove(i)">x</button>
       </td>
     </tr>
     <tr>
       <td>
         <button type="button" class="btn btn-outline-primary btn-sm" @click="add()">+</button>
+      </td>
+      <td>
+        two-letter code if possible
       </td>
     </tr>
   </table>`,
@@ -180,17 +185,23 @@ const ItemEditor = {
 <p>Basic information about the vocabulary:</p>
 <form-row :label="'URI'">
   <a v-if="item.uri" :href="item.uri">{{item.uri}}</a>
-  <input v-else type="text" v-model="uri" class="form-control"/>
+  <div>
+    <input v-else type="text" v-model="uri" class="form-control"/>
+    Please leave empty to assign a BARTOC URI!
+  </div>
 </form-row>
 <form-row :label="'Title'">
   <label-editor v-model:prefLabel="item.prefLabel" v-model:altLabel="item.altLabel"/>
-</form-row>
-<form-row :label="'Notation'">
-  <input type="text" class="form-control" v-model="item.notation[0]" />
-  <p>common, unique acronym or abbreviation the vocabulary is known under</p>
+  The first title of each language code is used as preferred label, more titles as
+  alternative labels.
 </form-row>
 <form-row :label="'Languages'">
   <language-select v-model="item.languages" class="form-control" :repeatable="true"/>
+  Comma-separated list of language codes which the vocabulary is available in.
+</form-row>
+<form-row :label="'Notation'">
+  <input type="text" class="form-control" v-model="item.notation[0]" />
+  Common, unique acronym or abbreviation the vocabulary is known under.
 </form-row>
 <form-row :label="'identifier'">
   ...
@@ -241,7 +252,7 @@ const ItemEditor = {
   ...
 </form-row>
 <hr>
-<p> 
+<p>
   Fields required only if concept notations are mapped to concept URIs:
 </p>
 <form-row :label="'namespace'">
@@ -257,7 +268,7 @@ const ItemEditor = {
   <input type="text" class="form-control" v-model="examples"/>
 </form-row>
 <hr>
-<p> 
+<p>
   Fields required only for vocabularies used in PICA or MARC databases:
 </p>
 <form-row :label="'PICA path'">
@@ -269,14 +280,14 @@ const ItemEditor = {
 <hr>
 <p>
  By saving you agree to publish the vocabulary metadata as public domain.
- All metadata is editable by the community of 
+ All metadata is editable by the community of
  <a href="/contact">the BARTOC.org editors</a>.
 </p>
 <div class="form-group row">
   <div class="col-sm-2"></div>
   <div class="col-sm-4">
     <button v-if="auth" class="btn btn-primary" @click="saveItem">save</button>
-    <span v-else>authentification required!</span>
+    <button v-else class="btn btn-danger">authentification required!</button>
 &nbsp;
 <button class="btn btn-warning" onclick="location.reload()">reset</button>
   </div>
