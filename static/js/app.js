@@ -334,6 +334,7 @@ const ItemEditor = {
 </form-row>
 <form-row :label="'KOS Types'">
   <set-select :modelValue="type" @update:modelValue="item.type=$event.map(t=>t.uri)" :options="kostypes" />
+  Use SHIFT key to deselect or select multiple types.
 </form-row>
 <form-row :label="'Subjects'">
   <subject-editor v-model="item.subject"/>
@@ -349,6 +350,7 @@ const ItemEditor = {
 </form-row>
 <form-row :label="'License'">
   <set-select v-model="item.license" :options="licenses" />
+  Use SHIFT key to deselect or select multiple licenses.
 </form-row>
 <form-row :label="'URL'">
   <input type="text" class="form-control" v-model="item.url" />
