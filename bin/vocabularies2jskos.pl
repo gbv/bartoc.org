@@ -52,7 +52,7 @@ for (qw(eurovoc ddc language license kostype)) {
 sub mapid {
     my ( $voc, $id ) = @_;
     return "https://bartoc.org/ILC/$id" if $voc eq 'ilc';
-    $IDS->{$voc}{$id} // die "unknown $voc: $id!\n";
+    $IDS->{$voc}{$id} // say STDERR "unknown $voc: $id\n";
 }
 
 my %vocuri = (
@@ -160,8 +160,7 @@ while (<>) {
     push @subject,
       map { mapsubject( ddc => $_ ) } ( $R{DDC} =~ /href="([^"]+)"/g );
 
- # TODO: harvest mapping of BARTOC URIs to EuroVoc URI (see select-eurovoc.html)
- # push @subject, map { mapid( eurovoc => $_ ) } terms 'EuroVoc';
+    push @subject, map { mapsubject( eurovoc => $_ ) } terms 'EuroVoc';
 
     my @ilc =
       map { mapsubject( ilc => $_ ) } ( $R{ILC} =~ /"\/en\/ILC\/([^"]+)"/g );
