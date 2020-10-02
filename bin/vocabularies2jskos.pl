@@ -101,8 +101,8 @@ my %download = map {
         modified => date( $r->{'Updated date'} )
     };
     if ( $r->{Link} ) {
-        my @links = grep { $_ =~ qr{^https?//} } dehtmlist $r->{Link};
-        if ( @links eq 1 ) {
+        my @links = grep { $_ =~ qr{^https?://[^ ]+$} } dehtmlist $r->{Link};
+        if ( @links == 1 ) {
             $jskos->{url} = $links[0];
         }
         else {
@@ -155,17 +155,16 @@ while (<>) {
     $jskos{license} = \@licenses if @licenses;
 
     my @subject;
-
     push @subject, mapsubject( ddc => $1 )
       if $R{'DDC Main Class'} =~ qr{"(/en/DDC-Class/[^"]+)"};
     push @subject,
       map { mapsubject( ddc => $_ ) } ( $R{DDC} =~ /href="([^"]+)"/g );
 
-    # TODO
-    # push @subject, map { mapid( eurovoc => $_ ) } terms 'EuroVoc';
+ # TODO: harvest mapping of BARTOC URIs to EuroVoc URI (see select-eurovoc.html)
+ # push @subject, map { mapid( eurovoc => $_ ) } terms 'EuroVoc';
 
     my @ilc =
-      map { mapsubject( ilc => $_ ) } ( $R{ILC} =~ qr{"/en(/ILC/[^"]+)"} );
+      map { mapsubject( ilc => $_ ) } ( $R{ILC} =~ /"\/en\/ILC\/([^"]+)"/g );
     push @subject, @ilc;
 
     $jskos{subject} = \@subject if @subject;
@@ -200,17 +199,35 @@ while (<>) {
 
     $jskos{CONTACT} = dehtml( $R{Contact} ) =~ s/^mailto://r if $R{Contact};
 
-    # TODO:
-    #    342 Address - Premise (i.e. Apartment / Suite number)
-    #   2221 Address - Postal code
-    #   2260 Address - Thoroughfare (i.e. Street address)
-    #   2391 Address - Locality (i.e. City)
-    #   2428 Address
-    #   2428 Address - Country
-    #     5 Address - Dependent locality
+    if ( $R{Address} ) {
 
-    # TODO
-    # say STDERR $R{Location} if $R{Location};
+        # will require cleanup later
+        $jskos{ADDRESS} = {};
+        my %field = (
+            country  => 'Address - Country',
+            postcode => 'Address - Postal code',
+            city     => 'Address - Locality (i.e. City)',
+            address  => 'Address - Thoroughfare (i.e. Street address)',
+            locality => 'Address - Dependent locality',
+            premise  => 'Address - Premise (i.e. Apartment / Suite number)',
+            subpremise =>
+              'Address - Sub Premise (i.e. Suite, Apartment, Floor, Unknown.',
+            company   => 'Address - Company',
+            firstname => 'Address - First name',
+            fullname  => 'Address - Full name',
+            lastname  => 'Address - Last name',
+            area      => 'Address - Sub administrative area'
+        );
+        $jskos{ADDRESS} = {
+            map { ( $_ => $R{ $field{$_} } ) }
+            grep { $R{ $field{$_} } } keys %field
+        };
+    }
+
+    # will require cleanup later
+    if ( $R{Location} ) {
+        $jskos{LOCATION} = [ ( $R{Location} =~ /"\/en\/Location\/([^"]+)"/g ) ];
+    }
 
     if ( $R{'SKOS Vocabulary Service'} ) {
         $jskos{API} =
@@ -218,6 +235,8 @@ while (<>) {
     }
 
     if ( $R{Format} ) {
+
+        # will require cleanup later
         $jskos{FORMAT} =
           [ map { pop @{ [ split "/", $_ ] } } ( dehtmlist $R{Format} ) ];
     }
@@ -229,6 +248,8 @@ while (<>) {
     }
 
     if ( $R{Access} ) {
+
+        # will require cleanup later
         $jskos{ACCESS} = [ dehtmlist $R{'Access'} ];
     }
 
