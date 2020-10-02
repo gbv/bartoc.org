@@ -195,7 +195,7 @@ while (<>) {
     # say STDERR $R{Location} if $R{Location};
 
     if ( $R{'SKOS Vocabulary Service'} ) {
-        $jskos{SKOSMOS} =
+        $jskos{API} =
           [ dehtmlist $R{'SKOS Vocabulary Service'} ];
     }
 

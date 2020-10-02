@@ -234,18 +234,7 @@ const ItemEditor = {
   Common, unique acronym or abbreviation the vocabulary is known under.
 </form-row>
 <form-row :label="'Identifier'">
-  <table>
-    <tr v-for="(entry,i) in item.identifier" :key="i"><td>
-      <input type="text" class="form-control" v-model="item.identifier[i]"/></td><td>
-      <button type="button" class="btn btn-outline-primary btn-sm"
-              @click="item.identifier.splice(i,1)">x</button>
-      </td>
-    </tr>
-    <tr><td>
-    <button type="button" class="btn btn-outline-primary btn-sm"
-            @click="item.identifier.push('')">+</button>
-    </td></tr>
-  </table>
+  <list-editor v-model="item.identifier" />
   Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
 </form-row>
 <form-row :label="'Size'">
@@ -293,13 +282,18 @@ const ItemEditor = {
   Do you have to register to take a look at the KOS, is it 'hidden' in a licensed database or is it free online?
 </form-row>
 <form-row :label="'Contact'">
-  ...
+  <input type="text" class="form-control" v-model="item.CONTACT"/>
+  email address
 </form-row>
 <form-row :label="'Listed In'">
   ...repeatable
 </form-row>
 <form-row :label="'Vocabulary services'">
-  ...repeatable
+  <list-editor v-model="item.API" />
+  Endpoints of vocabulary services
+  (<a href="http://skosmos.org/">Skosmos</a>,
+   <a href="https://github.com/gbv/jskos-server#readme">jskos-server</a>...)
+  to query the vocabulary.
 </form-row>
 <hr>
 <p>
