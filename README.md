@@ -4,13 +4,11 @@
 
 This repository contains the new web interface of BARTOC.org, run at [VZG](https://www.gbv.de/).
 
-*See <https://info.gbv.de/display/DiB/BARTOC-Import> for additional information (internally only)*
-
 ## Functional Requirements
 
 * Keep all BARTOC URIs and most URLs
 * Provide a nice web interface, possibly multilingual
-* Use JSKOS API (in particular DANTE) as backend
+* Use JSKOS API as backend
 * Serve HTML, JSKOS, and RDF
 
 ## Install
@@ -29,7 +27,7 @@ npm install
 
 Optionally transform the Drupal export to JSKOS format (requires Perl >= 5.14 without additional modules):
 
-~~~
+~~~sh
 npm run cache
 ~~~
 
