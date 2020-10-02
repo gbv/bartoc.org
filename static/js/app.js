@@ -48,7 +48,7 @@ const FormRow = {
   template: `
     <div class="form-group row">
       <label class="col-form-label col-sm-2">{{label}}</label>
-      <div class="col-sm-10" class="font-weight-light">
+      <div class="col-sm-10 font-weight-light">
         <slot/>
       </div>
     </div>`,
@@ -70,34 +70,128 @@ const LanguageSelect = {
   }
 }
 
-/**
- * Edit an array list of strings.
- */
-const ListEditor = {
-  template: `
-  <table>
-    <tr v-for="(entry,i) in list"><td>
-      <input type="text" class="form-control" v-model="entry"/></td><td>
-      <button type="button" class="btn btn-outline-primary btn-sm"
-              @click="list.splice(i,1)">x</button>
-      </td>
-    </tr>
-    <tr><td>
-    <button type="button" class="btn btn-outline-primary btn-sm"
-            @click="list.push('')">+</button>
-    </td></tr>
-  </table>`,
+const SetEditorMixin = {
+  emits: ['update:modelValue'],
   props: {
     modelValue: Array
   },
   data () {
     return {
-      list: [...(this.modelValue || [])]
+      set: [...(this.modelValue || [])]
     }
   },
-  created () {
-    this.$watch('list', a => this.$emit('update:modelValue', a), { deep: true })
+  watch: {
+    set: {
+      deep: true,
+      handler (set) {
+        this.$emit('update:modelValue', set)
+      }
+    }
+  },
+  methods: {
+    add (item) {
+      this.set.push(item)
+    },
+    remove (index) {
+      this.set.splice(index, 1)
+    }
   }
+}
+
+/**
+ * Edit a list of strings.
+ */
+const ListEditor = {
+  mixins: [SetEditorMixin],
+  template: `
+  <table class="table table-sm table-borderless">
+    <tr v-for="(entry,i) in set">
+      <td>
+        <input type="text" class="form-control" v-model="set[i]"/>
+      </td><td>
+        <button type="button" class="btn btn-outline-primary" @click="remove(i)">x</button>
+      </td>
+    </tr><tr>
+      <td>
+        <button type="button" class="btn btn-outline-primary" @click="add('')">+</button>
+      </td>
+    </tr>
+  </table>`
+}
+
+function prefLabel (item) {
+  if (item && item.prefLabel) {
+    if ('en' in item.prefLabel) return item.prefLabel.en
+    for (const lang in item.prefLabel) return item.prefLabel[lang]
+  }
+  return '???'
+}
+
+const SubjectEditor = {
+  mixins: [SetEditorMixin],
+  template: `
+<table class="table table-sm table-borderless">
+  <tr v-for="(subject,i) in set">
+    <td v-if="(subject.inScheme||[]).length">
+      {{shortLabel(findScheme(subject.inScheme[0].uri))}}
+    </td>
+    <td v-else>?</td>
+    <td>
+      <input type="text" class="form-control" v-model="set[i].uri"/>
+    </td><td>
+      <button type="button" class="btn btn-outline-primary" @click="remove(i)">x</button>
+    </td>
+  </tr><tr>
+    <td>
+      <select class="form-control" v-model="nextScheme">
+        <option v-for="scheme in indexingSchemes" :value="scheme.uri">
+          {{shortLabel(scheme)}}
+        </option>
+      </select>
+    </td><td>
+      <button type="button" class="btn btn-outline-primary" @click="add()">+</button>
+    </td>
+  </tr>
+</table>
+  `,
+  data () {
+
+    // TODO: configure somewhere else, this is part of BARTOC data anyway
+    const indexingSchemes = [
+      {
+        uri: 'http://bartoc.org/en/node/241',
+        notation: ['DDC']
+      },
+      {
+        uri: 'http://bartoc.org/en/node/15',
+        prefLabel: { en: 'EuroVoc' }
+      },
+      {
+        uri: "http://bartoc.org/de/node/472",
+        notation: ['ILC']
+      }
+    ]
+
+    return {
+      nextScheme: indexingSchemes[0].uri,
+      indexingSchemes
+    }
+  },
+  methods: {
+    findScheme(uri) {
+      return this.indexingSchemes.find(scheme => scheme.uri === uri)
+    },
+    add() {
+      var inScheme = this.findScheme(this.nextScheme)
+      inScheme = [ { uri: inScheme.uri } ]
+      this.set.push({ inScheme, uri: '' })
+    },
+    shortLabel (item) {
+      if (item && item.notation && item.notation.length) return item.notation[0]
+      return prefLabel(item)
+    }
+  }
+
 }
 
 /**
@@ -105,23 +199,22 @@ const ListEditor = {
  */
 const LabelEditor = {
   components: { LanguageSelect },
-  template: `<table>
-    <tr><th>title</th><th>language code</th></tr>
+  template: `<table class="table table-sm table-borderless">
+    <tr><th>title</th><th colspan="2">language code</th></tr>
     <tr v-for="(label,i) in labels">
       <td>
         <input type="text" class="form-control" v-model="label.label"/>
-      </td>
-      <td class="form-inline">
+      </td><td>
         <language-select v-model="label.language" class="form-control"/>
-        &nbsp;
-        <button type="button" class="btn btn-outline-primary btn-sm" @click="remove(i)">x</button>
+      </td><td>
+        <button type="button" class="btn btn-outline-primary" @click="remove(i)">x</button>
       </td>
     </tr>
     <tr>
       <td>
-        <button type="button" class="btn btn-outline-primary btn-sm" @click="add()">+</button>
+        <button type="button" class="btn btn-outline-primary" @click="add()">+</button>
       </td>
-      <td>
+      <td colspan="2">
         two-letter code if possible
       </td>
     </tr>
@@ -131,9 +224,8 @@ const LabelEditor = {
     altLabel: Object
   },
   data () {
-    const labels = []
     return {
-      labels
+      labels: []
     }
   },
   created () {
@@ -176,14 +268,6 @@ const LabelEditor = {
   }
 }
 
-function prefLabel (item) {
-  if (item && item.prefLabel) {
-    if ('en' in item.prefLabel) return item.prefLabel.en
-    for (const lang in item.prefLabel) return item.prefLabel[lang]
-  }
-  return '???'
-}
-
 /**
  * Select from multiple options.
  */
@@ -210,7 +294,7 @@ const SetSelect = {
  * Web form to modify and create vocabulary metadata.
  */
 const ItemEditor = {
-  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor },
+  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor },
   template: `
 <p>Basic information about the vocabulary:</p>
 <form-row :label="'URI'">
@@ -252,7 +336,10 @@ const ItemEditor = {
   <set-select :modelValue="type" @update:modelValue="item.type=$event.map(t=>t.uri)" :options="kostypes" />
 </form-row>
 <form-row :label="'Subjects'">
-  ...DDC Main Class (one or more), DDC (one or more), EuroVoc, ILC...
+  <subject-editor v-model="item.subject"/>
+  Please assign at least a DDC main class.
+  <!-- TODO -->
+  More convenient selection of subjects will be added!
 </form-row>
 <hr>
 <p>Fields about how the vocabulary is made available:</p>
@@ -391,7 +478,7 @@ const ItemEditor = {
     }
   },
   computed: {
-      type() { return this.item.type.map(uri => ({uri})) }
+    type () { return this.item.type.map(uri => ({ uri })) }
   },
   watch: {
     abstractEn: function (s) { this.item.definition.en = [s] },

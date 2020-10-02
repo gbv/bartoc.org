@@ -50,7 +50,23 @@ for (qw(eurovoc ddc language license kostype)) {
 }
 
 sub mapid {
-    $IDS->{ $_[0] }{ $_[1] } // die "unknown $_[0]: $_[1]!\n";
+    my ( $voc, $id ) = @_;
+    return "https://bartoc.org/ILC/$id" if $voc eq 'ilc';
+    $IDS->{$voc}{$id} // die "unknown $voc: $id!\n";
+}
+
+my %vocuri = (
+    ddc     => "http://bartoc.org/en/node/241",
+    eurovoc => "http://bartoc.org/en/node/15",
+    ilc     => "http://bartoc.org/de/node/472"
+);
+
+sub mapsubject {
+    my ( $voc, $id ) = @_;
+    return {
+        uri => mapid( $voc => $id ),
+        inScheme => [ { uri => $vocuri{$voc} } ]
+    };
 }
 
 ## use critic
@@ -140,17 +156,19 @@ while (<>) {
 
     my @subject;
 
-    push @subject, mapid( ddc => $1 )
+    push @subject, mapsubject( ddc => $1 )
       if $R{'DDC Main Class'} =~ qr{"(/en/DDC-Class/[^"]+)"};
-    push @subject, map { mapid( ddc => $_ ) } ( $R{DDC} =~ /href="([^"]+)"/g );
+    push @subject,
+      map { mapsubject( ddc => $_ ) } ( $R{DDC} =~ /href="([^"]+)"/g );
 
     # TODO
     # push @subject, map { mapid( eurovoc => $_ ) } terms 'EuroVoc';
 
-    # TODO: ILC (repeatable)
-    # say STDERR $R{ILC} if $R{ILC};
+    my @ilc =
+      map { mapsubject( ilc => $_ ) } ( $R{ILC} =~ qr{"/en(/ILC/[^"]+)"} );
+    push @subject, @ilc;
 
-    $jskos{subject} = [ map { { uri => $_ } } @subject ] if @subject;
+    $jskos{subject} = \@subject if @subject;
 
     $jskos{type} = [
         "http://www.w3.org/2004/02/skos/core#ConceptScheme",
