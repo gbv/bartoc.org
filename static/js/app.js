@@ -354,26 +354,32 @@ const ItemEditor = {
   <input type="text" class="form-control" v-model="item.url" />
 </form-row>
 <form-row :label="'Additional links'">
-  ...
-</form-row>
-<form-row :label="'Publisher'">
-  ...author, address, location, VIAF
-  Try to use an institution rather than a person. repeatable?
+  <div>{{item.subjectOf}}</div>
 </form-row>
 <form-row :label="'Formats'">
-  ...
+  <div>{{item.FORMAT}}</div>
   Select the format(s) in which the KOS is available.
 </form-row>
 <form-row :label="'Access'">
-  ...
+  <div>{{item.ACCESS}}</div>
   Do you have to register to take a look at the KOS, is it 'hidden' in a licensed database or is it free online?
+</form-row>
+<form-row :label="'Publisher'">
+  <div>{{item.publisher}}</div>
+  Try to use an institution rather than a person. repeatable?
+</form-row>
+<form-row :label="'Address'">
+  <div>{{item.ADDRESS}}</div>
+</form-row>
+<form-row :label="'Location'">
+  <div>{{item.LOCATION}}</div>
 </form-row>
 <form-row :label="'Contact'">
   <input type="text" class="form-control" v-model="item.CONTACT"/>
-  email address
+  email address of anyone in charge of the vocabulary
 </form-row>
 <form-row :label="'Listed In'">
-  ...repeatable
+  <div>{{item.partOf}}</div>
 </form-row>
 <form-row :label="'Vocabulary services'">
   <list-editor v-model="item.API" />
