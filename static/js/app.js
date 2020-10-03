@@ -155,7 +155,6 @@ const SubjectEditor = {
 </table>
   `,
   data () {
-
     // TODO: configure somewhere else, this is part of BARTOC data anyway
     const indexingSchemes = [
       {
@@ -167,7 +166,7 @@ const SubjectEditor = {
         prefLabel: { en: 'EuroVoc' }
       },
       {
-        uri: "http://bartoc.org/de/node/472",
+        uri: 'http://bartoc.org/de/node/472',
         notation: ['ILC']
       }
     ]
@@ -178,12 +177,12 @@ const SubjectEditor = {
     }
   },
   methods: {
-    findScheme(uri) {
+    findScheme (uri) {
       return this.indexingSchemes.find(scheme => scheme.uri === uri)
     },
-    add() {
+    add () {
       var inScheme = this.findScheme(this.nextScheme)
-      inScheme = [ { uri: inScheme.uri } ]
+      inScheme = [{ uri: inScheme.uri }]
       this.set.push({ inScheme, uri: '' })
     },
     shortLabel (item) {
@@ -334,13 +333,12 @@ const ItemEditor = {
 </form-row>
 <form-row :label="'KOS Types'">
   <set-select :modelValue="type" @update:modelValue="item.type=$event.map(t=>t.uri)" :options="kostypes" />
-  Use SHIFT key to deselect or select multiple types.
+  Use Shift key to deselect or select multiple types.
 </form-row>
 <form-row :label="'Subjects'">
   <subject-editor v-model="item.subject"/>
   Please assign at least a DDC main class.
-  <!-- TODO -->
-  More convenient selection of subjects will be added!
+  <!-- TODO: --> More convenient selection of subjects will be added later!
 </form-row>
 <hr>
 <p>Fields about how the vocabulary is made available:</p>
@@ -350,13 +348,14 @@ const ItemEditor = {
 </form-row>
 <form-row :label="'License'">
   <set-select v-model="item.license" :options="licenses" />
-  Use SHIFT key to deselect or select multiple licenses.
+  Use Shift key to deselect or select multiple licenses.
 </form-row>
 <form-row :label="'URL'">
   <input type="text" class="form-control" v-model="item.url" />
 </form-row>
 <form-row :label="'Additional links'">
-  <div>{{item.subjectOf}}</div>
+  <list-editor :modelValue="item.subjectOf.map(s=>s.url)"
+               @update:modelValue="item.subjectOf=$event.map(url=>({url}))" />
 </form-row>
 <form-row :label="'Formats'">
   <div>{{item.FORMAT}}</div>
@@ -453,8 +452,10 @@ const ItemEditor = {
   },
   data () {
     const item = this.current || {}
-    ;['prefLabel', 'altLabel', 'definition'].forEach(key => { if (!item[key]) item[key] = {} })
-    ;['notation', 'identifier', 'license', 'type'].forEach(key => { if (!item[key]) item[key] = [] })
+    ;['prefLabel', 'altLabel', 'definition']
+      .forEach(key => { if (!item[key]) item[key] = {} })
+    ;['notation', 'identifier', 'license', 'type', 'subjectOf']
+      .forEach(key => { if (!item[key]) item[key] = [] })
 
     const examples = (item.EXAMPLES || []).join(', ')
 
@@ -523,7 +524,7 @@ const ItemEditor = {
         if (!isEmpty(item[key])) clean[key] = item[key]
       }
       return clean
-    }
+    },
   }
 }
 
