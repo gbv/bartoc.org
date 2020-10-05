@@ -4,9 +4,17 @@ const utils = require('./src/utils')
 const jsonld = require('jsonld')
 const path = require('path')
 const cdk = require('cocoda-sdk')
+const axios = require('axios')
 
 const proxy = require('express-http-proxy')
 const backend = cdk.initializeRegistry(config.backend)
+
+// TODO: https://github.com/gbv/cocoda-sdk/issues/22
+backend.search = async ({search}) => {
+  const url = `http://localhost:${config.port}/api/search?search=` + encodeURIComponent(search)
+  console.log(url)
+  return axios.get(url).then(res => res.data)
+}
 
 // static data
 const registries = utils.indexByUri(utils.readNdjson('./data/registries.ndjson'))
@@ -114,7 +122,12 @@ app.get('/vocabularies', vocabulariesSearch)
 async function vocabulariesSearch (req, res, next) {
   const params = req.query
   params.properties = '*' // TODO: supported in jskos-server?
-  backend.getSchemes({ params }).then(result => {
+
+  const search = params.search
+    ? backend.search({ search: params.search })
+    : backend.getSchemes({ params })
+
+  search.then(result => {
     if (params.uri) {
       if (result.length) {
         sendItem(req, res, result[0])
