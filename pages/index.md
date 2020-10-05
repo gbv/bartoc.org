@@ -15,7 +15,7 @@ title:
   </div>
 </div>
 
-<!-form class="main-form" action="/vocabularies">
+<!--form class="main-form" action="/vocabularies">
   <div class="form-group">
     <label for="search">Search for vocabularies</label>
     <div class="row">
