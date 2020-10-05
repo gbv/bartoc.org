@@ -25,13 +25,20 @@ cd bartoc.org
 npm install
 ~~~
 
-Optionally transform the Drupal export to JSKOS format (requires Perl >= 5.14 without additional modules):
+Optionally transform the Drupal export from September 2020 and other vocabulayr files to JSKOS format (requires Perl >= 5.14 without additional modules):
 
 ~~~sh
-npm run cache
+npm run data
 ~~~
 
-Then import the resulting file `cache/vocabularies.ndjson` into your jskos-server instance.
+Then import the resulting file `cache/vocabularies.ndjson` and additional vocabulary files into your jskos-server instance (being in directory `$SERVER`while bartoc.org in directory `$BARTOC`). The following commands will remove all previous vocabularies and concepts from the jskos-server instance:
+
+~~~
+cd $SERVER
+npm run -- import --reset schemes $BARTOC/cache/vocabularies.ndjson
+npm run -- import schemes $BARTOC/data/bartoc-formats.scheme.ndjson
+npm run -- import --reset concepts $BARTOC/data/bartoc-formats.concepts.ndjson
+~~~
 
 ## Configuration
 

@@ -9,13 +9,14 @@ Spreadsheet,"Spreadsheet (Excel, ODS...)"
 HTML,HTML
 CSV,CSV
 JSON,JSON
+JSON-LD,"JSON-LD"
+JSKOS,"JSKOS"
 MADS,MADS
 OWL,"OWL"
 Zthes,"ZThes"
 XTM,"Topic Map (XTM, CTM, GTM...)"
 DC,"Dublin Core"
 BS8723-5,BS8723-5
-JSON-LD,"JSON-LD"
 VDEX,"VDEX"
 Microform,"Microform"
 TXT,"Raw Text (ASCII or Unicode)"

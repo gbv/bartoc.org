@@ -1,0 +1,31 @@
+{"uri":"http://bartoc.org/en/Format/Online","notation":["Online"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Online"}}
+{"uri":"http://bartoc.org/en/Format/PDF","notation":["PDF"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"PDF"}}
+{"uri":"http://bartoc.org/en/Format/SKOS","notation":["SKOS"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"SKOS"}}
+{"uri":"http://bartoc.org/en/Format/Printed","notation":["Printed"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Printed"}}
+{"uri":"http://bartoc.org/en/Format/XML","notation":["XML"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"XML"}}
+{"uri":"http://bartoc.org/en/Format/RDF","notation":["RDF"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"RDF"}}
+{"uri":"http://bartoc.org/en/Format/Spreadsheet","notation":["Spreadsheet"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Spreadsheet (Excel, ODS...)"}}
+{"uri":"http://bartoc.org/en/Format/HTML","notation":["HTML"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"HTML"}}
+{"uri":"http://bartoc.org/en/Format/CSV","notation":["CSV"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"CSV"}}
+{"uri":"http://bartoc.org/en/Format/JSON","notation":["JSON"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"JSON"}}
+{"uri":"http://bartoc.org/en/Format/JSON-LD","notation":["JSON-LD"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"JSON-LD"}}
+{"uri":"http://bartoc.org/en/Format/JSKOS","notation":["JSKOS"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"JSKOS"}}
+{"uri":"http://bartoc.org/en/Format/MADS","notation":["MADS"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"MADS"}}
+{"uri":"http://bartoc.org/en/Format/OWL","notation":["OWL"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"OWL"}}
+{"uri":"http://bartoc.org/en/Format/Zthes","notation":["Zthes"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"ZThes"}}
+{"uri":"http://bartoc.org/en/Format/XTM","notation":["XTM"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Topic Map (XTM, CTM, GTM...)"}}
+{"uri":"http://bartoc.org/en/Format/DC","notation":["DC"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Dublin Core"}}
+{"uri":"http://bartoc.org/en/Format/BS8723-5","notation":["BS8723-5"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"BS8723-5"}}
+{"uri":"http://bartoc.org/en/Format/VDEX","notation":["VDEX"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"VDEX"}}
+{"uri":"http://bartoc.org/en/Format/Microform","notation":["Microform"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Microform"}}
+{"uri":"http://bartoc.org/en/Format/TXT","notation":["TXT"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Raw Text (ASCII or Unicode)"}}
+{"uri":"http://bartoc.org/en/Format/Word","notation":["Word"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Word Processor (MS Word, ODT...)"}}
+{"uri":"http://bartoc.org/en/Format/CD-ROM","notation":["CD-ROM"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"CD-ROM"}}
+{"uri":"http://bartoc.org/en/Format/XSD","notation":["XSD"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"XML Schema (XSD)"}}
+{"uri":"http://bartoc.org/en/Format/OBO","notation":["OBO"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"OBO"}}
+{"uri":"http://bartoc.org/en/Format/Floppy-Disc","notation":["Floppy-Disc"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Floppy-Disc"}}
+{"uri":"http://bartoc.org/en/Format/MARC","notation":["MARC"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"MARC Format (MARC21 or other)"}}
+{"uri":"http://bartoc.org/en/Format/Database","notation":["Database"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Database Dump (MS-Access, MySQL-Dump...)"}}
+{"uri":"http://bartoc.org/en/Format/Geodata","notation":["Geodata"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"Geographical data (GeoJSON, KML...)"}}
+{"uri":"http://bartoc.org/en/Format/EPUB","notation":["EPUB"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"EPUB"}}
+{"uri":"http://bartoc.org/en/Format/ClaML","notation":["ClaML"],"inScheme":[{"uri":"http://bartoc.org/en/node/20000"}],"prefLabel":{"en":"ClaML"}}
