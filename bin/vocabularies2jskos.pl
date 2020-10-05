@@ -3,6 +3,7 @@
 use v5.14;
 use autodie;
 use JSON::PP;
+use List::Util qw(uniq);
 
 # convert Drupal JSON export of BARTOC.org vocabularies to JSKOS
 # Usage: vocabularies2jskos.pl ../data/download.ndjson < ../data/vocabularies-dump.ndjson
@@ -64,9 +65,29 @@ my %vocuri = (
 sub mapsubject {
     my ( $voc, $id ) = @_;
     return {
-        uri => mapid( $voc => $id ),
+        uri      => mapid( $voc => $id ),
         inScheme => [ { uri => $vocuri{$voc} } ]
     };
+}
+
+sub mapformat {
+    $_[0] =~ qr{/([^/]+)$};
+    my $format = $1;
+
+    # reduce number of formats
+    return 'RDF' if $format =~ /(Turtle|N-Quads|N-Triples|N3|TriX|TriG)/;
+    return 'Spreadsheet' if $format =~ /(XLS|XLSX|ODS)/;
+    return 'CSV'         if $format =~ /^(TAB|CSV)$/;
+    return 'Word'        if $format =~ /(DOC|DOCX|RTF|ODT)/;
+    return 'MARC'        if $format =~ /MARC/;
+    return 'HTML'        if $format =~ /HTML/;
+    return 'TXT'         if $format =~ /^(ASCII|PCC)$/;
+    return 'Database'    if $format =~ /^(MS-Access|MDB|MySQL-Dump)$/;
+    return 'Geodata'     if $format =~ /^(KML|MapInfo|GeoJSON)$/;
+    return
+      if grep { $format eq $_ }    # too rare or too specific
+      qw(RSS DTD DjVu E-Book ESRI TIFF Isabelle 58674 YML G2KI CLIPS N1TS LIST SGML SPS);
+    return $format;
 }
 
 ## use critic
@@ -218,7 +239,7 @@ while (<>) {
             area      => 'Address - Sub administrative area'
         );
         $jskos{ADDRESS} = {
-            map { ( $_ => $R{ $field{$_} } ) }
+            map  { ( $_ => $R{ $field{$_} } ) }
             grep { $R{ $field{$_} } } keys %field
         };
     }
@@ -236,8 +257,7 @@ while (<>) {
     if ( $R{Format} ) {
 
         # will require cleanup later
-        $jskos{FORMAT} =
-          [ map { pop @{ [ split "/", $_ ] } } ( dehtmlist $R{Format} ) ];
+        $jskos{FORMAT} = [ uniq map { mapformat $_ } ( dehtmlist $R{Format} ) ];
     }
 
     if ( $R{'Listed in'} ) {
