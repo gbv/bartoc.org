@@ -332,7 +332,9 @@ const ItemEditor = {
   Use quotation marks and original language if copied from another source (e.g. homepage).
 </form-row>
 <form-row :label="'KOS Types'">
-  <set-select :modelValue="type" @update:modelValue="item.type=$event.map(t=>t.uri)" :options="kostypes" />
+  <set-select :modelValue="type"
+              @update:modelValue="item.type=$event.map(t=>t.uri)"
+              :options="kostypes" />
   Use Shift key to deselect or select multiple types.
 </form-row>
 <form-row :label="'Subjects'">
@@ -380,7 +382,10 @@ const ItemEditor = {
   email address of anyone in charge of the vocabulary
 </form-row>
 <form-row :label="'Listed In'">
-  <div>{{item.partOf}}</div>
+  <list-editor :modelValue="item.partOf.map(({uri})=>uri)"
+               @update:modelValue="item.partOf=$event.map(uri=>({uri}))" />
+  Which <a href="/registries">terminology registries</a> list the vocabulary?
+  Please use registry URIs, a more convenient editing form will be added later!
 </form-row>
 <form-row :label="'Vocabulary services'">
   <list-editor v-model="item.API" />
@@ -455,7 +460,7 @@ const ItemEditor = {
     const item = this.current || {}
     ;['prefLabel', 'altLabel', 'definition']
       .forEach(key => { if (!item[key]) item[key] = {} })
-    ;['notation', 'identifier', 'languages', 'license', 'type', 'subject', 'subjectOf', 'FORMAT', 'API']
+    ;['notation', 'identifier', 'languages', 'license', 'type', 'subject', 'subjectOf', 'partOf', 'FORMAT', 'API']
       .forEach(key => { if (!item[key]) item[key] = [] })
 
     const examples = (item.EXAMPLES || []).join(', ')
@@ -500,6 +505,7 @@ const ItemEditor = {
     loadVoc('licenses', 'https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Furi.gbv.de%2Fterminology%2Flicense%2F')
     loadVoc('kostypes', 'https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Fw3id.org%2Fnkos%2Fnkostype')
     loadVoc('formats', '/api/voc/top?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F20000')
+    loadVoc('registries', '/registries?format=jskos')
   },
   methods: {
     saveItem () {
