@@ -5,37 +5,67 @@
 </p>
 
 <%- include('abstract', { abstract: item.definition }) %>
-<%- include('abstract', { abstract: item.scopeNote }) %>
 
 <!-- TODO: merge with registry.ejs -->
 
 <table class="table">
   <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
   <%- include('row-list', { label: 'Notation', list: item.notation }) %>
-  <%
-var titles = Object.values(item.prefLabel || {})
-           .concat(...Object.values(item.altLabel || {}))
-  %>
+  <%  var titles = Object.values(item.prefLabel || {}).concat(...Object.values(item.altLabel || {})) %>
   <%- include('row-list', { label: 'Titles', list: titles }) %>
+
   <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
+  <%- include('row-list', { label: 'Links', list: item.subjectOf, view: s => include('link', s) }) %>
   <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
-  <!-- TODO: access (free...) -->
   <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
+
   <%- include('row-list', { label: 'Subject', list: item.subject,
         view: s => include('item', { item: s, base: '/vocabularies?subject=' }) }) %>
+
+  <%- include('row', { label: 'Size', content: item.extent } ) %>
+
   <%- include('row-list', { label: 'License', list: item.license,
               view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
-  <%- include('row', { label: 'Size', content: item.extent } ) %>
-  <%- include('row-list', { label: 'Publisher', list: item.publisher,
-              view: item => include('item', { item }) }) %>
+
+  <%- include('row-list', { label: 'Access', list: item.ACCESS, view: s => s.uri }) %>
+  <%- include('row-list', { label: 'Format', list: item.FORMAT, view: s => s.uri }) %>
+
   <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
   <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
-  <!-- TODO: location -->
-  <!-- TODO: format -->
-  <!-- TODO: access -->
-  <%- include('row', { label: 'Namespace', content: item.namespace }) %>
+
   <%- include('row-list', { label: 'KOS Type', list: item.type.slice(1),
       view: item => include('item', { item: nkostypes[item], base: '/vocabularies?type=' }) }) %>
+
+  <%- include('row-list', { label: 'Publisher', list: item.publisher,
+      view: item => include('item', { item }) }) %>
+
+  <%  var address = []
+     if (item.ADDRESS) {
+       for(let field of ['street','ext','locality','code','country']) {
+         if (item.ADDRESS[field]) address.push(item.ADDRESS[field])
+       }
+     }
+  %>
+  <%- include('row-list', { label: 'Address', list: address }) %>
+  <%- include('row', { label: 'Contact', content: item.CONTACT }) %>
+
+  <!-- TODO: partOf (listed in) -->
+
+  <%- include('row-list', { label: 'Services (API)', list: item.API,
+      view: s => `<a href='${s}'>${s}</a>` }) %>
+
+  <%- include('row-list', { label: 'Listed in', list: item.partOf,
+      view: s => include('link', { url: s.uri }) }) %>
+
+  <%- include('row', { label: 'Namespace', content: item.namespace }) %>
+  <%- include('row', { label: 'Namespace', content: item.notationPattern }) %>
+  <%- include('row', { label: 'Namespace', content: item.uriPattern }) %>
+  <!-- TODO: example notations -->
+
+  <%- include('row', { label: 'MARCspec', content: item.MARCSPEC }) %>
+  <%- include('row', { label: 'PICA path', content: item.PICAPATH }) %>
+  <%- include('row', { label: 'CQL key', content: item.CQLKEY }) %>
+
   <!-- TODO: rating -->
 </table>
 

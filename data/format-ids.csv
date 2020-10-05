@@ -15,6 +15,7 @@
 /en/Format/OTD,Word
 /en/Format/UNIMARC,MARC
 /en/Format/USMARC,MARC
+/en/Format/MARCXML,MARC
 /en/Format/ASCII,TXT
 /en/Format/PCC,TXT
 /en/Format/MS-Access,Database

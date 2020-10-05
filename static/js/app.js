@@ -486,6 +486,9 @@ const ItemEditor = {
 <p>
   Fields required only for vocabularies used in PICA or MARC databases:
 </p>
+<form-row :label="'MARCSpec'">
+  <input type="text" class="form-control" v-model="item.MARCSPEC"/>
+</form-row>
 <form-row :label="'PICA path'">
   <input type="text" class="form-control" v-model="item.PICAPATH"/>
 </form-row>
