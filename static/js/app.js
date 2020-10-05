@@ -289,11 +289,53 @@ const SetSelect = {
   methods: { prefLabel }
 }
 
+const AddressEditor = {
+  emits: ['update:modelValue'],
+  template: `
+  <table>
+    <tr>
+      <td>Street address</td>
+      <td><input type="text" class="form-control" v-model="street"/></td>
+    </tr><tr>
+      <td></td>
+      <td><input type="text" class="form-control" v-model="ext"/></td>
+    </tr><tr>
+      <td>City</td>
+      <td><input type="text" class="form-control" v-model="locality"/></td>
+    </tr><tr>
+      <td>Postal code</td>
+      <td><input type="text" class="form-control" v-model="code"/></td>
+    </tr><tr>
+      <td>Country</td>
+      <td><input type="text" class="form-control" v-model="country"/></td>
+    </tr>
+  </table>
+  `,
+  props: {
+    modelValue: Object
+  },
+  data () {
+    const { ext, street, locality, code, country } = (this.modelValue || {})
+    return { ext, street, locality, code, country }
+  },
+  created () {
+    for (const name of ['ext', 'street', 'locality', 'code', 'country']) {
+      this.$watch(name, this.update)
+    }
+  },
+  methods: {
+    update () {
+      const { ext, street, locality, code, country } = this
+      this.$emit('update:modelValue', { ext, street, locality, code, country })
+    }
+  }
+}
+
 /**
  * Web form to modify and create vocabulary metadata.
  */
 const ItemEditor = {
-  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor },
+  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor, AddressEditor },
   template: `
 <p>Basic information about the vocabulary:</p>
 <form-row :label="'URI'">
@@ -372,7 +414,7 @@ const ItemEditor = {
   Try to use an institution rather than a person. repeatable?
 </form-row>
 <form-row :label="'Address'">
-  <div>{{item.ADDRESS}}</div>
+  <address-editor v-model="item.ADDRESS" />
 </form-row>
 <form-row :label="'Contact'">
   <input type="text" class="form-control" v-model="item.CONTACT"/>
@@ -455,7 +497,7 @@ const ItemEditor = {
   data () {
     // make sure item has iterable fields
     const item = this.current || {}
-    ;['prefLabel', 'altLabel', 'definition']
+    ;['prefLabel', 'altLabel', 'definition', 'ADDRESS']
       .forEach(key => { if (!item[key]) item[key] = {} })
     ;['notation', 'identifier', 'languages', 'license', 'type', 'subject', 'subjectOf', 'partOf', 'FORMAT', 'API']
       .forEach(key => { if (!item[key]) item[key] = [] })

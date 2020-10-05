@@ -10,7 +10,7 @@ const proxy = require('express-http-proxy')
 const backend = cdk.initializeRegistry(config.backend)
 
 // TODO: https://github.com/gbv/cocoda-sdk/issues/22
-backend.search = async ({search}) => {
+backend.search = async ({ search }) => {
   const url = `http://localhost:${config.port}/api/search?search=` + encodeURIComponent(search)
   console.log(url)
   return axios.get(url).then(res => res.data)
@@ -163,7 +163,7 @@ app.get('/([a-z][a-z])/:page([a-z-]+)', (req, res) => {
 
 // list of terminology registries
 app.get('/registries', (req, res) => {
-  if (req.query.format === "jskos") {
+  if (req.query.format === 'jskos') {
     return res.send(registries)
   }
   render(req, res, 'registries', { title: 'Terminology Registries' })

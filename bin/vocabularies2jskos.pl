@@ -222,22 +222,14 @@ while (<>) {
 
     if ( $R{Address} ) {
 
-        # will require cleanup later
+        # vCard aligned address format
         $jskos{ADDRESS} = {};
         my %field = (
+            ext      => 'Address - Premise (i.e. Apartment / Suite number)',
+            street   => 'Address - Thoroughfare (i.e. Street address)',
+            locality => 'Address - Locality (i.e. City)',
+            code     => 'Address - Postal code',
             country  => 'Address - Country',
-            postcode => 'Address - Postal code',
-            city     => 'Address - Locality (i.e. City)',
-            address  => 'Address - Thoroughfare (i.e. Street address)',
-            locality => 'Address - Dependent locality',
-            premise  => 'Address - Premise (i.e. Apartment / Suite number)',
-            subpremise =>
-              'Address - Sub Premise (i.e. Suite, Apartment, Floor, Unknown.',
-            company   => 'Address - Company',
-            firstname => 'Address - First name',
-            fullname  => 'Address - Full name',
-            lastname  => 'Address - Last name',
-            area      => 'Address - Sub administrative area'
         );
         $jskos{ADDRESS} = {
             map { ( $_ => $R{ $field{$_} } ) }
