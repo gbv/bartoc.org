@@ -451,10 +451,11 @@ const ItemEditor = {
     }
   },
   data () {
+    // make sure item has iterable fields
     const item = this.current || {}
     ;['prefLabel', 'altLabel', 'definition']
       .forEach(key => { if (!item[key]) item[key] = {} })
-    ;['notation', 'identifier', 'license', 'type', 'subjectOf']
+    ;['notation', 'identifier', 'languages', 'license', 'type', 'subject', 'subjectOf', 'FORMAT', 'API']
       .forEach(key => { if (!item[key]) item[key] = [] })
 
     const examples = (item.EXAMPLES || []).join(', ')
@@ -491,12 +492,12 @@ const ItemEditor = {
       this.item.EXAMPLES = s.split(',').map(s => s.trim()).filter(s => s !== '')
     }
   },
-  created() {
+  created () {
     // TODO: use cdk instead. Catch error.
     const loadVoc = (name, url) =>
       fetch(url).then(res => res.json()).then(res => { this[name] = res })
 
-    loadVoc('licenses','https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Furi.gbv.de%2Fterminology%2Flicense%2F')
+    loadVoc('licenses', 'https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Furi.gbv.de%2Fterminology%2Flicense%2F')
     loadVoc('kostypes', 'https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Fw3id.org%2Fnkos%2Fnkostype')
     loadVoc('formats', '/api/voc/top?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F20000')
   },
@@ -528,7 +529,7 @@ const ItemEditor = {
         if (!isEmpty(item[key])) clean[key] = item[key]
       }
       return clean
-    },
+    }
   }
 }
 
