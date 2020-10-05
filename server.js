@@ -163,6 +163,9 @@ app.get('/([a-z][a-z])/:page([a-z-]+)', (req, res) => {
 
 // list of terminology registries
 app.get('/registries', (req, res) => {
+  if (req.query.format === "jskos") {
+    return res.send(registries)
+  }
   render(req, res, 'registries', { title: 'Terminology Registries' })
 })
 
