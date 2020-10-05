@@ -198,7 +198,8 @@ const SubjectEditor = {
  */
 const LabelEditor = {
   components: { LanguageSelect },
-  template: `<table class="table table-sm table-borderless">
+  template: `
+  <table class="table table-sm table-borderless">
     <tr><th>title</th><th colspan="2">language code</th></tr>
     <tr v-for="(label,i) in labels">
       <td>
@@ -292,7 +293,7 @@ const SetSelect = {
 const AddressEditor = {
   emits: ['update:modelValue'],
   template: `
-  <table>
+  <table class="table-sm">
     <tr>
       <td>Street address</td>
       <td><input type="text" class="form-control" v-model="street"/></td>
@@ -331,11 +332,42 @@ const AddressEditor = {
   }
 }
 
+const PublisherEditor = {
+  emits: ['update:modelValue'],
+  template: `
+  <table class="table table-sm table-borderless">
+    <tr>
+      <td><input type="text" class="form-control" v-model="name"/></td>
+      <td>Name</td>
+    </tr><tr>
+      <td><input type="text" class="form-control" v-model="viaf"/></td>
+      <td><a href="http://viaf.org/">VIAF</a> URI</td>
+    </tr>
+  </table>`,
+  props: {
+    modelValue: Array
+  },
+  data () {
+    const publisher = ((this.modelValue||[])[0]||{})
+    return {
+      viaf: publisher.uri,
+      name: (publisher.prefLabel||{}).en
+    }
+  },
+  created () {
+    const update = function () {
+      this.$emit('update:modelValue', [{ uri: this.viaf, prefLabel: { en: this.name } }])
+    }
+    this.$watch('name', update)
+    this.$watch('viaf', update)
+  }
+}
+
 /**
  * Web form to modify and create vocabulary metadata.
  */
 const ItemEditor = {
-  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor, AddressEditor },
+  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor, AddressEditor, PublisherEditor },
   template: `
 <p>Basic information about the vocabulary:</p>
 <form-row :label="'URI'">
@@ -410,8 +442,8 @@ const ItemEditor = {
   Do you have to register to take a look at the KOS, is it 'hidden' in a licensed database or is it free online?
 </form-row>
 <form-row :label="'Publisher'">
-  <div>{{item.publisher}}</div>
-  Try to use an institution rather than a person. repeatable?
+  <publisher-editor v-model="item.publisher" />
+  Try to use an institution rather than a person.
 </form-row>
 <form-row :label="'Address'">
   <address-editor v-model="item.ADDRESS" />
@@ -499,7 +531,7 @@ const ItemEditor = {
     const item = this.current || {}
     ;['prefLabel', 'altLabel', 'definition', 'ADDRESS']
       .forEach(key => { if (!item[key]) item[key] = {} })
-    ;['notation', 'identifier', 'languages', 'license', 'type', 'subject', 'subjectOf', 'partOf', 'FORMAT', 'API']
+    ;['notation', 'identifier', 'languages', 'license', 'type', 'subject', 'subjectOf', 'partOf', 'FORMAT', 'API', 'publisher']
       .forEach(key => { if (!item[key]) item[key] = [] })
 
     const examples = (item.EXAMPLES || []).join(', ')

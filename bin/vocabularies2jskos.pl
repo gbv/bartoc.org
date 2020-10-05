@@ -208,7 +208,7 @@ while (<>) {
     my $publisher;
     my ($viaf) = field 'VIAF';
     if ( $viaf =~ qr{https?://(viaf.org/viaf/\d+)[^>]+>([^<]+)} ) {
-        $publisher = { uri => "http://$1", prefLabel => { und => $2 } };
+        $publisher = { uri => "http://$1", prefLabel => { en => $2 } };
     }
     elsif ( my ($publisher) = field 'Author' ) {
         $publisher = { prefLabel => { und => $publisher } };
