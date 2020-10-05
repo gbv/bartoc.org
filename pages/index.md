@@ -15,19 +15,19 @@ title:
   </div>
 </div>
 
-<!--form class="main-form" action="/vocabularies">
+<form class="main-form" action="/vocabularies">
   <div class="form-group">
-    <label for="search-vocabulary">Search for vocabularies</label>
+    <label for="query">Search for vocabularies</label>
     <div class="row">
       <div class="col-md-10">
-        <input type="text" class="form-control" id="search-vocabulary">
+        <input type="text" class="form-control" id="query" name="query">
       </div>
       <div class="col-md-2">
         <button type="submit" class="btn btn-primary">Search</button>
       </div>
     </div>
   </div>
-</form-->
+</form>
 
 <div class="main-form">
   <div class="form-group">

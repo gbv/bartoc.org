@@ -6,14 +6,21 @@
   "scripts": {
     "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npm run lint:js; npm run lint:ejs",
-    "lint:js": "eslint *.js src/*.js static/js/*.js",
-    "lint:ejs": "ejslint views/*.ejs",
+    "lint": "eslint *.js src/*.js static/js/*.js; ejslint views/*.ejs",
     "fix": "eslint --fix *.js src/*.js static/js/*.js",
     "data": "mkdir -p cache; npm run data:nkostype; make -C data; make -C bin",
     "data:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > cache/nkostype.ndjson",
     "validate": "jskos-validate"
   },
+  "lint-staged": {
+    "**/*.js": [
+      "eslint --fix"
+    ],
+    "*.js": [
+      "eslint --fix"
+    ]
+  },
+  "pre-commit": "lint-staged",
   "author": "Jakob Voß",
   "license": "MIT",
   "repository": {

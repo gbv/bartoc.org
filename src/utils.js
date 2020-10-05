@@ -5,7 +5,7 @@ const isBartocUri = id => id.match(bartocUri)
 const readLines = file => readFileSync(file).toString()
   .split(/\n|\n\r/).filter(Boolean)
 
-// TODO: this is not used yet
+/* TODO: this is not used yet
 function extendScheme (voc) {
   var { uri, identifier } = voc
   if (identifier && !isBartocUri(uri)) {
@@ -17,7 +17,7 @@ function extendScheme (voc) {
     }
   }
   return voc
-}
+} */
 
 module.exports = {
   cleanupItem: item => {

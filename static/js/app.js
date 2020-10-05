@@ -465,8 +465,8 @@ const ItemEditor = {
 
     // make non-English abstract to language code "und"
     for (const code in item.definition) {
-	    if (code === 'en') abstractEn = item.definition[code][0]
-	    else abstractUnd = item.definition[code][0]
+      if (code === 'en') abstractEn = item.definition[code][0]
+      else abstractUnd = item.definition[code][0]
     }
 
     return {
@@ -506,18 +506,18 @@ const ItemEditor = {
       if (!this.user || !this.auth) return
       var uri = this.item.uri
       const method = uri ? 'PUT' : 'POST'
-	    if (!uri) {
-		    // TODO: validate uri
-		    uri = this.uri
-		   }
+      if (!uri) {
+        // TODO: validate uri
+        uri = this.uri
+      }
       const body = JSON.stringify(this.cleanupItem({ ...this.item, uri }))
       const token = this.auth.token
       const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       // TODO: don't call if no uri exists or trying to create with existing URI
       fetch('/api/voc', { method, body, headers }).then(res => {
-	      if (res.ok) {
-          		      window.location.href = '/vocabularies?uri=' + encodeURIComponent(uri)
-		     }
+        if (res.ok) {
+          window.location.href = '/vocabularies?uri=' + encodeURIComponent(uri)
+        }
         Object.assign(this.status, { status: res.ok ? 'success' : 'warning', message: this.statusText })
       })
     },
@@ -561,3 +561,5 @@ const app = {
 }
 
 Vue.createApp(app).mount('#app')
+
+/* global Vue, LoginClient, fetch  */
