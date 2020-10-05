@@ -245,19 +245,12 @@ while (<>) {
         };
     }
 
-    # will require cleanup later
-    if ( $R{Location} ) {
-        $jskos{LOCATION} = [ ( $R{Location} =~ /"\/en\/Location\/([^"]+)"/g ) ];
-    }
-
     if ( $R{'SKOS Vocabulary Service'} ) {
         $jskos{API} =
           [ dehtmlist $R{'SKOS Vocabulary Service'} ];
     }
 
     if ( $R{Format} ) {
-
-        # will require cleanup later
         $jskos{FORMAT} = [ uniq map { mapformat $_ } ( dehtmlist $R{Format} ) ];
     }
 

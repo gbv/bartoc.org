@@ -374,9 +374,6 @@ const ItemEditor = {
 <form-row :label="'Address'">
   <div>{{item.ADDRESS}}</div>
 </form-row>
-<form-row :label="'Location'">
-  <div>{{item.LOCATION}}</div>
-</form-row>
 <form-row :label="'Contact'">
   <input type="text" class="form-control" v-model="item.CONTACT"/>
   email address of anyone in charge of the vocabulary
