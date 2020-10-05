@@ -438,8 +438,9 @@ const ItemEditor = {
   Select the format(s) in which the KOS is available.
 </form-row>
 <form-row :label="'Access'">
-  <div>{{item.ACCESS}}</div>
-  Do you have to register to take a look at the KOS, is it 'hidden' in a licensed database or is it free online?
+  <set-select :modelValue="item.ACCESS"
+              :options="access"/>
+  Do you have to register to view the KOS, is it 'hidden' in a licensed database or is it free online?
 </form-row>
 <form-row :label="'Publisher'">
   <publisher-editor v-model="item.publisher" />
@@ -531,7 +532,7 @@ const ItemEditor = {
     const item = this.current || {}
     ;['prefLabel', 'altLabel', 'definition', 'ADDRESS']
       .forEach(key => { if (!item[key]) item[key] = {} })
-    ;['notation', 'identifier', 'languages', 'license', 'type', 'subject', 'subjectOf', 'partOf', 'FORMAT', 'API', 'publisher']
+    ;['notation', 'identifier', 'languages', 'license', 'type', 'subject', 'subjectOf', 'partOf', 'FORMAT', 'API', 'ACCESS', 'publisher']
       .forEach(key => { if (!item[key]) item[key] = [] })
 
     const examples = (item.EXAMPLES || []).join(', ')
@@ -554,6 +555,7 @@ const ItemEditor = {
       kostypes: [],
       licenses: [],
       formats: [],
+      access: [],
       status: { },
       showJSKOS: false
     }
@@ -576,6 +578,7 @@ const ItemEditor = {
     loadVoc('licenses', 'https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Furi.gbv.de%2Fterminology%2Flicense%2F')
     loadVoc('kostypes', 'https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Fw3id.org%2Fnkos%2Fnkostype')
     loadVoc('formats', '/api/voc/top?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F20000')
+    loadVoc('access', '/api/voc/top?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F20001')
     loadVoc('registries', '/registries?format=jskos')
   },
   methods: {

@@ -11,4 +11,6 @@ cd $SERVER
 npm run -- import --reset schemes $BARTOC/cache/vocabularies.ndjson
 npm run -- import schemes $BARTOC/data/bartoc-formats.scheme.ndjson
 npm run -- import --reset concepts $BARTOC/data/bartoc-formats.concepts.ndjson
+npm run -- import schemes $BARTOC/data/bartoc-access.scheme.ndjson
+npm run -- import --reset concepts $BARTOC/data/bartoc-access.concepts.ndjson
 cd $BARTOC

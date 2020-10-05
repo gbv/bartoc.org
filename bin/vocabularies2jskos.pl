@@ -255,7 +255,8 @@ while (<>) {
     if ( $R{Access} ) {
 
         # will require cleanup later
-        $jskos{ACCESS} = [ dehtmlist $R{'Access'} ];
+        $jskos{ACCESS} =
+          [ map { { uri => "http://bartoc.org$_" } } dehtmlist $R{'Access'} ];
     }
 
     say encode_json \%jskos;
