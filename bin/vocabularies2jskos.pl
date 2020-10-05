@@ -65,7 +65,7 @@ my %vocuri = (
 sub mapsubject {
     my ( $voc, $id ) = @_;
     return {
-        uri      => mapid( $voc => $id ),
+        uri => mapid( $voc => $id ),
         inScheme => [ { uri => $vocuri{$voc} } ]
     };
 }
@@ -75,19 +75,20 @@ sub mapformat {
     my $format = $1;
 
     # reduce number of formats
-    return 'RDF' if $format =~ /(Turtle|N-Quads|N-Triples|N3|TriX|TriG)/;
-    return 'Spreadsheet' if $format =~ /(XLS|XLSX|ODS)/;
-    return 'CSV'         if $format =~ /^(TAB|CSV)$/;
-    return 'Word'        if $format =~ /(DOC|DOCX|RTF|ODT)/;
-    return 'MARC'        if $format =~ /MARC/;
-    return 'HTML'        if $format =~ /HTML/;
-    return 'TXT'         if $format =~ /^(ASCII|PCC)$/;
-    return 'Database'    if $format =~ /^(MS-Access|MDB|MySQL-Dump)$/;
-    return 'Geodata'     if $format =~ /^(KML|MapInfo|GeoJSON)$/;
+    $format = 'RDF' if $format =~ /(Turtle|N-Quads|N-Triples|N3|TriX|TriG)/;
+    $format = 'Spreadsheet' if $format =~ /(XLS|XLSX|ODS)/;
+    $format = 'CSV'         if $format =~ /^(TAB|CSV)$/;
+    $format = 'Word'        if $format =~ /(DOC|DOCX|RTF|ODT)/;
+    $format = 'MARC'        if $format =~ /MARC/;
+    $format = 'HTML'        if $format =~ /HTML/;
+    $format = 'TXT'         if $format =~ /^(ASCII|PCC)$/;
+    $format = 'Database'    if $format =~ /^(MS-Access|MDB|MySQL-Dump)$/;
+    $format = 'Geodata'     if $format =~ /^(KML|MapInfo|GeoJSON)$/;
     return
       if grep { $format eq $_ }    # too rare or too specific
       qw(RSS DTD DjVu E-Book ESRI TIFF Isabelle 58674 YML G2KI CLIPS N1TS LIST SGML SPS);
-    return $format;
+
+    return { uri => "http://bartoc.org/en/Format/$format" };
 }
 
 ## use critic
@@ -239,7 +240,7 @@ while (<>) {
             area      => 'Address - Sub administrative area'
         );
         $jskos{ADDRESS} = {
-            map  { ( $_ => $R{ $field{$_} } ) }
+            map { ( $_ => $R{ $field{$_} } ) }
             grep { $R{ $field{$_} } } keys %field
         };
     }

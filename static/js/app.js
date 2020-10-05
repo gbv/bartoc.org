@@ -358,7 +358,7 @@ const ItemEditor = {
                @update:modelValue="item.subjectOf=$event.map(url=>({url}))" />
 </form-row>
 <form-row :label="'Formats'">
-  <div>{{item.FORMAT}}</div>
+  <set-select v-model="item.FORMAT" :options="formats" />
   Select the format(s) in which the KOS is available.
 </form-row>
 <form-row :label="'Access'">
@@ -468,12 +468,6 @@ const ItemEditor = {
 	    else abstractUnd = item.definition[code][0]
     }
 
-    // TODO: use cdk instead. Catch error.
-    fetch('https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Furi.gbv.de%2Fterminology%2Flicense%2F').then(res => res.json())
-      .then(res => { this.licenses = res })
-    fetch('https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Fw3id.org%2Fnkos%2Fnkostype').then(res => res.json())
-      .then(res => { this.kostypes = res })
-
     return {
       item,
       uri: null, // for new items
@@ -482,6 +476,7 @@ const ItemEditor = {
       abstractUnd,
       kostypes: [],
       licenses: [],
+      formats: [],
       status: { },
       showJSKOS: false
     }
@@ -495,6 +490,15 @@ const ItemEditor = {
     examples: function (s) {
       this.item.EXAMPLES = s.split(',').map(s => s.trim()).filter(s => s !== '')
     }
+  },
+  created() {
+    // TODO: use cdk instead. Catch error.
+    const loadVoc = (name, url) =>
+      fetch(url).then(res => res.json()).then(res => { this[name] = res })
+
+    loadVoc('licenses','https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Furi.gbv.de%2Fterminology%2Flicense%2F')
+    loadVoc('kostypes', 'https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Fw3id.org%2Fnkos%2Fnkostype')
+    loadVoc('formats', '/api/voc/top?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F20000')
   },
   methods: {
     saveItem () {

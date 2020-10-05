@@ -31,13 +31,10 @@ Optionally transform the Drupal export from September 2020 and other vocabulayr 
 npm run data
 ~~~
 
-Then import the resulting file `cache/vocabularies.ndjson` and additional vocabulary files into your jskos-server instance (being in directory `$SERVER`while bartoc.org in directory `$BARTOC`). The following commands will remove all previous vocabularies and concepts from the jskos-server instance:
+Then import the resulting file `cache/vocabularies.ndjson` and additional vocabulary files into your jskos-server instance (resetting all stored vocabularies and concepts!):
 
 ~~~
-cd $SERVER
-npm run -- import --reset schemes $BARTOC/cache/vocabularies.ndjson
-npm run -- import schemes $BARTOC/data/bartoc-formats.scheme.ndjson
-npm run -- import --reset concepts $BARTOC/data/bartoc-formats.concepts.ndjson
+./bin/import.sh $DIRECTORY_OF_YOUR_JSKOS_SERVER
 ~~~
 
 ## Configuration
