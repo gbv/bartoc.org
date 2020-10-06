@@ -659,7 +659,7 @@ const VocabularySearch = {
     <language-select v-model="languages" class="form-control" />
     language code which the vocabulary is available in (en, fr, es...)
   </form-row>
-  <form-row v-if="subjects.length" :label="'Subject'">
+  <form-row :label="'Subject'">
     <subject-editor v-model="subjects"/>
   </form-row>
   <form-row>
