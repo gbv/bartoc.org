@@ -6,6 +6,25 @@ function loadConcepts (api, uri) {
   return fetch(api).then(res => res ? res.json() : [])
 }
 
+// TODO: configure somewhere else, this is part of BARTOC data anyway
+const indexingSchemes = [
+  {
+    uri: 'http://bartoc.org/en/node/241',
+    namespace: 'http://dewey.info/class/',
+    notation: ['DDC']
+  },
+  {
+    uri: 'http://bartoc.org/en/node/15',
+    namespace: 'http://eurovoc.europa.eu/',
+    prefLabel: { en: 'EuroVoc' }
+  },
+  {
+    uri: 'http://bartoc.org/de/node/472',
+    namespace: 'http://bartoc.org/en/ILC/',
+    notation: ['ILC']
+  }
+]
+
 /**
  * Establish connection to login server and show logged in user or link to login.
  */
@@ -168,22 +187,6 @@ const SubjectEditor = {
 </table>
   `,
   data () {
-    // TODO: configure somewhere else, this is part of BARTOC data anyway
-    const indexingSchemes = [
-      {
-        uri: 'http://bartoc.org/en/node/241',
-        notation: ['DDC']
-      },
-      {
-        uri: 'http://bartoc.org/en/node/15',
-        prefLabel: { en: 'EuroVoc' }
-      },
-      {
-        uri: 'http://bartoc.org/de/node/472',
-        notation: ['ILC']
-      }
-    ]
-
     return {
       nextScheme: indexingSchemes[0].uri,
       indexingSchemes
@@ -646,7 +649,7 @@ function isEmpty (obj) {
 }
 
 const VocabularySearch = {
-  components: { FormRow, SetSelect, LanguageSelect },
+  components: { FormRow, SetSelect, LanguageSelect, SubjectEditor },
   template: `
 <form @submit.prevent="search">
   <form-row :label="'KOS Type'">
@@ -656,22 +659,28 @@ const VocabularySearch = {
     <language-select v-model="languages" class="form-control" />
     language code which the vocabulary is available in (en, fr, es...)
   </form-row>
+  <form-row v-if="subjects.length" :label="'Subject'">
+    <subject-editor v-model="subjects"/>
+  </form-row>
   <form-row>
     <input type="submit" class="btn btn-primary" @click="search" title="search" />
-  </form-row>
-  <form-row v-if="subject" :label="'Subject'">
-    <a :href="subject">{{subject}}</a>
   </form-row>
 </form>`,
   props: { query: Object },
   data () {
-    const { type, languages, subject, license, format } = this.query
+    const { type, languages, subject, license, format, access, country } = this.query
+    const subjects = (subject || '').split('|').map(uri => {
+      const scheme = indexingSchemes.find(scheme => uri.indexOf(scheme.namespace) === 0)
+      return scheme ? { uri, inScheme: [scheme] } : false
+    }).filter(Boolean)
     return {
       type,
       languages,
-      subject,
-      license,
-      format,
+      subjects,
+      license, // TODO: https://github.com/gbv/bartoc.org/issues/43
+      country, // TODO: https://github.com/gbv/bartoc.org/issues/24
+      format, // TODO: https://github.com/gbv/bartoc.org/issues/25
+      access, // TODO: https://github.com/gbv/bartoc.org/issues/42
       kostypes: []
     }
   },
@@ -687,6 +696,7 @@ const VocabularySearch = {
       const query = {}
       if (this.type) query.type = this.type
       if (this.languages) query.languages = this.languages
+      if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join('|')
       window.location.href = '/vocabularies?' + (new URLSearchParams(query).toString())
     }
   }

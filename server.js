@@ -75,6 +75,10 @@ for (const [url, uri] of utils.readCsv('./data/license-ids.csv')) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?license=${uri}`))
 }
 
+for (const [url, uri] of utils.readCsv('./data/access-ids.csv')) {
+  app.get(url, (req, res) => res.redirect(`/vocabularies?access=${uri}`))
+}
+
 for (const [url, id] of utils.readCsv('./data/format-ids.csv')) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?format=http://bartoc.org/en/Format/${id}`))
 }
