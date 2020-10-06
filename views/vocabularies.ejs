@@ -1,39 +1,6 @@
 <%- include('header') %>
 
-<p>
-  <form action="/vocabularies">
-    <div class="form-group row">
-      <label for="type" class="col-form-label col-sm-2">Type</label>
-      <div class="col-sm-10">
-        <select class="form-control" name="type" onchange="this.form.submit()">
-          <option value="">any</option>
-          <% for (let item of Object.values(nkostypes)) { %>
-            <option value="<%= item.uri %>" <%= query.type === item.uri ? "selected" : "" %>>
-              <%- include('item', { item, url: false }) %>
-            </option>
-          <% } %>
-        </select>
-      </div>
-    </div>
-    <% if(query.subject) { %>
-    <div class="form-group row">
-      <label for="type" class="col-form-label col-sm-2">Subject</label>
-      <div class="col-sm-10">
-        <%- include('link', { url: query.subject }) %>
-        <input type="hidden" name="subject" value="<%= query.subject %>" />
-        <a class="btn btn-primary btn-sm" href="<%= utils.buildQuery({...query, subject: ""}) %>">✕</a>
-      </div>
-    </div>
-    <% } %>
-    <div class="form-group row">
-      <div class="col-sm-2"></div>
-      <div class="col-sm-10">
-        <input type="submit" class="btn btn-primary"></input>
-      </div>
-    </div>
-  </form>
-  <em>Filtering by Format, License... is going to be implemented!</em>
-</p>
+<vocabulary-search :query='<%- JSON.stringify(query).replace(/'/g,"&apos;") %>'></vocabulary-search>
 
 <hr>
 

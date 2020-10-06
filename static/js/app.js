@@ -1,3 +1,11 @@
+/* Utility functions */
+
+// TODO: use cdk instead
+function loadConcepts (api, uri) {
+  if (uri) api = `${api}?uri=${encodeURIComponent(uri)}`
+  return fetch(api).then(res => res ? res.json() : [])
+}
+
 /**
  * Establish connection to login server and show logged in user or link to login.
  */
@@ -42,7 +50,7 @@ const UserStatus = {
 }
 
 /**
- * A row in the form to edit vocabulary metadata.
+ * A row in a form with multiple input fields.
  */
 const FormRow = {
   template: `
@@ -52,7 +60,12 @@ const FormRow = {
         <slot/>
       </div>
     </div>`,
-  props: ['label']
+  props: {
+    label: {
+      type: String,
+      default: ''
+    }
+  }
 }
 
 /**
@@ -273,21 +286,28 @@ const LabelEditor = {
  */
 const SetSelect = {
   template: `
-      <select v-model="set" multiple :size="options.length" class="form-control">
-        <option v-for="opt in options" v-bind:value="{ uri: opt.uri }">{{prefLabel(opt)}}</option>
-      </select>
-`,
+  <select v-if="repeatable()" v-model="value" multiple :size="options.length" class="form-control">
+    <option v-for="opt in options" v-bind:value="{ uri: opt.uri }">{{prefLabel(opt)}}</option>
+  </select>
+  <select v-else v-model="value" class="form-control">
+    <option v-for="opt in options" v-bind:value="{ uri: opt.uri }">{{prefLabel(opt)}}</option>
+  </select>`,
   props: {
-    modelValue: Array,
+    modelValue: [Array, Object],
     options: Array
   },
   data () {
-    return { set: [...this.modelValue] }
+    return {
+      value: this.repeatable() ? [...this.modelValue] : this.modelValue
+    }
   },
   created () {
-    this.$watch('set', set => { this.$emit('update:modelValue', set) })
+    this.$watch('value', value => { this.$emit('update:modelValue', value) })
   },
-  methods: { prefLabel }
+  methods: {
+    prefLabel,
+    repeatable () { return Array.isArray(this.modelValue) }
+  }
 }
 
 const AddressEditor = {
@@ -348,10 +368,10 @@ const PublisherEditor = {
     modelValue: Array
   },
   data () {
-    const publisher = ((this.modelValue||[])[0]||{})
+    const publisher = ((this.modelValue || [])[0] || {})
     return {
       viaf: publisher.uri,
-      name: (publisher.prefLabel||{}).en
+      name: (publisher.prefLabel || {}).en
     }
   },
   created () {
@@ -573,16 +593,18 @@ const ItemEditor = {
       this.item.EXAMPLES = s.split(',').map(s => s.trim()).filter(s => s !== '')
     }
   },
-  created () {
-    // TODO: use cdk instead. Catch error.
-    const loadVoc = (name, url) =>
-      fetch(url).then(res => res.json()).then(res => { this[name] = res })
 
-    loadVoc('licenses', 'https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Furi.gbv.de%2Fterminology%2Flicense%2F')
-    loadVoc('kostypes', 'https://api.dante.gbv.de/voc/top?uri=http%3A%2F%2Fw3id.org%2Fnkos%2Fnkostype')
-    loadVoc('formats', '/api/voc/top?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F20000')
-    loadVoc('access', '/api/voc/top?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F20001')
-    loadVoc('registries', '/registries?format=jskos')
+  created () {
+    loadConcepts('https://api.dante.gbv.de/voc/top', 'http://uri.gbv.de/terminology/license/')
+      .then(set => { this.licenses = set })
+    loadConcepts('https://api.dante.gbv.de/voc/top', 'http://w3id.org/nkos/nkostype')
+      .then(set => { this.kostypes = set })
+    loadConcepts('/api/voc/top', 'http://bartoc.org/en/node/20000')
+      .then(set => { this.formats = set })
+    loadConcepts('/api/voc/top', 'http://bartoc.org/en/node/20001')
+      .then(set => { this.access = set })
+    loadConcepts('/registries?format=jskos')
+      .then(set => { this.registries = set })
   },
   methods: {
     saveItem () {
@@ -623,11 +645,58 @@ function isEmpty (obj) {
   return false
 }
 
+const VocabularySearch = {
+  components: { FormRow, SetSelect, LanguageSelect },
+  template: `
+<form @submit.prevent="search">
+  <form-row :label="'KOS Type'">
+    <set-select :modelValue="{uri:type}" @update:modelValue="type=$event.uri" :options="kostypes" />
+  </form-row>
+  <form-row :label="'Language'">
+    <language-select v-model="languages" class="form-control" />
+    language code which the vocabulary is available in (en, fr, es...)
+  </form-row>
+  <form-row>
+    <input type="submit" class="btn btn-primary" @click="search" title="search" />
+  </form-row>
+  <form-row v-if="subject" :label="'Subject'">
+    <a :href="subject">{{subject}}</a>
+  </form-row>
+</form>`,
+  props: { query: Object },
+  data () {
+    const { type, languages, subject, license, format } = this.query
+    return {
+      type,
+      languages,
+      subject,
+      license,
+      format,
+      kostypes: []
+    }
+  },
+  created () {
+    loadConcepts('https://api.dante.gbv.de/voc/top', 'http://w3id.org/nkos/nkostype')
+      .then(set => {
+        set.unshift({ uri: '', prefLabel: { en: '' } })
+        this.kostypes = set
+      })
+  },
+  methods: {
+    search () {
+      const query = {}
+      if (this.type) query.type = this.type
+      if (this.languages) query.languages = this.languages
+      window.location.href = '/vocabularies?' + (new URLSearchParams(query).toString())
+    }
+  }
+}
+
 /**
  * Client side application for user interaction.
  */
 const app = {
-  components: { UserStatus, ItemEditor },
+  components: { UserStatus, ItemEditor, VocabularySearch },
   data () {
     return {
       login: 'coli-conc.gbv.de/login/',
