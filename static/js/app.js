@@ -633,7 +633,7 @@ const ItemEditor = {
 
       fetch('/api/voc', { method, body, headers }).then(res => {
         if (res.ok) {
-          window.location.href = '/vocabularies?uri=' + encodeURIComponent(uri)
+          window.location.href = '/vocabularies?uri=' + encodeURIComponent(item.uri)
         } else {
           res.json().then(error => {
             this.error = { message: error.message || res.statusText, status: res.status }
