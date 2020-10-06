@@ -7,7 +7,7 @@ The content of BARTOC is available in several formats under the [Public Domain D
 ## Linked Open Data
 
 Each entry is identifier by an URI of the form `http://bartoc.org/en/node/{ID}` where `{ID}` is a number.
-For instance the International Classification of Diseases (ICD) has URI <http://bartoc.org/en/node/447>.
+For instance the International Classification of Diseases (ICD) has URI [http://bartoc.org/en/node/447](/en/node/447) (mind it starts with `http://`, not `https://`).
 Each BARTOC entry can be accessed in RDF N-Triples format by appending
 `?format=nt` to its URI. The footer contains a corresponding "RDF" link.
 
@@ -18,8 +18,8 @@ Each BARTOC entry can be accessed in [JSKOS format](https://gbv.github.io/jskos/
 
 ## API
 
-BARTOC can be accessed at [https://bartoc.org/api/](/api/) via JSKOS API.
+BARTOC can be accessed at [https://bartoc.org/api/](/api/) via JSKOS API to query and filter vocabulary metadata.
 
 ## Database dumps
 
-Will be made available after relaunch of BARTOC.org. Meanwhile please use API.
+Regular database dumps [will be made available](https://github.com/gbv/bartoc.org/issues/4) later. Meanwhile use JSKOS API `/voc?limit=5000` to download all records in JSKOS format.
