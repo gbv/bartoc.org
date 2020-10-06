@@ -18,7 +18,7 @@ Europe (<http://bartoc.org/en/contact>) and BARTOC has been approved by
 the International Society for Knowledge Organization (ISKO)
 ([http://www.isko.org/](http://www.isko.org/)).
 
-BARTOC was founded by Andreas Ledel as the Basel Register of Thesauri,
+BARTOC was founded by Andreas Ledl as the Basel Register of Thesauri,
 Ontologies & Classifications at Basel University Library, Switzerland. In
 2020 moved to the Verbundzentrale des GBV (VZG), Germany and got renamed
 and ported from Drupal to a new technical infrastructure based on the
@@ -30,8 +30,9 @@ Read more in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](https://en.wiki
 
 **Publications**
 
+* [ISKO Porto 2018](http://mate.unipv.it/gnoli/portot.pdf)
 * [International UDC Seminar 2017](http://www.udcc.org/index.php/site/page?view=facetedclassification)
-* [ISKO UK biennial conference 2017](http://www.iskouk.org/content/bartoc-story-blog-basic-full-terminology-registry)
+* [ISKO UK biennial conference 2017](http://event-archive.iskouk.org/content/isko-uk-conference-2017-knowledge-organization-whats-story)
 * [Informationspraxis 3(2), 2017](https://doi.org/10.11588/ip.2017.2.40335)
 * [Taxonomy Boot Camp London 2016](https://zenodo.org/record/162035)
 * [16th NKOS Workshop 2016](https://zenodo.org/record/160926)
