@@ -621,6 +621,14 @@ const ItemEditor = {
       if (item.uri) {
         // TODO: should be set at server
         item.modified = (new Date()).toISOString()
+        if (this.user) {
+          if (!this.creator || !this.creator.find(c => c.uri === this.user.uri)) {
+            item.contributor = item.contributor || []
+            if (!item.contributor.find(c => c.uri === this.user.uri)) {
+              item.contributor.push({ uri: this.user.uri, prefLabel: { en: this.user.name } })
+            }
+          }
+        }
       } else { // guess an URI not taken yet
         const total = await fetch('/api/voc?limit=1').then(res => res.headers.get('x-total-count'))
         item.uri = 'http://bartoc.org/en/node/' + (17000 + 1 * total)
