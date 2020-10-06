@@ -182,6 +182,7 @@ const SubjectEditor = {
       </select>
     </td><td>
       <button type="button" class="btn btn-outline-primary" @click="add()">+</button>
+      Please use concept URIs (unless <a href="https://github.com/gbv/bartoc.org/issues/12">this issue</a> is solved)!
     </td>
   </tr>
 </table>

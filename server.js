@@ -12,8 +12,12 @@ const backend = cdk.initializeRegistry(config.backend)
 // TODO: https://github.com/gbv/cocoda-sdk/issues/22
 backend.search = async ({ search }) => {
   const url = `http://localhost:${config.port}/api/search?search=` + encodeURIComponent(search)
-  console.log(url)
   return axios.get(url).then(res => res.data)
+}
+
+backend.countVocabularies = async () => {
+  const url = `http://localhost:${config.port}/api/voc?limit=1`
+  return axios.get(url).then(res => res.headers['x-total-count'])
 }
 
 // static data
@@ -148,7 +152,8 @@ async function vocabulariesSearch (req, res, next) {
 
 // Statistics
 app.get('/stats', async (req, res) => {
-  render(req, res, 'stats', { title: 'Statistics' })
+  const totalCount = await backend.countVocabularies()
+  render(req, res, 'stats', { title: 'Statistics', totalCount })
 })
 
 // format page
@@ -173,12 +178,12 @@ app.get('/registries', (req, res) => {
   render(req, res, 'registries', { title: 'Terminology Registries' })
 })
 
-// BARTOC id
+// BARTOC ID => registry or vocabulary (if found)
 app.get('/en/node/:id([0-9]+)', async (req, res, next) => {
   const uri = `http://bartoc.org/en/node/${req.params.id}`
   var { path } = req
-
   var item = registries[uri]
+
   if (item) {
     path = '/registries'
   } else {
