@@ -616,13 +616,18 @@ const ItemEditor = {
       this.error = this.itemError()
       if (this.error) return
 
-      var uri = this.item.uri
-      const method = uri ? 'PUT' : 'POST'
-      if (!uri) { // guess an URI not taken yet
+      const item = { ...this.item }
+      const method = item.uri ? 'PUT' : 'POST'
+      if (!item.uri) { // guess an URI not taken yet
         const total = await fetch('/api/voc?limit=1').then(res => res.headers.get('x-total-count'))
-        uri = 'http://bartoc.org/en/node/' + (17000 + 1 * total)
+        item.uri = 'http://bartoc.org/en/node/' + (17000 + 1 * total)
+        // TODO: should be done at server
+        item.created = Date.now().toISOString()
+        if (this.user) {
+          item.creator = [{ uri: this.user.uri, prefLabel: { en: this.user.name } }]
+        }
       }
-      const body = JSON.stringify(this.cleanupItem({ ...this.item, uri }))
+      const body = JSON.stringify(this.cleanupItem(item))
       const headers = { 'Content-Type': 'application/json' }
       if (this.auth) headers.Authorization = `Bearer ${this.auth.token}`
 
