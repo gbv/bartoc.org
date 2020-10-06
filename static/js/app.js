@@ -618,10 +618,13 @@ const ItemEditor = {
 
       const item = { ...this.item }
       const method = item.uri ? 'PUT' : 'POST'
-      if (!item.uri) { // guess an URI not taken yet
+      if (item.uri) {
+        // TODO: should be set at server
+        item.modified = (new Date()).toISOString()
+      } else { // guess an URI not taken yet
         const total = await fetch('/api/voc?limit=1').then(res => res.headers.get('x-total-count'))
         item.uri = 'http://bartoc.org/en/node/' + (17000 + 1 * total)
-        // TODO: should be done at server
+        // TODO: should be set at server
         item.created = (new Date()).toISOString()
         if (this.user) {
           item.creator = [{ uri: this.user.uri, prefLabel: { en: this.user.name } }]
