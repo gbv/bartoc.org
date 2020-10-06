@@ -622,7 +622,7 @@ const ItemEditor = {
         const total = await fetch('/api/voc?limit=1').then(res => res.headers.get('x-total-count'))
         item.uri = 'http://bartoc.org/en/node/' + (17000 + 1 * total)
         // TODO: should be done at server
-        item.created = Date.now().toISOString()
+        item.created = (new Date()).toISOString()
         if (this.user) {
           item.creator = [{ uri: this.user.uri, prefLabel: { en: this.user.name } }]
         }
