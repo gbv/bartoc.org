@@ -232,7 +232,7 @@ const LabelEditor = {
         <button type="button" class="btn btn-outline-primary" @click="add()">+</button>
       </td>
       <td colspan="2">
-        two-letter code if possible
+        two-letter code if possible, three letter otherwise.
       </td>
     </tr>
   </table>`,
@@ -267,7 +267,7 @@ const LabelEditor = {
       const prefLabel = {}
       const altLabel = {}
       labels.forEach(({ label, language }) => {
-        if (!label || !language) return
+        if (!label) return
         const code = language || 'und'
         label = label.trim()
         if (label === '') return
