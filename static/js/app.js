@@ -46,7 +46,7 @@ const UserStatus = {
   },
   emits: ['update:user', 'update:auth'],
   created () {
-    const { connect, disconnect, login, logout, update, error, token, about } = LoginClient.events
+    const { connect, disconnect, login, logout, update, token, about } = LoginClient.events
     this.client.addEventListener(about, ({ publicKey }) => { this.auth.publicKey = publicKey; this._updateAuth() })
     this.client.addEventListener(connect, () => { this.connected = true })
     this.client.addEventListener(disconnect, () => { this.connected = false })
@@ -54,7 +54,7 @@ const UserStatus = {
     this.client.addEventListener(update, ({ user }) => { this._updadeUser(user) })
     this.client.addEventListener(logout, () => { this._setUser(null) })
     this.client.addEventListener(token, ({ token }) => { this.auth.token = token; this._updateAuth() })
-    this.client.addEventListener(error, console.warn)
+    // this.client.addEventListener(error, console.warn)
     this.client.connect()
   },
   methods: {
@@ -394,12 +394,8 @@ const ItemEditor = {
   components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor, AddressEditor, PublisherEditor },
   template: `
 <p>Basic information about the vocabulary:</p>
-<form-row :label="'URI'">
-  <a v-if="item.uri" :href="item.uri">{{item.uri}}</a>
-  <div v-else>
-    <input type="text" v-model="uri" class="form-control"/>
-    Please leave empty to assign a BARTOC URI! <em>(not implemented yet)</em>
-  </div>
+<form-row :label="'URI'" v-if="item.uri">
+  <a :href="item.uri">{{item.uri}}</a>
 </form-row>
 <form-row :label="'Title'">
   <label-editor v-model:prefLabel="item.prefLabel" v-model:altLabel="item.altLabel"/>
@@ -529,7 +525,7 @@ const ItemEditor = {
   <div class="col-sm-2"></div>
   <div class="col-sm-4">
     <button v-if="auth" class="btn btn-primary" @click="saveItem">save</button>
-    <button v-else class="btn btn-danger">authentification required!</button>
+    <button v-else class="btn btn-danger" @click="saveItem">authentification required!</button>
 &nbsp;
 <button class="btn btn-warning" onclick="location.reload()">reset</button>
   </div>
@@ -537,10 +533,10 @@ const ItemEditor = {
    <input type="checkbox" id="showJSKOS" v-model="showJSKOS">&nbsp;<label for="showJSKOS">show JSKOS record</label>
   </div>
 </div>
-<div class="form-group row" v-if="'status' in status">
+<div class="form-group row" v-if="error">
   <div class="col-sm-2"></div>
   <div class="col-sm-8">
-    <div :class="'alert alert-'+status.status">{{status.message || "!!"}}</div>
+    <div class="alert alert-warning">error {{error.status}}: {{error.message}}</div>
   </div>
 </div>
 <pre v-show="showJSKOS">{{cleanupItem(item)}}</pre>
@@ -575,7 +571,6 @@ const ItemEditor = {
 
     return {
       item,
-      uri: null, // for new items
       examples,
       abstractEn,
       abstractUnd,
@@ -583,7 +578,7 @@ const ItemEditor = {
       licenses: [],
       formats: [],
       access: [],
-      status: { },
+      error: null,
       showJSKOS: false
     }
   },
@@ -611,23 +606,34 @@ const ItemEditor = {
       .then(set => { this.registries = set })
   },
   methods: {
-    saveItem () {
-      if (!this.user || !this.auth) return
+    itemError () {
+      if (!Object.keys(this.item.prefLabel).length) {
+        return { message: 'item must have at least a title!' }
+      }
+      // TODO: add more validation
+    },
+    async saveItem () {
+      this.error = this.itemError()
+      if (this.error) return
+
       var uri = this.item.uri
       const method = uri ? 'PUT' : 'POST'
-      if (!uri) {
-        // TODO: validate uri
-        uri = this.uri
+      if (!uri) { // guess an URI not taken yet
+        const total = await fetch('/api/voc?limit=1').then(res => res.headers.get('x-total-count'))
+        uri = 'http://bartoc.org/en/node/' + (17000 + 1 * total)
       }
       const body = JSON.stringify(this.cleanupItem({ ...this.item, uri }))
-      const token = this.auth.token
-      const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
-      // TODO: don't call if no uri exists or trying to create with existing URI
+      const headers = { 'Content-Type': 'application/json' }
+      if (this.auth) headers.Authorization = `Bearer ${this.auth.token}`
+
       fetch('/api/voc', { method, body, headers }).then(res => {
         if (res.ok) {
           window.location.href = '/vocabularies?uri=' + encodeURIComponent(uri)
+        } else {
+          res.json().then(error => {
+            this.error = { message: error.message || res.statusText, status: res.status }
+          })
         }
-        Object.assign(this.status, { status: res.ok ? 'success' : 'warning', message: this.statusText })
       })
     },
     cleanupItem (item) {
