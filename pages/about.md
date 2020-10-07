@@ -21,8 +21,9 @@ the International Society for Knowledge Organization (ISKO)
 BARTOC was founded by Andreas Ledl as the Basel Register of Thesauri,
 Ontologies & Classifications at Basel University Library, Switzerland. In
 2020 moved to the Verbundzentrale des GBV (VZG), Germany and got renamed
-and ported from Drupal to a new technical infrastructure based on the
-[DANTE terminology service](http://api.dante.gbv.de/).
+and ported from Drupal to a new technical infrastructure based on
+[JSKOS Server](https://github.com/gbv/jskos-server#readme) and
+[fully available](https://github.com/gbv/bartoc.org) as Open Source.
 
 Read more in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](https://en.wikipedia.org/wiki/BARTOC).
 
