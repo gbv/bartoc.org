@@ -6,11 +6,12 @@
   "scripts": {
     "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint *.js src/*.js static/js/*.js; ejslint views/*.ejs",
-    "fix": "eslint --fix *.js src/*.js static/js/*.js",
+    "lint": "eslint *.js src/*.js bin/*.js static/js/*.js; ejslint views/*.ejs",
+    "fix": "eslint --fix *.js src/*.js bin/*.js static/js/*.js",
     "data": "mkdir -p cache; npm run data:nkostype; make -C data; make -C bin",
     "data:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > cache/nkostype.ndjson",
-    "validate": "jskos-validate"
+    "validate": "jskos-validate",
+    "diffdump": "js ./bin/diffdump.js"
   },
   "lint-staged": {
     "**/*.js": [
@@ -37,9 +38,11 @@
     "express-http-proxy": "^1.6.2",
     "front-matter": "^3.2.1",
     "jskos-cli": "^0.4.2",
+    "jsondiffpatch": "^0.4.1",
     "jsonld": "^2.0.2",
     "lodash": "^4.17.20",
-    "marked": "^0.7.0"
+    "marked": "^0.7.0",
+    "n-readlines": "^1.0.0"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.14.0",
