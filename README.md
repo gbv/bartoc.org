@@ -25,7 +25,7 @@ cd bartoc.org
 npm install
 ~~~
 
-Optionally transform the Drupal export from September 2020 and other vocabulayr files to JSKOS format (requires Perl >= 5.14 without additional modules):
+Optionally transform the Drupal export from September 2020 and other vocabulary files to JSKOS format (requires Perl >= 5.14 without additional modules):
 
 ~~~sh
 npm run data

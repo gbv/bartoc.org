@@ -11,7 +11,7 @@
     "data": "mkdir -p cache; npm run data:nkostype; make -C data; make -C bin",
     "data:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > cache/nkostype.ndjson",
     "validate": "jskos-validate",
-    "diffdump": "js ./bin/diffdump.js"
+    "dump": "js ./bin/dump.js"
   },
   "lint-staged": {
     "**/*.js": [
