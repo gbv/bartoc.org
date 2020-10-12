@@ -58,8 +58,8 @@
       view: s => include('link', { url: s.uri }) }) %>
 
   <%- include('row', { label: 'Namespace', content: item.namespace }) %>
-  <%- include('row', { label: 'Namespace', content: item.notationPattern }) %>
-  <%- include('row', { label: 'Namespace', content: item.uriPattern }) %>
+  <%- include('row', { label: 'Notation pattern', content: item.notationPattern }) %>
+  <%- include('row', { label: 'URI pattern', content: item.uriPattern }) %>
   <!-- TODO: example notations -->
 
   <%- include('row', { label: 'MARCspec', content: item.MARCSPEC }) %>
