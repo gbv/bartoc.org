@@ -69,3 +69,7 @@ git pull
 npm install
 pm2 restart bartoc.org
 ~~~
+
+## Database dumps
+
+To regularly update dumps, add a cronjob with command `npm run dump update`. Dumps will be placed in directory `data/dumps`. To compare two dump files run `npm run dump diff`.
