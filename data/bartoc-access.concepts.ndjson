@@ -1,3 +1,3 @@
-{"uri":"http://bartoc.org/en/Access/Free","notation":["Free"],"inScheme":[{"uri":"http://bartoc.org/en/node/20001"}],"prefLabel":{"en":"Freely available"},"topConceptOf":[{"uri":"http://bartoc.org/en/node/20001"}]}
+{"uri":"http://bartoc.org/en/Access/Free","notation":["Free"],"inScheme":[{"uri":"http://bartoc.org/en/node/20001"}],"prefLabel":{"en":"freely available"},"topConceptOf":[{"uri":"http://bartoc.org/en/node/20001"}]}
 {"uri":"http://bartoc.org/en/Access/Registered","notation":["Registered"],"inScheme":[{"uri":"http://bartoc.org/en/node/20001"}],"prefLabel":{"en":"registration required"},"topConceptOf":[{"uri":"http://bartoc.org/en/node/20001"}]}
 {"uri":"http://bartoc.org/en/Access/Licensed","notation":["Licensed"],"inScheme":[{"uri":"http://bartoc.org/en/node/20001"}],"prefLabel":{"en":"license required"},"topConceptOf":[{"uri":"http://bartoc.org/en/node/20001"}]}

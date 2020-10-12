@@ -406,9 +406,9 @@ const ItemEditor = {
   <language-select v-model="item.languages" class="form-control" :repeatable="true"/>
   Comma-separated list of language codes which the vocabulary is available in.
 </form-row>
-<form-row :label="'Notation'">
+<form-row :label="'Abbreviation'">
   <input type="text" class="form-control" v-model="item.notation[0]" />
-  Common, unique acronym or abbreviation the vocabulary is known under.
+  Common, unique abbreviation, acronym, or notation the vocabulary is known under.
 </form-row>
 <form-row :label="'Identifier'">
   <list-editor v-model="item.identifier" />

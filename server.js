@@ -23,6 +23,7 @@ backend.countVocabularies = async () => {
 // static data
 const registries = utils.indexByUri(utils.readNdjson('./data/registries.ndjson'))
 const nkostypes = utils.indexByUri(utils.readNdjson('./cache/nkostype.ndjson'))
+const accesstypes = utils.indexByUri(utils.readNdjson('./data/bartoc-access.concepts.ndjson'))
 
 config.log(`Running in ${config.env} mode.`)
 
@@ -250,13 +251,13 @@ app.use((req, res, next) => {
   }
 })
 
-// Problem with backend or simply a bug
+// Backend error or another kind of bug
 app.use((err, req, res, next) => {
   // console.error(err)
   render(req, res, '500', { title: err.message })
 })
 
-// Start
+// Start server
 app.listen(config.port, () => {
   config.log(`Listening on port ${config.port}`)
 })
