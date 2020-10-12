@@ -70,36 +70,52 @@ function dumpDiff (fileA, fileB, showDelta) {
   const a = new LineReader(fileA)
   const b = new LineReader(fileB)
 
-  let line
-  while (line = a.next()) { // eslint-disable-line
-    var other = b.next()
-    var delta
+  const next = reader => {
+    const line = reader.next()
+    if (line) return normalize(JSON.parse(line))
+  }
 
-    if (other) {
-      line = line.toString()
-      other = other.toString()
-      if (line !== other) {
-        const before = JSON.parse(line)
-        const after = JSON.parse(other)
+  const addedDelta = item => {
+    for (const key in item) { item[key] = [item[key]] }
+    return item
+  }
 
-        delta = diff.diff(before, after)
-        delta.uri = [before.uri] // always show uri as added
-      }
-    } else {
-      // removed
-      const uri = JSON.parse(line).uri
-      delta = { uri: [uri, 0, 0] }
+  const removedDelta = item => ({ uri: [item.uri, 0, 0] })
+
+  var before = next(a)
+  var after = next(b)
+
+  while (before && after) { // eslint-disable-line
+
+    while (after && after.uri < before.uri) {
+      showDelta(addedDelta(after))
+      after = next(b)
     }
 
-    if (delta) {
-      showDelta(delta)
+    if (after) {
+      while (before && before.uri < after.uri) {
+        showDelta(removedDelta(before))
+        before = next(a)
+      }
+
+      if (before && before.uri === after.uri) {
+        const delta = diff.diff(before, after)
+        if (delta) {
+          delta.uri = [before.uri] // always show uri as added
+          showDelta(delta)
+        }
+        before = next(a)
+        after = next(b)
+      }
     }
   }
 
-  while (line = b.next()) { // eslint-disable-line
-    // added
-    const delta = JSON.parse(line)
-    for (const key in delta) { delta[key] = [delta[key]] }
-    showDelta(delta)
+  var item
+  while (before = next(a)) { // eslint-disable-line
+    showDelta(removedDelta(before))
+  }
+
+  while (item = next(b)) { // eslint-disable-line
+    showDelta(addedDelta(item))
   }
 }
