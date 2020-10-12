@@ -23,7 +23,6 @@ backend.countVocabularies = async () => {
 // static data
 const registries = utils.indexByUri(utils.readNdjson('./data/registries.ndjson'))
 const nkostypes = utils.indexByUri(utils.readNdjson('./cache/nkostype.ndjson'))
-const accesstypes = utils.indexByUri(utils.readNdjson('./data/bartoc-access.concepts.ndjson'))
 
 config.log(`Running in ${config.env} mode.`)
 

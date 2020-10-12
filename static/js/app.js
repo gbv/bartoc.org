@@ -653,22 +653,33 @@ const ItemEditor = {
       })
     },
     cleanupItem (item) {
-      const clean = {}
       const type = 'http://www.w3.org/2004/02/skos/core#ConceptScheme'
       if (item.type[0] !== type) item.type.unshift(type)
-      for (const key in item) {
-        if (!isEmpty(item[key])) clean[key] = item[key]
-      }
-      return clean
+      return filtered(item)
     }
   }
 }
 
-function isEmpty (obj) {
-  if (obj === '' || obj === null || obj === undefined) return true
-  if (Array.isArray(obj)) return obj.every(isEmpty)
-  if (typeof obj === 'object') return Object.values(obj).every(isEmpty)
-  return false
+// recursively remove empty JSKOS fields
+function filtered (value) {
+  if (typeof value === 'object') {
+    if (Array.isArray(value)) {
+      value = value.map(filtered).filter(Boolean)
+      return value.length ? value : null
+    } else {
+      const keys =
+        ('uri' in value && !value.uri) ? [] // remove object without URI
+          : Object.keys(value).filter(key => key[0] !== '_').sort()
+      const obj = keys.reduce((obj, key) => {
+        const fieldValue = filtered(value[key])
+        if (fieldValue) obj[key] = fieldValue
+        return obj
+      }, {})
+      return Object.keys(obj).length ? obj : null
+    }
+  } else {
+    return value
+  }
 }
 
 const VocabularySearch = {
