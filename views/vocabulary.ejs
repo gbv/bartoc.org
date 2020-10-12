@@ -27,8 +27,10 @@
   <%- include('row-list', { label: 'License', list: item.license,
               view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
 
-  <%- include('row-list', { label: 'Access', list: item.ACCESS, view: s => s.uri }) %>
-  <%- include('row-list', { label: 'Format', list: item.FORMAT, view: s => s.uri }) %>
+  <%- include('row-list', { label: 'Access', list: item.ACCESS,
+      view: s => include('item', { item: accesstypes[s.uri] || { uri: s.uri }})}) %>
+  <%- include('row-list', { label: 'Format', list: item.FORMAT,
+      view: s => include('item', { item: formats[s.uri] || { uri: s.uri }})}) %>
 
   <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
   <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>

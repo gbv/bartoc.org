@@ -23,6 +23,8 @@ backend.countVocabularies = async () => {
 // static data
 const registries = utils.indexByUri(utils.readNdjson('./data/registries.ndjson'))
 const nkostypes = utils.indexByUri(utils.readNdjson('./cache/nkostype.ndjson'))
+const accesstypes = utils.indexByUri(utils.readNdjson('./data/bartoc-access.concepts.ndjson'))
+const formats = utils.indexByUri(utils.readNdjson('./data/bartoc-formats.concepts.ndjson'))
 
 config.log(`Running in ${config.env} mode.`)
 
@@ -232,7 +234,7 @@ async function sendItem (req, res, item, vars = {}) {
 
 function render (req, res, view, locals) {
   const { query, path } = req
-  const vars = { config, query, path, utils, registries, repositories, nkostypes }
+  const vars = { config, query, path, utils, registries, repositories, nkostypes, accesstypes, formats }
   return res.render(view, { ...vars, ...locals })
 }
 
