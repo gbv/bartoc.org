@@ -140,16 +140,35 @@ async function vocabulariesSearch (req, res, next) {
   search.then(result => {
     if (params.uri) {
       if (result.length) {
-        sendItem(req, res, result[0])
+        return result[0]
       } else {
         next()
       }
     } else {
       render(req, res, 'vocabularies', { title: 'Vocabularies', result })
     }
-  }).catch(e => {
-    next(e)
   })
+    .then(enrichItem)
+    .then(item => sendItem(req, res, item))
+    .catch(e => {
+      next(e)
+    })
+}
+
+async function enrichItem (item) {
+  const subjects = item.subject || []
+  if (subjects.length) {
+    const found = await backend.getConcepts({ concepts: item.subject })
+    item.subject = found.map(utils.cleanupItem)
+    // add non-found subjects
+    const uris = found.map(s => s.uri)
+    for (const subj of subjects) {
+      if (!uris.find(uri => uri === subj.uri)) {
+        item.subject.push(subj)
+      }
+    }
+  }
+  return item
 }
 
 // Statistics

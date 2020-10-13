@@ -20,7 +20,7 @@
   <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
 
   <%- include('row-list', { label: 'Subject', list: item.subject,
-        view: s => include('item', { item: s, base: '/vocabularies?subject=' }) }) %>
+        view: s => include('item', { item: s, base: '/vocabularies?subject=', withNotation: true }) }) %>
 
   <%- include('row', { label: 'Size', content: item.extent } ) %>
 

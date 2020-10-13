@@ -13,6 +13,9 @@
      }
      value = value ? value : item.uri;
   }
+  if ( locals.withNotation && item.notation && item.notation.length ) {
+    value = item.notation[0] + " " + value
+  }
 %>
 <% if (url) { %>
   <a href="<%= url %>" lang="<%= code %>">
