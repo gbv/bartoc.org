@@ -393,7 +393,7 @@ const PublisherEditor = {
 const ItemEditor = {
   components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor, AddressEditor, PublisherEditor },
   template: `
-<p>Basic information about the vocabulary:</p>
+<p style="border-top: 1px solid #ddd">Basic information about the vocabulary:</p>
 <form-row :label="'URI'" v-if="item.uri">
   <a :href="item.uri">{{item.uri}}</a>
 </form-row>
@@ -401,10 +401,6 @@ const ItemEditor = {
   <label-editor v-model:prefLabel="item.prefLabel" v-model:altLabel="item.altLabel"/>
   The first of each language code is used as preferred title, more as
   alternative titles, translations, abbreviations...
-</form-row>
-<form-row :label="'Languages'">
-  <language-select v-model="item.languages" class="form-control" :repeatable="true"/>
-  Comma-separated list of language codes which the vocabulary is available in.
 </form-row>
 <form-row :label="'Abbreviation'">
   <input type="text" class="form-control" v-model="item.notation[0]" />
@@ -414,16 +410,20 @@ const ItemEditor = {
   <list-editor v-model="item.identifier" />
   Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
 </form-row>
-<form-row :label="'Size'">
-  <input type="text" class="form-control" v-model="item.extent"/>
-  Number of classes, subclasses, taxa, terms, concepts etc. Please add date in parenthesis (YYYY-MM).
-</form-row>
 <form-row :label="'English Abstract'">
   <textarea id="abstract-en" class="form-control" v-model="abstractEn" rows="8"></textarea>
 </form-row>
 <form-row :label="'Non-English Abstract'">
   <textarea id="abstract" class="form-control" v-model="abstractUnd" rows="8"></textarea>
   Use quotation marks and original language if copied from another source (e.g. homepage).
+</form-row>
+<form-row :label="'Languages'">
+  <language-select v-model="item.languages" class="form-control" :repeatable="true"/>
+  Comma-separated list of language codes which the vocabulary is available in.
+</form-row>
+<form-row :label="'Size'">
+  <input type="text" class="form-control" v-model="item.extent"/>
+  Number of classes, subclasses, taxa, terms, concepts etc. Please add date in parenthesis (YYYY-MM).
 </form-row>
 <form-row :label="'KOS Types'">
   <set-select :modelValue="type"
@@ -437,7 +437,7 @@ const ItemEditor = {
   <!-- TODO: --> More convenient selection of subjects will be added later!
 </form-row>
 <hr>
-<p>Fields about how the vocabulary is made available:</p>
+<p>How the vocabulary is made available:</p>
 <form-row :label="'Created'">
   <input type="text" class="form-control" v-model="item.startDate" maxlength="4"/>
   The year when the KOS was first created (YYYY).
@@ -488,7 +488,7 @@ const ItemEditor = {
 </form-row>
 <hr>
 <p>
-  Fields required only if concept notations are mapped to concept URIs:
+  Relevant only if concept notations are mapped to concept URIs:
 </p>
 <form-row :label="'namespace'">
   <input type="text" class="form-control" v-model="item.namespace"/>
@@ -504,7 +504,7 @@ const ItemEditor = {
 </form-row>
 <hr>
 <p>
-  Fields required only for vocabularies used in PICA or MARC databases:
+  Relevant only for vocabularies used in PICA or MARC databases:
 </p>
 <form-row :label="'MARCSpec'">
   <input type="text" class="form-control" v-model="item.MARCSPEC"/>
