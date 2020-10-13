@@ -89,6 +89,10 @@ for (const [url, id] of utils.readCsv('./data/format-ids.csv')) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?format=http://bartoc.org/en/Format/${id}`))
 }
 
+// ILC
+app.get('/ILC/1', (req, res) => res.redirect('/en/node/472'))
+app.get('/ILC/1/:id([a-z0-9-]+)', (req, res) => res.redirect('/en/node/472')) // TODO: show concept
+
 // root page
 app.get('/', (req, res) => {
   req.params = { page: 'index' }
