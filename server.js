@@ -127,7 +127,7 @@ app.get('/edit', async (req, res, next) => {
     }
   }
 
-  render(req, res, 'edit', { item, title })
+  render(req, res, 'edit', { item, title, edit: true })
 })
 
 // vocabulary search

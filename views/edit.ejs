@@ -1,4 +1,6 @@
-<%- include('header') %>
+<%- include('header', { 
+  button: `<a style="float:right" class="btn btn-warning" href="/vocabularies?uri=${item ? item.uri : ''}">cancel</a>`
+}) %>
 
 <item-editor :user="user" :auth="auth" <% if(item) { %>:current='<%- JSON.stringify(item).replace(/'/g,"&apos;") %>'<% } %>/>
 

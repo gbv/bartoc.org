@@ -1,4 +1,6 @@
-<%- include('header') %>
+<%- include('header', { 
+  button: `<a v-cloak v-if="user" style="float:right" class="btn btn-success" href="/edit?uri=${item.uri}">edit</a>`
+}) %>
 
 <%- include('abstract', { abstract: item.definition }) %>
 
