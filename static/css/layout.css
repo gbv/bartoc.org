@@ -18,7 +18,7 @@ small.label-help {
   margin-bottom: 0.25rem;
 }
 ul.list-inline > li.list-inline-item:not(:last-child)::after {
-  content: ","
+  content: "\A0"
 }
 ul.list-inline > li.list-inline-item:not(:last-child) {
   margin-right: 0;
@@ -27,7 +27,7 @@ td > ul {
   margin-bottom: 0;
 }
 ul.pagination > li:not(:last-child)::after {
-  content: "\00a0|\00a0";
+  content: "\A0|\A0";
 }
 li.current-page {
   font-weight: bold;
