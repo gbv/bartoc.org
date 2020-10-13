@@ -1,9 +1,5 @@
 <%- include('header') %>
 
-<p v-cloak v-if="user">
-  <a class="btn btn-warning" href="/edit?uri=<%= item.uri %>">edit this vocabulary</a>
-</p>
-
 <%- include('abstract', { abstract: item.definition }) %>
 
 <!-- TODO: merge with registry.ejs -->
@@ -19,23 +15,23 @@
   <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
   <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
 
-  <%- include('row-list', { label: 'Subject', list: item.subject,
+  <%- include('row-list', { label: 'Subject', list: item.subject, style: 'inline',
         view: s => include('item', { item: s, base: '/vocabularies?subject=', withNotation: true }) }) %>
 
   <%- include('row', { label: 'Size', content: item.extent } ) %>
 
-  <%- include('row-list', { label: 'License', list: item.license,
+  <%- include('row-list', { label: 'License', list: item.license, style: "inline",
               view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
 
-  <%- include('row-list', { label: 'Access', list: item.ACCESS,
+  <%- include('row-list', { label: 'Access', list: item.ACCESS, style: "inline",
       view: s => include('item', { item: accesstypes[s.uri] || { uri: s.uri }})}) %>
-  <%- include('row-list', { label: 'Format', list: item.FORMAT,
+  <%- include('row-list', { label: 'Format', list: item.FORMAT, style: 'inline',
       view: s => include('item', { item: formats[s.uri] || { uri: s.uri }})}) %>
 
   <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
   <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
 
-  <%- include('row-list', { label: 'KOS Type', list: item.type.slice(1),
+  <%- include('row-list', { label: 'KOS Type', list: item.type.slice(1), style: 'inline',
       view: item => include('item', { item: nkostypes[item], base: '/vocabularies?type=' }) }) %>
 
   <%- include('row-list', { label: 'Publisher', list: item.publisher,

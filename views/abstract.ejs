@@ -2,7 +2,7 @@
   for (let lang in (abstract || {})) {
     for (let text of abstract[lang]) {
 %>
- <p lang="<%= lang %>">
+ <p lang="<%= lang %>" style="border-top: 1px solid #ddd">
   <%- String(text).split(/\n+/).map(utils.escapeXML).join("</p><p>") %>
  </p>
 <%

@@ -18,7 +18,8 @@ small.label-help {
   margin-bottom: 0.25rem;
 }
 ul.list-inline > li.list-inline-item:not(:last-child)::after {
-  content: "\A0"
+  content: "\A0|\A0";
+  color: #ddd;
 }
 ul.list-inline > li.list-inline-item:not(:last-child) {
   margin-right: 0;
