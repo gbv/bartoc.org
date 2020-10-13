@@ -22,4 +22,4 @@ BARTOC can be accessed at [https://bartoc.org/api/](/api/) via JSKOS API to quer
 
 ## Database dumps
 
-Regular database dumps [will be made available](https://github.com/gbv/bartoc.org/issues/4) later. Meanwhile use JSKOS API `/voc?limit=5000` to download all records in JSKOS format.
+There is a [daily database dump](/data/dumps/latest.ndjson) in NDJSON format (each line a JSKOS record).
