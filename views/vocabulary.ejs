@@ -50,7 +50,6 @@
   <%- include('row', { label: 'Contact', content: item.CONTACT }) %>
 
   <!-- TODO: partOf (listed in) -->
-<% item.API = ["http://api.dante.gbv.de/"] %>
 
   <%- include('row-list', { label: 'Services (API)', list: item.API,
       view: s => `<api-url :uri='"${item.uri}"'>${s}</api-url>` }) %>
