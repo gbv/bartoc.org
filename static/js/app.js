@@ -736,11 +736,33 @@ const VocabularySearch = {
   }
 }
 
+const getTextChildren = nodes => nodes.map(node => typeof node.children === 'string' ? node.children : '').join('')
+
+const ApiUrl = {
+  template: `<a :href="baseUrl"><slot/></a>
+    <a v-if="cocoda" class="btn btn-sm btn-primary" style="margin-left: 1em" :href="cocoda"
+    >Cocoda Mapping Tool</a>
+   `,
+  props: {
+    uri: String
+  },
+  data () {
+    const slot = this.$slots.default
+    const baseUrl = slot ? getTextChildren(slot()) : ''
+    const cocoda = baseUrl.match(/^https?:\/\/(api\.dante\.gbv\.de|coli-conc\.gbv\.de\/api)\//)
+      ? 'https://coli-conc.gbv.de/cocoda/app/?fromScheme=' + encodeURIComponent(this.uri) : ''
+    return {
+      baseUrl,
+      cocoda
+    }
+  }
+}
+
 /**
  * Client side application for user interaction.
  */
 const app = {
-  components: { UserStatus, ItemEditor, VocabularySearch },
+  components: { UserStatus, ItemEditor, VocabularySearch, ApiUrl },
   data () {
     return {
       login: 'coli-conc.gbv.de/login/',
