@@ -537,6 +537,7 @@ const ItemEditor = {
 </form-row>
 <form-row :label="'example notations'">
   <input type="text" class="form-control" v-model="examples"/>
+  Please use comma to separate multiple notations.
 </form-row>
 <hr>
 <p>
