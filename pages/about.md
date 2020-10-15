@@ -13,19 +13,19 @@ includes any kind of KOS from any subject area, in any language, any
 publication format, and any form of accessibility. BARTOC’s search
 interface is available in 20 European languages and provides two search
 options: Basic Search by keywords, and Advanced Search by taxonomy
-terms. A circle of editors has gathered around BARTOC from all across
+terms. A [circle of editors](/contact) has gathered around BARTOC from all across
 Europe (<http://bartoc.org/en/contact>) and BARTOC has been approved by
 the International Society for Knowledge Organization (ISKO)
 ([http://www.isko.org/](http://www.isko.org/)).
 
 BARTOC was founded by Andreas Ledl as the Basel Register of Thesauri,
-Ontologies & Classifications at Basel University Library, Switzerland. In
-2020 moved to the Verbundzentrale des GBV (VZG), Germany and got renamed
-and ported from Drupal to a new technical infrastructure based on
-[JSKOS Server](https://github.com/gbv/jskos-server#readme) and
-[fully available](https://github.com/gbv/bartoc.org) as Open Source.
+Ontologies & Classifications at [Basel University Library, Switzerland](https://www.ub.unibas.ch/).
+In 2020 the database moved to the Verbundzentrale des GBV (VZG), Germany and
+got renamed and ported from Drupal to a new technical infrastructure based on
+[JSKOS Server](https://github.com/gbv/jskos-server#readme). The implementation
+is [fully available](https://github.com/gbv/bartoc.org) as Open Source.
 
-Read more in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](https://en.wikipedia.org/wiki/BARTOC).
+Read more about BARTOC in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](https://en.wikipedia.org/wiki/BARTOC).
 
 <img src="/img/bartoc-logo.svg" />
 
