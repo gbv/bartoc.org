@@ -100,3 +100,5 @@ Editor<br>
 Senior Vocabulary Editor, Gale, a Cengage Company</p>
 </div>
 </div>
+
+See [contributing](/contributing) for additional information how to contribute to BARTOC.

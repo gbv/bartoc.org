@@ -2,10 +2,10 @@
 title: About
 ---
 
-The Basic Register of Thesauri, Ontologies & Classifications (BARTOC) is
-a database of Knowledge Organization Systems and KOS related Registries.
+The **Basic Register of Thesauri, Ontologies & Classifications (BARTOC)** is
+a database of Knowledge Organization Systems and KOS related registries.
 
-Its main goal is
+The main goal of BARTOC is
 to list as many Knowledge Organization Systems as possible at one place
 in order to achieve greater visibility, highlight their features, make
 them searchable and comparable, and foster knowledge sharing. BARTOC
@@ -14,16 +14,14 @@ publication format, and any form of accessibility. BARTOC’s search
 interface is available in 20 European languages and provides two search
 options: Basic Search by keywords, and Advanced Search by taxonomy
 terms. A [circle of editors](/contact) has gathered around BARTOC from all across
-Europe (<http://bartoc.org/en/contact>) and BARTOC has been approved by
-the International Society for Knowledge Organization (ISKO)
-([http://www.isko.org/](http://www.isko.org/)).
+Europe and BARTOC has been approved by
+the [International Society for Knowledge Organization (ISKO)](http://www.isko.org/).
 
 BARTOC was founded by Andreas Ledl as the Basel Register of Thesauri,
 Ontologies & Classifications at [Basel University Library, Switzerland](https://www.ub.unibas.ch/).
 In 2020 the database moved to the Verbundzentrale des GBV (VZG), Germany and
-got renamed and ported from Drupal to a new technical infrastructure based on
-[JSKOS Server](https://github.com/gbv/jskos-server#readme). The implementation
-is [fully available](https://github.com/gbv/bartoc.org) as Open Source.
+got renamed and ported from Drupal to a new [technical infrastructure](/contributing).
+The implementation is [fully available](https://github.com/gbv/bartoc.org) as Open Source.
 
 Read more about BARTOC in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](https://en.wikipedia.org/wiki/BARTOC).
 
