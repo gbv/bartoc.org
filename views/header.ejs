@@ -29,7 +29,7 @@
           <li v-cloak>
             <user-status :login="login" @update:user="updateUser" @update:auth="updateAuth"/>
           </li>
-          <li v-cloak v-if="user">
+          <li v-cloak v-if="userCanAdd">
             <a class="btn btn-success" href="/edit">add</a>
           </li>
         </ul>
