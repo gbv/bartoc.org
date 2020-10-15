@@ -159,8 +159,43 @@ function prefLabel (item) {
   return '???'
 }
 
+const ItemInput = {
+  template: `
+      <input v-show="hasFocus || !item.uri" @focus="hasFocus=true" @blur="hasFocus=false" ref="input" type="text" class="form-control" v-model="item.uri"/>
+      <div v-if="!hasFocus" @click="edit()">
+    {{item.uri}}
+      <a href="" @focus="edit()"/>
+    </div>`,
+  props: {
+    modelValue: Object
+  },
+  data () {
+    return {
+      item: this.modelValue,
+      hasFocus: false
+    }
+  },
+  watch: {
+    item: {
+      deep: true,
+      handler (item) {
+        this.$emit('update:modelValue', item)
+      }
+    }
+  },
+  methods: {
+    edit () {
+      this.hasFocus = true
+      this.$nextTick(() => {
+        this.$refs.input.focus()
+      })
+    }
+  }
+}
+
 const SubjectEditor = {
   mixins: [SetEditorMixin],
+  components: { ItemInput },
   template: `
 <table class="table table-sm table-borderless">
   <tr v-for="(subject,i) in set">
@@ -168,9 +203,9 @@ const SubjectEditor = {
       {{shortLabel(findScheme(subject.inScheme[0].uri))}}
     </td>
     <td v-else>?</td>
-    <td>
-      <input type="text" class="form-control" v-model="set[i].uri"/>
-    </td><td>
+    <td class="item-input">
+      <item-input v-model="set[i]"/>
+   </td><td>
       <button type="button" class="btn btn-outline-primary" @click="remove(i)">x</button>
     </td>
   </tr><tr>
@@ -205,7 +240,8 @@ const SubjectEditor = {
     shortLabel (item) {
       if (item && item.notation && item.notation.length) return item.notation[0]
       return prefLabel(item)
-    }
+    },
+    prefLabel
   }
 
 }
