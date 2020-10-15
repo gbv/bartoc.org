@@ -436,7 +436,7 @@ const ItemEditor = {
 <form-row :label="'Title'">
   <label-editor v-model:prefLabel="item.prefLabel" v-model:altLabel="item.altLabel"/>
   The first of each language code is used as preferred title, more as
-  alternative titles, translations, abbreviations...
+  aliases, translations... Please provide at least an English title.
 </form-row>
 <form-row :label="'Abbreviation'">
   <input type="text" class="form-control" v-model="item.notation[0]" />
@@ -448,6 +448,7 @@ const ItemEditor = {
 </form-row>
 <form-row :label="'English Abstract'">
   <textarea id="abstract-en" class="form-control" v-model="abstractEn" rows="8"></textarea>
+  Please provide a short description. Better brief than nothing!
 </form-row>
 <form-row :label="'Non-English Abstract'">
   <textarea id="abstract" class="form-control" v-model="abstractUnd" rows="8"></textarea>
