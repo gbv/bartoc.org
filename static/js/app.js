@@ -718,10 +718,24 @@ function filtered (value) {
   }
 }
 
+// search form
 const VocabularySearch = {
   components: { FormRow, SetSelect, LanguageSelect, SubjectEditor },
   template: `
-<form @submit.prevent="search">
+<form @submit.prevent="submitSearch">
+  <form-row :label="'Search'">
+    <div class="row">
+      <div class="col col-md-10">
+        <input type="text" v-model="search" class="form-control"/>
+      </div>
+      <div class="col col-md-2">
+        <button type="submit" class="btn btn-primary" @click="submitSearch">search</button>
+      </div>
+    </div>
+  </form-row>
+</form>
+<hr>
+<form @submit.prevent="submitFilter">
   <form-row :label="'KOS Type'">
     <set-select :modelValue="{uri:type}" @update:modelValue="type=$event.uri" :options="kostypes" />
   </form-row>
@@ -733,18 +747,19 @@ const VocabularySearch = {
     <subject-editor v-model="subjects"/>
   </form-row>
   <form-row>
-    <input type="submit" class="btn btn-primary" @click="search" title="search" />
+    <button type="submit" class="btn btn-primary" @click="submitFilter">filter</button>
   </form-row>
 </form>`,
   props: { query: Object },
   data () {
-    const { type, languages, subject, license, format, access, country } = this.query
+    const { type, languages, subject, license, format, access, country, search } = this.query
     const subjects = (subject || '').split('|').map(uri => {
       const scheme = indexingSchemes.find(scheme => uri.indexOf(scheme.namespace) === 0)
       return scheme ? { uri, inScheme: [scheme] } : false
     }).filter(Boolean)
     return {
       type,
+      search,
       languages,
       subjects,
       license, // TODO: https://github.com/gbv/bartoc.org/issues/43
@@ -762,12 +777,18 @@ const VocabularySearch = {
       })
   },
   methods: {
-    search () {
-      const query = {}
-      if (this.type) query.type = this.type
-      if (this.languages) query.languages = this.languages
-      if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join('|')
+    submit (query) {
+      Object.keys(query).filter(key => !query[key]).forEach(key => delete query[key])
       window.location.href = '/vocabularies?' + (new URLSearchParams(query).toString())
+    },
+    submitSearch () {
+      this.submit({ search: this.search })
+    },
+    submitFilter () {
+      const { type, languages } = this
+      const query = { type, languages }
+      if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join('|')
+      this.submit(query)
     }
   }
 }

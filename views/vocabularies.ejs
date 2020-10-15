@@ -4,6 +4,8 @@
 
 <hr>
 
+<% if (result.length) { %>
+
 <%- include("pagination", { result, query }) %>
 <ul>
 <% for (let item of result) { %>
@@ -13,6 +15,12 @@
 <% } %>
 </ul>
 <%- include("pagination", { result, query }) %>
+
+<% } else { %>
+
+<em>No vocabularies found matching your query!</em>
+
+<% } %>
 
 <hr>
 

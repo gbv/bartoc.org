@@ -11,7 +11,7 @@ const backend = cdk.initializeRegistry(config.backend)
 
 // TODO: https://github.com/gbv/cocoda-sdk/issues/22
 backend.search = async ({ search }) => {
-  const url = `http://localhost:${config.port}/api/search?search=` + encodeURIComponent(search)
+  const url = `http://localhost:${config.port}/api/voc/search?search=` + encodeURIComponent(search)
   return axios.get(url).then(res => res.data)
 }
 
