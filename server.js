@@ -43,6 +43,7 @@ app.set('view engine', 'ejs')
 
 // static assets
 app.use(express.static('static'))
+app.use('/data/dumps/', express.static('data/dumps'))
 
 // redirect permanently moved URLs from legacy BARTOC.org
 for (const [from, to] of Object.entries(config.redirects)) {

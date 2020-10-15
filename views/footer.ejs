@@ -13,7 +13,7 @@
         <div class="row">
           <div class="col-md-10">
             <p>
-              <%= config.name %> data is
+              <%= config.name %> vocabulary metadata is
               <a href="/download">made available</a> under the
               <a href="<%= config.license.url %>"><%= config.license.name %></a>
             </p>
@@ -29,9 +29,11 @@
         </div>
         <div class="row">
          <div class="col text-muted">
-           <a href="/api/">API</a>
-           |
-           <a href="https://github.com/gbv/bartoc.org">sources</a>
+           <ul class="list-inline">
+             <li class="list-inline-item"><a href="/api/">API</a></li>
+             <li class="list-inline-item"><a href="/download">download</a></li>
+             <li class="list-inline-item"><a href="https://github.com/gbv/bartoc.org">sources</a></li>
+           </ul>
          </div>
         </div>
       </div>

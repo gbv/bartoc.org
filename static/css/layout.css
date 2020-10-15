@@ -21,6 +21,9 @@ ul.list-inline > li.list-inline-item:not(:last-child)::after {
   content: "\A0|\A0";
   color: #ddd;
 }
+footer ul.list-inline > li.list-inline-item:not(:last-child)::after {
+  color: #6c757d;
+}
 ul.list-inline > li.list-inline-item:not(:last-child) {
   margin-right: 0;
 }
