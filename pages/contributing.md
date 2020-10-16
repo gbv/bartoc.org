@@ -4,7 +4,7 @@ title: Contributing
 
 ## Technical infrastructure
 
-BARTOC is based on a technical infrastructure developed as part of [project coli-conc](https://coli-conc.gbv.de/).
+BARTOC is based on a technical infrastructure developed as part of [coli-conc services](https://coli-conc.gbv.de/).
 All parts are published as Open Source. In particular these are:
 
 * BARTOC web interface developed in JavaScript with [Vue](https://v3.vuejs.org/). See the [bartoc.org git repository](https://github.com/gbv/bartoc.org#readme) for details.
