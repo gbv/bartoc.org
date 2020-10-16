@@ -423,6 +423,12 @@ const PublisherEditor = {
   }
 }
 
+function githubIssueUrl (title, body) {
+  return 'https://github.com/gbv/bartoc.org/issues/new' +
+        '?title=' + encodeURIComponent(title) +
+        '&body=' + encodeURIComponent(body)
+}
+
 /**
  * Web form to modify and create vocabulary metadata.
  */
@@ -574,7 +580,10 @@ const ItemEditor = {
 <div class="form-group row" v-if="error">
   <div class="col-sm-2"></div>
   <div class="col-sm-8">
-    <div class="alert alert-warning">error {{error.status}}: {{error.message}}</div>
+    <div class="alert alert-warning">
+      <p>error {{error.status}}: {{error.message}}</p>
+      <p v-if="error.html" v-html="error.html"></p>
+    </div>
   </div>
 </div>
 <pre v-show="showJSKOS">{{cleanupItem(item)}}</pre>
@@ -657,6 +666,7 @@ const ItemEditor = {
       const item = { ...this.item }
       const method = item.uri ? 'PUT' : 'POST'
       if (item.uri) {
+        // TODO: check other user identities
         // TODO: should be set at server
         item.modified = (new Date()).toISOString()
         if (this.user) {
@@ -676,17 +686,27 @@ const ItemEditor = {
           item.creator = [{ uri: this.user.uri, prefLabel: { en: this.user.name } }]
         }
       }
-      const body = JSON.stringify(this.cleanupItem(item))
+      item.prefLabel = ['x'] // invalid
+      const body = JSON.stringify(this.cleanupItem(item), null, 2)
       const headers = { 'Content-Type': 'application/json' }
       if (this.auth) headers.Authorization = `Bearer ${this.auth.token}`
+
+      const onError = (error, res) => {
+        var message = error.message || res.StatusText
+        var issue = 'This JSKOS record could not be saved:\n\n~~~json\n' + body + '\n~~~\n' +
+                      'The request included ' + (this.auth ? 'a token for authentification.' : 'no token.')
+        var url = githubIssueUrl(`Error ${res.status} when saving`, issue)
+        var html = `If you think this is a bug, please
+                  <a href='${url}'>open a GitHub issue</a> including the current JSKOS record!`
+        this.error = { message, status: res.status, html }
+      }
 
       fetch('/api/voc', { method, body, headers }).then(res => {
         if (res.ok) {
           window.location.href = '/vocabularies?uri=' + encodeURIComponent(item.uri)
         } else {
-          res.json().then(error => {
-            this.error = { message: error.message || res.statusText, status: res.status }
-          })
+          res.json().then(err => onError(err, res))
+            .catch(err => onError({}, res)) // eslint-disable-line handle-callback-err
         }
       })
     },

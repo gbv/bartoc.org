@@ -279,6 +279,7 @@ app.use((req, res, next) => {
 // Backend error or another kind of bug
 app.use((err, req, res, next) => {
   // console.error(err)
+  res.status(500)
   render(req, res, '500', { title: err.message })
 })
 
