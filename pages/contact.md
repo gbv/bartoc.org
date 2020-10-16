@@ -97,7 +97,7 @@ UK Data Service, University of Essex</p>
 <h2>USA/North America</h2>
 <p><strong><a href="http://www.hedden-information.com/about/" target="_blank">Heather Hedden<span class="ext" aria-label="(link is external)"></span></a></strong><br>
 Editor<br>
-Senior Vocabulary Editor, Gale, a Cengage Company</p>
+Data & Knowledge Engineer, Semantic Web Company</p>
 </div>
 </div>
 
