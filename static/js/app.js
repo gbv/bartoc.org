@@ -686,7 +686,6 @@ const ItemEditor = {
           item.creator = [{ uri: this.user.uri, prefLabel: { en: this.user.name } }]
         }
       }
-      item.prefLabel = ['x'] // invalid
       const body = JSON.stringify(this.cleanupItem(item), null, 2)
       const headers = { 'Content-Type': 'application/json' }
       if (this.auth) headers.Authorization = `Bearer ${this.auth.token}`
