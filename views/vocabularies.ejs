@@ -7,13 +7,38 @@
 <% if (result.length) { %>
 
 <%- include("pagination", { result, query }) %>
-<ul>
-<% for (let item of result) { %>
-<li>
-  <%- include('item', { item, base: '/vocabularies' }) %>
-</li>
-<% } %>
-</ul>
+
+<table class="table table-borderless table-hover">
+  <thead>
+    <th>Name</th>
+    <th colspan="2">Links</th>
+  </thead>
+  <tbody>
+  <% for (let item of result) { %>
+    <tr>
+      <td>
+        <%- include('item', { item, base: '/vocabularies' }) %>
+        <% if (item.definition) { %>
+          <%= (((def) => {
+            if (def.en) { return def.en[0] }
+            for (var lang in def) { return def[lang][0] }
+          })(item.definition)).split(/\.\s/m)[0]+"..." %>
+        <% } %>
+      </td>
+      <td>
+       <% if (item.url) { %>
+        <a href="<%= item.url %>" title="homepage"><i class="fas fa-home"></i></a>
+        <% } %>
+      </td>
+      <td>
+       <% if (item.API) { %>
+         <%- include('link', { url: item.API[0], label: "API" }) %>
+       <% } %>
+      </td>
+    </tr>
+  <% } %>
+  </tbody>
+</table>
 <%- include("pagination", { result, query }) %>
 
 <% } else { %>
