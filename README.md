@@ -25,7 +25,13 @@ cd bartoc.org
 npm install
 ~~~
 
-Optionally transform the Drupal export from September 2020 and other vocabulary files to JSKOS format (requires Perl >= 5.14 without additional modules):
+## Setup
+
+### Transform legacy data
+
+*this step only documented for historical reasons, don't run this*
+
+Before relaunch in October 2020 the Drupal export from September 2020 had to be transformed and (requires Perl >= 5.14 without additional modules):
 
 ~~~sh
 npm run data
@@ -34,8 +40,18 @@ npm run data
 Then import the resulting file `cache/vocabularies.ndjson` and additional vocabulary files into your jskos-server instance (resetting all stored vocabularies and concepts!):
 
 ~~~
-./bin/import.sh $DIRECTORY_OF_YOUR_JSKOS_SERVER
+./bin/import-legacy.sh $DIRECTORY_OF_YOUR_JSKOS_SERVER
 ~~~
+
+### Import database dump
+
+Import a backup/dump of concept schemes, e.g.:
+
+    npm run import schemes http://bartoc.gbv.de/data/dumps/latest.ndjson
+
+### Import auxilary vocabularies
+
+    ./bin/import.sh $DIRECTORY_OF_YOUR_JSKOS_SERVER
 
 ## Configuration
 
