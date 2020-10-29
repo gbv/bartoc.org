@@ -793,6 +793,11 @@ const VocabularySearch = {
     <language-select v-model="languages" class="form-control" />
     language code which the vocabulary is available in (en, fr, es...)
   </form-row>
+  <form-row :label="'License'">
+    <input type="text" v-model="license" class="form-control"/>
+    please use license URI
+    <!-- TODO: set-select v-model="license" :options="licenses" /-->
+  </form-row>
   <form-row :label="'Subject'">
     <subject-editor v-model="subjects"/>
   </form-row>
@@ -812,7 +817,7 @@ const VocabularySearch = {
       search,
       languages,
       subjects,
-      license, // TODO: https://github.com/gbv/bartoc.org/issues/43
+      license,
       country, // TODO: https://github.com/gbv/bartoc.org/issues/24
       format, // TODO: https://github.com/gbv/bartoc.org/issues/25
       access, // TODO: https://github.com/gbv/bartoc.org/issues/42
@@ -835,8 +840,8 @@ const VocabularySearch = {
       this.submit({ search: this.search })
     },
     submitFilter () {
-      const { type, languages } = this
-      const query = { type, languages }
+      const { type, languages, license } = this
+      const query = { type, languages, license }
       if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join('|')
       this.submit(query)
     }
