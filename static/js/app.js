@@ -159,11 +159,26 @@ function prefLabel (item) {
   return '???'
 }
 
-const ItemInput = {
+/**
+ * Display an item with notation and prefLabel or URI as fallback.
+ */
+const ItemShort = {
   template: `
-      <input v-show="hasFocus || !item.uri" @focus="hasFocus=true" @blur="hasFocus=false" ref="input" type="text" class="form-control" v-model="item.uri"/>
+<span v-if="item.notation" v-text="item.notation[0]" style="font-weight: bold; padding-right: 0.5em;"/>
+<span v-if="item.prefLabel" v-text="prefLabel(item)"/>
+<span v-else-if="!item.notation" v-text="item.uri"/>`,
+  props: {
+    item: { type: Object, default: {} }
+  },
+  methods: { prefLabel }
+}
+
+const ItemInput = {
+  components: { ItemShort },
+  template: `
+      <input v-show="hasFocus || !item.uri" @focus="hasFocus=true" @blur="hasFocus=false" ref="input" type="text" class="form-control" v-model="item.uri" v-on:keyup.enter="$event.target.blur()"/>
       <div v-if="!hasFocus" @click="edit()">
-    {{item.uri}}
+       <item-short :item="item"/>
       <a href="" @focus="edit()"/>
     </div>`,
   props: {
@@ -172,7 +187,8 @@ const ItemInput = {
   data () {
     return {
       item: this.modelValue,
-      hasFocus: false
+      hasFocus: false,
+      loaded: null
     }
   },
   watch: {
@@ -180,8 +196,15 @@ const ItemInput = {
       deep: true,
       handler (item) {
         this.$emit('update:modelValue', item)
+        if (this.loaded !== item.uri) {
+          this.loaded = item.uri
+          this.loadDetails()
+        }
       }
     }
+  },
+  created () {
+    this.loadDetails()
   },
   methods: {
     edit () {
@@ -189,7 +212,14 @@ const ItemInput = {
       this.$nextTick(() => {
         this.$refs.input.focus()
       })
+    },
+    loadDetails () {
+      const { uri, inScheme } = this.item
+      loadConcepts('/api/data', uri).then(res => {
+        this.item = res[0] || { uri, inScheme }
+      })
     }
+
   }
 }
 
@@ -243,7 +273,6 @@ const SubjectEditor = {
     },
     prefLabel
   }
-
 }
 
 /**
@@ -719,7 +748,7 @@ const ItemEditor = {
 
 // recursively remove empty JSKOS fields
 function filtered (value) {
-  if (typeof value === 'object') {
+  if (value && typeof value === 'object') {
     if (Array.isArray(value)) {
       value = value.map(filtered).filter(Boolean)
       return value.length ? value : null
