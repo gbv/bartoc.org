@@ -794,9 +794,7 @@ const VocabularySearch = {
     language code which the vocabulary is available in (en, fr, es...)
   </form-row>
   <form-row :label="'License'">
-    <input type="text" v-model="license" class="form-control"/>
-    please use license URI
-    <!-- TODO: set-select v-model="license" :options="licenses" /-->
+    <set-select :modelValue="{uri:license}" @update:modelValue="license=$event.uri" :options="licenses" />
   </form-row>
   <form-row :label="'Subject'">
     <subject-editor v-model="subjects"/>
@@ -821,15 +819,20 @@ const VocabularySearch = {
       country, // TODO: https://github.com/gbv/bartoc.org/issues/24
       format, // TODO: https://github.com/gbv/bartoc.org/issues/25
       access, // TODO: https://github.com/gbv/bartoc.org/issues/42
-      kostypes: []
+      kostypes: [],
+      licenses: []
     }
   },
   created () {
-    loadConcepts('https://api.dante.gbv.de/voc/top', 'http://w3id.org/nkos/nkostype')
+    const loadVoc = (name, uri) =>
+      loadConcepts('https://api.dante.gbv.de/voc/top', uri)
       .then(set => {
         set.unshift({ uri: '', prefLabel: { en: '' } })
-        this.kostypes = set
+        this[name] = set
       })
+
+    loadVoc('kostypes', 'http://w3id.org/nkos/nkostype')
+    loadVoc('licenses', 'http://uri.gbv.de/terminology/license/')
   },
   methods: {
     submit (query) {
