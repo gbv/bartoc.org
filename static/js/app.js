@@ -826,10 +826,10 @@ const VocabularySearch = {
   created () {
     const loadVoc = (name, uri) =>
       loadConcepts('https://api.dante.gbv.de/voc/top', uri)
-      .then(set => {
-        set.unshift({ uri: '', prefLabel: { en: '' } })
-        this[name] = set
-      })
+        .then(set => {
+          set.unshift({ uri: '', prefLabel: { en: '' } })
+          this[name] = set
+        })
 
     loadVoc('kostypes', 'http://w3id.org/nkos/nkostype')
     loadVoc('licenses', 'http://uri.gbv.de/terminology/license/')

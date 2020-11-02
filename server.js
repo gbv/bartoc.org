@@ -138,26 +138,28 @@ async function vocabulariesSearch (req, res, next) {
   const params = req.query
   params.properties = '*' // TODO: supported in jskos-server?
 
-  const search = params.search
+  var search = params.search
     ? backend.search({ search: params.search })
     : backend.getSchemes({ params })
 
-  search.then(result => {
-    if (params.uri) {
+  if (params.uri) {
+    search = search.then(result => {
       if (result.length) {
         return result[0]
       } else {
         next()
       }
-    } else {
-      render(req, res, 'vocabularies', { title: 'Vocabularies', result })
-    }
-  })
-    .then(enrichItem)
-    .then(item => sendItem(req, res, item))
-    .catch(e => {
-      next(e)
     })
+      .then(enrichItem)
+      .then(item => sendItem(req, res, item))
+  } else {
+    search =
+    search.then(result => {
+      render(req, res, 'vocabularies', { title: 'Vocabularies', result })
+    })
+  }
+
+  search.catch(e => { next(e) })
 }
 
 async function enrichItem (item) {
