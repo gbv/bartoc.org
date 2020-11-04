@@ -2,7 +2,7 @@
 
 > Relaunch of BARTOC.org web interface
 
-This repository contains the new web interface of BARTOC.org, run at [VZG](https://www.gbv.de/).
+This repository contains the [new web interface of BARTOC.org](https://bartoc.org), run by [VZG](https://www.gbv.de/).
 
 ## Functional Requirements
 
@@ -47,7 +47,7 @@ Then import the resulting file `cache/vocabularies.ndjson` and additional vocabu
 
 Import a backup/dump of concept schemes, e.g.:
 
-    npm run import schemes http://bartoc.gbv.de/data/dumps/latest.ndjson
+    npm run import schemes http://bartoc.org/data/dumps/latest.ndjson
 
 ### Import auxilary vocabularies
 
