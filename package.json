@@ -37,12 +37,14 @@
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.2",
     "front-matter": "^3.2.1",
+    "gbv-login-client": "^0.2.13",
     "jskos-cli": "^0.4.2",
     "jsondiffpatch": "^0.4.1",
     "jsonld": "^2.0.2",
     "lodash": "^4.17.20",
     "marked": "^0.7.0",
-    "n-readlines": "^1.0.0"
+    "n-readlines": "^1.0.0",
+    "vue": "^3.0.2"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.14.0",
