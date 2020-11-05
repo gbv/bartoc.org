@@ -47,7 +47,7 @@ title:
         <button type="submit" class="btn btn-primary mb-2">Search</button>
       </div>
     </form>
-    <form class="row" action="http://api.dante.gbv.de/search" method="get">
+    <form class="row" action="https://api.dante.gbv.de/search" method="get">
       <div class="col-md-2">
         <a href="https://api.dante.gbv.de/">DANTE</a>
       </div>
