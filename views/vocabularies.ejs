@@ -17,7 +17,7 @@
   <% for (let item of result) { %>
     <tr>
       <td>
-        <%- include('item', { item, base: '/vocabularies' }) %>
+        <%- include('item', { item, base: '/vocabularies', withNotation: 1 }) %>
         <% if (item.definition) { %>
           <%= (((def) => {
             if (def.en) { return def.en[0] }
