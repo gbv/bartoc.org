@@ -1,4 +1,4 @@
-<%- include('header', { 
+<%- include('header', {
   button: `<a v-cloak v-if="userCanAdd" style="float:right" class="btn btn-success" href="/edit?uri=${item.uri}">edit</a>`
 }) %>
 
@@ -55,7 +55,7 @@
       view: s => `<api-url :uri='"${item.uri}"'>${s}</api-url>` }) %>
 
   <%- include('row-list', { label: 'Listed in', list: item.partOf,
-      view: s => include('link', { url: s.uri }) }) %>
+      view: s => include('item', { item: registries[s.uri] || { uri: s.uri } })  }) %>
 
   <%- include('row', { label: 'Namespace', content: item.namespace }) %>
   <%- include('row', { label: 'Notation pattern', content: item.notationPattern }) %>
