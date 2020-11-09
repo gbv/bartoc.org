@@ -72,7 +72,7 @@ Department of Knowledge &amp; Information, Hansung University</p>
 
  <div class="col">
 <h2>Spain    </h2>
-<p><strong><a href="http://bd.ub.edu/pub/pons/ca" target="_blank">Prof. Amadeu Pons<span class="ext" aria-label="(link is external)"></span></a></strong><br>
+<p><strong><a href="https://fbd.ub.edu/directori/ficha10" target="_blank">Prof. Amadeu Pons<span class="ext" aria-label="(link is external)"></span></a></strong><br>
 Editor<br>
 Facultat d'Informació i Mitjans Audiovisuals (UB)</p>
 </div>
