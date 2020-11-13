@@ -160,7 +160,7 @@ function prefLabel (item) {
 }
 
 /**
- * Display an item with notation and prefLabel or URI as fallback.
+ * Display an item with notation and prefLabel or its URI as fallback.
  */
 const ItemShort = {
   template: `
