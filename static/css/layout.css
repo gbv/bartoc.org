@@ -39,3 +39,10 @@ li.current-page {
 
 label { font-weight: bold; }
 [v-cloak] { display: none; }
+
+a[href*="twitter.com"]:before {
+  font-family: FontAwesome;
+  content: "\f099";
+  text-decoration: none;
+  display: inline-block;
+}

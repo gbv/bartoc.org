@@ -9,8 +9,7 @@ BARTOC content is curated by an international group of editors. Please contact o
 <h2>Austria</h2>
 
 **[Andreas Blumauer](https://www.poolparty.biz/semantic-web-company-gmbh/)**\
-Editor\
-Managing Director &amp; CEO\
+Managing Director & CEO\
 Semantic Web Company GmbH / PoolParty
 
 </div>
@@ -19,8 +18,7 @@ Semantic Web Company GmbH / PoolParty
 <h2>France</h2>
 
 **[Ghislain Atemezing, PhD](http://linkedvocabs.org/perso/index.html)**\
-Editor\
-R&amp;D Engineer, Mondeca
+R&D Engineer, Mondeca
 
 </div>
 
@@ -28,8 +26,11 @@ R&amp;D Engineer, Mondeca
 <h2>Germany</h2>
 
 **[Project coli-conc](https://coli-conc.gbv.de/)**\
-Editor and Infrastructure\
 Head Office of the GBV Common Library Network
+
+Jakob Voß [](https://twitter.com/Nichtich)\
+Uma Balakrishnan\
+Stefan Peters
 
 </div>
 </div>
@@ -39,7 +40,6 @@ Head Office of the GBV Common Library Network
 <h2>Greece</h2>
 
 **[Dr. Haralabos Papatheodorou](http://www.linkedin.com/in/haralabospapatheodorou)**\
-Editor\
 English to Greek medical translator
 
 </div>
@@ -47,8 +47,7 @@ English to Greek medical translator
 <div class="col">
 <h2>Italy</h2>
 
-**[Claudio Gnoli](http://www-dimat.unipv.it/gnoli/)**\
-Editor\
+**[Claudio Gnoli](http://www-dimat.unipv.it/gnoli/)** [](https://twitter.com/scritur)\
 Science and Technology Library, University of Pavia
 
 </div>
@@ -57,7 +56,6 @@ Science and Technology Library, University of Pavia
 <h2>The Netherlands</h2>
 
 **[Gerard Coen](https://dans.knaw.nl/en/about/organisation-and-policy/staff/coen)**\
-Editor\
 Data Archiving and Networked Services (DANS), The Hague
 
 </div>
@@ -70,7 +68,6 @@ Data Archiving and Networked Services (DANS), The Hague
 <h2>Norway</h2>
 
 **[Dan Michael O. Heggø](http://www.ub.uio.no/english/about/people/ureal/urealundervisning/dmheggo/)**\
-Editor\
 University of Oslo Library
 
 </div>
@@ -78,9 +75,11 @@ University of Oslo Library
 <div class="col">
 <h2>South Korea</h2>
 
-**[Prof. Ziyoung Park](http://www.hansung.ac.kr/web/kis/508593)**\
-Editor\
-Department of Knowledge &amp; Information, Hansung University
+**[Prof. Ziyoung Park](http://www.hansung.ac.kr/web/kis/508593)** [](https://twitter.com/ParkZiyoung)\
+Department of Knowledge & Information, Hansung University
+
+**Dr. So Young Yoon** [](https://twitter.com/SoyoungCorba99)\
+Department of Knowledge & Information, Hansung University
 
 </div>
 
@@ -88,7 +87,6 @@ Department of Knowledge &amp; Information, Hansung University
 <h2>Spain</h2>
 
 **[Prof. Amadeu Pons](https://fbd.ub.edu/directori/ficha10)**\
-Editor\
 Facultat d'Informació i Mitjans Audiovisuals (UB)
 
 </div>
@@ -99,7 +97,6 @@ Facultat d'Informació i Mitjans Audiovisuals (UB)
 <h2>Switzerland</h2>
 
 **[Dr. Andreas Ledl](https://www.fhnw.ch/de/personen/andreas-ledl)**\
-Editor-in-chief\
 University of Applied Sciences and Arts Northwestern Switzerland
 
 </div>
@@ -108,7 +105,6 @@ University of Applied Sciences and Arts Northwestern Switzerland
 <h2>United Kingdom</h2>
 
 **[Suzanne Barbalet](http://www.data-archive.ac.uk/about/staff?sid=sbarba)**\
-Editor\
 UK Data Service, University of Essex
 
 </div>
@@ -117,7 +113,6 @@ UK Data Service, University of Essex
 <h2>USA/North America</h2>
 
 **[Heather Hedden](http://www.hedden-information.com/about/)**\
-Editor\
 Data & Knowledge Engineer, Semantic Web Company
 
 </div>
