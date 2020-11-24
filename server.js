@@ -50,6 +50,11 @@ for (const [from, to] of Object.entries(config.redirects)) {
   app.get(from, (req, res) => res.redirect(301, to))
 }
 
+// redirect non-language URLs to English URLs
+app.get('/node/:id([0-9]+)', (req, res, next) => {
+  res.redirect(`/en/node/${req.params.id}`)
+})
+
 // redirect non-English URLs to English URLs
 app.get('/:lang([a-z][a-z])/node/:id([0-9]+)', (req, res, next) => {
   const { lang, id } = req.params
