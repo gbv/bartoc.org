@@ -111,7 +111,14 @@ app.use('/api', (req, res, next) => {
     const query = req.url.slice(req.path.length)
     return res.redirect(301, `/api/${query}`)
   } else {
-    return proxy(config.backend.api)(req, res, next)
+    // Deconstruct backend API URL to properly proxy requests.
+    const url = new URL(config.backend.api)
+    proxy(url.origin, {
+      proxyReqPathResolver: function (req) {
+        const path = url.pathname.endsWith('/') ? url.pathname.slice(0, -1) : url.pathname
+        return path + req.url
+      }
+    })(req, res, next)
   }
 })
 
