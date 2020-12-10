@@ -5,7 +5,7 @@ module.exports = {
   },
   extends: [
     "gbv",
-    "gbv/vue",
+    "gbv/vue/3",
   ],
   globals: {
     Atomics: "readonly",
