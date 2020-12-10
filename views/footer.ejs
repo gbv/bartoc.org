@@ -39,10 +39,7 @@
       </div>
     </footer>
   </div>
+  <script src="<%= config.vue.assetPrefix %>js/chunk-vendors.js"></script>
+  <script src="<%= config.vue.assetPrefix %>js/app.js"></script>
 </body>
 </html>
-<script src="<%= config.vue.assetPrefix %>js/chunk-vendors.js"></script>
-<% if (config.env === "development") { %>
-<script src="<%= config.vue.assetPrefix %>js/chunk-common.js"></script>
-<% } %>
-<script src="<%= config.vue.assetPrefix %>js/app.js"></script>

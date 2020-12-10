@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/fontawesome.min.css">
     <title><%= config.name %><%= title ? ": " + title : "" %></title>
+    <link href="<%= config.vue.assetPrefix %>js/chunk-vendors.js" rel="preload" as="script">
+    <link href="<%= config.vue.assetPrefix %>js/app.js" rel="preload" as="script">
   </head>
   <body>
     <div id="app">
