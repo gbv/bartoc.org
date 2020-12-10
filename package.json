@@ -13,7 +13,7 @@
     "validate": "jskos-validate",
     "dump": "js ./bin/dump.js",
     "vue:serve": "vue-cli-service serve",
-    "vue:build": "vue-cli-service build --no-clean --report-json",
+    "build": "vue-cli-service build --no-clean --report-json",
     "express:serve": "NODE_ENV=development nodemon server.js",
     "dev": "concurrently \"npm:express:serve\" \"npm:vue:serve\""
   },
