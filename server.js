@@ -6,6 +6,19 @@ const path = require("path")
 const cdk = require("cocoda-sdk")
 const axios = require("axios")
 
+// build our vue project on first run if report.json can't be found
+// TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
+if (config.env !== "development") {
+  console.log("Building Vue project in background... (old Vue files might be served in the meantime)")
+  require("child_process").exec("npm run build", { env: process.env }, (error) => {
+    if (error) {
+      console.warn("Vue build failed!", error)
+    } else {
+      console.log("Vue project built successfully.")
+    }
+  })
+}
+
 const proxy = require("express-http-proxy")
 const backend = cdk.initializeRegistry(config.backend)
 
