@@ -1,26 +1,26 @@
-const config = require('../config')
-const fs = require('fs')
-const path = require('path')
-const cdk = require('cocoda-sdk')
-const _ = require('lodash')
-const diff = require('jsondiffpatch')
-const LineReader = require('n-readlines')
+const config = require("../config")
+const fs = require("fs")
+const path = require("path")
+const cdk = require("cocoda-sdk")
+const _ = require("lodash")
+const diff = require("jsondiffpatch")
+const LineReader = require("n-readlines")
 
-const dumpsDir = path.join(__dirname, '../data/dumps')
+const dumpsDir = path.join(__dirname, "../data/dumps")
 const [command, ...args] = process.argv.slice(2)
 
-if (command === 'diff') {
+if (command === "diff") {
   if (args.length === 2) {
     dumpDiff(...args, diff.console.log)
   } else if (args.length === 1) {
     dumpDiff(args[0], `${dumpsDir}/latest.ndjson`, diff.console.log)
   } else {
-    usage('diff $file1 [$file2]')
+    usage("diff $file1 [$file2]")
   }
-} else if (command === 'update') {
+} else if (command === "update") {
   updateDump()
 } else {
-  usage('[diff|update] [arguments]')
+  usage("[diff|update] [arguments]")
 }
 
 function usage (syntax) {
@@ -34,7 +34,7 @@ function normalize (item) {
     if (_.isString(value)) return value.normalize()
     // sort keys and remove keys starting with "_"
     if (_.isPlainObject(item)) {
-      const keys = Object.keys(item).filter(key => key[0] !== '_').sort()
+      const keys = Object.keys(item).filter(key => key[0] !== "_").sort()
       return keys.reduce((obj, key) => {
         obj[key] = normalize(item[key])
         return obj
@@ -47,20 +47,20 @@ function updateDump () {
   if (!fs.existsSync(dumpsDir)) fs.mkdirSync(dumpsDir)
 
   const backend = cdk.initializeRegistry({
-    provider: 'ConceptApi',
-    api: `http://localhost:${config.port}/api/`
+    provider: "ConceptApi",
+    api: `http://localhost:${config.port}/api/`,
   })
 
   backend.getSchemes({ params: { limit: 9999 } }).then(schemes => {
     const latest = `${dumpsDir}/latest.ndjson`
     if (fs.existsSync(latest)) {
-      const mtime = fs.statSync(latest).mtime.toISOString().split('T')[0]
+      const mtime = fs.statSync(latest).mtime.toISOString().split("T")[0]
       fs.renameSync(latest, `${dumpsDir}/${mtime}.ndjson`)
     }
 
     const stream = fs.createWriteStream(latest)
-    _.sortBy(schemes, 'uri').forEach(voc => {
-      stream.write(JSON.stringify(normalize(voc)) + '\n')
+    _.sortBy(schemes, "uri").forEach(voc => {
+      stream.write(JSON.stringify(normalize(voc)) + "\n")
     })
     console.log(`${latest}: ${schemes.length} vocabularies`)
   })

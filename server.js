@@ -1,12 +1,12 @@
-const config = require('./config')
-const page = require('./routes/page')
-const utils = require('./src/utils')
-const jsonld = require('jsonld')
-const path = require('path')
-const cdk = require('cocoda-sdk')
-const axios = require('axios')
+const config = require("./config")
+const page = require("./routes/page")
+const utils = require("./src/utils")
+const jsonld = require("jsonld")
+const path = require("path")
+const cdk = require("cocoda-sdk")
+const axios = require("axios")
 
-const proxy = require('express-http-proxy')
+const proxy = require("express-http-proxy")
 const backend = cdk.initializeRegistry(config.backend)
 
 // TODO: https://github.com/gbv/cocoda-sdk/issues/22
@@ -17,34 +17,34 @@ backend.search = async ({ search }) => {
 
 backend.countVocabularies = async () => {
   const url = `http://localhost:${config.port}/api/voc?limit=1`
-  return axios.get(url).then(res => res.headers['x-total-count'])
+  return axios.get(url).then(res => res.headers["x-total-count"])
 }
 
 // static data
-const registries = utils.indexByUri(utils.readNdjson('./data/registries.ndjson'))
-const nkostypes = utils.indexByUri(utils.readNdjson('./cache/nkostype.ndjson'))
-const accesstypes = utils.indexByUri(utils.readNdjson('./data/bartoc-access.concepts.ndjson'))
-const formats = utils.indexByUri(utils.readNdjson('./data/bartoc-formats.concepts.ndjson'))
+const registries = utils.indexByUri(utils.readNdjson("./data/registries.ndjson"))
+const nkostypes = utils.indexByUri(utils.readNdjson("./cache/nkostype.ndjson"))
+const accesstypes = utils.indexByUri(utils.readNdjson("./data/bartoc-access.concepts.ndjson"))
+const formats = utils.indexByUri(utils.readNdjson("./data/bartoc-formats.concepts.ndjson"))
 
 config.log(`Running in ${config.env} mode.`)
 
-const repoType = 'http://bartoc.org/full-repository'
+const repoType = "http://bartoc.org/full-repository"
 const repositories = utils.indexByUri(Object.values(registries).filter(item => item.type.find(type => type === repoType)))
 config.log(`Read ${Object.keys(registries).length} registries, ${Object.keys(repositories).length} also being repositories or services.`)
 
 // Initialize express with settings
-const express = require('express')
+const express = require("express")
 const app = express()
-app.set('json spaces', 2)
+app.set("json spaces", 2)
 
 // Configure view engine to render EJS templates.
-app.set('views', path.join(__dirname, '/views'))
-app.set('view engine', 'ejs')
+app.set("views", path.join(__dirname, "/views"))
+app.set("view engine", "ejs")
 
 // static assets
-app.use(express.static('static'))
-app.use('/data/dumps/', express.static('data/dumps'))
-app.use('/dist/', express.static('dist'))
+app.use(express.static("static"))
+app.use("/data/dumps/", express.static("data/dumps"))
+app.use("/dist/", express.static("dist"))
 
 // redirect permanently moved URLs from legacy BARTOC.org
 for (const [from, to] of Object.entries(config.redirects)) {
@@ -52,14 +52,14 @@ for (const [from, to] of Object.entries(config.redirects)) {
 }
 
 // redirect non-language URLs to English URLs
-app.get('/node/:id([0-9]+)', (req, res, next) => {
+app.get("/node/:id([0-9]+)", (req, res) => {
   res.redirect(`/en/node/${req.params.id}`)
 })
 
 // redirect non-English URLs to English URLs
-app.get('/:lang([a-z][a-z])/node/:id([0-9]+)', (req, res, next) => {
+app.get("/:lang([a-z][a-z])/node/:id([0-9]+)", (req, res, next) => {
   const { lang, id } = req.params
-  if (lang === 'en') {
+  if (lang === "en") {
     next()
   } else {
     res.redirect(`/en/node/${id}`)
@@ -68,47 +68,47 @@ app.get('/:lang([a-z][a-z])/node/:id([0-9]+)', (req, res, next) => {
 
 // redirect old subject URLs to vocabulary search
 
-for (const [url, uri] of utils.readCsv('./data/eurovoc-ids.csv')) {
+for (const [url, uri] of utils.readCsv("./data/eurovoc-ids.csv")) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?subject=${uri}`))
 }
 
-for (const [url, uri] of utils.readCsv('./data/ddc-ids.csv')) {
+for (const [url, uri] of utils.readCsv("./data/ddc-ids.csv")) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?subject=${uri}`))
 }
 
-for (const [url, code] of utils.readCsv('./data/language-ids.csv')) {
+for (const [url, code] of utils.readCsv("./data/language-ids.csv")) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?languages=${code}`))
 }
 
-for (const [url, uri] of utils.readCsv('./data/kostype-ids.csv')) {
+for (const [url, uri] of utils.readCsv("./data/kostype-ids.csv")) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?type=${uri}`))
 }
 
-for (const [url, uri] of utils.readCsv('./data/license-ids.csv')) {
+for (const [url, uri] of utils.readCsv("./data/license-ids.csv")) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?license=${uri}`))
 }
 
-for (const [url, uri] of utils.readCsv('./data/access-ids.csv')) {
+for (const [url, uri] of utils.readCsv("./data/access-ids.csv")) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?access=${uri}`))
 }
 
-for (const [url, id] of utils.readCsv('./data/format-ids.csv')) {
+for (const [url, id] of utils.readCsv("./data/format-ids.csv")) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?format=http://bartoc.org/en/Format/${id}`))
 }
 
 // ILC
-app.get('/ILC/1', (req, res) => res.redirect('/en/node/472'))
-app.get('/ILC/1/:id([a-z0-9-]+)', (req, res) => res.redirect('/en/node/472')) // TODO: show concept
+app.get("/ILC/1", (req, res) => res.redirect("/en/node/472"))
+app.get("/ILC/1/:id([a-z0-9-]+)", (req, res) => res.redirect("/en/node/472")) // TODO: show concept
 
 // root page
-app.get('/', (req, res) => {
-  req.params = { page: 'index' }
+app.get("/", (req, res) => {
+  req.params = { page: "index" }
   page(req, res)
 })
 
 // backend
-app.use('/api', (req, res, next) => {
-  if (!req.originalUrl.startsWith('/api/')) {
+app.use("/api", (req, res, next) => {
+  if (!req.originalUrl.startsWith("/api/")) {
     const query = req.url.slice(req.path.length)
     return res.redirect(301, `/api/${query}`)
   } else {
@@ -116,22 +116,22 @@ app.use('/api', (req, res, next) => {
     const url = new URL(config.backend.api)
     proxy(url.origin, {
       proxyReqPathResolver: function (req) {
-        const path = url.pathname.endsWith('/') ? url.pathname.slice(0, -1) : url.pathname
+        const path = url.pathname.endsWith("/") ? url.pathname.slice(0, -1) : url.pathname
         return path + req.url
-      }
+      },
     })(req, res, next)
   }
 })
 
 // edit form
-app.get('/edit', async (req, res, next) => {
+app.get("/edit", async (req, res, next) => {
   const { uri } = req.query
   var item
-  var title = 'Add vocabulary'
+  var title = "Add vocabulary"
 
   if (uri) {
     item = await backend.getSchemes({ params: { uri } }).then(result => result[0])
-    title = 'Edit vocabulary'
+    title = "Edit vocabulary"
     if (item) {
       utils.cleanupItem(item)
       delete item.concepts
@@ -141,15 +141,15 @@ app.get('/edit', async (req, res, next) => {
     }
   }
 
-  render(req, res, 'edit', { item, title, edit: true })
+  render(req, res, "edit", { item, title, edit: true })
 })
 
 // vocabulary search
-app.get('/vocabularies', vocabulariesSearch)
+app.get("/vocabularies", vocabulariesSearch)
 
 async function vocabulariesSearch (req, res, next) {
   const params = req.query
-  params.properties = '*' // TODO: supported in jskos-server?
+  params.properties = "*" // TODO: supported in jskos-server?
 
   var search = params.search
     ? backend.search({ search: params.search })
@@ -168,7 +168,7 @@ async function vocabulariesSearch (req, res, next) {
   } else {
     search =
     search.then(result => {
-      render(req, res, 'vocabularies', { title: 'Vocabularies', result })
+      render(req, res, "vocabularies", { title: "Vocabularies", result })
     })
   }
 
@@ -192,13 +192,13 @@ async function enrichItem (item) {
 }
 
 // Statistics
-app.get('/stats', async (req, res) => {
+app.get("/stats", async (req, res) => {
   const totalCount = await backend.countVocabularies()
-  render(req, res, 'stats', { title: 'Statistics', totalCount })
+  render(req, res, "stats", { title: "Statistics", totalCount })
 })
 
 // format page
-app.get('/en/Format/:id', async (req, res, next) => {
+app.get("/en/Format/:id", async (req, res, next) => {
   const uri = `http://bartoc.org/en/Format/${req.params.id}`
   backend.getConcepts({ concepts: [{ uri }] })
     .then(concepts => concepts.length ? sendItem(req, res, concepts[0]) : next())
@@ -206,29 +206,29 @@ app.get('/en/Format/:id', async (req, res, next) => {
 })
 
 // static pages
-app.get('/:page([a-z-]+)', page)
-app.get('/([a-z][a-z])/:page([a-z-]+)', (req, res) => {
+app.get("/:page([a-z-]+)", page)
+app.get("/([a-z][a-z])/:page([a-z-]+)", (req, res) => {
   res.redirect(`/${req.params.page}`)
 })
 
 // list of terminology registries
-app.get('/registries', (req, res) => {
-  if (req.query.format === 'jskos') {
+app.get("/registries", (req, res) => {
+  if (req.query.format === "jskos") {
     return res.send(registries)
   }
-  render(req, res, 'registries', { title: 'Terminology Registries' })
+  render(req, res, "registries", { title: "Terminology Registries" })
 })
 
 // BARTOC ID => registry or vocabulary (if found)
-app.get('/en/node/:id([0-9]+)', async (req, res, next) => {
+app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   const uri = `http://bartoc.org/en/node/${req.params.id}`
   var { path } = req
   var item = registries[uri]
 
   if (item) {
-    path = '/registries'
+    path = "/registries"
   } else {
-    req.path = '/vocabularies'
+    req.path = "/vocabularies"
     req.query.uri = uri
     return vocabulariesSearch(req, res, next)
     /*    path = '/vocabularies'
@@ -246,22 +246,22 @@ app.get('/en/node/:id([0-9]+)', async (req, res, next) => {
 })
 
 const viewsByType = {
-  'http://www.w3.org/2004/02/skos/core#Concept': 'concept',
-  'http://www.w3.org/2004/02/skos/core#ConceptScheme': 'vocabulary',
-  'http://purl.org/cld/cdtype/CatalogueOrIndex': 'registry'
+  "http://www.w3.org/2004/02/skos/core#Concept": "concept",
+  "http://www.w3.org/2004/02/skos/core#ConceptScheme": "vocabulary",
+  "http://purl.org/cld/cdtype/CatalogueOrIndex": "registry",
 }
 
-const jskosContext = require('./static/context.json')
+const jskosContext = require("./static/context.json")
 
 async function sendItem (req, res, item, vars = {}) {
-  if (req.query.format === 'json') {
-    item['@context'] = 'https://gbv.github.io/jskos/context.json'
-    Object.keys(item).filter(key => key[0] === '_').forEach(key => delete item[key])
+  if (req.query.format === "json") {
+    item["@context"] = "https://gbv.github.io/jskos/context.json"
+    Object.keys(item).filter(key => key[0] === "_").forEach(key => delete item[key])
     res.send([item])
-  } else if (req.query.format === 'nt') {
-    res.setHeader('Content-Type', 'application/n-triples')
-    item['@context'] = jskosContext
-    res.send(await jsonld.toRDF(item, { format: 'application/n-quads' }))
+  } else if (req.query.format === "nt") {
+    res.setHeader("Content-Type", "application/n-triples")
+    item["@context"] = jskosContext
+    res.send(await jsonld.toRDF(item, { format: "application/n-quads" }))
   } else {
     const view = viewsByType[item.type[0]]
     const title = utils.label(item.prefLabel).value
@@ -273,29 +273,29 @@ async function sendItem (req, res, item, vars = {}) {
 
 function render (req, res, view, locals) {
   const { query, path } = req
-  const vars = { config, query, path, utils, registries, repositories, nkostypes, accesstypes, formats, page: path.replace(/^\/|\/$/g, '') }
+  const vars = { config, query, path, utils, registries, repositories, nkostypes, accesstypes, formats, page: path.replace(/^\/|\/$/g, "") }
   return res.render(view, { ...vars, ...locals })
 }
 
 // Error handling
-app.use((req, res, next) => {
-  const title = 'Not found'
+app.use((req, res) => {
+  const title = "Not found"
 
   res.status(404)
-  if (req.query.format === 'json') {
+  if (req.query.format === "json") {
     res.send([])
-  } else if (req.query.format === 'nt') {
-    res.type('txt').send(title)
+  } else if (req.query.format === "nt") {
+    res.type("txt").send(title)
   } else {
-    render(req, res, '404', { title })
+    render(req, res, "404", { title })
   }
 })
 
 // Backend error or another kind of bug
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   // console.error(err)
   res.status(500)
-  render(req, res, '500', { title: err.message })
+  render(req, res, "500", { title: err.message })
 })
 
 // Start server
