@@ -90,7 +90,8 @@
   "nodemonConfig": {
     "ignore": [
       "test/*",
-      "vue/*"
+      "vue/*",
+      "dist/*"
     ]
   }
 }
