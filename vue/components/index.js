@@ -1,7 +1,7 @@
 /* Utility functions */
 
 // TODO: use cdk instead
-function loadConcepts (api, uri) {
+function loadConcepts(api, uri) {
   if (uri) api = `${api}?uri=${encodeURIComponent(uri)}`
   return fetch(api).then(res => res ? res.json() : [])
 }
@@ -9,64 +9,21 @@ function loadConcepts (api, uri) {
 // TODO: configure somewhere else, this is part of BARTOC data anyway
 const indexingSchemes = [
   {
-    uri: 'http://bartoc.org/en/node/241',
-    namespace: 'http://dewey.info/class/',
-    notation: ['DDC']
+    uri: "http://bartoc.org/en/node/241",
+    namespace: "http://dewey.info/class/",
+    notation: ["DDC"],
   },
   {
-    uri: 'http://bartoc.org/en/node/15',
-    namespace: 'http://eurovoc.europa.eu/',
-    prefLabel: { en: 'EuroVoc' }
+    uri: "http://bartoc.org/en/node/15",
+    namespace: "http://eurovoc.europa.eu/",
+    prefLabel: { en: "EuroVoc" },
   },
   {
-    uri: 'http://bartoc.org/de/node/472',
-    namespace: 'http://bartoc.org/en/ILC/',
-    notation: ['ILC']
-  }
+    uri: "http://bartoc.org/de/node/472",
+    namespace: "http://bartoc.org/en/ILC/",
+    notation: ["ILC"],
+  },
 ]
-
-/**
- * Establish connection to login server and show logged in user or link to login.
- */
-const UserStatus = {
-  template: '<a v-if="connected" class="nav-link" :href="\'https://\'+login+\'account\'">{{user ? user.name : \'login\'}}</a>',
-  props: {
-    login: {
-      type: String,
-      required: true
-    }
-  },
-  data () {
-    return {
-      client: new LoginClient(this.login),
-      connected: false,
-      user: null,
-      auth: {}
-    }
-  },
-  emits: ['update:user', 'update:auth'],
-  created () {
-    const { connect, disconnect, login, logout, update, token, about } = LoginClient.events
-    this.client.addEventListener(about, ({ publicKey }) => { this.auth.publicKey = publicKey; this._updateAuth() })
-    this.client.addEventListener(connect, () => { this.connected = true })
-    this.client.addEventListener(disconnect, () => { this.connected = false })
-    this.client.addEventListener(login, ({ user }) => { this._setUser(user) })
-    this.client.addEventListener(update, ({ user }) => { this._updadeUser(user) })
-    this.client.addEventListener(logout, () => { this._setUser(null) })
-    this.client.addEventListener(token, ({ token }) => { this.auth.token = token; this._updateAuth() })
-    // this.client.addEventListener(error, console.warn)
-    this.client.connect()
-  },
-  methods: {
-    _updateAuth () {
-      this.$emit('update:auth', this.auth.token ? this.auth : null)
-    },
-    _setUser (user) {
-      this.user = user
-      this.$emit('update:user', user)
-    }
-  }
-}
 
 /**
  * A row in a form with multiple input fields.
@@ -82,9 +39,9 @@ const FormRow = {
   props: {
     label: {
       type: String,
-      default: ''
-    }
-  }
+      default: "",
+    },
+  },
 }
 
 /**
@@ -98,36 +55,36 @@ const LanguageSelect = {
          @input="$emit('update:modelValue', $event.target.value)"/>`,
   props: {
     modelValue: [String, Array],
-    repeatable: Boolean
-  }
+    repeatable: Boolean,
+  },
 }
 
 const SetEditorMixin = {
-  emits: ['update:modelValue'],
+  emits: ["update:modelValue"],
   props: {
-    modelValue: Array
+    modelValue: Array,
   },
-  data () {
+  data() {
     return {
-      set: [...(this.modelValue || [])]
+      set: [...(this.modelValue || [])],
     }
   },
   watch: {
     set: {
       deep: true,
-      handler (set) {
-        this.$emit('update:modelValue', set)
-      }
-    }
+      handler(set) {
+        this.$emit("update:modelValue", set)
+      },
+    },
   },
   methods: {
-    add (item) {
+    add(item) {
       this.set.push(item)
     },
-    remove (index) {
+    remove(index) {
       this.set.splice(index, 1)
-    }
-  }
+    },
+  },
 }
 
 /**
@@ -148,15 +105,15 @@ const ListEditor = {
         <button type="button" class="btn btn-outline-primary" @click="add('')">+</button>
       </td>
     </tr>
-  </table>`
+  </table>`,
 }
 
-function prefLabel (item) {
+function prefLabel(item) {
   if (item && item.prefLabel) {
-    if ('en' in item.prefLabel) return item.prefLabel.en
+    if ("en" in item.prefLabel) return item.prefLabel.en
     for (const lang in item.prefLabel) return item.prefLabel[lang]
   }
-  return '???'
+  return "???"
 }
 
 /**
@@ -168,9 +125,9 @@ const ItemShort = {
 <span v-if="item.prefLabel" v-text="prefLabel(item)"/>
 <span v-else-if="!item.notation" v-text="item.uri"/>`,
   props: {
-    item: { type: Object, default: {} }
+    item: { type: Object, default: {} },
   },
-  methods: { prefLabel }
+  methods: { prefLabel },
 }
 
 const ItemInput = {
@@ -182,45 +139,45 @@ const ItemInput = {
       <a href="" @focus="edit()"/>
     </div>`,
   props: {
-    modelValue: Object
+    modelValue: Object,
   },
-  data () {
+  data() {
     return {
       item: this.modelValue,
       hasFocus: false,
-      loaded: null
+      loaded: null,
     }
   },
   watch: {
     item: {
       deep: true,
-      handler (item) {
-        this.$emit('update:modelValue', item)
+      handler(item) {
+        this.$emit("update:modelValue", item)
         if (this.loaded !== item.uri) {
           this.loaded = item.uri
           this.loadDetails()
         }
-      }
-    }
+      },
+    },
   },
-  created () {
+  created() {
     this.loadDetails()
   },
   methods: {
-    edit () {
+    edit() {
       this.hasFocus = true
       this.$nextTick(() => {
         this.$refs.input.focus()
       })
     },
-    loadDetails () {
+    loadDetails() {
       const { uri, inScheme } = this.item
-      loadConcepts('/api/data', uri).then(res => {
+      loadConcepts("/api/data", uri).then(res => {
         this.item = res[0] || { uri, inScheme }
       })
-    }
+    },
 
-  }
+  },
 }
 
 const SubjectEditor = {
@@ -252,27 +209,27 @@ const SubjectEditor = {
   </tr>
 </table>
   `,
-  data () {
+  data() {
     return {
       nextScheme: indexingSchemes[0].uri,
-      indexingSchemes
+      indexingSchemes,
     }
   },
   methods: {
-    findScheme (uri) {
+    findScheme(uri) {
       return this.indexingSchemes.find(scheme => scheme.uri === uri)
     },
-    add () {
+    add() {
       var inScheme = this.findScheme(this.nextScheme)
       inScheme = [{ uri: inScheme.uri }]
-      this.set.push({ inScheme, uri: '' })
+      this.set.push({ inScheme, uri: "" })
     },
-    shortLabel (item) {
+    shortLabel(item) {
       if (item && item.notation && item.notation.length) return item.notation[0]
       return prefLabel(item)
     },
-    prefLabel
-  }
+    prefLabel,
+  },
 }
 
 /**
@@ -303,14 +260,14 @@ const LabelEditor = {
   </table>`,
   props: {
     prefLabel: Object,
-    altLabel: Object
+    altLabel: Object,
   },
-  data () {
+  data() {
     return {
-      labels: []
+      labels: [],
     }
   },
-  created () {
+  created() {
     for (const language in this.prefLabel) {
       this.add({ label: this.prefLabel[language], language })
     }
@@ -319,23 +276,23 @@ const LabelEditor = {
       this.altLabel[language].forEach(label => this.add({ label, language }))
     }
     this.add()
-    this.$watch('labels', l => this.change(l), { deep: true })
+    this.$watch("labels", l => this.change(l), { deep: true })
   },
   methods: {
-    add (label = { label: '', language: '' }) {
+    add(label = { label: "", language: "" }) {
       this.labels.push(label)
     },
-    remove (i) {
+    remove(i) {
       this.labels.splice(i, 1)
     },
-    change (labels) {
+    change(labels) {
       const prefLabel = {}
       const altLabel = {}
       labels.forEach(({ label, language }) => {
         if (!label) return
-        const code = language || 'und'
+        const code = language || "und"
         label = label.trim()
-        if (label === '') return
+        if (label === "") return
         if (code in altLabel) {
           altLabel[code].push(label)
         } else if (code in prefLabel) {
@@ -344,10 +301,10 @@ const LabelEditor = {
           prefLabel[code] = label
         }
       })
-      this.$emit('update:prefLabel', prefLabel)
-      this.$emit('update:altLabel', altLabel)
-    }
-  }
+      this.$emit("update:prefLabel", prefLabel)
+      this.$emit("update:altLabel", altLabel)
+    },
+  },
 }
 
 /**
@@ -363,24 +320,24 @@ const SetSelect = {
   </select>`,
   props: {
     modelValue: [Array, Object],
-    options: Array
+    options: Array,
   },
-  data () {
+  data() {
     return {
-      value: this.repeatable() ? [...this.modelValue] : this.modelValue
+      value: this.repeatable() ? [...this.modelValue] : this.modelValue,
     }
   },
-  created () {
-    this.$watch('value', value => { this.$emit('update:modelValue', value) })
+  created() {
+    this.$watch("value", value => { this.$emit("update:modelValue", value) })
   },
   methods: {
     prefLabel,
-    repeatable () { return Array.isArray(this.modelValue) }
-  }
+    repeatable() { return Array.isArray(this.modelValue) },
+  },
 }
 
 const AddressEditor = {
-  emits: ['update:modelValue'],
+  emits: ["update:modelValue"],
   template: `
   <table class="table-sm">
     <tr>
@@ -402,27 +359,27 @@ const AddressEditor = {
   </table>
   `,
   props: {
-    modelValue: Object
+    modelValue: Object,
   },
-  data () {
+  data() {
     const { ext, street, locality, code, country } = (this.modelValue || {})
     return { ext, street, locality, code, country }
   },
-  created () {
-    for (const name of ['ext', 'street', 'locality', 'code', 'country']) {
+  created() {
+    for (const name of ["ext", "street", "locality", "code", "country"]) {
       this.$watch(name, this.update)
     }
   },
   methods: {
-    update () {
+    update() {
       const { ext, street, locality, code, country } = this
-      this.$emit('update:modelValue', { ext, street, locality, code, country })
-    }
-  }
+      this.$emit("update:modelValue", { ext, street, locality, code, country })
+    },
+  },
 }
 
 const PublisherEditor = {
-  emits: ['update:modelValue'],
+  emits: ["update:modelValue"],
   template: `
   <table class="table table-sm table-borderless">
     <tr>
@@ -434,28 +391,28 @@ const PublisherEditor = {
     </tr>
   </table>`,
   props: {
-    modelValue: Array
+    modelValue: Array,
   },
-  data () {
+  data() {
     const publisher = ((this.modelValue || [])[0] || {})
     return {
       viaf: publisher.uri,
-      name: (publisher.prefLabel || {}).en
+      name: (publisher.prefLabel || {}).en,
     }
   },
-  created () {
+  created() {
     const update = function () {
-      this.$emit('update:modelValue', [{ uri: this.viaf, prefLabel: { en: this.name } }])
+      this.$emit("update:modelValue", [{ uri: this.viaf, prefLabel: { en: this.name } }])
     }
-    this.$watch('name', update)
-    this.$watch('viaf', update)
-  }
+    this.$watch("name", update)
+    this.$watch("viaf", update)
+  },
 }
 
-function githubIssueUrl (title, body) {
-  return 'https://github.com/gbv/bartoc.org/issues/new' +
-        '?title=' + encodeURIComponent(title) +
-        '&body=' + encodeURIComponent(body)
+function githubIssueUrl(title, body) {
+  return "https://github.com/gbv/bartoc.org/issues/new" +
+    "?title=" + encodeURIComponent(title) +
+    "&body=" + encodeURIComponent(body)
 }
 
 /**
@@ -619,29 +576,29 @@ const ItemEditor = {
 `,
   props: {
     user: {
-      type: Object
+      type: Object,
     },
     auth: {},
     current: {
-      type: Object
-    }
+      type: Object,
+    },
   },
-  data () {
+  data() {
     // make sure item has iterable fields
-    const item = this.current || {}
-    ;['prefLabel', 'altLabel', 'definition', 'ADDRESS']
-      .forEach(key => { if (!item[key]) item[key] = {} })
-    ;['notation', 'identifier', 'languages', 'license', 'type', 'subject', 'subjectOf', 'partOf', 'FORMAT', 'API', 'ACCESS', 'publisher']
+    const item = this.current || {};
+    ["prefLabel", "altLabel", "definition", "ADDRESS"]
+      .forEach(key => { if (!item[key]) item[key] = {} });
+    ["notation", "identifier", "languages", "license", "type", "subject", "subjectOf", "partOf", "FORMAT", "API", "ACCESS", "publisher"]
       .forEach(key => { if (!item[key]) item[key] = [] })
 
-    const examples = (item.EXAMPLES || []).join(', ')
+    const examples = (item.EXAMPLES || []).join(", ")
 
-    var abstractEn = ''
-    var abstractUnd = ''
+    var abstractEn = ""
+    var abstractUnd = ""
 
     // make non-English abstract to language code "und"
     for (const code in item.definition) {
-      if (code === 'en') abstractEn = item.definition[code][0]
+      if (code === "en") abstractEn = item.definition[code][0]
       else abstractUnd = item.definition[code][0]
     }
 
@@ -655,45 +612,45 @@ const ItemEditor = {
       formats: [],
       access: [],
       error: null,
-      showJSKOS: false
+      showJSKOS: false,
     }
   },
   computed: {
-    type () { return this.item.type.map(uri => ({ uri })) }
+    type() { return this.item.type.map(uri => ({ uri })) },
   },
   watch: {
     abstractEn: function (s) { this.item.definition.en = [s] },
     abstractUnd: function (s) { this.item.definition.und = [s] },
     examples: function (s) {
-      this.item.EXAMPLES = s.split(',').map(s => s.trim()).filter(s => s !== '')
-    }
+      this.item.EXAMPLES = s.split(",").map(s => s.trim()).filter(s => s !== "")
+    },
   },
 
-  created () {
-    loadConcepts('https://api.dante.gbv.de/voc/top', 'http://uri.gbv.de/terminology/license/')
+  created() {
+    loadConcepts("https://api.dante.gbv.de/voc/top", "http://uri.gbv.de/terminology/license/")
       .then(set => { this.licenses = set })
-    loadConcepts('https://api.dante.gbv.de/voc/top', 'http://w3id.org/nkos/nkostype')
+    loadConcepts("https://api.dante.gbv.de/voc/top", "http://w3id.org/nkos/nkostype")
       .then(set => { this.kostypes = set })
-    loadConcepts('/api/voc/top', 'http://bartoc.org/en/node/20000')
+    loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000")
       .then(set => { this.formats = set })
-    loadConcepts('/api/voc/top', 'http://bartoc.org/en/node/20001')
+    loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001")
       .then(set => { this.access = set })
-    loadConcepts('/registries?format=jskos')
+    loadConcepts("/registries?format=jskos")
       .then(set => { this.registries = set })
   },
   methods: {
-    itemError () {
+    itemError() {
       if (!Object.keys(this.item.prefLabel).length) {
-        return { message: 'item must have at least a title!' }
+        return { message: "item must have at least a title!" }
       }
       // TODO: add more validation
     },
-    async saveItem () {
+    async saveItem() {
       this.error = this.itemError()
       if (this.error) return
 
       const item = { ...this.item }
-      const method = item.uri ? 'PUT' : 'POST'
+      const method = item.uri ? "PUT" : "POST"
       if (item.uri) {
         // TODO: check other user identities
         // TODO: should be set at server
@@ -707,8 +664,8 @@ const ItemEditor = {
           }
         }
       } else { // guess an URI not taken yet
-        const total = await fetch('/api/voc?limit=1').then(res => res.headers.get('x-total-count'))
-        item.uri = 'http://bartoc.org/en/node/' + (17000 + 1 * total)
+        const total = await fetch("/api/voc?limit=1").then(res => res.headers.get("x-total-count"))
+        item.uri = "http://bartoc.org/en/node/" + (17000 + 1 * total)
         // TODO: should be set at server
         item.created = (new Date()).toISOString()
         if (this.user) {
@@ -716,46 +673,46 @@ const ItemEditor = {
         }
       }
       const body = JSON.stringify(this.cleanupItem(item), null, 2)
-      const headers = { 'Content-Type': 'application/json' }
+      const headers = { "Content-Type": "application/json" }
       if (this.auth) headers.Authorization = `Bearer ${this.auth.token}`
 
       const onError = (error, res) => {
         var message = error.message || res.StatusText
-        var issue = 'This JSKOS record could not be saved:\n\n~~~json\n' + body + '\n~~~\n' +
-                      'The request included ' + (this.auth ? 'a token for authentification.' : 'no token.')
+        var issue = "This JSKOS record could not be saved:\n\n~~~json\n" + body + "\n~~~\n" +
+          "The request included " + (this.auth ? "a token for authentification." : "no token.")
         var url = githubIssueUrl(`Error ${res.status} when saving`, issue)
         var html = `If you think this is a bug, please
                   <a href='${url}'>open a GitHub issue</a> including the current JSKOS record!`
         this.error = { message, status: res.status, html }
       }
 
-      fetch('/api/voc', { method, body, headers }).then(res => {
+      fetch("/api/voc", { method, body, headers }).then(res => {
         if (res.ok) {
-          window.location.href = '/vocabularies?uri=' + encodeURIComponent(item.uri)
+          window.location.href = "/vocabularies?uri=" + encodeURIComponent(item.uri)
         } else {
           res.json().then(err => onError(err, res))
-            .catch(err => onError({}, res)) // eslint-disable-line handle-callback-err
+            .catch(() => onError({}, res)) // eslint-disable-line handle-callback-err
         }
       })
     },
-    cleanupItem (item) {
-      const type = 'http://www.w3.org/2004/02/skos/core#ConceptScheme'
+    cleanupItem(item) {
+      const type = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
       if (item.type[0] !== type) item.type.unshift(type)
       return filtered(item)
-    }
-  }
+    },
+  },
 }
 
 // recursively remove empty JSKOS fields
-function filtered (value) {
-  if (value && typeof value === 'object') {
+function filtered(value) {
+  if (value && typeof value === "object") {
     if (Array.isArray(value)) {
       value = value.map(filtered).filter(Boolean)
       return value.length ? value : null
     } else {
       const keys =
-        ('uri' in value && !value.uri) ? [] // remove object without URI
-          : Object.keys(value).filter(key => key[0] !== '_').sort()
+        ("uri" in value && !value.uri) ? [] // remove object without URI
+          : Object.keys(value).filter(key => key[0] !== "_").sort()
       const obj = keys.reduce((obj, key) => {
         const fieldValue = filtered(value[key])
         if (fieldValue) obj[key] = fieldValue
@@ -804,9 +761,9 @@ const VocabularySearch = {
   </form-row>
 </form>`,
   props: { query: Object },
-  data () {
+  data() {
     const { type, languages, subject, license, format, access, country, search } = this.query
-    const subjects = (subject || '').split('|').map(uri => {
+    const subjects = (subject || "").split("|").map(uri => {
       const scheme = indexingSchemes.find(scheme => uri.indexOf(scheme.namespace) === 0)
       return scheme ? { uri, inScheme: [scheme] } : false
     }).filter(Boolean)
@@ -820,38 +777,38 @@ const VocabularySearch = {
       format, // TODO: https://github.com/gbv/bartoc.org/issues/25
       access, // TODO: https://github.com/gbv/bartoc.org/issues/42
       kostypes: [],
-      licenses: []
+      licenses: [],
     }
   },
-  created () {
+  created() {
     const loadVoc = (name, uri) =>
-      loadConcepts('https://api.dante.gbv.de/voc/top', uri)
+      loadConcepts("https://api.dante.gbv.de/voc/top", uri)
         .then(set => {
-          set.unshift({ uri: '', prefLabel: { en: '' } })
+          set.unshift({ uri: "", prefLabel: { en: "" } })
           this[name] = set
         })
 
-    loadVoc('kostypes', 'http://w3id.org/nkos/nkostype')
-    loadVoc('licenses', 'http://uri.gbv.de/terminology/license/')
+    loadVoc("kostypes", "http://w3id.org/nkos/nkostype")
+    loadVoc("licenses", "http://uri.gbv.de/terminology/license/")
   },
   methods: {
-    submit (query) {
+    submit(query) {
       Object.keys(query).filter(key => !query[key]).forEach(key => delete query[key])
-      window.location.href = '/vocabularies?' + (new URLSearchParams(query).toString())
+      window.location.href = "/vocabularies?" + (new URLSearchParams(query).toString())
     },
-    submitSearch () {
+    submitSearch() {
       this.submit({ search: this.search })
     },
-    submitFilter () {
+    submitFilter() {
       const { type, languages, license } = this
       const query = { type, languages, license }
-      if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join('|')
+      if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join("|")
       this.submit(query)
-    }
-  }
+    },
+  },
 }
 
-const getTextChildren = nodes => nodes.map(node => typeof node.children === 'string' ? node.children : '').join('')
+const getTextChildren = nodes => nodes.map(node => typeof node.children === "string" ? node.children : "").join("")
 
 const ApiUrl = {
   template: `<a :href="baseUrl"><slot/></a>
@@ -859,54 +816,22 @@ const ApiUrl = {
     >Cocoda Mapping Tool</a>
    `,
   props: {
-    uri: String
+    uri: String,
   },
-  data () {
+  data() {
     const slot = this.$slots.default
-    const baseUrl = slot ? getTextChildren(slot()) : ''
+    const baseUrl = slot ? getTextChildren(slot()) : ""
     const cocoda = baseUrl.match(/^https?:\/\/(api\.dante\.gbv\.de|coli-conc\.gbv\.de\/api)\//)
-      ? 'https://coli-conc.gbv.de/cocoda/app/?fromScheme=' + encodeURIComponent(this.uri) : ''
+      ? "https://coli-conc.gbv.de/cocoda/app/?fromScheme=" + encodeURIComponent(this.uri) : ""
     return {
       baseUrl,
-      cocoda
-    }
-  }
-}
-
-/**
- * Client side application for user interaction.
- */
-const app = {
-  components: { UserStatus, ItemEditor, VocabularySearch, ApiUrl },
-  data () {
-    return {
-      login: 'coli-conc.gbv.de/login/',
-      user: null,
-      userCanAdd: false,
-      auth: null
+      cocoda,
     }
   },
-  methods: {
-    updateUser (user) {
-      this.user = user
-      this.checkAuth()
-    },
-    updateAuth (auth) {
-      this.auth = auth
-      return this.checkAuth()
-    },
-    checkAuth () {
-      if (this.auth) {
-        const url = '/api/checkAuth?type=schemes&action=create'
-        const headers = { Authorization: `Bearer ${this.auth.token}` }
-        fetch(url, { headers }).then(res => { this.userCanAdd = res.ok })
-      } else {
-        this.userCanAdd = false
-      }
-    }
-  }
 }
 
-Vue.createApp(app).mount('#app')
-
-/* global Vue, LoginClient, fetch  */
+export {
+  ItemEditor,
+  VocabularySearch,
+  ApiUrl,
+}

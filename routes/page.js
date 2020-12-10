@@ -11,7 +11,7 @@ module.exports = (req, res) => {
     const content = marked(body)
     const { path } = req
     res.setHeader('Content-Type', 'text/html')
-    res.render('page', { config, content, path, ...attributes })
+    res.render('page', { config, content, path, ...attributes, page: path.replace(/^\/|\/$/g, '') })
   } else {
     req.next()
   }

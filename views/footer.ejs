@@ -18,29 +18,31 @@
             </p>
           </div>
           <% if (locals.item) { %>
-           <div class="col-md-2">
+            <div class="col-md-2">
             <p class="text-right">
               <a href="<%= utils.buildQuery({...query, format:"json"}) %>">JSON</a> |
               <a href="<%= utils.buildQuery({...query, format:"nt"}) %>">RDF</a>
             </p>
-           </div>
+            </div>
           <% } %>
         </div>
         <div class="row">
-         <div class="col text-muted">
-           <ul class="list-inline">
-             <li class="list-inline-item"><a href="/api/">API</a></li>
-             <li class="list-inline-item"><a href="/download">download</a></li>
-             <li class="list-inline-item"><a href="https://github.com/gbv/bartoc.org">sources</a></li>
-             <li class="list-inline-item"><a href="https://github.com/gbv/bartoc.org/issues">issues</a></li>
-           </ul>
-         </div>
+          <div class="col text-muted">
+            <ul class="list-inline">
+              <li class="list-inline-item"><a href="/api/">API</a></li>
+              <li class="list-inline-item"><a href="/download">download</a></li>
+              <li class="list-inline-item"><a href="https://github.com/gbv/bartoc.org">sources</a></li>
+              <li class="list-inline-item"><a href="https://github.com/gbv/bartoc.org/issues">issues</a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </footer>
   </div>
 </body>
 </html>
-<script src="/js/login-client.js"></script>
-<script src="/js/vue.js"></script>
-<script src="/js/app.js"></script>
+<script src="<%= config.vue.assetPrefix %>js/chunk-vendors.js"></script>
+<% if (config.env === "development") { %>
+<script src="<%= config.vue.assetPrefix %>js/chunk-common.js"></script>
+<% } %>
+<script src="<%= config.vue.assetPrefix %>js/app.js"></script>

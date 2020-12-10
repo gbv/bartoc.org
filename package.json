@@ -4,14 +4,18 @@
   "description": "BARTOC.org web interface",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "NODE_ENV=production nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint *.js src/*.js bin/*.js static/js/*.js; ejslint views/*.ejs",
     "fix": "eslint --fix *.js src/*.js bin/*.js static/js/*.js",
     "data": "mkdir -p cache; npm run data:nkostype; make -C data; make -C bin",
     "data:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > cache/nkostype.ndjson",
     "validate": "jskos-validate",
-    "dump": "js ./bin/dump.js"
+    "dump": "js ./bin/dump.js",
+    "vue:serve": "vue-cli-service serve",
+    "vue:build": "vue-cli-service build --no-clean --report-json",
+    "express:serve": "NODE_ENV=development nodemon server.js",
+    "dev": "concurrently \"npm:express:serve\" \"npm:vue:serve\""
   },
   "lint-staged": {
     "**/*.js": [
@@ -36,26 +40,59 @@
     "ejs": "^3.1.5",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.2",
-    "front-matter": "^3.2.1",
+    "front-matter": "^4.0.2",
     "gbv-login-client": "^0.2.13",
-    "jskos-cli": "^0.4.2",
+    "jskos-cli": "^0.4.5",
     "jsondiffpatch": "^0.4.1",
-    "jsonld": "^2.0.2",
+    "jsonld": "^3.2.0",
     "lodash": "^4.17.20",
-    "marked": "^0.7.0",
-    "n-readlines": "^1.0.0",
-    "vue": "^3.0.2"
+    "marked": "^1.2.5",
+    "n-readlines": "^1.0.1",
+    "vue": "^3.0.4"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.14.0",
+    "@fortawesome/fontawesome-free": "^5.15.1",
+    "@vue/cli-plugin-babel": "^4.5.9",
+    "@vue/cli-plugin-eslint": "^4.5.9",
+    "@vue/cli-service": "^4.5.9",
+    "@vue/compiler-sfc": "^3.0.4",
+    "@vue/eslint-config-standard": "^6.0.0",
+    "babel-eslint": "^10.1.0",
+    "concurrently": "^5.3.0",
     "ejs-lint": "github:gbv/ejs-lint",
-    "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.22.0",
+    "eslint": "^7.15.0",
+    "eslint-config-gbv": "git+https://github.com/gbv/eslint-config-gbv.git",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "lint-staged": "^9.5.0",
-    "nodemon": "^2.0.4"
+    "eslint-plugin-standard": "^5.0.0",
+    "eslint-plugin-vue": "^7.2.0",
+    "lint-staged": "^10.5.3",
+    "nodemon": "^2.0.6"
+  },
+  "vue": {
+    "publicPath": "http://localhost:8122/",
+    "devServer": {
+      "port": 8122,
+      "progress": false,
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    "pages": {
+      "app": "vue/main.js"
+    },
+    "filenameHashing": false,
+    "css": {
+      "extract": false
+    },
+    "runtimeCompiler": true
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "test/*",
+      "vue/*"
+    ]
   }
 }

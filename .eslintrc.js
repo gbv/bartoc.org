@@ -1,19 +1,30 @@
 module.exports = {
   env: {
     es6: true,
-    node: true
+    node: true,
   },
   extends: [
-    'standard'
+    "gbv",
+    "gbv/vue",
   ],
   globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly'
+    Atomics: "readonly",
+    SharedArrayBuffer: "readonly",
   },
   parserOptions: {
     ecmaVersion: 2018,
-    sourceType: 'module'
+    sourceType: "module",
+    parser: "babel-eslint",
   },
   rules: {
-  }
+    "template-curly-spacing": "off",
+    indent: [
+      "warn",
+      2,
+      {
+        ignoredNodes: ["TemplateLiteral"],
+        SwitchCase: 1,
+      },
+    ],
+  },
 }

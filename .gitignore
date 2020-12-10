@@ -6,6 +6,7 @@ config*.json
 !config.test.json
 !config/config.default.json
 !config/config.test.json
+dist/
 
 cache
 

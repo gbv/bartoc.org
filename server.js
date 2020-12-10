@@ -44,6 +44,7 @@ app.set('view engine', 'ejs')
 // static assets
 app.use(express.static('static'))
 app.use('/data/dumps/', express.static('data/dumps'))
+app.use('/dist/', express.static('dist'))
 
 // redirect permanently moved URLs from legacy BARTOC.org
 for (const [from, to] of Object.entries(config.redirects)) {
@@ -272,7 +273,7 @@ async function sendItem (req, res, item, vars = {}) {
 
 function render (req, res, view, locals) {
   const { query, path } = req
-  const vars = { config, query, path, utils, registries, repositories, nkostypes, accesstypes, formats }
+  const vars = { config, query, path, utils, registries, repositories, nkostypes, accesstypes, formats, page: path.replace(/^\/|\/$/g, '') }
   return res.render(view, { ...vars, ...locals })
 }
 
