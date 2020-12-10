@@ -4,7 +4,7 @@
   "description": "BARTOC.org web interface",
   "main": "server.js",
   "scripts": {
-    "start": "NODE_ENV=production nodemon server.js",
+    "start": "NODE_ENV=production node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint '**/*.js'; ejslint views/*.ejs; vue-cli-service lint --no-fix vue/**/*.vue",
     "fix": "eslint --fix '**/*.js'; vue-cli-service lint vue/**/*.vue",
