@@ -50,14 +50,6 @@ if (!config.baseUrl.endsWith("/")) {
   config.baseUrl += "/"
 }
 
-const pkg = require("../package.json")
-config.pkg = pkg
-// TODO: - Don't depend on pkg.vue.devServer.port
-// TODO: - assetPrefix for non-dev might have to be set
-config.vue = {
-  port: pkg.vue.devServer.port,
-  assetPrefix: env === "development" ? `http://localhost:${pkg.vue.devServer.port}/` : "/dist/",
-  pages: Object.keys(pkg.vue.pages),
-}
+config.vue.assetPrefix = env === "development" ? `http://localhost:${config.vue.port}/` : "/dist/"
 
 module.exports = config

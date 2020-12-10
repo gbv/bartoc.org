@@ -69,24 +69,6 @@
     "nodemon": "^2.0.6",
     "pre-commit": "^1.2.2"
   },
-  "vue": {
-    "publicPath": "http://localhost:8122/",
-    "devServer": {
-      "port": 8122,
-      "progress": false,
-      "headers": {
-        "Access-Control-Allow-Origin": "*"
-      }
-    },
-    "pages": {
-      "app": "vue/main.js"
-    },
-    "filenameHashing": false,
-    "css": {
-      "extract": false
-    },
-    "runtimeCompiler": true
-  },
   "nodemonConfig": {
     "ignore": [
       "test/*",

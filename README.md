@@ -69,14 +69,14 @@ Basic configuration is located in `config/config.default.json`. Selected fields 
 ## Run for testing
 
 ~~~sh
-npm run start
+npm run dev
 ~~~
 
 The application is made available at <http://localhost:8338/>.
 
 ## Deployment
 
-The application is temporarily deployed at <http://bartoc.gbv.de/> and will be made available at <http://bartoc.org/> with the relaunch.
+The application is deployed at <http://bartoc.org/>.
 
 Update an existing installation:
 
@@ -85,6 +85,8 @@ git pull
 npm install
 pm2 restart bartoc.org
 ~~~
+
+Note that `NODE_ENV` has to be set to `production`, otherwise Vue files will be requested from the dev server. This is given when using `npm run start`.
 
 ## Database dumps
 
