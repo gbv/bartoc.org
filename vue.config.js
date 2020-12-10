@@ -13,11 +13,13 @@ module.exports = {
     },
   },
   pages: {
+    // required because we're using an unusual path
     app: "vue/main.js",
   },
+  // don't add hashing so that the generated filenames don't change
   filenameHashing: false,
-  // prevent having separate .css files
   css: {
+    // prevent having separate .css files
     extract: false,
   },
   // required for in-DOM templates
