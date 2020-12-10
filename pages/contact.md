@@ -8,7 +8,7 @@ BARTOC content is curated by an international group of editors. Please contact o
 <div class="col">
 <h2>Austria</h2>
 
-**[Andreas Blumauer](https://www.poolparty.biz/semantic-web-company-gmbh/)**\
+**[Andreas Blumauer](https://www.poolparty.biz/semantic-web-company-gmbh/)** \
 Managing Director & CEO\
 Semantic Web Company GmbH / PoolParty
 
@@ -17,7 +17,7 @@ Semantic Web Company GmbH / PoolParty
 <div class="col">
 <h2>France</h2>
 
-**[Ghislain Atemezing, PhD](http://linkedvocabs.org/perso/index.html)**\
+**[Ghislain Atemezing, PhD](http://linkedvocabs.org/perso/index.html)** \
 R&D Engineer, Mondeca
 
 </div>
@@ -25,7 +25,7 @@ R&D Engineer, Mondeca
 <div class="col">
 <h2>Germany</h2>
 
-**[Project coli-conc](https://coli-conc.gbv.de/)**\
+**[Project coli-conc](https://coli-conc.gbv.de/)** \
 Head Office of the GBV Common Library Network
 
 Jakob Voß [](https://twitter.com/Nichtich)\
@@ -39,7 +39,7 @@ Stefan Peters
 <div class="col">
 <h2>Greece</h2>
 
-**[Dr. Haralabos Papatheodorou](http://www.linkedin.com/in/haralabospapatheodorou)**\
+**[Dr. Haralabos Papatheodorou](http://www.linkedin.com/in/haralabospapatheodorou)** \
 English to Greek medical translator
 
 </div>
@@ -55,7 +55,7 @@ Science and Technology Library, University of Pavia
 <div class="col">
 <h2>The Netherlands</h2>
 
-**[Gerard Coen](https://dans.knaw.nl/en/about/organisation-and-policy/staff/coen)**\
+**[Gerard Coen](https://dans.knaw.nl/en/about/organisation-and-policy/staff/coen)** \
 Data Archiving and Networked Services (DANS), The Hague
 
 </div>
@@ -67,7 +67,7 @@ Data Archiving and Networked Services (DANS), The Hague
 
 <h2>Norway</h2>
 
-**[Dan Michael O. Heggø](http://www.ub.uio.no/english/about/people/ureal/urealundervisning/dmheggo/)**\
+**[Dan Michael O. Heggø](http://www.ub.uio.no/english/about/people/ureal/urealundervisning/dmheggo/)** \
 University of Oslo Library
 
 </div>
@@ -86,7 +86,7 @@ Department of Knowledge & Information, Hansung University
 <div class="col">
 <h2>Spain</h2>
 
-**[Prof. Amadeu Pons](https://fbd.ub.edu/directori/ficha10)**\
+**[Prof. Amadeu Pons](https://fbd.ub.edu/directori/ficha10)** \
 Facultat d'Informació i Mitjans Audiovisuals (UB)
 
 </div>
@@ -96,7 +96,7 @@ Facultat d'Informació i Mitjans Audiovisuals (UB)
 <div class="col">
 <h2>Switzerland</h2>
 
-**[Dr. Andreas Ledl](https://www.fhnw.ch/de/personen/andreas-ledl)**\
+**[Dr. Andreas Ledl](https://www.fhnw.ch/de/personen/andreas-ledl)** \
 University of Applied Sciences and Arts Northwestern Switzerland
 
 </div>
@@ -104,7 +104,7 @@ University of Applied Sciences and Arts Northwestern Switzerland
 <div class="col">
 <h2>United Kingdom</h2>
 
-**[Suzanne Barbalet](http://www.data-archive.ac.uk/about/staff?sid=sbarba)**\
+**[Suzanne Barbalet](http://www.data-archive.ac.uk/about/staff?sid=sbarba)** \
 UK Data Service, University of Essex
 
 </div>
@@ -112,7 +112,7 @@ UK Data Service, University of Essex
 <div class="col">
 <h2>USA/North America</h2>
 
-**[Heather Hedden](http://www.hedden-information.com/about/)**\
+**[Heather Hedden](http://www.hedden-information.com/about/)** \
 Data & Knowledge Engineer, Semantic Web Company
 
 </div>
