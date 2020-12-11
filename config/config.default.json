@@ -4,6 +4,10 @@
   "vue": {
     "port": 8122
   },
+  "login": {
+    "api": "coli-conc.gbv.de/login/",
+    "ssl": true
+  },
   "name": "BARTOC.org",
   "fullname": "Basic Register of Thesauri, Ontologies & Classifications",
   "menu": [

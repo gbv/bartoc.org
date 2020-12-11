@@ -2,7 +2,7 @@
   <a
     v-if="connected"
     class="nav-link"
-    :href="'https://'+login+'account'">
+    :href="`http${login.ssl ? 's' : ''}://${login.api}account`">
     {{ user ? user.name : 'login' }}
   </a>
 </template>
@@ -14,14 +14,14 @@ export default {
   name: "UserStatus",
   props: {
     login: {
-      type: String,
+      type: Object,
       required: true,
     },
   },
   emits: ["update:user", "update:auth"],
   data () {
     return {
-      client: new LoginClient(this.login),
+      client: new LoginClient(this.login.api, { ssl: this.login.ssl }),
       connected: false,
       user: null,
       auth: {},
