@@ -72,7 +72,7 @@ Basic configuration is located in `config/config.default.json`. Selected fields 
 npm run dev
 ~~~
 
-The application is made available at <http://localhost:8338/>.
+The application is made available at <http://localhost:3883/>.
 
 ## Deployment
 
