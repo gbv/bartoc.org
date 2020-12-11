@@ -1,4 +1,7 @@
 {
   "name": "bartoc.org",
-  "script": "./server.js"
+  "script": "./server.js",
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
