@@ -41,7 +41,7 @@ label { font-weight: bold; }
 [v-cloak] { display: none; }
 
 a[href*="twitter.com"]:before {
-  font-family: FontAwesome;
+  font-family: "Font Awesome 5 Brands";
   content: "\f099";
   text-decoration: none;
   display: inline-block;
