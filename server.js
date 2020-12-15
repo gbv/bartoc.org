@@ -3,6 +3,7 @@ const page = require("./routes/page")
 const utils = require("./src/utils")
 const jsonld = require("jsonld")
 const path = require("path")
+const jskos = require("jskos-tools")
 const cdk = require("cocoda-sdk")
 const axios = require("axios")
 
@@ -192,7 +193,7 @@ async function enrichItem (item) {
   const subjects = item.subject || []
   if (subjects.length) {
     const found = await backend.getConcepts({ concepts: item.subject })
-    item.subject = found.map(utils.cleanupItem)
+    item.subject = found.map(jskos.clean)
     // add non-found subjects
     const uris = found.map(s => s.uri)
     for (const subj of subjects) {
