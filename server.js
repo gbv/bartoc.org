@@ -21,19 +21,9 @@ if (config.env !== "development") {
   })
 }
 
+
 const proxy = require("express-http-proxy")
 const backend = cdk.initializeRegistry(config.backend)
-
-// TODO: https://github.com/gbv/cocoda-sdk/issues/22
-backend.search = async ({ search }) => {
-  const url = `http://localhost:${config.port}/api/voc/search?search=` + encodeURIComponent(search)
-  return axios.get(url).then(res => res.data)
-}
-
-backend.countVocabularies = async () => {
-  const url = `http://localhost:${config.port}/api/voc?limit=1`
-  return axios.get(url).then(res => res.headers["x-total-count"])
-}
 
 // static data
 const registries = utils.indexByUri(utils.readNdjson("./data/registries.ndjson"))
@@ -166,7 +156,7 @@ async function vocabulariesSearch (req, res, next) {
   const { query } = req
 
   var search = query.search
-    ? backend.search({ properties: "*", search: query.search })
+    ? backend.vocSearch({ properties: "*", search: query.search })
     : backend.getSchemes({ properties: "*", ...query })
 
   if (query.uri) {
@@ -207,7 +197,8 @@ async function enrichItem (item) {
 
 // Statistics
 app.get("/stats", async (req, res) => {
-  const totalCount = await backend.countVocabularies()
+  const url = `http://localhost:${config.port}/api/voc?limit=1`
+  const totalCount = await axios.get(url).then(res => res.headers["x-total-count"])
   render(req, res, "stats", { title: "Statistics", totalCount })
 })
 
