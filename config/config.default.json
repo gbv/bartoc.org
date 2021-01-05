@@ -20,6 +20,10 @@
       "prefLabel": { "en": "Registries" }
     },
     {
+      "url": "/software",
+      "prefLabel": { "en": "Software" }
+    },
+    {
       "url": "/about",
       "prefLabel": { "en": "About" }
     },
