@@ -157,7 +157,7 @@ async function vocabulariesSearch (req, res, next) {
 
   var search = query.search
     ? backend.vocSearch({ properties: "*", search: query.search })
-    : backend.getSchemes({ properties: "*", ...query })
+    : backend.getSchemes({ properties: "*", params: query })
 
   if (query.uri) {
     search = search.then(result => {
