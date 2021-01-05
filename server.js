@@ -6,6 +6,7 @@ const path = require("path")
 const jskos = require("jskos-tools")
 const cdk = require("cocoda-sdk")
 const axios = require("axios")
+const querystring = require("querystring")
 
 // build our vue project on first run if report.json can't be found
 // TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
@@ -162,14 +163,13 @@ app.get("/edit", async (req, res, next) => {
 app.get("/vocabularies", vocabulariesSearch)
 
 async function vocabulariesSearch (req, res, next) {
-  const params = req.query
-  params.properties = "*" // TODO: supported in jskos-server?
+  const { query } = req
 
-  var search = params.search
-    ? backend.search({ search: params.search })
-    : backend.getSchemes({ params })
+  var search = query.search
+    ? backend.search({ properties: "*", search: query.search })
+    : backend.getSchemes({ properties: "*", ...query })
 
-  if (params.uri) {
+  if (query.uri) {
     search = search.then(result => {
       if (result.length) {
         return result[0]
@@ -182,7 +182,7 @@ async function vocabulariesSearch (req, res, next) {
   } else {
     search =
     search.then(result => {
-      render(req, res, "vocabularies", { title: "Vocabularies", result })
+      render(req, res, "vocabularies", { title: "Vocabularies", result, api: "voc" })
     })
   }
 
@@ -287,7 +287,7 @@ async function sendItem (req, res, item, vars = {}) {
 
 function render (req, res, view, locals) {
   const { query, path } = req
-  const vars = { config, query, path, utils, registries, repositories, nkostypes, accesstypes, formats, page: path.replace(/^\/|\/$/g, "") }
+  const vars = { config, query, path, utils, querystring, registries, repositories, nkostypes, accesstypes, formats, page: path.replace(/^\/|\/$/g, "") }
   return res.render(view, { ...vars, ...locals })
 }
 

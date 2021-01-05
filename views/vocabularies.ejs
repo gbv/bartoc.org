@@ -2,11 +2,9 @@
 
 <vocabulary-search :query='<%- JSON.stringify(query).replace(/'/g,"&apos;") %>'></vocabulary-search>
 
-<hr>
-
 <% if (result.length) { %>
 
-<%- include("pagination", { result, query }) %>
+<%- include("pagination", { result, query, api }) %>
 
 <table class="table table-borderless table-hover">
   <thead>
@@ -39,14 +37,12 @@
   <% } %>
   </tbody>
 </table>
-<%- include("pagination", { result, query }) %>
+<%- include("pagination", { result, query, api }) %>
 
 <% } else { %>
 
 <em>No vocabularies found matching your query!</em>
 
 <% } %>
-
-<hr>
 
 <%- include('footer') %>

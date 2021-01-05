@@ -33,9 +33,6 @@ module.exports = {
 
   indexByUri: array => array.reduce((obj, item) => { obj[item.uri] = item; return obj }, {}),
 
-  buildQuery: query => "?" + Object.keys(query)
-    .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(query[key])).join("&"),
-
   // TODO: move utility function to jskos-tools
   label (labels, language, fallback = "") {
     var value = fallback

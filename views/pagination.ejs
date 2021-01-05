@@ -1,19 +1,26 @@
-<ul class="pagination">
-<% if (result._totalCount > result.length) {
-  const total = result._totalCount
-  const limit = 500
-  const cur = Number(query.offset || 0)
-%>
-  <% for (let offset=0; offset<result._totalCount; offset+=limit) { %>
-  <li<%= cur == offset ? " class=current-page" : "" %>>
-    <a href="<%= utils.buildQuery({ ...query, limit, offset }) %>">
-      <%= offset+1 %>...<%=
-        offset+limit > total ? total : offset+limit
-      %>
-    </a>
-  </li>
+<nav aria-label="pagination">
+  <a href="/api/<%= api + "?" + querystring.stringify(query) %>" style="float: right;">
+    <i class="fa fa-code" aria-hidden="true"></i>
+  </a>
+  <ul class="pagination">
+    <% if (result._totalCount > result.length) {
+      const total = result._totalCount
+      const limit = 500
+      const cur = Number(query.offset || 0)
+    %>
+    <% for (let offset=0; offset<result._totalCount; offset+=limit) { %>
+    <li class="page-item <%= cur == offset ? " active" : "" %>">
+      <a href="?<%= querystring.stringify({ ...query, limit, offset }) %>" class="page-link">
+        <%= offset+1 %>...<%=
+          offset+limit > total ? total : offset+limit
+        %>
+      </a>
+    </li>
+    <% } %>
+  <% } else if (result.length > 7) { %>
+    <li class="page-item">
+      <a href="#" class="page-link">1...<%= result.length %></a>
+    </li>
   <% } %>
-<% } else if (result.length > 7) { %>
-  <li class=current-page">1...<%= result.length %></li>
-<% } %>
-</ul>
+  </ul>
+</nav>

@@ -20,8 +20,8 @@
           <% if (locals.item) { %>
             <div class="col-md-2">
             <p class="text-right">
-              <a href="<%= utils.buildQuery({...query, format:"json"}) %>">JSON</a> |
-              <a href="<%= utils.buildQuery({...query, format:"nt"}) %>">RDF</a>
+              <a href="?format=json">JSON</a> |
+              <a href="?format=nt">RDF</a>
             </p>
             </div>
           <% } %>
