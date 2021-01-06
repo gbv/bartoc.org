@@ -17,14 +17,16 @@
               <a href="<%= config.license.url %>"><%= config.license.name %></a>
             </p>
           </div>
-          <% if (locals.item) { %>
-            <div class="col-md-2">
+          <div class="col-md-2">
             <p class="text-right">
-              <a href="?format=json">JSON</a> |
-              <a href="?format=nt">RDF</a>
+             <% if (locals.item) { %>
+              <a href="/api/data?uri=<%= item.uri %>">JSON</a> |
+              <a href="/vocabularies?uri=<%= item.uri %>&format=nt">RDF</a>
+             <% } else if (locals.api && locals.query) { %>
+              <a href="/api/<%= api + "?" + querystring.stringify(query) %>">JSON</a>
+             <% } %>
             </p>
-            </div>
-          <% } %>
+          </div>
         </div>
         <div class="row">
           <div class="col text-muted">
