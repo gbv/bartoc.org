@@ -1,6 +1,8 @@
 import { createApp } from "vue"
 
-import { ItemEditor, VocabularySearch, ApiUrl } from "./components"
+import { ItemEditor, VocabularySearch } from "./components"
+import ServiceLink from "./components/ServiceLink.vue"
+
 import UserStatus from "./components/UserStatus.vue"
 // Note: Using the JSON files directly because Lodash is used in config/index.js
 import configDefault from "../config/config.default.json"
@@ -8,7 +10,7 @@ import configUser from "../config/config.json"
 const login = Object.assign({}, configDefault.login, configUser.login || {})
 
 const app = createApp({
-  components: { UserStatus, ItemEditor, VocabularySearch, ApiUrl },
+  components: { UserStatus, ItemEditor, VocabularySearch, ServiceLink },
   data() {
     return {
       login,

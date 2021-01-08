@@ -10,6 +10,9 @@
 <script>
 import LoginClient from "gbv-login-client"
 
+/**
+ * Shows and manages login status.
+ */
 export default {
   name: "UserStatus",
   props: {

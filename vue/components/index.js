@@ -1,3 +1,7 @@
+import FormRow from "./FormRow.vue"
+import SetSelect from "./SetSelect.vue"
+import ItemName from "./ItemName.vue"
+
 /* Utility functions */
 
 // TODO: use cdk instead
@@ -24,25 +28,6 @@ const indexingSchemes = [
     notation: ["ILC"],
   },
 ]
-
-/**
- * A row in a form with multiple input fields.
- */
-const FormRow = {
-  template: `
-    <div class="form-group row">
-      <label class="col-form-label col-sm-2">{{label}}</label>
-      <div class="col-sm-10 font-weight-light">
-        <slot/>
-      </div>
-    </div>`,
-  props: {
-    label: {
-      type: String,
-      default: "",
-    },
-  },
-}
 
 /**
  * Select one or a list of languages (should be extened to show full language names).
@@ -108,34 +93,12 @@ const ListEditor = {
   </table>`,
 }
 
-function prefLabel(item) {
-  if (item && item.prefLabel) {
-    if ("en" in item.prefLabel) return item.prefLabel.en
-    for (const lang in item.prefLabel) return item.prefLabel[lang]
-  }
-  return "???"
-}
-
-/**
- * Display an item with notation and prefLabel or its URI as fallback.
- */
-const ItemShort = {
-  template: `
-<span v-if="item.notation" v-text="item.notation[0]" style="font-weight: bold; padding-right: 0.5em;"/>
-<span v-if="item.prefLabel" v-text="prefLabel(item)"/>
-<span v-else-if="!item.notation" v-text="item.uri"/>`,
-  props: {
-    item: { type: Object, default: {} },
-  },
-  methods: { prefLabel },
-}
-
 const ItemInput = {
-  components: { ItemShort },
+  components: { ItemName },
   template: `
       <input v-show="hasFocus || !item.uri" @focus="hasFocus=true" @blur="hasFocus=false" ref="input" type="text" class="form-control" v-model="item.uri" v-on:keyup.enter="$event.target.blur()"/>
       <div v-if="!hasFocus" @click="edit()">
-       <item-short :item="item"/>
+       <item-name :item="item" :notation="true"/>
       <a href="" @focus="edit()"/>
     </div>`,
   props: {
@@ -182,12 +145,12 @@ const ItemInput = {
 
 const SubjectEditor = {
   mixins: [SetEditorMixin],
-  components: { ItemInput },
+  components: { ItemInput, ItemName },
   template: `
 <table class="table table-sm table-borderless">
   <tr v-for="(subject,i) in set">
     <td v-if="(subject.inScheme||[]).length">
-      {{shortLabel(findScheme(subject.inScheme[0].uri))}}
+      <item-name :item="findScheme(subject.inScheme[0].uri)" :notation="true" :prefLabel="false" />
     </td>
     <td v-else>?</td>
     <td class="item-input">
@@ -199,7 +162,7 @@ const SubjectEditor = {
     <td>
       <select class="form-control" v-model="nextScheme">
         <option v-for="scheme in indexingSchemes" :value="scheme.uri">
-          {{shortLabel(scheme)}}
+          <item-name :item="scheme" :notation="true" :prefLabel="false" />
         </option>
       </select>
     </td><td>
@@ -224,11 +187,6 @@ const SubjectEditor = {
       inScheme = [{ uri: inScheme.uri }]
       this.set.push({ inScheme, uri: "" })
     },
-    shortLabel(item) {
-      if (item && item.notation && item.notation.length) return item.notation[0]
-      return prefLabel(item)
-    },
-    prefLabel,
   },
 }
 
@@ -304,35 +262,6 @@ const LabelEditor = {
       this.$emit("update:prefLabel", prefLabel)
       this.$emit("update:altLabel", altLabel)
     },
-  },
-}
-
-/**
- * Select from multiple options.
- */
-const SetSelect = {
-  template: `
-  <select v-if="repeatable()" v-model="value" multiple :size="options.length" class="form-control">
-    <option v-for="opt in options" v-bind:value="{ uri: opt.uri }">{{prefLabel(opt)}}</option>
-  </select>
-  <select v-else v-model="value" class="form-control">
-    <option v-for="opt in options" v-bind:value="{ uri: opt.uri }">{{prefLabel(opt)}}</option>
-  </select>`,
-  props: {
-    modelValue: [Array, Object],
-    options: Array,
-  },
-  data() {
-    return {
-      value: this.repeatable() ? [...this.modelValue] : this.modelValue,
-    }
-  },
-  created() {
-    this.$watch("value", value => { this.$emit("update:modelValue", value) })
-  },
-  methods: {
-    prefLabel,
-    repeatable() { return Array.isArray(this.modelValue) },
   },
 }
 
@@ -808,30 +737,7 @@ const VocabularySearch = {
   },
 }
 
-const getTextChildren = nodes => nodes.map(node => typeof node.children === "string" ? node.children : "").join("")
-
-const ApiUrl = {
-  template: `<a :href="baseUrl"><slot/></a>
-    <a v-if="cocoda" class="btn btn-sm btn-primary" style="margin-left: 1em" :href="cocoda"
-    >Cocoda Mapping Tool</a>
-   `,
-  props: {
-    uri: String,
-  },
-  data() {
-    const slot = this.$slots.default
-    const baseUrl = slot ? getTextChildren(slot()) : ""
-    const cocoda = baseUrl.match(/^https?:\/\/(api\.dante\.gbv\.de|coli-conc\.gbv\.de\/api)\//)
-      ? "https://coli-conc.gbv.de/cocoda/app/?fromScheme=" + encodeURIComponent(this.uri) : ""
-    return {
-      baseUrl,
-      cocoda,
-    }
-  },
-}
-
 export {
   ItemEditor,
   VocabularySearch,
-  ApiUrl,
 }

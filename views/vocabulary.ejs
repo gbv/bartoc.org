@@ -52,7 +52,7 @@
   <!-- TODO: partOf (listed in) -->
 
   <%- include('row-list', { label: 'Services (API)', list: item.API,
-      view: s => `<api-url :uri='"${item.uri}"'>${s}</api-url>` }) %>
+      view: s => `<service-link :vocabulary='"${item.uri}"' :api='"${s}"'></service-link>` }) %>
 
   <%- include('row-list', { label: 'Listed in', list: item.partOf,
       view: s => include('item', { item: registries[s.uri] || { uri: s.uri } })  }) %>
