@@ -1,6 +1,7 @@
 import { createApp } from "vue"
 
-import { ItemEditor, VocabularySearch } from "./components"
+import ItemEditor from "./components/ItemEditor.vue"
+import VocabularySearch from "./components/VocabularySearch.vue"
 import ServiceLink from "./components/ServiceLink.vue"
 
 import UserStatus from "./components/UserStatus.vue"
