@@ -46,7 +46,6 @@
       v-model="item.languages"
       class="form-control"
       :repeatable="true" />
-    Comma-separated list of language codes which the vocabulary is available in.
   </form-row>
   <form-row :label="'Size'">
     <input
@@ -341,7 +340,7 @@ export default {
     },
     current: {
       type: Object,
-      required: true,
+      default: () => ({}),
     },
   },
   data() {

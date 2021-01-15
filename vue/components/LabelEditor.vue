@@ -1,23 +1,29 @@
 <template>
   <table class="table table-sm table-borderless">
-    <tr>
-      <th>title</th><th colspan="2">
-        language code
+    <tr class="d-flex">
+      <th class="col-9">
+        title
+      </th>
+      <th
+        colspan="2"
+        class="col-3">
+        language
       </th>
     </tr>
     <tr
       v-for="(label,i) in labels"
-      :key="i">
-      <td>
+      :key="i"
+      class="d-flex">
+      <td class="col-9">
         <input
           v-model="label.label"
           type="text"
           class="form-control">
-      </td><td>
+      </td><td class="col-2">
         <language-select
           v-model="label.language"
           class="form-control" />
-      </td><td>
+      </td><td class="col-1">
         <button
           type="button"
           class="btn btn-outline-primary"
@@ -34,9 +40,6 @@
           @click="add()">
           +
         </button>
-      </td>
-      <td colspan="2">
-        two-letter code if possible, three letter otherwise.
       </td>
     </tr>
   </table>

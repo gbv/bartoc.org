@@ -27,11 +27,11 @@
         :options="kostypes"
         @update:modelValue="type=$event.uri" />
     </form-row>
-    <form-row :label="'Language'">
+    <form-row :label="'Languages'">
       <language-select
         v-model="languages"
+        :repeatable="true"
         class="form-control" />
-      language code which the vocabulary is available in (en, fr, es...)
     </form-row>
     <form-row :label="'License'">
       <set-select
@@ -79,7 +79,7 @@ export default {
     return {
       type,
       search,
-      languages,
+      languages: (languages||"").split(","),
       subjects,
       license,
       country, // TODO: https://github.com/gbv/bartoc.org/issues/24
@@ -110,7 +110,7 @@ export default {
     },
     submitFilter() {
       const { type, languages, license } = this
-      const query = { type, languages, license }
+      const query = { type, languages: languages.join(","), license }
       if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join("|")
       this.submit(query)
     },
