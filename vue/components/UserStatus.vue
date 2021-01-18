@@ -47,7 +47,11 @@ export default {
     this.client.addEventListener(logout, () => { this._setUser(null) })
     this.client.addEventListener(token, ({ token }) => { this.auth.token = token; this._updateAuth() })
     this.client.addEventListener(error, (e) => {
-      this.error = e.error.constructor.name
+      if (e.error instanceof LoginClient.errors.ThirdPartyCookiesBlockedError) {
+        this.error = "Login is not possible because third-party cookies are blocked."
+      } else {
+        this.error = "Login is not possible because connection failed."
+      }
     })
     this.client.connect()
   },
