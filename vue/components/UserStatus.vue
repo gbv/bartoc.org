@@ -5,6 +5,12 @@
     :href="`http${login.ssl ? 's' : ''}://${login.api}account`">
     {{ user ? user.name : 'login' }}
   </a>
+  <a
+    v-else
+    class="nav-link"
+    :title="error"
+    style="text-decoration: line-through">login
+  </a>
 </template>
 
 <script>
@@ -28,10 +34,11 @@ export default {
       connected: false,
       user: null,
       auth: {},
+      error: null,
     }
   },
   created () {
-    const { connect, disconnect, login, logout, update, token, about } = LoginClient.events
+    const { connect, disconnect, login, logout, update, token, about, error } = LoginClient.events
     this.client.addEventListener(about, ({ publicKey }) => { this.auth.publicKey = publicKey; this._updateAuth() })
     this.client.addEventListener(connect, () => { this.connected = true })
     this.client.addEventListener(disconnect, () => { this.connected = false })
@@ -39,7 +46,9 @@ export default {
     this.client.addEventListener(update, ({ user }) => { this._updadeUser(user) })
     this.client.addEventListener(logout, () => { this._setUser(null) })
     this.client.addEventListener(token, ({ token }) => { this.auth.token = token; this._updateAuth() })
-    // this.client.addEventListener(error, console.warn)
+    this.client.addEventListener(error, (e) => {
+      this.error = e.error.constructor.name
+    })
     this.client.connect()
   },
   methods: {
