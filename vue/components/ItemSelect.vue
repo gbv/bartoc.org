@@ -1,5 +1,20 @@
 <template>
   <Multiselect
+    v-if="repeatable"
+    v-model="value"
+    mode="tags"
+    :caret="false"
+    :options="search"
+    :filter-results="false"
+    :min-chars="0"
+    :resolve-on-load="true"
+    :delay="0"
+    :searchable="true"
+    :loading="isLoading"
+    :max-height="300"
+    @change="$emit('update:modelValue', $event)" />
+  <Multiselect
+    v-else
     v-model="value"
     :options="search"
     :filter-results="false"
@@ -26,26 +41,40 @@ export default {
   },
   props: {
     modelValue: {
-      type: String,
-      default: () => "",
+      type: [String, Array],
+      default: () => this.repeatable ? [] : "",
+    },
+    repeatable: {
+      type: Boolean,
+      default: false,
     },
     scheme: {
       type: Object,
       required: true,
     },
+    extractValue: {
+      type: Function,
+      default: (concept) => concept.uri,
+    },
+    extractLabel: {
+      type: Function,
+      default: (concept) => `${jskos.notation(concept)} ${jskos.prefLabel(concept)}`,
+    },
   },
   emits: ["update:modelValue"],
   data() {
     return {
-      value: this.modelValue,
+      value: this.modelValue || (this.repeatable ? [] : null),
       isLoading: false,
       cancel: null,
       registry: null,
     }
   },
   watch: {
-    scheme() {
-      this.initializeRegistry()
+    scheme(newScheme, oldScheme) {
+      if (!jskos.compare(newScheme, oldScheme)) {
+        this.initializeRegistry()
+      }
     },
   },
   created() {
@@ -92,7 +121,7 @@ export default {
       this.isLoading = false
 
       return results.map(c => ({
-        value: c.uri, label: `${jskos.notation(c)} ${jskos.prefLabel(c)}`,
+        value: this.extractValue(c), label: this.extractLabel(c),
       }))
     },
   },

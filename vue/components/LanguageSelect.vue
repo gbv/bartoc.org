@@ -1,98 +1,61 @@
 <template>
-  <Multiselect
-    v-if="repeatable"
+  <item-select
     v-model="value"
-    mode="tags"
-    :caret="false"
-    :options="search"
-    :filter-results="false"
-    :min-chars="0"
-    :resolve-on-load="true"
-    :delay="0"
-    :searchable="true"
-    :loading="isLoading"
-    :max-height="300"
-    @change="$emit('update:modelValue', $event)" />
-  <Multiselect
-    v-else
-    v-model="value"
-    :options="search"
-    :filter-results="false"
-    :min-chars="0"
-    :resolve-on-load="true"
-    :delay="0"
-    :searchable="true"
-    :loading="isLoading"
-    :max-height="300"
-    @change="$emit('update:modelValue', $event)" />
+    :repeatable="repeatable"
+    :scheme="scheme"
+    :extract-value="extractValue"
+    :extract-label="extractLabel" />
 </template>
 
 <script>
-import Multiselect from "@vueform/multiselect"
-import cdk from "cocoda-sdk"
-
-const scheme = { uri: "http://bartoc.org/en/node/20287" }
-const registry = cdk.initializeRegistry({
-  provider: "ConceptApi",
-  api: "/api/",
-  schemes: [scheme],
-})
+import ItemSelect from "./ItemSelect"
+import jskos from "jskos-tools"
 
 /**
  * Select one or a list of languages.
+ *
+ * Is simply a wrapper around ItemSelect since this is used in different places.
  */
 export default {
   components: {
-    Multiselect,
+    ItemSelect,
   },
   props: {
     modelValue: {
-      type: [Array, String],
-      default: () => "",
+      type: [String, Array],
+      default: () => this.repeatable ? [] : "",
     },
-    repeatable: Boolean,
+    repeatable: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ["update:modelValue"],
   data() {
     return {
-      value: (this.modelValue || (this.repeatable ? [] : "und")),
-      isLoading: false,
-      cancel: null,
+      // TODO: Do not hardcode this.
+      scheme: { uri: "http://bartoc.org/en/node/20287", API: "/api/" },
     }
   },
+  computed: {
+    /**
+     * Passthrough model value.
+     */
+    value: {
+      get() {
+        return this.modelValue
+      },
+      set(val) {
+        this.$emit("update:modelValue", val)
+      },
+    },
+  },
   methods: {
-    async search(query) {
-
-      this.isLoading = true
-      // cancel previos request if necessary
-      this.cancel && this.cancel("canceled")
-
-      let promise
-      if (query) {
-        promise = registry.search({ search: query, scheme })
-      } else {
-        promise = registry.getTop({ scheme })
-      }
-      this.cancel = promise.cancel
-
-      let results = []
-      try {
-        results = await promise
-      } catch (error) {
-        if (error.message === "canceled") {
-          return
-        }
-        // seems to be a network error, logging to console
-        console.error(error)
-        results = []
-      }
-
-      this.cancel = null
-      this.isLoading = false
-
-      return results.map(c => ({
-        value: c.notation[0], label: c.prefLabel.en,
-      }))
+    extractValue(concept) {
+      return jskos.notation(concept)
+    },
+    extractLabel(concept) {
+      return jskos.prefLabel(concept)
     },
   },
 }
