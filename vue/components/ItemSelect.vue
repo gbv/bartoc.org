@@ -30,7 +30,7 @@
 <script>
 import Multiselect from "@vueform/multiselect"
 import jskos from "jskos-tools"
-import { initializeRegistryForScheme } from "../utils"
+import { initializeRegistry } from "../utils"
 
 /**
  * Select one or a list of languages.
@@ -82,7 +82,7 @@ export default {
   },
   methods: {
     initializeRegistry() {
-      this.registry = this.scheme ? initializeRegistryForScheme(this.scheme) : null
+      this.registry = this.scheme ? initializeRegistry(this.scheme.API) : null
     },
     async search(query) {
       if (!this.registry) {

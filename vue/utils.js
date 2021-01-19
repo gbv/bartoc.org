@@ -1,5 +1,26 @@
 import cdk from "cocoda-sdk"
 
+// Use a store to minimize number of registry initializations
+const store = {
+  registries: [],
+  getRegistry(api) {
+    // 1. Try to get registry from cache
+    let registry = this.registries.find(r => r._jskos.api === api)
+    if (!registry) {
+      // 2. If not found, initialize it
+      registry = cdk.initializeRegistry({
+        provider: api.includes("skosmos") ? "SkosmosApi" : "ConceptApi",
+        api,
+        // schemes is only necessary for using `getSchemes` which we don't use here.
+        schemes: [],
+      })
+      // 3. Add to cache
+      this.registries.push(registry)
+    }
+    return registry
+  },
+}
+
 // TODO: configure somewhere else, this is part of BARTOC data anyway
 export const indexingSchemes = [
   {
@@ -35,12 +56,8 @@ export function loadConcepts(api, uri) {
   return fetch(api).then(res => res ? res.json() : [])
 }
 
-export function initializeRegistryForScheme(scheme) {
-  return cdk.initializeRegistry({
-    provider: scheme.API.includes("skosmos") ? "SkosmosApi" : "ConceptApi",
-    api: scheme.API,
-    schemes: [scheme],
-  })
+export function initializeRegistry(api) {
+  return store.getRegistry(api)
 }
 
 // TODO: These methods have to be merged. Also determining how to initialize the registry should be its own utility method.
@@ -48,7 +65,7 @@ export async function cdkLoadConcepts(scheme, uri) {
   if (!scheme || !scheme.API || !uri) {
     return []
   }
-  const registry = initializeRegistryForScheme(scheme)
+  const registry = initializeRegistry(scheme.API)
   const result = await registry.getConcepts({ concepts: [{ uri, inScheme: [scheme] }] })
   return result
 }
