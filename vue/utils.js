@@ -27,7 +27,7 @@ export const indexingSchemes = [
     uri: "http://bartoc.org/en/node/241",
     namespace: "http://dewey.info/class/",
     notation: ["DDC"],
-    API: "/api/",
+    API: ["/api/"],
   },
   // NOTE: For BARTOC, we need to have those URIs in the `uri` field that the API uses.
   // ? Is this an issue if we use different URIs?
@@ -38,7 +38,7 @@ export const indexingSchemes = [
     prefLabel: { en: "EuroVoc" },
     notation: ["EUROVOC"],
     VOCID: "EuroVoc",
-    API: "https://bartoc-skosmos.unibas.ch/rest/v1/",
+    API: ["https://bartoc-skosmos.unibas.ch/rest/v1/"],
   },
   {
     uri: "https://bartoc.org/ILC/1",
@@ -46,7 +46,7 @@ export const indexingSchemes = [
     namespace: "http://bartoc.org/en/ILC/",
     notation: ["ILC"],
     VOCID: "ILC",
-    API: "https://bartoc-skosmos.unibas.ch/rest/v1/",
+    API: ["https://bartoc-skosmos.unibas.ch/rest/v1/"],
   },
 ]
 
@@ -62,10 +62,10 @@ export function initializeRegistry(api) {
 
 // TODO: These methods have to be merged. Also determining how to initialize the registry should be its own utility method.
 export async function cdkLoadConcepts(scheme, uri) {
-  if (!scheme || !scheme.API || !uri) {
+  if (!scheme || !scheme.API || !scheme.API.length || !uri) {
     return []
   }
-  const registry = initializeRegistry(scheme.API)
+  const registry = initializeRegistry(scheme.API[0])
   const result = await registry.getConcepts({ concepts: [{ uri, inScheme: [scheme] }] })
   return result
 }

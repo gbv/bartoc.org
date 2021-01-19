@@ -34,7 +34,7 @@ export default {
   data() {
     return {
       // TODO: Do not hardcode this.
-      scheme: { uri: "http://bartoc.org/en/node/20287", API: "/api/" },
+      scheme: { uri: "http://bartoc.org/en/node/20287", API: ["/api/"] },
     }
   },
   computed: {
