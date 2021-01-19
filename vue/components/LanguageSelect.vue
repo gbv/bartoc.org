@@ -60,21 +60,3 @@ export default {
   },
 }
 </script>
-
-<style src="@vueform/multiselect/themes/default.css"></style>
-<style>
-/* Adjust for Bootstrap CSS */
-div.multiselect {
-  border: 0;
-  padding: 0;
-}
-div.multiselect-input, div.multiselect-options {
-  border: 1px solid #ced4da;
-}
-div.multiselect-options {
-  overflow-x: hidden;
-}
-div.multiselect.form-control {
-  height: inherit;
-}
-</style>
