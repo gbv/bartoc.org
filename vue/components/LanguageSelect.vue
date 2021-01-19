@@ -43,7 +43,7 @@ export default {
      */
     value: {
       get() {
-        return this.modelValue
+        return this.modelValue || "und"
       },
       set(val) {
         this.$emit("update:modelValue", val)
