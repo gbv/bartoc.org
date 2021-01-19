@@ -13,7 +13,9 @@
         ?
       </td>
       <td class="item-input">
-        <item-input v-model="set[i]" />
+        <item-input
+          v-model="set[i]"
+          :scheme="findScheme(subject.inScheme[0].uri)" />
       </td><td>
         <button
           type="button"
@@ -25,14 +27,14 @@
     </tr><tr>
       <td>
         <select
-          v-model="nextScheme"
+          v-model="schemeUri"
           class="form-control">
           <option
-            v-for="scheme in indexingSchemes"
-            :key="scheme.uri"
-            :value="scheme.uri">
+            v-for="s in indexingSchemes"
+            :key="s.uri"
+            :value="s.uri">
             <item-name
-              :item="scheme"
+              :item="s"
               :notation="true"
               :pref-label="false" />
           </option>
@@ -53,18 +55,21 @@
 <script>
 import SetEditorMixin from "./SetEditorMixin.js"
 import ItemName from "./ItemName.vue"
-import { indexingSchemes, loadConcepts } from "../utils.js"
+import ItemSelect from "./ItemSelect"
+import { indexingSchemes, cdkLoadConcepts } from "../utils.js"
+import jskos from "jskos-tools"
 
 const ItemInput = {
-  components: { ItemName },
+  components: { ItemName, ItemSelect },
   template: `
-      <input v-show="hasFocus || !item.uri" @focus="hasFocus=true" @blur="hasFocus=false" ref="input" type="text" class="form-control" v-model="item.uri" v-on:keyup.enter="$event.target.blur()"/>
+      <item-select v-show="hasFocus || !item.uri" @open="hasFocus=true" @close="hasFocus=false" ref="input" type="text" class="form-control" v-model="item.uri" v-on:keyup.enter="$event.target.blur()" :scheme="scheme" />
       <div v-if="!hasFocus" @click="edit()">
        <item-name :item="item" :notation="true"/>
       <a href="" @focus="edit()"/>
     </div>`,
   props: {
     modelValue: Object,
+    scheme: Object,
   },
   data() {
     return {
@@ -92,12 +97,14 @@ const ItemInput = {
     edit() {
       this.hasFocus = true
       this.$nextTick(() => {
-        this.$refs.input.focus()
+        // TODO: Can this be done more elegantly?
+        const input = this.$refs.input.$el.getElementsByTagName("input")[0]
+        input && input.focus()
       })
     },
     loadDetails() {
       const { uri, inScheme } = this.item
-      loadConcepts("/api/data", uri).then(res => {
+      cdkLoadConcepts(this.scheme, uri).then(res => {
         this.item = res[0] || { uri, inScheme }
       })
     },
@@ -109,16 +116,21 @@ export default {
   mixins: [SetEditorMixin],
   data() {
     return {
-      nextScheme: indexingSchemes[0].uri,
       indexingSchemes,
+      schemeUri: indexingSchemes[0].uri,
     }
+  },
+  computed: {
+    scheme() {
+      return this.findScheme(this.schemeUri)
+    },
   },
   methods: {
     findScheme(uri) {
-      return this.indexingSchemes.find(scheme => scheme.uri === uri)
+      return this.indexingSchemes.find(scheme => jskos.compare(scheme, { uri }))
     },
     add() {
-      var inScheme = this.findScheme(this.nextScheme)
+      var inScheme = this.scheme
       inScheme = [{ uri: inScheme.uri }]
       this.set.push({ inScheme, uri: "" })
     },
