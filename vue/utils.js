@@ -43,7 +43,7 @@ export const indexingSchemes = [
   {
     uri: "https://bartoc.org/ILC/1",
     identifier: ["http://bartoc.org/de/node/472"],
-    namespace: "http://bartoc.org/en/ILC/",
+    namespace: "https://bartoc.org/ILC/1/",
     notation: ["ILC"],
     VOCID: "ILC",
     API: ["https://bartoc-skosmos.unibas.ch/rest/v1/"],
