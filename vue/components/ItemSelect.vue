@@ -1,6 +1,7 @@
 <template>
   <Multiselect
     v-if="repeatable"
+    ref="multiselect"
     v-model="value"
     mode="tags"
     :caret="false"
@@ -15,6 +16,7 @@
     @change="$emit('update:modelValue', $event)" />
   <Multiselect
     v-else
+    ref="multiselect"
     v-model="value"
     :options="search"
     :filter-results="false"
@@ -123,6 +125,10 @@ export default {
       return results.map(c => ({
         value: this.extractValue(c), label: this.extractLabel(c),
       }))
+    },
+    focus() {
+      const input = this.$refs.multiselect && this.$refs.multiselect.input
+      input && input.focus()
     },
   },
 }

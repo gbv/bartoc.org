@@ -97,9 +97,7 @@ const ItemInput = {
     edit() {
       this.hasFocus = true
       this.$nextTick(() => {
-        // TODO: Can this be done more elegantly?
-        const input = this.$refs.input.$el.getElementsByTagName("input")[0]
-        input && input.focus()
+        this.$refs.input && this.$refs.input.focus()
       })
     },
     loadDetails() {
