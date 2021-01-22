@@ -10,7 +10,9 @@
     <title><%= config.name %><%= title ? ": " + title : "" %></title>
     <link href="<%= config.vue.assetPrefix %>js/chunk-vendors.js" rel="preload" as="script">
     <link href="<%= config.vue.assetPrefix %>js/app.js" rel="preload" as="script">
-    <% if (locals.item) { %><link rel="canonical" href="<%= item.uri %>" /><% } %>
+    <% if (locals.item && locals.item.uri.match(/^https?:\/\/bartoc\.org/)) { %>
+    <link rel="canonical" href="<%= item.uri %>" />
+    <% } %>
   </head>
   <body>
     <div id="app">
