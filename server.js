@@ -23,7 +23,14 @@ if (config.env !== "development") {
 
 
 const proxy = require("express-http-proxy")
-const backend = cdk.initializeRegistry(config.backend)
+
+let backend
+try {
+  backend = cdk.initializeRegistry(config.backend)
+} catch (error) {
+  backend = null
+  console.error("Error: The backend could not be initialized! Please check the backend configuration in config/config.json!")
+}
 
 // static data
 const registries = utils.indexByUri(utils.readNdjson("./data/registries.ndjson"))
@@ -126,6 +133,15 @@ app.use("/api", (req, res, next) => {
       },
     })(req, res, next)
   }
+})
+
+// if the backend was not initialize, throw error here
+app.use((req, res, next) => {
+  if (!backend) {
+    // Note: We don't need any explanation here because we're handling this case in the error handling route.
+    next(new Error())
+  }
+  next()
 })
 
 // edit form
@@ -297,10 +313,24 @@ app.use((req, res) => {
 })
 
 // Backend error or another kind of bug
-app.use((err, req, res) => {
-  // console.error(err)
+app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err)
+  }
+  const errors = require("cocoda-sdk/errors")
+  let message
+  if (!backend) {
+    message = "The backend was not configured properly."
+  } else if (err instanceof errors.NetworkError) {
+    message = `The backend was not reachable (status: ${err.code || (err.relatedError && err.relatedError.code)})`
+  }
+  // TODO: Handle more errors here.
+  else {
+    message = err.message
+  }
+  // TODO: Should the error be logged to the console?
   res.status(500)
-  render(req, res, "500", { title: err.message })
+  render(req, res, "500", { title: err.message, message })
 })
 
 // Start server
