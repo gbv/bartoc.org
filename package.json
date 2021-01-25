@@ -35,7 +35,7 @@
   "dependencies": {
     "@vueform/multiselect": "^1.2.5",
     "axios": "^0.21.1",
-    "cocoda-sdk": "^1.0.9",
+    "cocoda-sdk": "^1.0.10",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.2",
