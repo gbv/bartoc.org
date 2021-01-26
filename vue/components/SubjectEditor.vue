@@ -46,7 +46,6 @@
           @click="add()">
           +
         </button>
-        Please use concept URIs (unless <a href="https://github.com/gbv/bartoc.org/issues/12">this issue</a> is solved)!
       </td>
     </tr>
   </table>
@@ -135,3 +134,12 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+table tr td:first-child {
+  min-width: 130px;
+}
+table tr td:nth-child(2) {
+  width: 100%;
+}
+</style>
