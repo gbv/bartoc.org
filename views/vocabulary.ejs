@@ -41,7 +41,7 @@
 
   <%  var address = []
      if (item.ADDRESS) {
-       for(let field of ['street','ext','locality','code','country']) {
+       for(let field of ['street','ext','locality','region','code','country']) {
          if (item.ADDRESS[field]) address.push(item.ADDRESS[field])
        }
      }

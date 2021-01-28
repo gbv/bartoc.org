@@ -244,48 +244,7 @@ import LanguageSelect from "./LanguageSelect.vue"
 import LabelEditor from "./LabelEditor.vue"
 import SubjectEditor from "./SubjectEditor.vue"
 import ListEditor from "./ListEditor.vue"
-
-const AddressEditor = {
-  emits: ["update:modelValue"],
-  template: `
-  <table class="table-sm">
-    <tr>
-      <td>Street address</td>
-      <td><input type="text" class="form-control" v-model="street"/></td>
-    </tr><tr>
-      <td></td>
-      <td><input type="text" class="form-control" v-model="ext"/></td>
-    </tr><tr>
-      <td>City</td>
-      <td><input type="text" class="form-control" v-model="locality"/></td>
-    </tr><tr>
-      <td>Postal code</td>
-      <td><input type="text" class="form-control" v-model="code"/></td>
-    </tr><tr>
-      <td>Country</td>
-      <td><input type="text" class="form-control" v-model="country"/></td>
-    </tr>
-  </table>
-  `,
-  props: {
-    modelValue: Object,
-  },
-  data() {
-    const { ext, street, locality, code, country } = (this.modelValue || {})
-    return { ext, street, locality, code, country }
-  },
-  created() {
-    for (const name of ["ext", "street", "locality", "code", "country"]) {
-      this.$watch(name, this.update)
-    }
-  },
-  methods: {
-    update() {
-      const { ext, street, locality, code, country } = this
-      this.$emit("update:modelValue", { ext, street, locality, code, country })
-    },
-  },
-}
+import AddressEditor from "./AddressEditor"
 
 const PublisherEditor = {
   emits: ["update:modelValue"],

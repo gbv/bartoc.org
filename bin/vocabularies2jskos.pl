@@ -235,6 +235,10 @@ while (<>) {
             map { ( $_ => $R{ $field{$_} } ) }
             grep { $R{ $field{$_} } } keys %field
         };
+
+        if ( $R{Address} =~ /<span class="state">([^<]+)<\/span>/ ) {
+            $jskos{ADDRESS}{region} = $1;
+        }
     }
 
     if ( $R{'SKOS Vocabulary Service'} ) {
