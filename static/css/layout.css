@@ -43,3 +43,10 @@ a[href*="twitter.com"]:before {
   text-decoration: none;
   display: inline-block;
 }
+a[href*="orcid.org"]:before {
+  font-family: "Font Awesome 5 Brands";
+  content: "\f8d2";
+  text-decoration: none;
+  color: #A6CE39;
+  display: inline-block;
+}
