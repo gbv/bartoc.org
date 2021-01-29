@@ -1,56 +1,107 @@
 <template>
-  <form @submit.prevent="submitSearch">
-    <form-row :label="'Search'">
-      <div class="row">
-        <div class="col col-md-10">
-          <input
-            v-model="search"
-            type="text"
-            class="form-control">
-        </div>
-        <div class="col col-md-2">
+  <ul
+    class="nav nav-tabs"
+    role="tablist">
+    <li
+      class="nav-item"
+      role="presentation">
+      <a
+        class="nav-link"
+        :class="{
+          active: tab === 0,
+        }"
+        href=""
+        data-toggle="tab"
+        role="tab"
+        :aria-selected="tab === 0"
+        @click.prevent="tab = 0">Search</a>
+    </li>
+    <li
+      class="nav-item"
+      role="presentation">
+      <a
+        class="nav-link"
+        :class="{
+          active: tab === 1,
+        }"
+        href=""
+        role="tab"
+        :aria-selected="tab === 1"
+        @click.prevent="tab = 1">Filter</a>
+    </li>
+  </ul>
+  <div
+    class="tab-content p-3">
+    <div
+      class="tab-pane fade"
+      :class="{
+        show: tab === 0,
+        active: tab === 0,
+      }"
+      role="tabpanel"
+      aria-labelledby="home-tab">
+      <form @submit.prevent="submitSearch">
+        <form-row :label="'Search'">
+          <div class="row">
+            <div class="col col-md-10">
+              <input
+                v-model="search"
+                type="text"
+                class="form-control">
+            </div>
+            <div class="col col-md-2">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                @click="submitSearch">
+                search
+              </button>
+            </div>
+          </div>
+        </form-row>
+      </form>
+    </div>
+    <div
+      class="tab-pane fade"
+      :class="{
+        show: tab === 1,
+        active: tab === 1,
+      }"
+      role="tabpanel"
+      aria-labelledby="profile-tab">
+      <form @submit.prevent="submitFilter">
+        <form-row :label="'KOS Type'">
+          <set-select
+            :model-value="{uri:type}"
+            :options="kostypes"
+            @update:modelValue="type=$event.uri" />
+        </form-row>
+        <form-row :label="'Languages'">
+          <language-select
+            v-model="languages"
+            :repeatable="true"
+            class="form-control" />
+        </form-row>
+        <form-row :label="'License'">
+          <set-select
+            :model-value="{uri:license}"
+            :options="licenses"
+            @update:modelValue="license=$event.uri" />
+        </form-row>
+        <form-row :label="'Subject'">
+          <subject-editor v-model="subjects" />
+        </form-row>
+        <form-row>
           <button
             type="submit"
             class="btn btn-primary"
-            @click="submitSearch">
-            search
+            @click="submitFilter">
+            filter
           </button>
-        </div>
-      </div>
-    </form-row>
-  </form>
-  <hr>
-  <form @submit.prevent="submitFilter">
-    <form-row :label="'KOS Type'">
-      <set-select
-        :model-value="{uri:type}"
-        :options="kostypes"
-        @update:modelValue="type=$event.uri" />
-    </form-row>
-    <form-row :label="'Languages'">
-      <language-select
-        v-model="languages"
-        :repeatable="true"
-        class="form-control" />
-    </form-row>
-    <form-row :label="'License'">
-      <set-select
-        :model-value="{uri:license}"
-        :options="licenses"
-        @update:modelValue="license=$event.uri" />
-    </form-row>
-    <form-row :label="'Subject'">
-      <subject-editor v-model="subjects" />
-    </form-row>
-    <form-row>
-      <button
-        type="submit"
-        class="btn btn-primary"
-        @click="submitFilter">
-        filter
-      </button>
-    </form-row>
-  </form>
+        </form-row>
+      </form>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -76,6 +127,7 @@ export default {
       const scheme = indexingSchemes.find(scheme => uri.indexOf(scheme.namespace) === 0)
       return scheme ? { uri, inScheme: [scheme] } : false
     }).filter(Boolean)
+    const tab = (Object.keys(this.query).includes("search") && search) || !Object.keys(this.query).length ? 0 : 1
     return {
       type,
       search,
@@ -87,6 +139,7 @@ export default {
       access, // TODO: https://github.com/gbv/bartoc.org/issues/42
       kostypes: [],
       licenses: [],
+      tab,
     }
   },
   created() {
