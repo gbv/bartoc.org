@@ -1,12 +1,12 @@
 const config = require("./config")
 const page = require("./routes/page")
 const utils = require("./src/utils")
-const jsonld = require("jsonld")
 const path = require("path")
 const jskos = require("jskos-tools")
 const cdk = require("cocoda-sdk")
 const axios = require("axios")
 const querystring = require("querystring")
+const { rdfContentType, rdfSerialize } = require("./src/rdf")
 
 // build our vue project on first run if report.json can't be found
 // TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
@@ -272,21 +272,22 @@ const viewsByType = {
   "http://purl.org/cld/cdtype/CatalogueOrIndex": "registry",
 }
 
-const jskosContext = require("./static/context.json")
-
 async function sendItem (req, res, item, vars = {}) {
-  if (req.query.format === "json") {
+  const { format } = req.query
+  if (format === "json" || format === "jsonld") {
     item["@context"] = "https://gbv.github.io/jskos/context.json"
     Object.keys(item).filter(key => key[0] === "_").forEach(key => delete item[key])
     res.send([item])
-  } else if (req.query.format === "nt") {
-    res.setHeader("Content-Type", "application/n-triples")
-    item["@context"] = jskosContext
-    res.send(await jsonld.toRDF(item, { format: "application/n-quads" }))
   } else {
-    const view = viewsByType[item.type[0]]
-    const title = utils.label(item.prefLabel).value
-    render(req, res, view, { ...vars, item, title })
+    const type = rdfContentType[format]
+    if (type) {
+      res.setHeader("Content-Type", type)
+      res.send(await rdfSerialize(item, format))
+    } else {
+      const view = viewsByType[item.type[0]]
+      const title = utils.label(item.prefLabel).value
+      render(req, res, view, { ...vars, item, title })
+    }
   }
 
   return true

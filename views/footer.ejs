@@ -21,8 +21,7 @@
           <div class="col-md-2">
             <p class="text-right">
              <% if (locals.item) { %>
-              <a href="/api/data?uri=<%= item.uri %>">JSON</a> |
-              <a href="/vocabularies?uri=<%= item.uri %>&format=nt">RDF</a>
+              <a href="/api/data?uri=<%= item.uri %>">JSON</a>
              <% } else if (locals.api && locals.query) { %>
               <a href="/api/<%= api + "?" + querystring.stringify(query) %>">JSON</a>
              <% } %>
@@ -30,13 +29,21 @@
           </div>
         </div>
         <div class="row">
-          <div class="col text-muted">
+          <div class="col-md-10 text-muted">
             <ul class="list-inline">
               <li class="list-inline-item"><a href="/api/">API</a></li>
               <li class="list-inline-item"><a href="/download">download</a></li>
               <li class="list-inline-item"><a href="https://github.com/gbv/bartoc.org">sources</a></li>
               <li class="list-inline-item"><a href="https://github.com/gbv/bartoc.org/issues">issues</a></li>
             </ul>
+          </div>
+          <div class="col-md-2">
+            <% if (locals.item) { %>
+            <ul class="list-inline text-right">
+              <li class="list-inline-item"><a href="/api/"><a href="/vocabularies?uri=<%= item.uri %>&format=nt">RDF</a></li>
+              <li class="list-inline-item"><a href="/api/"><a href="/vocabularies?uri=<%= item.uri %>&format=rdfxml">XML</a></li>
+            </ul>
+            <% } %>
           </div>
         </div>
       </div>
