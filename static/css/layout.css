@@ -4,6 +4,10 @@ footer {
 footer a {
   color: #fff;
 }
+.logos img {
+  transform: scale(0.8);
+  margin-left: -0.5em;
+}
 header {
   margin-bottom: 1.5em;
 }
