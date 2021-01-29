@@ -89,7 +89,7 @@ for (const [url, uri] of utils.readCsv("./data/ddc-ids.csv")) {
 }
 
 for (const [url, code] of utils.readCsv("./data/language-ids.csv")) {
-  app.get(url, (req, res) => res.redirect(`/vocabularies?languages=${code}`))
+  app.get(url, (req, res) => res.redirect(`/language/${code}`))
 }
 
 for (const [url, uri] of utils.readCsv("./data/kostype-ids.csv")) {
@@ -108,16 +108,6 @@ for (const [url, id] of utils.readCsv("./data/format-ids.csv")) {
   app.get(url, (req, res) => res.redirect(`/vocabularies?format=http://bartoc.org/en/Format/${id}`))
 }
 
-// ILC
-app.get("/ILC/1", (req, res) => res.redirect("/en/node/472"))
-app.get("/ILC/1/:id([a-z0-9-]+)", (req, res) => res.redirect("/en/node/472")) // TODO: show concept
-
-// root page
-app.get("/", (req, res) => {
-  req.params = { page: "index" }
-  page(req, res)
-})
-
 // backend
 app.use("/api", (req, res, next) => {
   if (!req.originalUrl.startsWith("/api/")) {
@@ -127,7 +117,7 @@ app.use("/api", (req, res, next) => {
     // Deconstruct backend API URL to properly proxy requests.
     const url = new URL(config.backend.api)
     proxy(url.origin, {
-      proxyReqPathResolver: function (req) {
+      proxyReqPathResolver(req) {
         const path = url.pathname.endsWith("/") ? url.pathname.slice(0, -1) : url.pathname
         return path + req.url
       },
@@ -218,12 +208,35 @@ app.get("/stats", async (req, res) => {
   render(req, res, "stats", { title: "Statistics", totalCount })
 })
 
-// format page
-app.get("/en/Format/:id", async (req, res, next) => {
-  const uri = `http://bartoc.org/en/Format/${req.params.id}`
-  backend.getConcepts({ concepts: [{ uri }] })
-    .then(concepts => concepts.length ? sendItem(req, res, concepts[0]) : next())
-    .catch(next)
+// Serve an individual concept
+function conceptPageHandler(prefix) {
+  return async (req, res, next) => {
+    const uri = prefix + req.params.id
+    backend.getConcepts({ concepts: [{ uri }] })
+      .then(concepts => concepts.length ? sendItem(req, res, concepts[0]) : next())
+      .catch(next)
+  }
+}
+
+// ILC
+app.get("/ILC/1", (req, res) => res.redirect("/en/node/472"))
+
+app.get("/en/Format/:id", conceptPageHandler("http://bartoc.org/en/Format/") )
+
+app.get("/language/:id([a-z]{2,3})", conceptPageHandler("https://bartoc.org/language/") )
+/*for (const [url, code] of utils.readCsv("./data/language-ids.csv")) {
+  app.get(url, (req, res) => res.redirect(`/vocabularies?languages=${code}`))
+}
+*/
+
+// FIXME: ILC is not in the BARTOC backend yet
+app.get("/ILC/1/:id([a-z0-9-]+)", conceptPageHandler("https://bartoc.org/ILC/1/") )
+
+
+// root page
+app.get("/", (req, res) => {
+  req.params = { page: "index" }
+  page(req, res)
 })
 
 // static pages
