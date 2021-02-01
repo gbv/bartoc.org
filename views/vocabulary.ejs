@@ -4,32 +4,6 @@
 
 <!-- TODO: merge with registry.ejs -->
 
-<script>
-  // Logic to change Bootstrap tabs
-  function changeTab(id) {
-    const linkList = document.getElementById("vocabulary-tabs").querySelectorAll(".nav-link")
-    linkList.forEach((element, key) => {
-      if (key === id) {
-        element.classList.add("active")
-        element.setAttribute("aria-selected", "true")
-      } else {
-        element.classList.remove("active")
-        element.setAttribute("aria-selected", "false")
-      }
-    })
-    const paneList = document.getElementById("vocabulary-tabs-content").querySelectorAll(".tab-pane")
-    paneList.forEach((element, key) => {
-      if (key === id) {
-        element.classList.add("show")
-        element.classList.add("active")
-      } else {
-        element.classList.remove("show")
-        element.classList.remove("active")
-      }
-    })
-  }
-</script>
-
 <ul class="nav nav-tabs" id="vocabulary-tabs" role="tablist">
   <li class="nav-item" role="presentation">
     <a class="nav-link active" data-toggle="tab" href="#" role="tab" aria-controls="about" aria-selected="true" onclick="changeTab(0); return false;">About</a>
@@ -132,3 +106,29 @@
 <%- include('item-dates') %>
 
 <%- include('footer') %>
+
+<script type="application/javascript">
+  // Logic to change Bootstrap tabs
+  function changeTab(id) {
+    const linkList = document.getElementById("vocabulary-tabs").querySelectorAll(".nav-link")
+    linkList.forEach((element, key) => {
+      if (key === id) {
+        element.classList.add("active")
+        element.setAttribute("aria-selected", "true")
+      } else {
+        element.classList.remove("active")
+        element.setAttribute("aria-selected", "false")
+      }
+    })
+    const paneList = document.getElementById("vocabulary-tabs-content").querySelectorAll(".tab-pane")
+    paneList.forEach((element, key) => {
+      if (key === id) {
+        element.classList.add("show")
+        element.classList.add("active")
+      } else {
+        element.classList.remove("show")
+        element.classList.remove("active")
+      }
+    })
+  }
+</script>
