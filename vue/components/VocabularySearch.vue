@@ -97,6 +97,41 @@
           <form-row :label="'Subject'">
             <subject-editor v-model="subjects" />
           </form-row>
+          <form-row label="Sorting">
+            <div class="form-inline m-1">
+              <select
+                v-model="sort"
+                class="form-control">
+                <option value="">
+                  none
+                </option>
+                <option value="label">
+                  label
+                </option>
+                <option value="notation">
+                  notation
+                </option>
+                <option value="created">
+                  created
+                </option>
+                <option value="modified">
+                  modified
+                </option>
+              </select>
+              <select
+                v-if="sort"
+                v-model="order"
+                class="form-control m-1">
+                <option
+                  value="asc">
+                  ascending
+                </option>
+                <option value="desc">
+                  descending
+                </option>
+              </select>
+            </div>
+          </form-row>
           <form-row>
             <button
               type="submit"
@@ -129,7 +164,7 @@ export default {
     },
   },
   data() {
-    const { type, languages, subject, license, format, access, country, search } = this.query
+    const { type, languages, subject, license, format, access, country, sort = "", order = "asc", search } = this.query
     const subjects = (subject || "").split("|").map(uri => {
       const scheme = indexingSchemes.find(scheme => uri.indexOf(scheme.namespace) === 0)
       return scheme ? { uri, inScheme: [scheme] } : false
@@ -147,6 +182,8 @@ export default {
       kostypes: [],
       licenses: [],
       tab,
+      sort,
+      order,
     }
   },
   created() {
@@ -169,8 +206,8 @@ export default {
       this.submit({ search: this.search })
     },
     submitFilter() {
-      const { type, languages, license } = this
-      const query = { type, languages: languages.join(","), license }
+      const { type, languages, license, sort, order } = this
+      const query = { type, languages: languages.join(","), license, sort, order }
       if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join("|")
       this.submit(query)
     },
