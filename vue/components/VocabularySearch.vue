@@ -100,22 +100,13 @@
           <form-row label="Sorting">
             <div class="form-inline m-1">
               <select
-                v-model="sort"
+                v-model="sorting"
                 class="form-control">
-                <option value="">
-                  none
-                </option>
-                <option value="label">
-                  label
-                </option>
-                <option value="notation">
-                  notation
-                </option>
-                <option value="created">
-                  created
-                </option>
-                <option value="modified">
-                  modified
+                <option
+                  v-for="option in sortOptions"
+                  :key="option.name"
+                  :value="option">
+                  {{ option.name }}
                 </option>
               </select>
               <select
@@ -164,7 +155,30 @@ export default {
     },
   },
   data() {
+    const sortOptions = [
+      {
+        name: "newest first",
+        sort: "created",
+        order: "desc",
+      },
+      {
+        name: "oldest first",
+        sort: "created",
+        order: "asc",
+      },
+      {
+        name: "recently changed",
+        sort: "modified",
+        order: "desc",
+      },
+      {
+        name: "by label",
+        sort: "label",
+        order: "asc",
+      },
+    ]
     const { type, languages, subject, license, format, access, country, sort = "", order = "asc", search } = this.query
+    const sorting = sortOptions.find(s => s.sort === sort && s.order === order)
     const subjects = (subject || "").split("|").map(uri => {
       const scheme = indexingSchemes.find(scheme => uri.indexOf(scheme.namespace) === 0)
       return scheme ? { uri, inScheme: [scheme] } : false
@@ -182,8 +196,8 @@ export default {
       kostypes: [],
       licenses: [],
       tab,
-      sort,
-      order,
+      sortOptions,
+      sorting,
     }
   },
   created() {
@@ -206,7 +220,7 @@ export default {
       this.submit({ search: this.search })
     },
     submitFilter() {
-      const { type, languages, license, sort, order } = this
+      const { type, languages, license } = this, sort = this.sorting && this.sorting.sort, order = this.sorting && this.sorting.order
       const query = { type, languages: languages.join(","), license, sort, order }
       if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join("|")
       this.submit(query)
