@@ -29,6 +29,7 @@ Read more about BARTOC in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](ht
 
 **Publications**
 
+* [ISKO Aalborg 2020](https://doi.org/10.5771/9783956507762-200)
 * [ISKO Porto 2018](http://mate.unipv.it/gnoli/portot.pdf)
 * [International UDC Seminar 2017](http://www.udcc.org/index.php/site/page?view=facetedclassification)
 * [ISKO UK biennial conference 2017](http://event-archive.iskouk.org/content/isko-uk-conference-2017-knowledge-organization-whats-story)
