@@ -136,10 +136,30 @@ export default {
 </script>
 
 <style scoped>
+table {
+  margin-bottom: 0;
+}
+table tr td {
+  vertical-align: middle;
+  padding: 0;
+}
+table tr td > span {
+  padding-left: 0.5rem;
+}
 table tr td:first-child {
   min-width: 130px;
 }
 table tr td:nth-child(2) {
   width: 100%;
+  padding-left: 0.5rem;
+}
+table tr td:nth-child(3) {
+  padding-left: 0.5rem;
+}
+table tr td {
+  padding-bottom: 5px;
+}
+table tr:last-child td {
+  padding-bottom: 0;
 }
 </style>

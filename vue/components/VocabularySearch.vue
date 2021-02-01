@@ -98,7 +98,7 @@
             <subject-editor v-model="subjects" />
           </form-row>
           <form-row label="Sorting">
-            <div class="form-inline m-1">
+            <div class="form-inline">
               <select
                 v-model="sorting"
                 class="form-control">
@@ -112,7 +112,7 @@
               <select
                 v-if="sort"
                 v-model="order"
-                class="form-control m-1">
+                class="form-control">
                 <option
                   value="asc">
                   ascending
