@@ -2,72 +2,124 @@
   button: `<a v-cloak v-if="userCanAdd" style="float:right" class="btn btn-success" href="/edit?uri=${item.uri}">edit</a>`
 }) %>
 
-<%- include('abstract', { abstract: item.definition }) %>
-
 <!-- TODO: merge with registry.ejs -->
 
-<table class="table">
-  <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
-  <%- include('row-list', { label: 'Notation', list: item.notation }) %>
-  <%  var titles = Object.values(item.prefLabel || {}).concat(...Object.values(item.altLabel || {})) %>
-  <%- include('row-list', { label: 'Titles', list: titles }) %>
+<script>
+  // Logic to change Bootstrap tabs
+  function changeTab(id) {
+    const linkList = document.getElementById("vocabulary-tabs").querySelectorAll(".nav-link")
+    linkList.forEach((element, key) => {
+      if (key === id) {
+        element.classList.add("active")
+        element.setAttribute("aria-selected", "true")
+      } else {
+        element.classList.remove("active")
+        element.setAttribute("aria-selected", "false")
+      }
+    })
+    const paneList = document.getElementById("vocabulary-tabs-content").querySelectorAll(".tab-pane")
+    paneList.forEach((element, key) => {
+      if (key === id) {
+        element.classList.add("show")
+        element.classList.add("active")
+      } else {
+        element.classList.remove("show")
+        element.classList.remove("active")
+      }
+    })
+  }
+</script>
 
-  <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
-  <%- include('row-list', { label: 'Links', list: item.subjectOf, view: s => include('link', s) }) %>
-  <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
-  <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
-
-  <%- include('row-list', { label: 'Subject', list: item.subject, style: 'inline',
+<ul class="nav nav-tabs" id="vocabulary-tabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link active" data-toggle="tab" href="#" role="tab" aria-controls="about" aria-selected="true" onclick="changeTab(0); return false;">About</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" data-toggle="tab" href="" role="tab" aria-controls="access" aria-selected="false" onclick="changeTab(1); return false;">Access</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" data-toggle="tab" href="" role="tab" aria-controls="content" aria-selected="false" onclick="changeTab(2); return false;">Content</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" data-toggle="tab" href="" role="tab" aria-controls="identifiers" aria-selected="false" onclick="changeTab(3); return false;">Identifiers</a>
+  </li>
+</ul>
+<div class="tab-content p-3" id="vocabulary-tabs-content">
+  <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="home-tab">
+    <!-- About (abstract, titles, notation, created, languages, KOS types, subjects, Links) -->
+    <%- include('abstract', { abstract: item.definition }) %>
+    <table class="table">
+      <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
+      <%  var titles = Object.values(item.prefLabel || {}).concat(...Object.values(item.altLabel || {})) %>
+      <%- include('row-list', { label: 'Titles', list: titles }) %>
+      <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
+      <%- include('row-list', { label: 'Links', list: item.subjectOf, view: s => include('link', s) }) %>
+      <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
+      <%- include('row-list', { label: 'Subject', list: item.subject, style: 'inline',
         view: s => include('item', { item: s, base: '/vocabularies?subject=', withNotation: true }) }) %>
+      <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
+      <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
+      <%- include('row-list', { label: 'KOS Type', list: item.type.slice(1), style: 'inline',
+        view: item => include('item', { item: nkostypes[item], base: '/vocabularies?type=' }) }) %>
 
-  <%- include('row', { label: 'Size', content: item.extent } ) %>
+    </table>
+  </div>
+  <div class="tab-pane fade" role="tabpanel" aria-labelledby="access-tab">
+    <!-- Access (license, formats, access, services, publisher, address, contact, listed in, APIs) -->
+    <table class="table">
+      <%- include('row-list', { label: 'License', list: item.license, style: "inline",
+        view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
+      <%- include('row-list', { label: 'Access', list: item.ACCESS, style: "inline",
+        view: s => include('item', { item: accesstypes[s.uri] || { uri: s.uri }})}) %>
+      <%- include('row-list', { label: 'Format', list: item.FORMAT, style: 'inline',
+        view: s => include('item', { item: formats[s.uri] || { uri: s.uri }})}) %>
+      <%- include('row-list', { label: 'Publisher', list: item.publisher,
+        view: item => include('item', { item }) }) %>
+      <%  var address = []
+        if (item.ADDRESS) {
+          for(let field of ['street','ext','locality','region','code','country']) {
+            if (item.ADDRESS[field]) address.push(item.ADDRESS[field])
+          }
+        }
+      %>
+      <%- include('row-list', { label: 'Address', list: address }) %>
+      <%- include('row', { label: 'Contact', content: item.CONTACT }) %>
+      <%- include('row-list', { label: 'Services (API)', list: item.API,
+        view: s => `<service-link :vocabulary='"${item.uri}"' :api='"${s}"'></service-link>` }) %>
+      <%- include('row-list', { label: 'Listed in', list: item.partOf,
+        view: s => include('item', { item: registries[s.uri] || { uri: s.uri } })  }) %>
+      <!-- TODO: rating -->
+    </table>
+  </div>
+  <div class="tab-pane fade" role="tabpanel" aria-labelledby="content-tab">
+    <!-- Content (size, search & browsing interface) -->
+    <!-- TODO -->
+    <table class="table">
+      <%- include('row', { label: 'Size', content: item.extent } ) %>
+      <p>
+        More information soon!
+      </p>
+    </table>
+  </div>
+  <div class="tab-pane fade" role="tabpanel" aria-labelledby="identifiers-tab">
+    <!-- Identifiers (identifiers, namespace, notation pattern, MARCspec, PICA path, CQL key) -->
+    <table class="table">
+      <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
+      <%- include('row-list', { label: 'Notation', list: item.notation }) %>
+      <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
+      <%- include('row', { label: 'Namespace', content: item.namespace }) %>
+      <%- include('row', { label: 'Notation pattern', content: item.notationPattern }) %>
+      <%- include('row', { label: 'URI pattern', content: item.uriPattern }) %>
+      <!-- TODO: example notations -->
 
-  <%- include('row-list', { label: 'License', list: item.license, style: "inline",
-              view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
+      <%- include('row', { label: 'MARCspec', content: item.MARCSPEC }) %>
+      <%- include('row', { label: 'PICA path', content: item.PICAPATH }) %>
+      <%- include('row', { label: 'CQL key', content: item.CQLKEY }) %>
+    </table>
+  </div>
+</div>
 
-  <%- include('row-list', { label: 'Access', list: item.ACCESS, style: "inline",
-      view: s => include('item', { item: accesstypes[s.uri] || { uri: s.uri }})}) %>
-  <%- include('row-list', { label: 'Format', list: item.FORMAT, style: 'inline',
-      view: s => include('item', { item: formats[s.uri] || { uri: s.uri }})}) %>
 
-  <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
-  <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
-
-  <%- include('row-list', { label: 'KOS Type', list: item.type.slice(1), style: 'inline',
-      view: item => include('item', { item: nkostypes[item], base: '/vocabularies?type=' }) }) %>
-
-  <%- include('row-list', { label: 'Publisher', list: item.publisher,
-      view: item => include('item', { item }) }) %>
-
-  <%  var address = []
-     if (item.ADDRESS) {
-       for(let field of ['street','ext','locality','region','code','country']) {
-         if (item.ADDRESS[field]) address.push(item.ADDRESS[field])
-       }
-     }
-  %>
-  <%- include('row-list', { label: 'Address', list: address }) %>
-  <%- include('row', { label: 'Contact', content: item.CONTACT }) %>
-
-  <!-- TODO: partOf (listed in) -->
-
-  <%- include('row-list', { label: 'Services (API)', list: item.API,
-      view: s => `<service-link :vocabulary='"${item.uri}"' :api='"${s}"'></service-link>` }) %>
-
-  <%- include('row-list', { label: 'Listed in', list: item.partOf,
-      view: s => include('item', { item: registries[s.uri] || { uri: s.uri } })  }) %>
-
-  <%- include('row', { label: 'Namespace', content: item.namespace }) %>
-  <%- include('row', { label: 'Notation pattern', content: item.notationPattern }) %>
-  <%- include('row', { label: 'URI pattern', content: item.uriPattern }) %>
-  <!-- TODO: example notations -->
-
-  <%- include('row', { label: 'MARCspec', content: item.MARCSPEC }) %>
-  <%- include('row', { label: 'PICA path', content: item.PICAPATH }) %>
-  <%- include('row', { label: 'CQL key', content: item.CQLKEY }) %>
-
-  <!-- TODO: rating -->
-</table>
 
 <!--
  // TODO: link to Wikipedia
