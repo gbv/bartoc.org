@@ -18,7 +18,10 @@
     <div id="app">
       <header class="navbar navbar-dark bg-primary navbar-expand-lg">
         <div class="container">
-          <a class="navbar-brand" href="/"><%= config.name %></a>
+          <a class="navbar-brand" href="/">
+            <span class="d-none d-md-block"><%= config.name %></span>
+            <span class="d-md-none">B</span>
+          </a>
           <ul class="navbar-nav mr-auto">
             <% config.menu.forEach( item => { %>
             <li class="nav-item <%= item.url == path ? 'active' : '' %>">
