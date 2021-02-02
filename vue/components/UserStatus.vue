@@ -2,7 +2,7 @@
   <a
     v-if="connected"
     class="nav-link"
-    :href="`http${login.ssl ? 's' : ''}://${login.api}account`">
+    :href="loginUrl">
     {{ user ? user.name : 'login' }}
   </a>
   <a
@@ -36,6 +36,21 @@ export default {
       auth: {},
       error: null,
     }
+  },
+  computed: {
+    loginUrl() {
+      let url = `http${this.login.ssl ? "s" : ""}://${this.login.api}`
+      if (!url.endsWith("/")) {
+        url += "/"
+      }
+      if (this.user) {
+        url += "account"
+      } else {
+        url += "login?redirect_uri="
+        url += encodeURIComponent(window.location.href)
+      }
+      return url
+    },
   },
   created () {
     const { connect, disconnect, login, logout, update, token, about, error } = LoginClient.events
