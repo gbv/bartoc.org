@@ -20,31 +20,30 @@
 </ul>
 <div class="tab-content p-3" id="vocabulary-tabs-content">
   <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="home-tab">
-    <!-- About (abstract, titles, notation, created, languages, KOS types, subjects, Links) -->
     <%- include('abstract', { abstract: item.definition }) %>
     <table class="table table-borderless">
-      <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
       <%  var titles = Object.values(item.prefLabel || {}).concat(...Object.values(item.altLabel || {})) %>
       <%- include('row-list', { label: 'Titles', list: titles }) %>
-      <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
-      <%- include('row-list', { label: 'Links', list: item.subjectOf, view: s => include('link', s) }) %>
-      <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
-      <%- include('row-list', { label: 'Subject', list: item.subject, style: 'inline',
-        view: s => include('item', { item: s, base: '/vocabularies?subject=', withNotation: true }) }) %>
-      <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
-      <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
+      <%- include('row-list', { label: 'Abbreviation', list: item.notation }) %>
       <%- include('row-list', { label: 'KOS Type', list: item.type.slice(1), style: 'inline',
         view: item => include('item', { item: nkostypes[item], base: '/vocabularies?type=' }) }) %>
-
+      <%- include('row-list', { label: 'Links', list: item.subjectOf, view: s => include('link', s) }) %>
+      <%- include('row-list', { label: 'Subject', list: item.subject, style: 'inline',
+        view: s => include('item', { item: s, base: '/vocabularies?subject=', withNotation: true }) }) %>
+      <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
+      <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
+      <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
+      <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
+      <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
+      <!-- TODO: rating -->
     </table>
   </div>
   <div class="tab-pane fade" role="tabpanel" aria-labelledby="access-tab">
-    <!-- Access (license, formats, access, services, publisher, address, contact, listed in, APIs) -->
     <table class="table table-borderless">
-      <%- include('row-list', { label: 'License', list: item.license, style: "inline",
-        view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
       <%- include('row-list', { label: 'Access', list: item.ACCESS, style: "inline",
         view: s => include('item', { item: accesstypes[s.uri] || { uri: s.uri }})}) %>
+      <%- include('row-list', { label: 'License', list: item.license, style: "inline",
+        view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
       <%- include('row-list', { label: 'Format', list: item.FORMAT, style: 'inline',
         view: s => include('item', { item: formats[s.uri] || { uri: s.uri }})}) %>
       <%- include('row-list', { label: 'Publisher', list: item.publisher,
@@ -58,31 +57,27 @@
       %>
       <%- include('row-list', { label: 'Address', list: address }) %>
       <%- include('row', { label: 'Contact', content: item.CONTACT }) %>
-      <%- include('row-list', { label: 'Services (API)', list: item.API,
-        view: s => `<service-link :vocabulary='"${item.uri}"' :api='"${s}"'></service-link>` }) %>
       <%- include('row-list', { label: 'Listed in', list: item.partOf,
         view: s => include('item', { item: registries[s.uri] || { uri: s.uri } })  }) %>
-      <!-- TODO: rating -->
-    </table>
+      <%- include('row-list', { label: 'Services (API)', list: item.API,
+        view: s => `<service-link :vocabulary='"${item.uri}"' :api='"${s}"'></service-link>` }) %>
+   </table>
   </div>
   <div class="tab-pane fade" role="tabpanel" aria-labelledby="content-tab">
-    <!-- Content (size, search & browsing interface) -->
-    <!-- TODO -->
     <table class="table table-borderless">
       <%- include('row', { label: 'Size', content: item.extent } ) %>
+      <!-- TODO: browsing interface -->
     </table>
   </div>
   <div class="tab-pane fade" role="tabpanel" aria-labelledby="identifiers-tab">
     <!-- Identifiers (identifiers, namespace, notation pattern, MARCspec, PICA path, CQL key) -->
     <table class="table table-borderless">
       <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
-      <%- include('row-list', { label: 'Notation', list: item.notation }) %>
-      <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
-      <%- include('row', { label: 'Namespace', content: item.namespace }) %>
+      <%- include('row-list', { label: 'Identifiers', list: item.identifier }) %>
+      <%- include('row', { label: 'Namespace', content: include('link', { url: item.namespace })}) %>
       <%- include('row', { label: 'Notation pattern', content: item.notationPattern }) %>
       <%- include('row', { label: 'URI pattern', content: item.uriPattern }) %>
-      <!-- TODO: example notations -->
-
+      <%- include('row-list', { label: 'Examples', list: item.EXAMPLES }) %>
       <%- include('row', { label: 'MARCspec', content: item.MARCSPEC }) %>
       <%- include('row', { label: 'PICA path', content: item.PICAPATH }) %>
       <%- include('row', { label: 'CQL key', content: item.CQLKEY }) %>
@@ -131,7 +126,7 @@
   // Find empty panes and disable the associated link
   paneList.forEach((element, key) => {
     if (element.textContent.length === 0) {
-      linkList[key].classList.add("disabled")
+      linkList[key].classList.add("d-none")
     }
   })
 </script>
