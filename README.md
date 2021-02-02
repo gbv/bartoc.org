@@ -27,6 +27,28 @@ npm install
 
 ## Setup
 
+### Create indexes (in jskos-server)
+
+Only necessary if not performed before.
+
+```bash
+npm run import -- --indexes
+```
+
+### Import database dump (in jskos-server)
+
+Import a backup/dump of concept schemes, e.g.:
+
+```bash
+npm run import -- schemes http://bartoc.org/data/dumps/latest.ndjson
+```
+
+### Import auxilary vocabularies
+
+```bash
+./bin/import.sh $DIRECTORY_OF_YOUR_JSKOS_SERVER
+```
+
 ### Transform legacy data
 
 *this step only documented for historical reasons, don't run this*
@@ -42,16 +64,6 @@ Then import the resulting file `cache/vocabularies.ndjson` and additional vocabu
 ~~~
 ./bin/import-legacy.sh $DIRECTORY_OF_YOUR_JSKOS_SERVER
 ~~~
-
-### Import database dump
-
-Import a backup/dump of concept schemes, e.g.:
-
-    npm run import schemes http://bartoc.org/data/dumps/latest.ndjson
-
-### Import auxilary vocabularies
-
-    ./bin/import.sh $DIRECTORY_OF_YOUR_JSKOS_SERVER
 
 ## Configuration
 
