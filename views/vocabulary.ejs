@@ -70,9 +70,6 @@
     <!-- TODO -->
     <table class="table">
       <%- include('row', { label: 'Size', content: item.extent } ) %>
-      <p>
-        More information soon!
-      </p>
     </table>
   </div>
   <div class="tab-pane fade" role="tabpanel" aria-labelledby="identifiers-tab">
@@ -109,8 +106,9 @@
 
 <script type="application/javascript">
   // Logic to change Bootstrap tabs
+  const linkList = document.getElementById("vocabulary-tabs").querySelectorAll(".nav-link")
+  const paneList = document.getElementById("vocabulary-tabs-content").querySelectorAll(".tab-pane")
   function changeTab(id) {
-    const linkList = document.getElementById("vocabulary-tabs").querySelectorAll(".nav-link")
     linkList.forEach((element, key) => {
       if (key === id) {
         element.classList.add("active")
@@ -120,7 +118,6 @@
         element.setAttribute("aria-selected", "false")
       }
     })
-    const paneList = document.getElementById("vocabulary-tabs-content").querySelectorAll(".tab-pane")
     paneList.forEach((element, key) => {
       if (key === id) {
         element.classList.add("show")
@@ -131,4 +128,10 @@
       }
     })
   }
+  // Find empty panes and disable the associated link
+  paneList.forEach((element, key) => {
+    if (element.textContent.length === 0) {
+      linkList[key].classList.add("disabled")
+    }
+  })
 </script>
