@@ -22,7 +22,7 @@
   <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="home-tab">
     <!-- About (abstract, titles, notation, created, languages, KOS types, subjects, Links) -->
     <%- include('abstract', { abstract: item.definition }) %>
-    <table class="table">
+    <table class="table table-borderless">
       <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
       <%  var titles = Object.values(item.prefLabel || {}).concat(...Object.values(item.altLabel || {})) %>
       <%- include('row-list', { label: 'Titles', list: titles }) %>
@@ -40,7 +40,7 @@
   </div>
   <div class="tab-pane fade" role="tabpanel" aria-labelledby="access-tab">
     <!-- Access (license, formats, access, services, publisher, address, contact, listed in, APIs) -->
-    <table class="table">
+    <table class="table table-borderless">
       <%- include('row-list', { label: 'License', list: item.license, style: "inline",
         view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
       <%- include('row-list', { label: 'Access', list: item.ACCESS, style: "inline",
@@ -68,13 +68,13 @@
   <div class="tab-pane fade" role="tabpanel" aria-labelledby="content-tab">
     <!-- Content (size, search & browsing interface) -->
     <!-- TODO -->
-    <table class="table">
+    <table class="table table-borderless">
       <%- include('row', { label: 'Size', content: item.extent } ) %>
     </table>
   </div>
   <div class="tab-pane fade" role="tabpanel" aria-labelledby="identifiers-tab">
     <!-- Identifiers (identifiers, namespace, notation pattern, MARCspec, PICA path, CQL key) -->
-    <table class="table">
+    <table class="table table-borderless">
       <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
       <%- include('row-list', { label: 'Notation', list: item.notation }) %>
       <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
