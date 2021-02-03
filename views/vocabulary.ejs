@@ -6,16 +6,16 @@
 
 <ul class="nav nav-tabs" id="vocabulary-tabs" role="tablist">
   <li class="nav-item" role="presentation">
-    <a class="nav-link active" data-toggle="tab" href="#" role="tab" aria-controls="about" aria-selected="true" onclick="changeTab(0); return false;">About</a>
+    <a class="nav-link active" data-toggle="tab" href="#about" role="tab" aria-controls="about" aria-selected="true" onclick="changeTab(0);">About</a>
   </li>
   <li class="nav-item" role="presentation">
-    <a class="nav-link" data-toggle="tab" href="" role="tab" aria-controls="access" aria-selected="false" onclick="changeTab(1); return false;">Access</a>
+    <a class="nav-link" data-toggle="tab" href="#access" role="tab" aria-controls="access" aria-selected="false" onclick="changeTab(1);">Access</a>
   </li>
   <li class="nav-item" role="presentation">
-    <a class="nav-link" data-toggle="tab" href="" role="tab" aria-controls="content" aria-selected="false" onclick="changeTab(2); return false;">Content</a>
+    <a class="nav-link" data-toggle="tab" href="#content" role="tab" aria-controls="content" aria-selected="false" onclick="changeTab(2);">Content</a>
   </li>
   <li class="nav-item" role="presentation">
-    <a class="nav-link" data-toggle="tab" href="" role="tab" aria-controls="identifiers" aria-selected="false" onclick="changeTab(3); return false;">Identifiers</a>
+    <a class="nav-link" data-toggle="tab" href="#identifiers" role="tab" aria-controls="identifiers" aria-selected="false" onclick="changeTab(3);">Identifiers</a>
   </li>
 </ul>
 <div class="tab-content p-3" id="vocabulary-tabs-content">
@@ -130,4 +130,11 @@
       linkList[key].classList.add("d-none")
     }
   })
+  // Open specific tab on page load if necessary
+  if (window.location.hash) {
+    const index = Array.from(linkList).findIndex(el => el.getAttribute("href") === window.location.hash)
+    if (index != -1) {
+      changeTab(index)
+    }
+  }
 </script>
