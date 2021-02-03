@@ -109,18 +109,6 @@
                   {{ option.name }}
                 </option>
               </select>
-              <select
-                v-if="sort"
-                v-model="order"
-                class="form-control">
-                <option
-                  value="asc">
-                  ascending
-                </option>
-                <option value="desc">
-                  descending
-                </option>
-              </select>
             </div>
           </form-row>
           <form-row>
