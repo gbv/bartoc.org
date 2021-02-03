@@ -10,9 +10,19 @@ echo "Importing auxilary vocabularies into jskos-server $SERVER."
 cd $SERVER
 npm run import -- schemes $BARTOC/data/bartoc-formats.scheme.ndjson
 npm run import -- concepts $BARTOC/data/bartoc-formats.concepts.ndjson
+
 npm run import -- schemes $BARTOC/data/bartoc-access.scheme.ndjson
 npm run import -- concepts $BARTOC/data/bartoc-access.concepts.ndjson
+
+npm run import -- schemes $BARTOC/data/ddc.scheme.ndjson
 npm run import -- concepts $BARTOC/data/ddc100.concepts.ndjson
+
 npm run import -- schemes $BARTOC/data/languages.scheme.ndjson
 npm run import -- concepts $BARTOC/data/languages.concepts.ndjson
+
+npm run import -- schemes $BARTOC/data/nkostype.scheme.ndjson
+npm run import -- concepts $BARTOC/data/nkostype.concepts.ndjson
+
+npm run import -- schemes $BARTOC/data/eurovoc.scheme.ndjson
+npm run import -- schemes $BARTOC/data/ilc.scheme.ndjson
 cd $BARTOC
