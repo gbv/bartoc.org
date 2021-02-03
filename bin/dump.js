@@ -9,18 +9,21 @@ const LineReader = require("n-readlines")
 const dumpsDir = path.join(__dirname, "../data/dumps")
 const [command, ...args] = process.argv.slice(2)
 
-if (command === "diff") {
+if (command === "diff" || command === "jsonpatch") {
+  const formatter = command === "diff" ? diff.console.log
+    : delta => console.log(JSON.stringify(diff.formatters.jsonpatch.format(delta)))
+
   if (args.length === 2) {
-    dumpDiff(...args, diff.console.log)
+    dumpDiff(...args, formatter)
   } else if (args.length === 1) {
-    dumpDiff(args[0], `${dumpsDir}/latest.ndjson`, diff.console.log)
+    dumpDiff(args[0], `${dumpsDir}/latest.ndjson`, formatter)
   } else {
     usage("diff $file1 [$file2]")
   }
 } else if (command === "update") {
   updateDump()
 } else {
-  usage("[diff|update] [arguments]")
+  usage("[diff|jsonpatch|update] [arguments]")
 }
 
 function usage (syntax) {
