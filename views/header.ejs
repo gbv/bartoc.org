@@ -43,6 +43,11 @@
         </ul>
       </header>
       <div class="container">
+        <noscript>
+          <div class="alert alert-danger" role="alert">
+            JavaScript needs to be enabled for this site to work properly.
+          </div>
+        </noscript>
         <% if (locals.button) { %><%- locals.button %><% } %>
         <% if(title) { %>
         <h1><%= title %></h1>
