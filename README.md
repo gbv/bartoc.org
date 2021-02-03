@@ -26,25 +26,10 @@ npm install
 ~~~
 
 ## Setup
-
-### Flush existing database
-
-For initial setup it makes sense to clear the database from existing vocabularies and concepts:
-
-...
-
-### Setup minimal content
-
-Import auxilary vocabularies and create indexes:
-
-...
-
-### Import vocabularies
-
-Import a backup/dump of concept schemes, e.g.:
+A setup script is provided in `./bin/setup.sh`. It must be called with the path to your jskos-server installation, e.g.:
 
 ```bash
-npm run import -- schemes http://bartoc.org/data/dumps/latest.ndjson
+./bin/setup.sh ../jskos-server
 ```
 
 ## Configuration
@@ -59,6 +44,28 @@ Basic configuration is located in `config/config.default.json`. Selected fields 
   }
 }
 ~~~
+
+### jskos-server Configuration
+To be able to use the full functionality of BARTOC, your jskos-server installation must allow concept schemes to be written via the API, e.g.:
+
+```json
+{
+  "schemes": {
+    "read": {
+      "auth": false
+    },
+    "create": {
+      "auth": true
+    },
+    "update": {
+      "auth": true,
+      "crossUser": true
+    }
+  }
+}
+```
+
+Via an array `identities` under `schemes`, you can limit which identity URIs can write vocabulary data.
 
 ## Run for testing
 
