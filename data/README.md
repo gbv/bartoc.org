@@ -1,4 +1,4 @@
-This directory contains data from the original BARTOC.org database until summer 2020.
+This directory contains auxiliary vocabularies and data from the original BARTOC.org database until summer 2020.
 
 ## Local identifiers
 

@@ -32,9 +32,9 @@ try {
   console.error("Error: The backend could not be initialized! Please check the backend configuration in config/config.json!")
 }
 
-// static data
+// static data (this could also be loaded from backend on startup)
 const registries = utils.indexByUri(utils.readNdjson("./data/registries.ndjson"))
-const nkostypes = utils.indexByUri(utils.readNdjson("./cache/nkostype.ndjson"))
+const nkostypes = utils.indexByUri(utils.readNdjson("./data/nkostype.concepts.ndjson"))
 const accesstypes = utils.indexByUri(utils.readNdjson("./data/bartoc-access.concepts.ndjson"))
 const formats = utils.indexByUri(utils.readNdjson("./data/bartoc-formats.concepts.ndjson"))
 

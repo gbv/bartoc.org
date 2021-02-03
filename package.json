@@ -10,7 +10,6 @@
     "fix": "eslint --fix '**/*.js'; vue-cli-service lint vue/**/*.vue",
     "lint-staged": "lint-staged",
     "data": "mkdir -p cache; npm run data:nkostype; make -C data; make -C bin",
-    "data:nkostype": "curl http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > cache/nkostype.ndjson",
     "validate": "jskos-validate",
     "dump": "js ./bin/dump.js",
     "vue:serve": "vue-cli-service serve",

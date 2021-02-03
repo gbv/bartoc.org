@@ -1,6 +1,8 @@
 .PHONY: languages.concepts.json
 
-default: bartoc-formats.concepts.ndjson ddc100.concepts.ndjson languages.concepts.ndjson
+# collect/convert auxiliary vocabularies
+
+default: bartoc-formats.concepts.ndjson ddc100.concepts.ndjson languages.concepts.ndjson nkostype.concepts.ndjson
 
 bartoc-formats.concepts.ndjson: formats.csv bartoc-formats.scheme.ndjson
 	jskos-convert -f csv -t ndjson -m -l en -s bartoc-formats.scheme.ndjson $< > $@
@@ -12,3 +14,6 @@ ddc100.concepts.ndjson: ddc100.csv
 languages.concepts.ndjson:
 	curl -L --silent https://datahub.io/core/language-codes/r/language-codes-full.json \
 	| jq -cf languages.jq > $@
+
+nkostype.concepts.ndjson:
+	curl -L --silent http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > $@
