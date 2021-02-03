@@ -27,43 +27,25 @@ npm install
 
 ## Setup
 
-### Create indexes (in jskos-server)
+### Flush existing database
 
-Only necessary if not performed before.
+For initial setup it makes sense to clear the database from existing vocabularies and concepts:
 
-```bash
-npm run import -- --indexes
-```
+...
 
-### Import database dump (in jskos-server)
+### Setup minimal content
+
+Import auxilary vocabularies and create indexes:
+
+...
+
+### Import vocabularies
 
 Import a backup/dump of concept schemes, e.g.:
 
 ```bash
 npm run import -- schemes http://bartoc.org/data/dumps/latest.ndjson
 ```
-
-### Import auxilary vocabularies
-
-```bash
-./bin/import.sh $DIRECTORY_OF_YOUR_JSKOS_SERVER
-```
-
-### Transform legacy data
-
-*this step only documented for historical reasons, don't run this*
-
-Before relaunch in October 2020 the Drupal export from September 2020 had to be transformed and (requires Perl >= 5.14 without additional modules):
-
-~~~sh
-npm run data
-~~~
-
-Then import the resulting file `cache/vocabularies.ndjson` and additional vocabulary files into your jskos-server instance (resetting all stored vocabularies and concepts!):
-
-~~~
-./bin/import-legacy.sh $DIRECTORY_OF_YOUR_JSKOS_SERVER
-~~~
 
 ## Configuration
 
