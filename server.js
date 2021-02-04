@@ -207,7 +207,7 @@ async function enrichItem (item) {
 app.get("/stats", async (req, res) => {
   const url = `http://localhost:${config.port}/api/voc?limit=1`
   const totalCount = await axios.get(url).then(res => res.headers["x-total-count"])
-  const reports = fs.readdirSync("data/reports/")
+  const reports = fs.existsSync("data/reports") ? fs.readdirSync("data/reports/") : []
   render(req, res, "stats", { title: "Statistics", totalCount, reports })
 })
 
