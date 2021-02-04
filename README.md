@@ -45,7 +45,7 @@ Basic configuration is located in `config/config.default.json`. Selected fields 
 }
 ~~~
 
-To be able to log in, add, and edit vocabularies, the login needs to be configured as well:
+To be able to log in, add, and edit vocabularies, you need to setup and configure an instance of [Login Server](https://github.com/gbv/login-server) as well (example for local installation):
 ```json
 {
   "login": {
