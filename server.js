@@ -4,6 +4,7 @@ const utils = require("./src/utils")
 const path = require("path")
 const jskos = require("jskos-tools")
 const cdk = require("cocoda-sdk")
+const fs = require("fs")
 const axios = require("axios")
 const querystring = require("querystring")
 const { rdfContentType, rdfSerialize } = require("./src/rdf")
@@ -56,6 +57,7 @@ app.set("view engine", "ejs")
 // static assets
 app.use(express.static("static"))
 app.use("/data/dumps/", express.static("data/dumps"))
+app.use("/data/reports/", express.static("data/reports"))
 app.use("/dist/", express.static("dist"))
 
 // redirect permanently moved URLs from legacy BARTOC.org
@@ -205,7 +207,8 @@ async function enrichItem (item) {
 app.get("/stats", async (req, res) => {
   const url = `http://localhost:${config.port}/api/voc?limit=1`
   const totalCount = await axios.get(url).then(res => res.headers["x-total-count"])
-  render(req, res, "stats", { title: "Statistics", totalCount })
+  const reports = fs.readdirSync("data/reports/")
+  render(req, res, "stats", { title: "Statistics", totalCount, reports })
 })
 
 // Serve an individual concept

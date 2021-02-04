@@ -33,5 +33,18 @@
   vocabulary content.
 </p>
 
+<% if (reports.length) { %>
+<h4>Daily Data Quality Reports</h4>
+<p>
+  <ul class="list-inline">
+  <% for (file of reports) { %>
+    <li class="list-inline-item">
+      <a href="/data/reports/<%= file %>"><%= file.replace(/\.[^.]+$/,'') %></a>
+    </li>
+  <% } %>
+  </ul>
+</p>
+<% } %>
+
 <%- include('footer') %>
 

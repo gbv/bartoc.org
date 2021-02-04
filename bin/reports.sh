@@ -6,7 +6,7 @@ DUMP=data/dumps/latest.ndjson
 mkdir -p data/reports
 
 report() {
-  jq -c "select($1)|{uri,notation,prefLabel,modified}" $DUMP > "data/reports/$2.ndjson"
+  jq "select($1)|{uri,notation,prefLabel,modified}" $DUMP | jq --arg name "$2" -s '{title:$name,schemes:.}' > "data/reports/$2.json"
 }
 
 report '.extent|not' 'no-extent'
