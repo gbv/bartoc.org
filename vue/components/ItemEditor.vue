@@ -417,7 +417,14 @@ export default {
     cleanupItem(item) {
       const type = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
       if (item.type[0] !== type) item.type.unshift(type)
-      return filtered(item)
+      item = filtered(item)
+      if (item.subject) {
+        item.subject = item.subject.map(({uri,inScheme,notation}) => {
+          inScheme = inScheme.map(({uri}) => ({uri}))
+          return {uri,inScheme,notation}
+        })
+      }
+      return item
     },
   },
 }
