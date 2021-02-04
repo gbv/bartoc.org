@@ -85,6 +85,15 @@ npm run dev
 
 The application is made available at <http://localhost:3883/>.
 
+## Publish
+**For maintainers only**
+
+Never work on the main branch directly. Always make changes on `dev` and then run the release script:
+
+```bash
+npm run release:patch # or minor or major
+```
+
 ## Deployment
 
 The application is deployed at <http://bartoc.org/>.
