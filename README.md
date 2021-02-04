@@ -45,6 +45,16 @@ Basic configuration is located in `config/config.default.json`. Selected fields 
 }
 ~~~
 
+To be able to log in, add, and edit vocabularies, the login needs to be configured as well:
+```json
+{
+  "login": {
+    "api": "localhost:3004/",
+    "ssl": false
+  }
+}
+```
+
 ### jskos-server Configuration
 To be able to use the full functionality of BARTOC, your jskos-server installation must allow concept schemes to be written via the API, e.g.:
 
