@@ -43,7 +43,8 @@
     "/full-repository": "/registries?type=http://bartoc.org/full-repository",
     "/en/Format": "/vocabularies?uri=http://uri.gbv.de/terminology/bartoc_formatcatalog/",
     "/en/ilc": "/en/node/472",
-    "/en/node/1948": "/contact"
+    "/en/node/1948": "/contact",
+    "/tracker": "/vocabularies?sort=modified&order=desc"
   },
   "license": {
     "name": "Public Domain Dedication and License v1.0",

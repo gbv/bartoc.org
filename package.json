@@ -51,6 +51,7 @@
     "marked": "^1.2.7",
     "n-readlines": "^1.0.1",
     "rdflib": "^2.1.7",
+    "timeago.js": "^4.0.2",
     "vue": "^3.0.5"
   },
   "devDependencies": {

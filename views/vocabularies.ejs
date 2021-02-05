@@ -10,6 +10,11 @@
   <thead>
     <th>Name</th>
     <th colspan="2">Links</th>
+    <% if (query.sort == "modified") { %>
+    <th>Modified</th>
+    <% } else if (query.sort == "created") { %>
+    <th>Created</th>
+    <% } %>
   </thead>
   <tbody>
   <% for (let item of result) { %>
@@ -33,6 +38,10 @@
          <%- include('link', { url: item.API[0], label: "API" }) %>
        <% } %>
       </td>
+      <% if (query.sort == "modified" || query.sort == "created") {
+         timestamp = item[query.sort] %>
+      <td><span class="timeago" title="<%= timestamp %>" datetime="<%= timestamp %>"><%= timestamp.split('T')[0] %></span></td>
+      <% } %>
     </tr>
   <% } %>
   </tbody>

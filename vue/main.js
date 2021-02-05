@@ -10,6 +10,8 @@ import configDefault from "../config/config.default.json"
 import configUser from "../config/config.json"
 const login = Object.assign({}, configDefault.login, configUser.login || {})
 
+import { render } from "../node_modules/timeago.js/"
+
 const app = createApp({
   components: { UserStatus, ItemEditor, VocabularySearch, ServiceLink },
   data() {
@@ -19,6 +21,10 @@ const app = createApp({
       userCanAdd: false,
       auth: null,
     }
+  },
+  mounted() {
+    // no need to use a Vue component, plain old JavaScript
+    render(document.querySelectorAll(".timeago"))
   },
   methods: {
     updateUser(user) {
