@@ -2,7 +2,7 @@
 
 # collect/convert auxiliary vocabularies
 
-default: bartoc-formats.concepts.ndjson ddc100.concepts.ndjson languages.concepts.ndjson nkostype.concepts.ndjson
+default: bartoc-formats.concepts.ndjson ddc100.concepts.ndjson languages.concepts.ndjson nkostype.concepts.ndjson bartoc-api-types.concepts.ndjson
 
 bartoc-formats.concepts.ndjson: formats.csv bartoc-formats.scheme.ndjson
 	jskos-convert -f csv -t ndjson -m -l en -s bartoc-formats.scheme.ndjson $< > $@
@@ -17,3 +17,6 @@ languages.concepts.ndjson:
 
 nkostype.concepts.ndjson:
 	curl -L --silent http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > $@
+
+bartoc-api-types.concepts.ndjson: bartoc-api-types.concepts.csv
+	jskos-convert -m -v -s bartoc-api-types.scheme.ndjson $< > $@
