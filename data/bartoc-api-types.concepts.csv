@@ -1,7 +1,7 @@
 notation,prefLabel,scopeNote
-jskos,JSKOS API,Base URL of a JSKOS Server instance of another service following its semantics
+jskos,JSKOS API,Base URL of a JSKOS Server instance or another service following its semantics
 skosmos,Skosmos API,Skosmos vocabulary information page without language code
 reconciliation,Reconciliation,Reconciliation Service API endpoint
 lod,Linked Open Data (LOD),Resolveable URI that returns or links vocabulary data in RDF
-sparql,SPARQL endpoint,
+sparql,SPARQL endpoint,Public SPARQL endpoint
 webservice,Unspecified Webservice,Unspecified kind of webservice (JSON/XML...)
