@@ -15,6 +15,7 @@ report '.definition|not' 'no-abstract'
 report '.url|not' 'no-homepage'
 report '.publisher|not' 'no-publisher'
 report '.subject|not' 'no-subject'
+#report '.subject[]?|select(.inScheme[].uri=="http://bartoc.org/en/node/241")|not' 'no-ddc'
 
 #report '(.subject[]?.inScheme[]?.uri|select(.=="http://bartoc.org/en/node/241"))|not' 'no-subject-ddc'
 #report '(.subject[]?.inScheme[]?.uri|select(.=="http://bartoc.org/en/node/15" or .=="http://eurovoc.europa.eu/100141"))|not' 'no-subject-eurovoc'

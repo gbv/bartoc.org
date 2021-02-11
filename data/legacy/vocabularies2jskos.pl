@@ -46,7 +46,7 @@ sub dehtmlist {
 my $IDS;
 
 for (qw(eurovoc ddc language license kostype)) {
-    open my $fh, "<", "../data/$_-ids.csv";
+    open my $fh, "<", "../$_-ids.csv";
     $IDS->{$_} = { map { chomp; split "," } <$fh> };
 }
 

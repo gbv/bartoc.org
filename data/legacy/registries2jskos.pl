@@ -4,7 +4,7 @@ use JSON::PP;
 
 # convert Drupal JSON export of BARTOC.org registries to JSKOS
 
-open my $fh, "<", "../data/eurovoc-ids.csv";
+open my $fh, "<", "../eurovoc-ids.csv";
 my %eurovoc = map { chomp; split "," } <$fh>;
 
 for ( map { decode_json($_) } <> ) {
