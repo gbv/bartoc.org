@@ -31,19 +31,5 @@
       "url": "/contact",
       "prefLabel": { "en": "Contact" }
     }
-  ],
-  "redirects": {
-    "/en": "/",
-    "/en/content/about": "/about",
-    "/terminology-registries": "/registries",
-    "/en/search/basic": "/vocabularies",
-    "/en/title-finder": "/vocabularies",
-    "/en/browse": "/vocabularies",
-    "/Full-Repository/Full-terminology-repository-provides-terminology-content": "/registries?type=http://bartoc.org/full-repository",
-    "/full-repository": "/registries?type=http://bartoc.org/full-repository",
-    "/en/Format": "/vocabularies?uri=http://uri.gbv.de/terminology/bartoc_formatcatalog/",
-    "/en/ilc": "/en/node/472",
-    "/en/node/1948": "/contact",
-    "/tracker": "/vocabularies?sort=modified&order=desc"
-  }
+  ]
 }

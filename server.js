@@ -61,7 +61,9 @@ app.use("/data/reports/", express.static("data/reports"))
 app.use("/dist/", express.static("dist"))
 
 // redirect permanently moved URLs from legacy BARTOC.org
-for (const [from, to] of Object.entries(config.redirects)) {
+const redirects = require("./data/redirects.json")
+
+for (const [from, to] of Object.entries(redirects)) {
   app.get(from, (req, res) => res.redirect(301, to))
 }
 
