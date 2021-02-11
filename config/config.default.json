@@ -45,9 +45,5 @@
     "/en/ilc": "/en/node/472",
     "/en/node/1948": "/contact",
     "/tracker": "/vocabularies?sort=modified&order=desc"
-  },
-  "license": {
-    "name": "Public Domain Dedication and License v1.0",
-    "url": "http://www.opendatacommons.org/licenses/pddl/1.0/"
   }
 }
