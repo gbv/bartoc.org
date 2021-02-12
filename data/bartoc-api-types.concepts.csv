@@ -3,5 +3,6 @@ jskos,JSKOS API,Base URL of a JSKOS Server instance or another service following
 skosmos,Skosmos API,Skosmos vocabulary information page without language code
 reconciliation,Reconciliation,Reconciliation Service API endpoint
 lod,Linked Open Data (LOD),Resolveable URI that returns or links vocabulary data in RDF
+skohub,Skohub,Skohub vocabulary lookup API
 sparql,SPARQL endpoint,Public SPARQL endpoint
 webservice,Unspecified Webservice,Unspecified kind of webservice (JSON/XML...)
