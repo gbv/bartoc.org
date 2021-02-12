@@ -23,5 +23,12 @@ if (scheme) { %>
               view: item => include('item', { item, base: '/vocabularies?license=' }) }) %>
 </table>
 
+<%# TODO: directly list result set here %>
+<% if (scheme && scheme.uri === "http://bartoc.org/en/node/20287" && item.notation) { %>
+<a href="/vocabularies?languages=<%= item.notation.join(",") %>">
+  <i class="fas fa-arrow-right"></i> vocabularies in this language
+</a>
+<% } %>
+
 <%- include('item-dates') %>
 <%- include('footer') %>
