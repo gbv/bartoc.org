@@ -1,13 +1,15 @@
-<% if (item.created || item.issued || item.modified) { %>
+<%
+  const { created, issued, modified } = item
+  if (created || issued || modified) { %>
   <ul class="list-inline text-right">
-   <% if (item.created) { %>
-    <li class="list-inline-item"><small>created <time><%= item.created %></time></small></li>
+   <% if (created) { %>
+    <li class="list-inline-item"><small>created <time><%= created %></time></small></li>
    <% } %>
-   <% if (item.issued) { %>
-    <li class="list-inline-item"><small>issued <time><%= item.issued %></time></small></li>
+   <% if (issued) { %>
+    <li class="list-inline-item"><small>issued <time><%= issued %></time></small></li>
    <% } %>
-   <% if (item.modified) { %>
-    <li class="list-inline-item"><small>modified <time><%= item.modified %></time></small></li>
+   <% if (modified && modified !== created && modified !== issued) { %>
+    <li class="list-inline-item"><small>modified <time><%= modified %></time></small></li>
    <% } %>
   </ul>
 <% } %>
