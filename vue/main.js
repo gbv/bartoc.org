@@ -24,7 +24,9 @@ const app = createApp({
   },
   mounted() {
     // no need to use a Vue component, plain old JavaScript
-    render(document.querySelectorAll(".timeago"))
+    // See https://github.com/hustcc/timeago.js/issues/230
+    const nodes = document.querySelectorAll(".timeago")
+    if (nodes.length) render(nodes)
   },
   methods: {
     updateUser(user) {
