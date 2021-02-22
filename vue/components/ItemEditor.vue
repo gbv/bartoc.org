@@ -310,7 +310,7 @@ export default {
     ["notation", "identifier", "languages", "license", "type", "subject", "subjectOf", "partOf", "FORMAT", "API", "ACCESS", "publisher"]
       .forEach(key => { if (!item[key]) item[key] = [] })
 
-    const examples = (item.EXAMPLES || []).join(", ")
+    const examples = (item.notationExamples || []).join(", ")
 
     var abstractEn = ""
     var abstractUnd = ""
@@ -341,7 +341,7 @@ export default {
     abstractEn: function (s) { this.item.definition.en = [s] },
     abstractUnd: function (s) { this.item.definition.und = [s] },
     examples: function (s) {
-      this.item.EXAMPLES = s.split(",").map(s => s.trim()).filter(s => s !== "")
+      this.item.notationExamples = s.split(",").map(s => s.trim()).filter(s => s !== "")
     },
   },
 
