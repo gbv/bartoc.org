@@ -1,24 +1,41 @@
 import cdk from "cocoda-sdk"
 
-// Use a store to minimize number of registry initializations
-const store = {
-  registries: [],
-  getRegistry(api) {
-    // 1. Try to get registry from cache
-    let registry = this.registries.find(r => r._jskos.api === api)
-    if (!registry) {
-      // 2. If not found, initialize it
-      registry = cdk.initializeRegistry({
-        provider: api.includes("skosmos") ? "SkosmosApi" : "ConceptApi",
-        api,
-        // schemes is only necessary for using `getSchemes` which we don't use here.
-        schemes: [],
-      })
-      // 3. Add to cache
-      this.registries.push(registry)
+// Initialize a CDK Registry object (if possible)
+function registryFromEndpoint({url, type}) {
+  console.log(url,type)
+  if (type === "http://bartoc.org/api-type/jskos") {
+    return cdk.initializeRegistry({
+      provider: "ConceptApi",
+      api: url,
+      schemes: [],
+    })
+  } else if (type === "http://bartoc.org/api-type/skosmos") {
+    const api = url.replace(/[^/]+\/$/,"rest/v1/")
+    return cdk.initializeRegistry({
+      provider: "SkosmosApi",
+      api,
+      schemes: [], // TODO: add VOCID (is part of the URL but we need scheme URI)
+    })
+  }
+}
+
+// Use a cache to minimize number of registry initializations
+const registryCache = {}
+export function initializeRegistry(endpoint) {
+  if ((endpoint||{}).url) {
+    if (!registryCache[endpoint.url]) {
+      registryCache[endpoint.url] = registryFromEndpoint(endpoint)
     }
-    return registry
-  },
+    return registryCache[endpoint.url]
+  }
+}
+
+export async function cdkLoadConcepts(scheme, uri) {
+  const registry = (scheme||{}).API ? initializeRegistry(scheme.API[0]) : null
+  if (!registry || !uri) return []
+
+  const result = await registry.getConcepts({ concepts: [{ uri, inScheme: [scheme] }] })
+  return result
 }
 
 // TODO: configure somewhere else, this is part of BARTOC data anyway
@@ -27,7 +44,7 @@ export const indexingSchemes = [
     uri: "http://bartoc.org/en/node/241",
     namespace: "http://dewey.info/class/",
     notation: ["DDC"],
-    API: ["/api/"],
+    API: [{url:"/api/",type:"http://bartoc.org/api-type/jskos"}],
   },
   // NOTE: For BARTOC, we need to have those URIs in the `uri` field that the API uses.
   // ? Is this an issue if we use different URIs?
@@ -38,7 +55,7 @@ export const indexingSchemes = [
     prefLabel: { en: "EuroVoc" },
     notation: ["EUROVOC"],
     VOCID: "EuroVoc",
-    API: ["https://bartoc-skosmos.unibas.ch/rest/v1/"],
+    API: [{url:"https://bartoc-skosmos.unibas.ch/rest/v1/",type:"http://bartoc.org/api-type/skosmos"}],
   },
   {
     uri: "https://bartoc.org/ILC/1",
@@ -46,7 +63,7 @@ export const indexingSchemes = [
     namespace: "https://bartoc.org/ILC/1/",
     notation: ["ILC"],
     VOCID: "ILC",
-    API: ["https://bartoc-skosmos.unibas.ch/rest/v1/"],
+    API: [{url:"https://bartoc-skosmos.unibas.ch/rest/v1/",type:"http://bartoc.org/api-type/skosmos"}],
   },
 ]
 
@@ -56,16 +73,3 @@ export function loadConcepts(api, uri) {
   return fetch(api).then(res => res ? res.json() : [])
 }
 
-export function initializeRegistry(api) {
-  return store.getRegistry(api)
-}
-
-// TODO: These methods have to be merged. Also determining how to initialize the registry should be its own utility method.
-export async function cdkLoadConcepts(scheme, uri) {
-  if (!scheme || !scheme.API || !scheme.API.length || !uri) {
-    return []
-  }
-  const registry = initializeRegistry(scheme.API[0])
-  const result = await registry.getConcepts({ concepts: [{ uri, inScheme: [scheme] }] })
-  return result
-}

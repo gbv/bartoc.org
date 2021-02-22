@@ -17,6 +17,10 @@ export default {
       type: String,
       required: true,
     },
+    type: {
+      type: String,
+      required: true,
+    },
     vocabulary: {
       type: String,
       required: true,

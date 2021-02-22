@@ -60,7 +60,7 @@
       <%- include('row-list', { label: 'Listed in', list: item.partOf,
         view: s => include('item', { item: registries[s.uri] || { uri: s.uri } })  }) %>
       <%- include('row-list', { label: 'Services (API)', list: item.API,
-        view: s => `<service-link :vocabulary='"${item.uri}"' :api='"${s}"'></service-link>` }) %>
+        view: s => `<service-link :vocabulary='"${item.uri}"' :api='"${s.url}"' :type='"${s.type}"'></service-link>` }) %>
    </table>
   </div>
   <div class="tab-pane fade" role="tabpanel" aria-labelledby="content-tab">

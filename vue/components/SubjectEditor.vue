@@ -102,7 +102,7 @@ const ItemInput = {
     loadDetails() {
       const { uri, inScheme } = this.item
       cdkLoadConcepts(this.scheme, uri).then(res => {
-        this.item = res[0] || { uri, inScheme }
+        this.item = res && res.length ? res[0] : { uri, inScheme }
       })
     },
   },
