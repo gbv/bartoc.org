@@ -1,34 +1,25 @@
 <template>
   <table class="table table-sm table-borderless">
-    <tr class="d-flex">
-      <th class="col-9">
-        title
-      </th>
-      <th
-        colspan="2"
-        class="col-3">
-        language
-      </th>
-    </tr>
     <tr
       v-for="(label,i) in labels"
       :key="i"
       class="d-flex">
-      <td class="col-9">
+      <td class="col-8">
         <input
           v-model="label.label"
           type="text"
           class="form-control">
-      </td><td class="col-2">
+      </td><td class="col-3">
         <language-select
           v-model="label.language"
           class="form-control" />
       </td><td class="col-1">
         <button
           type="button"
-          class="btn btn-outline-primary"
+          title="remove"
+          class="btn btn-outline-secondary button-remove"
           @click="remove(i)">
-          x
+          🗙
         </button>
       </td>
     </tr>
@@ -36,9 +27,9 @@
       <td>
         <button
           type="button"
-          class="btn btn-outline-primary"
+          class="btn btn-light button-add"
           @click="add()">
-          +
+          ＋ Add title
         </button>
       </td>
     </tr>
@@ -69,42 +60,45 @@ export default {
       labels: [],
     }
   },
+  watch: {
+    labels: {
+      deep: true,
+      handler(labels) {
+        const prefLabel = {}
+        const altLabel = {}
+        labels.forEach(({ label, language }) => {
+          label = label.trim()
+          if (label === "") return
+          const code = language || "und"
+          if (code in altLabel) {
+            altLabel[code].push(label)
+          } else if (code in prefLabel) {
+            altLabel[code] = [label]
+          } else {
+            prefLabel[code] = label
+          }
+        })
+        this.$emit("update:prefLabel", prefLabel)
+        this.$emit("update:altLabel", altLabel)
+      },
+    },
+  },
   created() {
     for (const language in this.prefLabel) {
       this.add({ label: this.prefLabel[language], language })
     }
-    // this will move an altLabel to become a prefLabel when no prefLabel of its language exist!
+    // this will move an altLabel to become a prefLabel if no prefLabel of its language exist!
     for (const language in this.altLabel) {
       this.altLabel[language].forEach(label => this.add({ label, language }))
     }
     this.add()
-    this.$watch("labels", l => this.change(l), { deep: true })
   },
   methods: {
-    add(label = { label: "", language: "" }) {
-      this.labels.push(label)
+    add(label) {
+      this.labels.push(label || { label: "", language: "" })
     },
     remove(i) {
       this.labels.splice(i, 1)
-    },
-    change(labels) {
-      const prefLabel = {}
-      const altLabel = {}
-      labels.forEach(({ label, language }) => {
-        if (!label) return
-        const code = language || "und"
-        label = label.trim()
-        if (label === "") return
-        if (code in altLabel) {
-          altLabel[code].push(label)
-        } else if (code in prefLabel) {
-          altLabel[code] = [label]
-        } else {
-          prefLabel[code] = label
-        }
-      })
-      this.$emit("update:prefLabel", prefLabel)
-      this.$emit("update:altLabel", altLabel)
     },
   },
 }
