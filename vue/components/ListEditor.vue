@@ -11,18 +11,18 @@
       </td><td>
         <button
           type="button"
-          class="btn btn-outline-primary"
+          class="btn btn-outline-secondary button-remove"
           @click="remove(i)">
-          x
+          🗙
         </button>
       </td>
     </tr><tr>
       <td>
         <button
           type="button"
-          class="btn btn-outline-primary"
+          class="btn btn-light button-add"
           @click="add('')">
-          +
+          ＋ Add {{ name }}
         </button>
       </td>
     </tr>
@@ -37,6 +37,12 @@ import SetEditorMixin from "./SetEditorMixin.js"
  */
 export default {
   mixins: [SetEditorMixin],
+  props: {
+    name: {
+      type: String,
+      default: "",
+    },
+  },
   mounted() {
     // to show at least one text input for the first entry
     if (!this.set.length) {

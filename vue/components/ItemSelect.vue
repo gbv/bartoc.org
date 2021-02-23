@@ -84,7 +84,7 @@ export default {
   },
   methods: {
     initializeRegistry() {
-      this.registry = this.scheme ? initializeRegistry(this.scheme.API[0]) : null
+      this.registry = (this.scheme||{}).API ? initializeRegistry(this.scheme.API[0]) : null
     },
     async search(query) {
       if (!this.registry) {

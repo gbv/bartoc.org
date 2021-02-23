@@ -11,7 +11,7 @@
     <label-editor
       v-model:prefLabel="item.prefLabel"
       v-model:altLabel="item.altLabel" />
-    The first of each language code is used as preferred title, more as
+    The first of each language is used as preferred title, more as
     aliases, translations... Please provide at least an English title.
   </form-row>
   <form-row :label="'Abbreviation'">
@@ -22,7 +22,9 @@
     Common, unique abbreviation, acronym, or notation the vocabulary is known under.
   </form-row>
   <form-row :label="'Identifier'">
-    <list-editor v-model="item.identifier" />
+    <list-editor
+      v-model="item.identifier"
+      :name="'identifier'" />
     Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
   <form-row :label="'English Abstract'">
@@ -91,6 +93,7 @@
   <form-row :label="'Additional links'">
     <list-editor
       :model-value="item.subjectOf.map(s=>s.url)"
+      :name="'link'"
       @update:modelValue="item.subjectOf=$event.map(url=>({url}))" />
   </form-row>
   <form-row :label="'Formats'">
@@ -122,16 +125,13 @@
   <form-row :label="'Listed In'">
     <list-editor
       :model-value="item.partOf.map(({uri})=>uri)"
+      :name="'registry URI'"
       @update:modelValue="item.partOf=$event.map(uri=>({uri}))" />
     Which <a href="/registries">terminology registries</a> list the vocabulary?
     Please use registry URIs, a more convenient editing form will be added later!
   </form-row>
   <form-row :label="'Vocabulary services'">
-    <list-editor v-model="item.API" />
-    Endpoints of vocabulary services
-    (<a href="http://skosmos.org/">Skosmos</a>,
-    <a href="https://github.com/gbv/jskos-server#readme">jskos-server</a>...)
-    to query the vocabulary.
+    <endpoints-editor v-model="item.API" />
   </form-row>
   <hr>
   <p>
@@ -245,6 +245,7 @@ import LabelEditor from "./LabelEditor.vue"
 import SubjectEditor from "./SubjectEditor.vue"
 import ListEditor from "./ListEditor.vue"
 import AddressEditor from "./AddressEditor"
+import EndpointsEditor from "./EndpointsEditor.vue"
 
 const PublisherEditor = {
   emits: ["update:modelValue"],
@@ -287,7 +288,7 @@ function githubIssueUrl(title, body) {
  * Web form to modify and create vocabulary metadata.
  */
 export default {
-  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor, AddressEditor, PublisherEditor },
+  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor, AddressEditor, PublisherEditor, EndpointsEditor },
   props: {
     user: {
       type: Object,
@@ -418,6 +419,9 @@ export default {
       const type = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
       if (item.type[0] !== type) item.type.unshift(type)
       item = filtered(item)
+      if (item.API) {
+        item.API = item.API.filter(endpoint => endpoint.url)
+      }
       if (item.subject) {
         item.subject = item.subject.map(({uri,inScheme,notation}) => {
           inScheme = inScheme.map(({uri}) => ({uri}))
