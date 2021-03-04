@@ -1,37 +1,33 @@
 import cdk from "cocoda-sdk"
 
-// Initialize a CDK Registry object (if possible)
-function registryFromEndpoint({url, type}) {
-  console.log(url,type)
-  if (type === "http://bartoc.org/api-type/jskos") {
-    return cdk.initializeRegistry({
-      provider: "ConceptApi",
-      api: url,
-      schemes: [],
-    })
-  } else if (type === "http://bartoc.org/api-type/skosmos") {
-    const api = url.replace(/[^/]+\/$/,"rest/v1/")
-    return cdk.initializeRegistry({
-      provider: "SkosmosApi",
-      api,
-      schemes: [], // TODO: add VOCID (is part of the URL but we need scheme URI)
-    })
-  }
-}
-
-// Use a cache to minimize number of registry initializations
 const registryCache = {}
-export function initializeRegistry(endpoint) {
-  if ((endpoint||{}).url) {
-    if (!registryCache[endpoint.url]) {
-      registryCache[endpoint.url] = registryFromEndpoint(endpoint)
+export function registryForScheme(scheme) {
+  if (!scheme || !scheme.API || !scheme.API.length) return
+
+  const { url, type } = scheme.API[0]
+
+  if (!(url in registryCache)) {
+    const config = { schemes: [scheme] }
+    if (type === "http://bartoc.org/api-type/jskos") {
+      config.api = url
+      config.provider = "ConceptApi"
+    } else if (type === "http://bartoc.org/api-type/skosmos") {
+      config.provider = "SkosmosApi"
+      const match = url.match(/(.+\/)([^/]+)\/$/)
+      if (!match) return
+      config.api = match[1] + "rest/v1/"
+      scheme.VOCID = match[2]
     }
-    return registryCache[endpoint.url]
+    if (!config.provider) return
+
+    registryCache[url] = cdk.initializeRegistry(config)
   }
+
+  return registryCache[url]
 }
 
 export async function cdkLoadConcepts(scheme, uri) {
-  const registry = (scheme||{}).API ? initializeRegistry(scheme.API[0]) : null
+  const registry = registryForScheme(scheme)
   if (!registry || !uri) return []
 
   const result = await registry.getConcepts({ concepts: [{ uri, inScheme: [scheme] }] })
@@ -54,16 +50,14 @@ export const indexingSchemes = [
     namespace: "http://eurovoc.europa.eu/",
     prefLabel: { en: "EuroVoc" },
     notation: ["EUROVOC"],
-    VOCID: "EuroVoc",
-    API: [{url:"https://bartoc-skosmos.unibas.ch/rest/v1/",type:"http://bartoc.org/api-type/skosmos"}],
+    API: [{url:"https://bartoc-skosmos.unibas.ch/EuroVoc/",type:"http://bartoc.org/api-type/skosmos"}],
   },
   {
     uri: "https://bartoc.org/ILC/1",
     identifier: ["http://bartoc.org/de/node/472"],
     namespace: "https://bartoc.org/ILC/1/",
     notation: ["ILC"],
-    VOCID: "ILC",
-    API: [{url:"https://bartoc-skosmos.unibas.ch/rest/v1/",type:"http://bartoc.org/api-type/skosmos"}],
+    API: [{url:"https://bartoc-skosmos.unibas.ch/ILC/",type:"http://bartoc.org/api-type/skosmos"}],
   },
 ]
 
