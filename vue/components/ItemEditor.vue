@@ -22,9 +22,7 @@
     Common, unique abbreviation, acronym, or notation the vocabulary is known under.
   </form-row>
   <form-row :label="'Identifier'">
-    <list-editor
-      v-model="item.identifier"
-      :name="'identifier'" />
+    <list-editor v-model="item.identifier" />
     Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
   <form-row :label="'English Abstract'">
@@ -93,7 +91,6 @@
   <form-row :label="'Additional links'">
     <list-editor
       :model-value="item.subjectOf.map(s=>s.url)"
-      :name="'link'"
       @update:modelValue="item.subjectOf=$event.map(url=>({url}))" />
   </form-row>
   <form-row :label="'Formats'">
@@ -125,7 +122,6 @@
   <form-row :label="'Listed In'">
     <list-editor
       :model-value="item.partOf.map(({uri})=>uri)"
-      :name="'registry URI'"
       @update:modelValue="item.partOf=$event.map(uri=>({uri}))" />
     Which <a href="/registries">terminology registries</a> list the vocabulary?
     Please use registry URIs, a more convenient editing form will be added later!

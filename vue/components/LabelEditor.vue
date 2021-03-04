@@ -15,21 +15,12 @@
           class="form-control" />
       </td><td class="col-1">
         <button
+          v-if="labels.length > 1"
           type="button"
           title="remove"
           class="btn btn-outline-secondary button-remove"
           @click="remove(i)">
           🗙
-        </button>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <button
-          type="button"
-          class="btn btn-light button-add"
-          @click="add()">
-          ＋ Add title
         </button>
       </td>
     </tr>
@@ -66,6 +57,12 @@ export default {
       handler(labels) {
         const prefLabel = {}
         const altLabel = {}
+
+        if (!labels.find(label => label.label.trim() === "")) {
+          this.add() // will trigger handler again
+          return
+        }
+
         labels.forEach(({ label, language }) => {
           label = label.trim()
           if (label === "") return

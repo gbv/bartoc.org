@@ -10,19 +10,11 @@
           class="form-control">
       </td><td>
         <button
+          v-if="set.length > 1"
           type="button"
           class="btn btn-outline-secondary button-remove"
           @click="remove(i)">
           🗙
-        </button>
-      </td>
-    </tr><tr>
-      <td>
-        <button
-          type="button"
-          class="btn btn-light button-add"
-          @click="add('')">
-          ＋ Add {{ name }}
         </button>
       </td>
     </tr>
@@ -37,17 +29,16 @@ import SetEditorMixin from "./SetEditorMixin.js"
  */
 export default {
   mixins: [SetEditorMixin],
-  props: {
-    name: {
-      type: String,
-      default: "",
+  watch: {
+    set: {
+      deep: true,
+      immediate: true,
+      handler(set) {
+        if (set.find(e => e.trim() === "") === undefined) {
+          set.push("")
+        }
+      },
     },
-  },
-  mounted() {
-    // to show at least one text input for the first entry
-    if (!this.set.length) {
-      this.add("")
-    }
   },
 }
 </script>
