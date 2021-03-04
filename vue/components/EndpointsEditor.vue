@@ -27,20 +27,11 @@
             :extract-label="extractLabel" />
         </td><td class="col-1">
           <button
+            v-if="endpoints.length > 1"
             type="button"
             class="btn btn-outline-secondary button-remove"
             @click="remove(i)">
             &times;
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <button
-            type="button"
-            class="btn btn-light button-add"
-            @click="add()">
-            ＋ Add API endpoint
           </button>
         </td>
       </tr>
@@ -82,15 +73,16 @@ export default {
   watch: {
     endpoints: {
       deep: true,
+      immediate: true,
       handler(endpoints) {
+        if(!endpoints.find(({ url}) => url.trim() === "")) {
+          endpoints.push({ url:"", type: "http://bartoc.org/api-type/webservice" })
+        }
         this.$emit("update:modelValue", endpoints)
       },
     },
   },
   methods: {
-    add() {
-      this.endpoints.push({ url:"", type: "http://bartoc.org/api-type/webservice" })
-    },
     remove(i) {
       this.endpoints.splice(i, 1)
     },
