@@ -30,7 +30,7 @@
             type="button"
             class="btn btn-outline-secondary button-remove"
             @click="remove(i)">
-            🗙
+            &times;
           </button>
         </td>
       </tr>
