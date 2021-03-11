@@ -13,9 +13,10 @@
         <li
           v-for="concept in topConcepts"
           :key="concept.uri"
-          class="clickable"
           @click="selected = concept">
-          <concept :concept="concept" />
+          <concept
+            :concept="concept"
+            class="clickable" />
         </li>
       </ul>
     </div>

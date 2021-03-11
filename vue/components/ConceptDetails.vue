@@ -4,13 +4,15 @@
       <li
         class="clickable"
         @click="$emit('update:concept', null)">
-        to top concepts
+        top concepts
       </li>
       <li
         v-for="ancestor in ancestors"
         :key="ancestor.uri"
         @click="$emit('update:concept', ancestor)">
-        <concept :concept="ancestor" />
+        <concept
+          :concept="ancestor"
+          class="clickable" />
       </li>
     </ul>
 
@@ -29,9 +31,10 @@
         <li
           v-for="child in narrower"
           :key="child.uri"
-          class="clickable"
           @click="$emit('update:concept', child)">
-          <concept :concept="child" />
+          <concept
+            :concept="child"
+            class="clickable" />
         </li>
       </ul>
     </div>
