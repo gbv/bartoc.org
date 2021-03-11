@@ -67,8 +67,12 @@
     <table class="table table-borderless">
       <%- include('row', { label: 'Size', content: item.extent } ) %>
       <%- include('row-list', { label: 'Languages', list: item.languages, style: 'inline' }) %>
-      <!-- TODO: browsing interface -->
     </table>
+   <% if (item.API) {
+     const scheme = { uri: item.uri, identifier: item.identifier, API: item.API }
+   %>
+   <concept-browser :scheme="<%= JSON.stringify(scheme) %>"></concept-browser>
+   <% } %>
   </div>
   <div class="tab-pane fade" role="tabpanel" aria-labelledby="identifiers-tab">
     <!-- Identifiers (identifiers, namespace, notation pattern, MARCspec, PICA path, CQL key) -->

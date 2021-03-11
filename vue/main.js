@@ -3,6 +3,7 @@ import { createApp } from "vue"
 import ItemEditor from "./components/ItemEditor.vue"
 import VocabularySearch from "./components/VocabularySearch.vue"
 import ServiceLink from "./components/ServiceLink.vue"
+import ConceptBrowser from "./components/ConceptBrowser.vue"
 
 import UserStatus from "./components/UserStatus.vue"
 // Note: Using the JSON files directly because Lodash is used in config/index.js
@@ -13,7 +14,7 @@ const login = Object.assign({}, configDefault.login, configUser.login || {})
 import { render } from "../node_modules/timeago.js/"
 
 const app = createApp({
-  components: { UserStatus, ItemEditor, VocabularySearch, ServiceLink },
+  components: { UserStatus, ItemEditor, VocabularySearch, ServiceLink, ConceptBrowser },
   data() {
     return {
       login,
