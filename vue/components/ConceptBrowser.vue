@@ -1,5 +1,6 @@
 <template>
   <div v-if="registry">
+    <!-- TODO: ItemSelect -->
     <div v-if="selected">
       <h4>Browse vocabulary</h4>
       <concept-details
@@ -36,9 +37,8 @@
         v-for="endpoint in scheme.API"
         :key="endpoint.url">
         <service-link
-          :vocabulary="scheme"
-          :api="endpoint.url"
-          :type="endpoint.type" />
+          :scheme="scheme"
+          :endpoint="endpoint" />
       </li>
     </ul>
   </div>

@@ -1,5 +1,6 @@
 <template>
-  <a :href="api">{{ api }}</a>
+  <a :href="endpoint.url">{{ endpoint.url }}</a>
+  (<item-name :item="apiType" />)
   <a
     v-if="cocoda"
     class="btn btn-sm btn-primary"
@@ -8,29 +9,39 @@
 </template>
 
 <script>
-/**
- * Show vocabulary service API URL and links to services based on the API.
- */
+import ItemName from "./ItemName"
+import { apiTypesScheme } from "../utils.js"
+import { registryForScheme } from "../utils"
+
+const registry = registryForScheme(apiTypesScheme)
+
+// Show scheme service API URL and links to services based on the API
 export default {
+  components: { ItemName },
   props: {
-    api: {
-      type: String,
+    // TODO: watch endpoint and reload on change
+    endpoint: {
+      type: Object,
       required: true,
     },
-    type: {
-      type: String,
-      required: true,
-    },
-    vocabulary: {
-      type: String,
+    scheme: {
+      type: Object,
       required: true,
     },
   },
+  // TODO: watch endpoint and reload on change
   data() {
-    const cocoda = this.api.match(/^https?:\/\/(api\.dante\.gbv\.de|coli-conc\.gbv\.de\/api)\//)
-      ? "https://coli-conc.gbv.de/cocoda/app/?fromScheme=" + encodeURIComponent(this.vocabulary) : ""
+    const cocoda = this.endpoint.url.match(/^https?:\/\/(api\.dante\.gbv\.de|coli-conc\.gbv\.de\/api)\//)
+      ? "https://coli-conc.gbv.de/cocoda/app/?fromScheme=" + encodeURIComponent(this.scheme.uri) : ""
     return {
       cocoda,
+      apiType: { uri: this.endpoint.type },
+    }
+  },
+  async mounted() {
+    const result = await registry.getConcepts({ concepts: [ this.apiType ] })
+    if (result.length) {
+      this.apiType = result[0]
     }
   },
 }

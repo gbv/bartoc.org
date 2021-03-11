@@ -61,6 +61,16 @@ export const indexingSchemes = [
   },
 ]
 
+export const apiTypesScheme = {
+  uri: "http://bartoc.org/en/node/20002",
+  API:[
+    {
+      url: "/api/",
+      type: "http://bartoc.org/api-type/jskos",
+    },
+  ],
+}
+
 // TODO: use cdk instead
 export function loadConcepts(api, uri) {
   if (uri) api = `${api}?uri=${encodeURIComponent(uri)}`

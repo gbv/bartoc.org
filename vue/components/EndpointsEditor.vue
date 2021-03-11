@@ -23,7 +23,7 @@
         </td><td class="col-3">
           <item-select
             v-model="api.type"
-            :scheme="apiTypes"
+            :scheme="apiTypesScheme"
             :extract-label="extractLabel" />
         </td><td class="col-1">
           <button
@@ -42,16 +42,7 @@
 <script>
 import ItemSelect from "./ItemSelect"
 import jskos from "jskos-tools"
-
-const apiTypes = {
-  uri: "http://bartoc.org/en/node/20002",
-  API:[
-    {
-      url: "/api/",
-      type: "http://bartoc.org/api-type/jskos",
-    },
-  ],
-}
+import { apiTypesScheme } from "../utils.js"
 
 // Form to select an API endpoint
 export default {
@@ -65,7 +56,7 @@ export default {
   emits: ["update:modelValue"],
   data() {
     return {
-      apiTypes,
+      apiTypesScheme,
       // deep copy of modelValue
       endpoints: this.modelValue.map(endpoint => ({...endpoint})),
     }

@@ -20,8 +20,8 @@
       <concept :concept="selected" />
       <div>
         <small>
-          URI: <a :href="selected.uri">{{ selected.uri }}</a><br>
-          Labels: {{ Object.entries(selected.prefLabel || {}).map(e => `${e[1]} (${e[0]})`).join(", ") }}
+        <a :href="selected.uri">{{ selected.uri }}</a><br>
+        Labels: {{ Object.entries(selected.prefLabel || {}).map(e => `${e[1]} (${e[0]})`).join(", ") }}
         </small>
       </div>
     </div>
