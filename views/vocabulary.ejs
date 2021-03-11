@@ -71,6 +71,7 @@
    <% if (item.API) {
      const scheme = { uri: item.uri, identifier: item.identifier, API: item.API }
    %>
+   <hr>
    <concept-browser :scheme="<%= JSON.stringify(scheme) %>"></concept-browser>
    <% } %>
   </div>

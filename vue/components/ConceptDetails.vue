@@ -4,7 +4,7 @@
       <li
         class="clickable"
         @click="$emit('update:concept', null)">
-        top concepts
+        <b>top concepts</b>
       </li>
       <li
         v-for="ancestor in ancestors"
