@@ -9,13 +9,30 @@
           type="text"
           class="form-control">
       </td><td>
-        <button
+        <div
           v-if="set.length > 1"
-          type="button"
-          class="btn btn-outline-secondary button-remove"
-          @click="remove(i)">
-          &times;
-        </button>
+          class="btn-group">
+          <button
+            :disabled="!i"
+            type="button"
+            class="btn btn-outline-secondary"
+            @click="up(i)">
+            &#9650;
+          </button>
+          <button
+            :disabled="i > set.length-2"
+            type="button"
+            class="btn btn-outline-secondary"
+            @click="down(i)">
+            &#9660;
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            @click="remove(i)">
+            &times;
+          </button>
+        </div>
       </td>
     </tr>
   </table>
@@ -42,3 +59,9 @@ export default {
   },
 }
 </script>
+
+<style>
+button.btn.btn-outline-secondary:disabled {
+  color: #fff;
+}
+</style>

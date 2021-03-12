@@ -27,7 +27,19 @@ export default {
       this.set.push(item)
     },
     remove(index) {
-      this.set.splice(index, 1)
+      if (index < this.set.length) {
+        this.set.splice(index, 1)
+      }
+    },
+    up(index) {
+      if (index && index < this.set.length) {
+        [this.set[index], this.set[index-1]] = [this.set[index-1], this.set[index]]
+      }
+    },
+    down(index) {
+      if (index < this.set.length + 1) {
+        [this.set[index], this.set[index+1]] = [this.set[index+1], this.set[index]]
+      }
     },
   },
 }
