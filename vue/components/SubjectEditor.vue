@@ -53,60 +53,10 @@
 
 <script>
 import SetEditorMixin from "./SetEditorMixin.js"
-import ItemName from "./ItemName.vue"
-import ItemSelect from "./ItemSelect"
-import { indexingSchemes, cdkLoadConcepts } from "../utils.js"
+import ItemName from "./ItemName"
+import ItemInput from "./ItemInput"
+import { indexingSchemes } from "../utils.js"
 import jskos from "jskos-tools"
-
-const ItemInput = {
-  components: { ItemName, ItemSelect },
-  template: `
-      <item-select v-show="hasFocus || !item.uri" @open="hasFocus=true" @close="hasFocus=false" ref="input" type="text" class="form-control" v-model="item.uri" v-on:keyup.enter="$event.target.blur()" :scheme="scheme" />
-      <div v-if="!hasFocus" @click="edit()">
-       <item-name :item="item" :notation="true"/>
-      <a href="" @focus="edit()"/>
-    </div>`,
-  props: {
-    modelValue: Object,
-    scheme: Object,
-  },
-  data() {
-    return {
-      item: this.modelValue,
-      hasFocus: false,
-      loaded: null,
-    }
-  },
-  watch: {
-    item: {
-      deep: true,
-      handler(item) {
-        this.$emit("update:modelValue", item)
-        if (this.loaded !== item.uri) {
-          this.loaded = item.uri
-          this.loadDetails()
-        }
-      },
-    },
-  },
-  created() {
-    this.loadDetails()
-  },
-  methods: {
-    edit() {
-      this.hasFocus = true
-      this.$nextTick(() => {
-        this.$refs.input && this.$refs.input.focus()
-      })
-    },
-    loadDetails() {
-      const { uri, inScheme } = this.item
-      cdkLoadConcepts(this.scheme, uri).then(res => {
-        this.item = res && res.length ? res[0] : { uri, inScheme }
-      })
-    },
-  },
-}
 
 export default {
   components: { ItemInput, ItemName },
