@@ -34,9 +34,7 @@ import Multiselect from "@vueform/multiselect"
 import jskos from "jskos-tools"
 import { registryForScheme } from "../utils"
 
-/**
- * Select one or a list of languages.
- */
+// Select one or a list of item URIs
 export default {
   components: {
     Multiselect,
@@ -44,7 +42,9 @@ export default {
   props: {
     modelValue: {
       type: [String, Array],
-      default: () => this.repeatable ? [] : "",
+      default(props) {
+        return props.repeatable ? [] : ""
+      },
     },
     repeatable: {
       type: Boolean,

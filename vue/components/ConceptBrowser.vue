@@ -1,10 +1,15 @@
 <template>
   <div v-if="registry">
-    <!-- TODO: ItemSelect -->
-    <div v-if="selected">
+    <!-- show input field only on success -->
+    <!--h4>Search in vocabulary</h4>
+    <item-select
+      v-model="selected"
+      :scheme="accessScheme" /-->
+    <div v-if="selected && selected.uri">
       <h4>Browse vocabulary</h4>
       <concept-details
         v-model:concept="selected"
+        :scheme="accessScheme"
         :registry="registry" />
     </div>
     <div v-else-if="topConcepts.length">
@@ -47,11 +52,13 @@
 <script>
 import Concept from "./Concept"
 import ConceptDetails from "./ConceptDetails"
+//import ItemSelect from "./ItemSelect"
 import ServiceLink from "./ServiceLink"
 import { registryForScheme } from "../utils.js"
+import jskos from "jskos-tools"
 
 export default {
-  components: { Concept, ConceptDetails, ServiceLink },
+  components: { Concept, ConceptDetails, ServiceLink }, //, ItemSelect },
   props: {
     scheme: {
       type: Object,
@@ -61,27 +68,40 @@ export default {
   data() {
     return {
       registry: null,
-      externalSchemeUri: null,
+      accessScheme: this.scheme,
       topConcepts: [],
-      selected: null,
+      selected: {},
     }
   },
   async mounted() {
     const { scheme } = this
 
-    // TODO: allow to manually switch API endpoints
-    this.registry = registryForScheme(scheme)
-
-    // this requires the vocabulary to have top concepts!
-    // FIXME for other vocabularies, e.g. query for an example concept
+    // FIXME: this requires the vocabulary to have top concepts. Better query example concept instead?
     const possibleUris = [ scheme.uri, ...(scheme.identifier||[]) ]
     for (let uri of possibleUris) {
-      // TODO: catch CDKError
-      var result = await this.registry.getTop({ scheme: { ...scheme, uri } })
-      if (result.length) {
-        this.topConcepts = result
-        this.externalSchemeUri = uri
-        break
+      const accessScheme = { ...scheme, uri }
+
+      // TODO: allow to manually switch API endpoints
+      const registry = registryForScheme(accessScheme)
+      if (registry) {
+        this.registry = registry
+
+        accessScheme.VOCID = registry._jskos.schemes[0].VOCID // TODO: this is a hack
+        this.accessScheme = accessScheme
+
+        var results = []
+        try {
+          results = await this.registry.getTop({ scheme: this.accessScheme })
+        } catch (e) {
+          // TODO: catch CDKError
+          console.error(e)
+        }
+        if (results.length) {
+          this.topConcepts = jskos.sortConcepts(results)
+          break
+        }
+      } else {
+        console.debug("Failed to get registry for scheme: ", this.accessScheme)
       }
     }
   },
@@ -89,6 +109,9 @@ export default {
 </script>
 
 <style scoped>
+h4 {
+  padding-top: 0.5em;
+}
 ul.narrower {
   list-style: none;
   padding-left: 0.5em;

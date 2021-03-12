@@ -20,8 +20,8 @@
       <concept :concept="selected" />
       <div>
         <small>
-        <a :href="selected.uri">{{ selected.uri }}</a><br>
-        Labels: {{ Object.entries(selected.prefLabel || {}).map(e => `${e[1]} (${e[0]})`).join(", ") }}
+          <a :href="selected.uri">{{ selected.uri }}</a><br>
+          Labels: {{ Object.entries(selected.prefLabel || {}).map(e => `${e[1]} (${e[0]})`).join(", ") }}
         </small>
       </div>
     </div>
@@ -43,6 +43,7 @@
 
 <script>
 import Concept from "./Concept"
+import { sortConcepts } from "jskos-tools"
 
 export default {
   components: { Concept },
@@ -52,6 +53,10 @@ export default {
       required: true,
     },
     registry: {
+      type: Object,
+      required: true,
+    },
+    scheme: {
       type: Object,
       required: true,
     },
@@ -68,16 +73,22 @@ export default {
     concept: {
       immediate: true,
       async handler(concept) {
-        console.log(concept.uri)
 
-        // load and merge details into concept
-        const details = (await this.registry.getConcepts({ concepts: [concept] }))[0]
-        this.selected = Object.assign(concept, details || {})
-
+        this.selected = concept
         this.ancestors = []
-        this.ancestors = await this.registry.getAncestors({ concept })
         this.narrower = []
-        this.narrower = await this.registry.getNarrower({ concept })
+
+        if (concept && concept.uri) {
+          // load and merge details into concept
+          const details = (await this.registry.getConcepts({ concepts: [concept] }))[0]
+          this.selected = Object.assign(concept, details || {})
+
+          // inject access scheme. Required to get VOCID. Should better be fixed in cocoda-sdk?
+          concept.inScheme = [this.scheme]
+
+          this.ancestors = await this.registry.getAncestors({ concept })
+          this.narrower = sortConcepts(await this.registry.getNarrower({ concept }))
+        }
       },
     },
   },
