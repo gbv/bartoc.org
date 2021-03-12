@@ -1,6 +1,6 @@
 <template>
   <item-select
-    v-show="hasFocus || !item.uri"
+    v-show="this.hasFocus || !this.item.uri"
     ref="input"
     v-model="item.uri"
     type="text"
@@ -9,6 +9,7 @@
     @open="hasFocus=true"
     @close="hasFocus=false"
     @keyup.enter="$event.target.blur()" />
+    {{scheme}}
   <div
     v-if="!hasFocus"
     @click="edit()">
@@ -26,7 +27,9 @@ import ItemName from "./ItemName.vue"
 import ItemSelect from "./ItemSelect"
 import { cdkLoadConcepts } from "../utils.js"
 
-// input form with typeahead
+/**
+ * Input form with typeahead.
+ */
 export default {
   components: { ItemName, ItemSelect },
   props: {

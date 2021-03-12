@@ -46,15 +46,11 @@ import SetEditorMixin from "./SetEditorMixin.js"
  */
 export default {
   mixins: [SetEditorMixin],
-  watch: {
-    set: {
-      deep: true,
-      immediate: true,
-      handler(set) {
-        if (set.find(e => e.trim() === "") === undefined) {
-          set.push("")
-        }
-      },
+  methods: {
+    ensureEmpty() {
+      if (this.set.find(e => e.trim() === "") === undefined) {
+        this.set.push("")
+      }
     },
   },
 }

@@ -34,7 +34,6 @@ export async function cdkLoadConcepts(scheme, uri) {
   return result
 }
 
-// TODO: configure somewhere else, this is part of BARTOC data anyway
 export const indexingSchemes = [
   {
     uri: "http://bartoc.org/en/node/241",

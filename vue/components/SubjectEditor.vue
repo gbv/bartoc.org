@@ -3,31 +3,15 @@
     <tr
       v-for="(subject,i) in set"
       :key="i">
-      <td v-if="(subject.inScheme||[]).length">
+      <td>
         <item-name
+          v-if="subject.uri"
           :item="findScheme(subject.inScheme[0].uri)"
           :notation="true"
           :pref-label="false" />
-      </td>
-      <td v-else>
-        ?
-      </td>
-      <td class="item-input">
-        <item-input
-          v-model="set[i]"
-          :scheme="findScheme(subject.inScheme[0].uri)" />
-      </td><td>
-        <button
-          type="button"
-          class="btn btn-outline-primary"
-          @click="remove(i)">
-          x
-        </button>
-      </td>
-    </tr><tr>
-      <td>
         <select
-          v-model="schemeUri"
+          v-else
+          v-model="subject.inScheme[0].uri"
           class="form-control">
           <option
             v-for="s in indexingSchemes"
@@ -39,13 +23,38 @@
               :pref-label="false" />
           </option>
         </select>
+      </td>
+      <td class="item-input">
+        <!-- use :key to force re-init of either subject uri or scheme changed -->
+        <item-input
+          :key="subject.uri + subject.inScheme[0].uri"
+          v-model="set[i]"
+          :scheme="findScheme(subject.inScheme[0].uri)" />
       </td><td>
-        <button
-          type="button"
-          class="btn btn-outline-primary"
-          @click="add()">
-          +
-        </button>
+        <div
+          v-if="set.length > 1"
+          class="btn-group">
+          <button
+            :disabled="!i"
+            type="button"
+            class="btn btn-outline-secondary"
+            @click="up(i)">
+            &#9650;
+          </button>
+          <button
+            :disabled="i > set.length-2"
+            type="button"
+            class="btn btn-outline-secondary"
+            @click="down(i)">
+            &#9660;
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            @click="remove(i)">
+            &times;
+          </button>
+        </div>
       </td>
     </tr>
   </table>
@@ -64,22 +73,16 @@ export default {
   data() {
     return {
       indexingSchemes,
-      schemeUri: indexingSchemes[0].uri,
     }
   },
-  computed: {
-    scheme() {
-      return this.findScheme(this.schemeUri)
-    },
-  },
   methods: {
+    ensureEmpty() {
+      if (!this.set.find(subject => !subject.uri)) {
+        this.set.push({ inScheme: [ { uri: this.indexingSchemes[0].uri } ], uri: "" })
+      }
+    },
     findScheme(uri) {
       return this.indexingSchemes.find(scheme => jskos.compare(scheme, { uri }))
-    },
-    add() {
-      var inScheme = this.scheme
-      inScheme = [{ uri: inScheme.uri }]
-      this.set.push({ inScheme, uri: "" })
     },
   },
 }

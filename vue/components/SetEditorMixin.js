@@ -18,9 +18,13 @@ export default {
     set: {
       deep: true,
       handler(set) {
+        this.ensureEmpty()
         this.$emit("update:modelValue", set)
       },
     },
+  },
+  created() {
+    this.ensureEmpty()
   },
   methods: {
     add(item) {

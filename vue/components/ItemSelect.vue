@@ -72,19 +72,13 @@ export default {
       registry: null,
     }
   },
-  watch: {
-    scheme(newScheme, oldScheme) {
-      if (!jskos.compare(newScheme, oldScheme)) {
-        this.initializeRegistry()
-      }
-    },
-  },
   created() {
     this.initializeRegistry()
   },
   methods: {
     initializeRegistry() {
       this.registry = registryForScheme(this.scheme)
+      console.log("registry initialized...")
     },
     async search(query) {
       if (!this.registry) {
