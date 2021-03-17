@@ -5,7 +5,7 @@
     v-model="value"
     mode="tags"
     :caret="false"
-    :options="search"
+    :options="options"
     :filter-results="false"
     :min-chars="0"
     :resolve-on-load="true"
@@ -18,7 +18,7 @@
     v-else
     ref="multiselect"
     v-model="value"
-    :options="search"
+    :options="options"
     :filter-results="false"
     :min-chars="0"
     :resolve-on-load="true"
@@ -69,21 +69,21 @@ export default {
       value: this.modelValue || (this.repeatable ? [] : null),
       isLoading: false,
       cancel: null,
-      registry: null,
     }
   },
-  created() {
-    this.initializeRegistry()
+  computed: {
+    registry() {
+      return registryForScheme(this.scheme)
+    },
+    options() {
+      return this.registry ? this.search : (this.scheme.concepts || [])
+    },
   },
   methods: {
-    initializeRegistry() {
-      this.registry = registryForScheme(this.scheme)
-      console.log("registry initialized...")
-    },
     async search(query) {
-      if (!this.registry) {
+      /*if (!this.registry) {
         return []
-      }
+      }*/
 
       this.isLoading = true
       // cancel previos request if necessary

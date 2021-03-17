@@ -10,7 +10,8 @@
     @close="hasFocus=false"
     @keyup.enter="$event.target.blur()" />
   <div
-    v-if="!hasFocus"
+    v-if="!this.hasFocus && this.item.uri"
+    class="itemInput"
     @click="edit()">
     <item-name
       :item="item"
@@ -80,3 +81,10 @@ export default {
   },
 }
 </script>
+
+<style>
+.itemInput {
+  border: 1px solid #ced4da;
+  padding: .375rem .75rem;
+}
+</style>
