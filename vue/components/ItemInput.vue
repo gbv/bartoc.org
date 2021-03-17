@@ -9,7 +9,6 @@
     @open="hasFocus=true"
     @close="hasFocus=false"
     @keyup.enter="$event.target.blur()" />
-    {{scheme}}
   <div
     v-if="!hasFocus"
     @click="edit()">
