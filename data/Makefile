@@ -15,7 +15,8 @@ languages.concepts.ndjson:
 	| jq -cf languages.jq > $@
 
 nkostype.concepts.ndjson:
-	curl -L --silent http://api.dante.gbv.de/voc/nkostype/top | jq -c .[] > $@
+	curl -L --silent http://api.dante.gbv.de/voc/nkostype/top \
+  | jq -c '.[]|.topConceptOf=.inScheme' > $@
 
 bartoc-api-types.concepts.ndjson: bartoc-api-types.concepts.csv
 	jskos-convert -m -v -s bartoc-api-types.scheme.ndjson $< > $@
