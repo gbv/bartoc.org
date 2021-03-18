@@ -9,7 +9,8 @@ export function registryForScheme(scheme) {
   if (!(url in registryCache)) {
     const config = { schemes: [scheme] }
     if (type === "http://bartoc.org/api-type/jskos") {
-      config.api = url
+      // use local database for bartoc.org
+      config.api = url.match(/^https?:\/\/bartoc.org\/api\/?/) ? "/api/" : url
       config.provider = "ConceptApi"
     } else if (type === "http://bartoc.org/api-type/skosmos") {
       config.provider = "SkosmosApi"
