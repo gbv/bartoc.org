@@ -1,10 +1,10 @@
 <template>
   <div v-if="registry">
-    <!-- show input field only on success -->
-    <!--h4>Search in vocabulary</h4>
+    <h4>Search in vocabulary</h4>
     <item-select
-      v-model="selected"
-      :scheme="accessScheme" /-->
+      :scheme="accessScheme"
+      :extract-value="c => c"
+      @change="selected = $event" />
     <div v-if="selected && selected.uri">
       <h4>Browse vocabulary</h4>
       <concept-details
@@ -52,13 +52,13 @@
 <script>
 import Concept from "./Concept"
 import ConceptDetails from "./ConceptDetails"
-//import ItemSelect from "./ItemSelect"
+import ItemSelect from "./ItemSelect"
 import ServiceLink from "./ServiceLink"
 import { registryForScheme } from "../utils.js"
 import jskos from "jskos-tools"
 
 export default {
-  components: { Concept, ConceptDetails, ServiceLink }, //, ItemSelect },
+  components: { Concept, ConceptDetails, ServiceLink, ItemSelect },
   props: {
     scheme: {
       type: Object,
@@ -99,6 +99,8 @@ export default {
         if (results.length) {
           this.topConcepts = jskos.sortConcepts(results)
           break
+        } else {
+          console.info(`Vocabulary ${uri} has no top concepts!`)
         }
       } else {
         console.debug("Failed to get registry for scheme: ", this.accessScheme)

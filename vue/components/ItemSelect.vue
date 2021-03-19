@@ -81,12 +81,12 @@ export default {
   },
   methods: {
     async search(query) {
-      /*if (!this.registry) {
+      if (!this.registry) {
         return []
-      }*/
+      }
 
       this.isLoading = true
-      // cancel previos request if necessary
+      // cancel previous request if necessary
       this.cancel && this.cancel("canceled")
 
       let promise

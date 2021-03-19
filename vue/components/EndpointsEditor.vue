@@ -24,7 +24,7 @@
           <item-select
             v-model="api.type"
             :scheme="apiTypesScheme"
-            :extract-label="extractLabel" />
+            :extract-label="jskos.prefLabel" />
         </td><td class="col-1">
           <button
             v-if="endpoints.length > 1"
@@ -59,6 +59,7 @@ export default {
       apiTypesScheme,
       // deep copy of modelValue
       endpoints: this.modelValue.map(endpoint => ({...endpoint})),
+      jskos,
     }
   },
   watch: {
@@ -76,9 +77,6 @@ export default {
   methods: {
     remove(i) {
       this.endpoints.splice(i, 1)
-    },
-    extractLabel(concept) {
-      return jskos.prefLabel(concept)
     },
   },
 }
