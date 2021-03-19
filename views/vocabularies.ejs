@@ -35,7 +35,16 @@
       </td>
       <td>
        <% if (item.API) { %>
-         <%- include('link', { url: item.API[0], label: "API" }) %>
+<% if (utils.isBartocUri(item.uri)) {
+       url = "/en/node/" + item.uri.split("/").pop()
+    } else if (locals.base) {
+       var uri = escape(item.uri)
+       url = base + (base.endsWith("=") ? uri : `?uri=${uri}`)
+    } else {
+       url = item.uri
+    }
+%>
+         <%- include('link', { url: url + "#access", label: "API" }) %>
        <% } %>
       </td>
       <% if (query.sort == "modified" || query.sort == "created") {
