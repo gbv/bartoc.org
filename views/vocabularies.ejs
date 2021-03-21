@@ -34,7 +34,7 @@
         <% } %>
       </td>
       <td>
-       <% if (item.API) { %>
+       <% if (item.API && item.API.length) { %>
 <% if (utils.isBartocUri(item.uri)) {
        url = "/en/node/" + item.uri.split("/").pop()
     } else if (locals.base) {
