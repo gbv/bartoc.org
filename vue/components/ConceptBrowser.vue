@@ -1,5 +1,11 @@
 <template>
   <div v-if="registry">
+    <p>
+      <em>
+        Search and browsing in vocabularies registered in BARTOC is experimental.
+        See <a href="https://www.npmjs.com/package/cocoda-sdk">cocoda-sdk</a> for technical background.
+      </em>
+    </p>
     <h4>Search in vocabulary</h4>
     <item-select
       :scheme="accessScheme"
@@ -24,12 +30,6 @@
             class="clickable" />
         </li>
       </ul>
-    </div>
-    <div v-else>
-      <p>
-        Access to this vocabulary failed. Vocabulary browsing
-        in BARTOC is experimental this this may get fixed soon.
-      </p>
     </div>
   </div>
   <div v-else-if="(scheme.API||[]).length">
