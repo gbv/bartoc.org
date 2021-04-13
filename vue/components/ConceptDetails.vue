@@ -4,12 +4,14 @@
       <li
         class="clickable"
         @click="$emit('update:concept', null)">
+        <icon :icon="'levelUp'" />
         <b>top concepts</b>
       </li>
       <li
         v-for="ancestor in ancestors"
         :key="ancestor.uri"
         @click="$emit('update:concept', ancestor)">
+        <icon :icon="'levelUp'" />
         <concept
           :concept="ancestor"
           class="clickable" />
@@ -32,6 +34,7 @@
           v-for="child in narrower"
           :key="child.uri"
           @click="$emit('update:concept', child)">
+          <icon :icon="'levelDown'" />
           <concept
             :concept="child"
             class="clickable" />
@@ -44,9 +47,10 @@
 <script>
 import Concept from "./Concept"
 import { sortConcepts } from "jskos-tools"
+import Icon from "./Icon"
 
 export default {
-  components: { Concept },
+  components: { Concept, Icon },
   props: {
     concept: {
       type: Object,
@@ -103,14 +107,8 @@ ul.narrower, ul.ancestors {
   list-style: none;
   padding-left: 0.5em;
 }
-ul.narrower li:before {
-  content: "\21B3\A0";
-}
 .clickable:hover {
   text-decoration: underline;
   cursor: pointer;
-}
-ul.ancestors li:before {
-  content: "\21B0\A0";
 }
 </style>

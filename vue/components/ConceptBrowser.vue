@@ -25,6 +25,7 @@
           v-for="concept in topConcepts"
           :key="concept.uri"
           @click="selected = concept">
+          <icon :icon="'levelDown'" />
           <concept
             :concept="concept"
             class="clickable" />
@@ -52,13 +53,14 @@
 <script>
 import Concept from "./Concept"
 import ConceptDetails from "./ConceptDetails"
+import Icon from "./Icon"
 import ItemSelect from "./ItemSelect"
 import ServiceLink from "./ServiceLink"
 import { registryForScheme } from "../utils.js"
 import jskos from "jskos-tools"
 
 export default {
-  components: { Concept, ConceptDetails, ServiceLink, ItemSelect },
+  components: { Concept, ConceptDetails, ServiceLink, ItemSelect, Icon },
   props: {
     scheme: {
       type: Object,
@@ -117,9 +119,6 @@ h4 {
 ul.narrower {
   list-style: none;
   padding-left: 0.5em;
-}
-ul.narrower li:before {
-  content: "\21B3\A0";
 }
 .clickable:hover {
   text-decoration: underline;
