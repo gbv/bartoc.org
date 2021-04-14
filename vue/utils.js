@@ -1,4 +1,5 @@
 import cdk from "cocoda-sdk"
+import jskos from "jskos-tools"
 
 const registryCache = {}
 export function registryForScheme(scheme) {
@@ -77,3 +78,7 @@ export function loadConcepts(api, uri) {
   return fetch(api).then(res => res ? res.json() : [])
 }
 
+export function sortConcepts(set, scheme) {
+  const numericNotations = (scheme.notationPattern || "").match(/^(\[1-9\])?\[0-9\][+*]$/)
+  return jskos.sortConcepts(set, numericNotations)
+}

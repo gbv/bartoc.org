@@ -1,7 +1,7 @@
 <template>
   <item-name
     :item="concept"
-    :notation="true" />
+    :notation="!hideNotation" />
 </template>
 
 <script>
@@ -14,6 +14,10 @@ export default {
     concept: {
       type: Object,
       required: true,
+    },
+    hideNotation: {
+      type: Boolean,
+      default: false,
     },
   },
 }

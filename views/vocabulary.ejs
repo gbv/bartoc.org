@@ -69,7 +69,13 @@
       <%- include('row-list', { label: 'Languages', list: item.languages, style: 'inline' }) %>
     </table>
    <% if (item.API) {
-     const scheme = { uri: item.uri, identifier: item.identifier, API: item.API }
+     const scheme = {
+       uri: item.uri,
+       identifier: item.identifier,
+       API: item.API,
+       DISPLAY: item.DISPLAY,
+       notationPattern: item.notationPattern,
+     }
    %>
    <hr>
    <concept-browser :scheme="<%= JSON.stringify(scheme) %>"></concept-browser>

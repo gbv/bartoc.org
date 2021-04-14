@@ -8,12 +8,15 @@
         <icon icon="levelUp" />
         <concept
           :concept="ancestor"
+          :hide-notation="display.hideNotation"
           class="clickable" />
       </li>
     </ul>
     <div v-if="selected">
       <div style="font-size:large">
-        <concept :concept="selected" />
+        <concept
+          :concept="selected"
+          :hide-notation="display.hideNotation" />
       </div>
       <div v-if="selected.uri || (selected.identifier||[]).length">
         <ul
@@ -75,6 +78,7 @@
           <icon :icon="'levelDown'" />
           <concept
             :concept="child"
+            :hide-notation="display.hideNotation"
             class="clickable" />
         </li>
       </ul>
@@ -84,10 +88,10 @@
 
 <script>
 import Concept from "./Concept"
-import { sortConcepts } from "jskos-tools"
 import Icon from "./Icon"
 import ItemLabels from "./ItemLabels"
 import ItemNotes from "./ItemNotes"
+import { sortConcepts } from "../utils.js"
 
 export default {
   components: { Concept, ItemNotes, ItemLabels, Icon },
@@ -103,6 +107,10 @@ export default {
     scheme: {
       type: Object,
       required: true,
+    },
+    display: {
+      type: Object,
+      default() { return {} },
     },
   },
   emits: ["update:concept"],
@@ -131,7 +139,7 @@ export default {
           concept.inScheme = [this.scheme]
 
           this.ancestors = await this.registry.getAncestors({ concept })
-          this.narrower = sortConcepts(await this.registry.getNarrower({ concept }))
+          this.narrower = sortConcepts(await this.registry.getNarrower({ concept }), this.scheme)
         }
       },
     },

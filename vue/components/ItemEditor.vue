@@ -112,14 +112,14 @@
   <form-row :label="'Address'">
     <address-editor v-model="item.ADDRESS" />
   </form-row>
-  <form-row :label="'Contact'">
+  <form-row label="Contact">
     <input
       v-model="item.CONTACT"
       type="text"
       class="form-control">
     email address of anyone in charge of the vocabulary
   </form-row>
-  <form-row :label="'Listed In'">
+  <form-row label="Listed In">
     <list-editor
       :model-value="item.partOf.map(({uri})=>uri)"
       @update:modelValue="item.partOf=$event.map(uri=>({uri}))" />
@@ -128,6 +128,19 @@
   </form-row>
   <form-row :label="'Vocabulary services'">
     <endpoints-editor v-model="item.API" />
+  </form-row>
+  <form-row label="Display options">
+    <div class="form-check">
+      <input
+        id="hideNotation"
+        v-model="item.DISPLAY.hideNotation"
+        type="checkbox"
+        class="form-check-input">
+      <label
+        for="hideNotation"
+        class="form-check-label">hide notation</label>
+      it is only used as internal identifier
+    </div>
   </form-row>
   <hr>
   <p>
@@ -302,7 +315,7 @@ export default {
   data() {
     // make sure item has iterable fields
     const item = this.current || {};
-    ["prefLabel", "altLabel", "definition", "ADDRESS"]
+    ["prefLabel", "altLabel", "definition", "ADDRESS", "DISPLAY"]
       .forEach(key => { if (!item[key]) item[key] = {} });
     ["notation", "identifier", "languages", "license", "type", "subject", "subjectOf", "partOf", "FORMAT", "API", "ACCESS", "publisher"]
       .forEach(key => { if (!item[key]) item[key] = [] })

@@ -24,6 +24,7 @@
       <concept-details
         v-model:concept="selected"
         :scheme="accessScheme"
+        :display="display"
         :registry="registry" />
     </div>
     <div v-else-if="topConcepts.length">
@@ -36,6 +37,7 @@
           <icon icon="levelDown" />
           <concept
             :concept="concept"
+            :hide-notation="display.hideNotation"
             class="clickable" />
         </li>
       </ul>
@@ -64,8 +66,7 @@ import ConceptDetails from "./ConceptDetails"
 import Icon from "./Icon"
 import ItemSelect from "./ItemSelect"
 import ServiceLink from "./ServiceLink"
-import { registryForScheme } from "../utils.js"
-import jskos from "jskos-tools"
+import { registryForScheme, sortConcepts } from "../utils.js"
 
 export default {
   components: { Concept, ConceptDetails, ServiceLink, ItemSelect, Icon },
@@ -82,6 +83,11 @@ export default {
       topConcepts: [],
       selected: {},
     }
+  },
+  computed: {
+    display() {
+      return this.scheme.DISPLAY || {}
+    },
   },
   async mounted() {
     const { scheme } = this
@@ -107,7 +113,8 @@ export default {
           console.error(e)
         }
         if (results.length) {
-          this.topConcepts = jskos.sortConcepts(results)
+          sortConcepts(results, this.scheme)
+          this.topConcepts = [...results] // no clue why this is necessary (WTF?)
           break
         } else {
           console.info(`Vocabulary ${uri} has no top concepts!`)
