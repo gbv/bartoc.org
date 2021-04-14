@@ -2,30 +2,68 @@
   <div class="concept-details">
     <ul class="ancestors">
       <li
-        class="clickable"
-        @click="$emit('update:concept', null)">
-        <icon :icon="'levelUp'" />
-        <b>top concepts</b>
-      </li>
-      <li
         v-for="ancestor in ancestors"
         :key="ancestor.uri"
         @click="$emit('update:concept', ancestor)">
-        <icon :icon="'levelUp'" />
+        <icon icon="levelUp" />
         <concept
           :concept="ancestor"
           class="clickable" />
       </li>
     </ul>
-
     <div v-if="selected">
-      <concept :concept="selected" />
-      <div>
-        <small>
-          <a :href="selected.uri">{{ selected.uri }}</a><br>
-          Labels: {{ Object.entries(selected.prefLabel || {}).map(e => `${e[1]} (${e[0]})`).join(", ") }}
-        </small>
+      <div style="font-size:large">
+        <concept :concept="selected" />
       </div>
+      <div v-if="selected.uri || (selected.identifier||[]).length">
+        <ul
+          class="list-inline"
+          style="margin-bottom: 0.2em">
+          <li
+            v-if="selected.uri"
+            class="list-inline-item">
+            <icon icon="link" />
+            <a :href="selected.uri">{{ selected.uri }}</a>
+          </li>
+          <li
+            v-for="id in (selected.identifier||[])"
+            :key="id"
+            class="list-inline-item">
+            {{ id }}
+          </li>
+        </ul>
+      </div>
+      <item-labels :item="selected" />
+      <item-notes :item="selected" />
+      <ul class="list-inline">
+        <li
+          v-if="selected.created"
+          class="list-inline-item"
+          title="created">
+          <icon
+            icon="created"
+            padding="" />
+          {{ selected.created }}
+        </li>
+        <li
+          v-if="selected.issued"
+          class="list-inline-item"
+          title="issued">
+          <icon
+            icon="modified"
+            padding="" />
+          {{ selected.issued }}
+        </li>
+        <li
+          v-if="selected.modified"
+          class="list-inline-item"
+          title="modified">
+          <icon
+            icon="modified"
+            padding="" />
+          {{ selected.modified }}
+        </li>
+      </ul>
     </div>
 
     <div v-if="narrower">
@@ -48,9 +86,11 @@
 import Concept from "./Concept"
 import { sortConcepts } from "jskos-tools"
 import Icon from "./Icon"
+import ItemLabels from "./ItemLabels"
+import ItemNotes from "./ItemNotes"
 
 export default {
-  components: { Concept, Icon },
+  components: { Concept, ItemNotes, ItemLabels, Icon },
   props: {
     concept: {
       type: Object,

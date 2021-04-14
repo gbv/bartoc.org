@@ -12,7 +12,15 @@
       :extract-value="c => c"
       @change="selected = $event" />
     <div v-if="selected && selected.uri">
-      <h4>Browse vocabulary</h4>
+      <h4
+        v-if="topConcepts.length"
+        class="clickable"
+        @click="selected = null">
+        Top concepts
+      </h4>
+      <h4 v-else>
+        Browse vocabulary
+      </h4>
       <concept-details
         v-model:concept="selected"
         :scheme="accessScheme"
@@ -25,7 +33,7 @@
           v-for="concept in topConcepts"
           :key="concept.uri"
           @click="selected = concept">
-          <icon :icon="'levelDown'" />
+          <icon icon="levelDown" />
           <concept
             :concept="concept"
             class="clickable" />

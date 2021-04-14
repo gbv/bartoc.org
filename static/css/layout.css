@@ -52,7 +52,7 @@ a[href*="orcid.org"]:before {
   display: inline-block;
 }
 
-.language-tag:before {
+.language-tag:after {
   content: attr(lang);
   color: #aaa;
   font-size: 80%;
