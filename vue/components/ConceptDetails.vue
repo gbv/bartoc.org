@@ -6,17 +6,17 @@
         :key="ancestor.uri"
         @click="$emit('update:concept', ancestor)">
         <icon icon="levelUp" />
-        <concept
-          :concept="ancestor"
-          :hide-notation="display.hideNotation"
+        <item-name
+          :item="ancestor"
+          :notation="!display.hideNotation"
           class="clickable" />
       </li>
     </ul>
     <div v-if="selected">
       <div style="font-size:large">
-        <concept
-          :concept="selected"
-          :hide-notation="display.hideNotation" />
+        <item-name
+          :item="selected"
+          :notation="!display.hideNotation" />
       </div>
       <div v-if="selected.uri || (selected.identifier||[]).length">
         <ul
@@ -76,9 +76,9 @@
           :key="child.uri"
           @click="$emit('update:concept', child)">
           <icon :icon="'levelDown'" />
-          <concept
-            :concept="child"
-            :hide-notation="display.hideNotation"
+          <item-name
+            :item="child"
+            :notation="!display.hideNotation"
             class="clickable" />
         </li>
       </ul>
@@ -87,14 +87,14 @@
 </template>
 
 <script>
-import Concept from "./Concept"
 import Icon from "./Icon"
 import ItemLabels from "./ItemLabels"
+import ItemName from "./ItemName"
 import ItemNotes from "./ItemNotes"
 import { sortConcepts } from "../utils.js"
 
 export default {
-  components: { Concept, ItemNotes, ItemLabels, Icon },
+  components: { ItemName, ItemNotes, ItemLabels, Icon },
   props: {
     concept: {
       type: Object,

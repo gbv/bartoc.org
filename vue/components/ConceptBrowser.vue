@@ -35,9 +35,9 @@
           :key="concept.uri"
           @click="selected = concept">
           <icon icon="levelDown" />
-          <concept
-            :concept="concept"
-            :hide-notation="display.hideNotation"
+          <item-name
+            :item="concept"
+            :notation="!display.hideNotation"
             class="clickable" />
         </li>
       </ul>
@@ -61,15 +61,15 @@
 </template>
 
 <script>
-import Concept from "./Concept"
 import ConceptDetails from "./ConceptDetails"
 import Icon from "./Icon"
+import ItemName from "./ItemName"
 import ItemSelect from "./ItemSelect"
 import ServiceLink from "./ServiceLink"
 import { registryForScheme, sortConcepts } from "../utils.js"
 
 export default {
-  components: { Concept, ConceptDetails, ServiceLink, ItemSelect, Icon },
+  components: { ConceptDetails, ServiceLink, ItemName, ItemSelect, Icon },
   props: {
     scheme: {
       type: Object,
