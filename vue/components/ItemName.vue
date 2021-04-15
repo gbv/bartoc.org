@@ -2,10 +2,12 @@
   <span v-if="item">
     <span v-if="notation && item.notation">
       <span
-        style="font-weight: bold; padding-right: 0.5em;"
+        class="jskos-notation"
         v-text="item.notation[0]" />
     </span>
-    <span v-if="item.prefLabel && (prefLabel || (notation && !item.notation))">{{ prefLabelToShow }}</span>
+    <span
+      v-if="item.prefLabel && (prefLabel || (notation && !item.notation))"
+      v-text="prefLabelToShow" />
     <span
       v-else-if="!notation || !item.notation"
       v-text="item.uri" />
@@ -13,35 +15,48 @@
 </template>
 
 <script>
+import jskos from "jskos-tools"
+
 /**
- * Display the notation and/or prefLabel of an item or its URI as fallback.
+ * Display the notation and/or prefLabel of an item. If neither can be shown, display it's URI.
  */
 export default {
   props: {
+    // the item
     item: {
       type: Object,
       default: () => ({}),
     },
-    // whether to show notation
+    // whether to show item's notation
     notation: {
       type: Boolean,
       default: false,
     },
-    // whether to show prefLabel (will also be used as fallback for missing notation)
+    // whether to show item's prefLabel (always true if no notation is shown)
     prefLabel: {
       type: Boolean,
       default: true,
     },
+    // preferred language
+    language: {
+      type: String,
+      required: false,
+    },
   },
   computed: {
     prefLabelToShow() {
-      const { prefLabel } = this.item
-      if (prefLabel) {
-        if ("en" in prefLabel) return prefLabel.en
-        for (const lang in prefLabel) return prefLabel[lang]
-      }
-      return "???"
+      const { item, language } = this
+      return item.prefLabel
+        ? jskos.prefLabel(item, { fallbackToUri: false, language })
+        : "???"
     },
   },
 }
 </script>
+
+<style>
+.jskos-notation {
+  font-weight: bold;
+  padding-right: 0.5em;
+}
+</style>
