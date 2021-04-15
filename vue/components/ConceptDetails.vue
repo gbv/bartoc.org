@@ -5,7 +5,7 @@
         v-for="ancestor in ancestors"
         :key="ancestor.uri"
         @click="$emit('update:concept', ancestor)">
-        <icon icon="levelUp" />
+        <icon name="levelUp" />
         <item-name
           :item="ancestor"
           :notation="!display.hideNotation"
@@ -25,7 +25,7 @@
           <li
             v-if="selected.uri"
             class="list-inline-item">
-            <icon icon="link" />
+            <icon name="link" />
             <a :href="selected.uri">{{ selected.uri }}</a>
           </li>
           <li
@@ -44,7 +44,7 @@
           class="list-inline-item"
           title="created">
           <icon
-            icon="created"
+            name="created"
             padding="" />
           {{ selected.created }}
         </li>
@@ -53,7 +53,7 @@
           class="list-inline-item"
           title="issued">
           <icon
-            icon="modified"
+            name="modified"
             padding="" />
           {{ selected.issued }}
         </li>
@@ -62,7 +62,7 @@
           class="list-inline-item"
           title="modified">
           <icon
-            icon="modified"
+            name="modified"
             padding="" />
           {{ selected.modified }}
         </li>
@@ -75,7 +75,7 @@
           v-for="child in narrower"
           :key="child.uri"
           @click="$emit('update:concept', child)">
-          <icon :icon="'levelDown'" />
+          <icon name="levelDown" />
           <item-name
             :item="child"
             :notation="!display.hideNotation"

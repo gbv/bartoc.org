@@ -1,13 +1,13 @@
 <template>
   <span
-    v-if="iconData"
+    v-if="icon"
     :style="padding ? `padding-right: ${padding}` : undefined">
     <font-awesome-icon
-      :icon="iconData[0]"
-      :flip="iconData[1]" />
+      :icon="icon[0]"
+      :flip="icon[1]" />
   </span>
   <span v-else>
-    {{ icon }}
+    {{ name }}
   </span>
 </template>
 
@@ -29,7 +29,7 @@ const knownIcons = {
 export default {
   components: { FontAwesomeIcon },
   props: {
-    icon: {
+    name: {
       type: String,
       required: true,
     },
@@ -39,7 +39,7 @@ export default {
     },
   },
   computed: {
-    iconData() { return knownIcons[this.icon] },
+    icon() { return knownIcons[this.name] },
   },
 }
 </script>

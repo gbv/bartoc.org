@@ -34,7 +34,7 @@
           v-for="concept in topConcepts"
           :key="concept.uri"
           @click="selected = concept">
-          <icon icon="levelDown" />
+          <icon name="levelDown" />
           <item-name
             :item="concept"
             :notation="!display.hideNotation"
