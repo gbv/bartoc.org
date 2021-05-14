@@ -34,6 +34,7 @@ Read more about BARTOC in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](ht
 * [International UDC Seminar 2017](http://www.udcc.org/index.php/site/page?view=facetedclassification)
 * [ISKO UK biennial conference 2017](http://event-archive.iskouk.org/content/isko-uk-conference-2017-knowledge-organization-whats-story)
 * [Informationspraxis 3(2), 2017](https://doi.org/10.11588/ip.2017.2.40335)
+* [SI & IT Workshop 2017](https://si-it-workshop.gbv.de/wp-content/uploads/2017/01/Ledl_Vortrag_SI_IT_Goettingen.pdf)
 * [Taxonomy Boot Camp London 2016](https://zenodo.org/record/162035)
 * [16th NKOS Workshop 2016](https://zenodo.org/record/160926)
 * [Proceedings of TKE 2016](http://hdl.handle.net/10398/9323)
