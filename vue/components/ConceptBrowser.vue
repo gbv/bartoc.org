@@ -133,9 +133,10 @@ export default {
           this.topConcepts = [...results] // no clue why this is necessary (WTF?)
           // Load selected concept if necessary
           if (selectedUri) {
-            const selected = (await this.registry.getConcepts({ concepts: [{ uri: selectedUri }] }))[0]
-            if (selected) {
-              this.selected = selected
+            // ConceptDetails will load the details itself
+            this.selected = {
+              uri: selectedUri,
+              inScheme: [accessScheme],
             }
           }
           break
