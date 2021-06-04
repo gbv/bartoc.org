@@ -89,8 +89,24 @@ export default {
       return this.scheme.DISPLAY || {}
     },
   },
+  watch: {
+    selected(concept) {
+      if (concept && concept.uri) {
+        // Update URL with new selected concept
+        const hash = window.location.hash
+        const urlParams = new URLSearchParams(window.location.search)
+        urlParams.set("uri", concept.uri)
+        // Note that hash/fragment needs to be at the end of the URL, otherwise the search params will be considered part of the hash!
+        window.history.replaceState({}, "", `${window.location.href.replace(hash, "").replace(window.location.search, "")}?${urlParams.toString()}${hash}`)
+      }
+    },
+  },
   async mounted() {
     const { scheme } = this
+
+    // Get URI for selected concept from URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const selectedUri = urlParams.get("uri")
 
     // FIXME: this requires the vocabulary to have top concepts. Better query example concept instead?
     const possibleUris = [ scheme.uri, ...(scheme.identifier||[]) ]
@@ -115,6 +131,13 @@ export default {
         if (results.length) {
           sortConcepts(results, this.scheme)
           this.topConcepts = [...results] // no clue why this is necessary (WTF?)
+          // Load selected concept if necessary
+          if (selectedUri) {
+            const selected = (await this.registry.getConcepts({ concepts: [{ uri: selectedUri }] }))[0]
+            if (selected) {
+              this.selected = selected
+            }
+          }
           break
         } else {
           console.info(`Vocabulary ${uri} has no top concepts!`)
