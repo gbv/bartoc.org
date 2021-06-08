@@ -17,6 +17,11 @@
         <item-name
           :item="selected"
           :notation="!display.hideNotation" />
+        <a
+          v-if="k10plus"
+          :href="k10plus"
+          title="search in K10plus library catalog"
+          target="k10plus">📚</a>
       </div>
       <div v-if="selected.uri || (selected.identifier||[]).length">
         <ul
@@ -92,6 +97,7 @@ import ItemLabels from "./ItemLabels"
 import ItemName from "./ItemName"
 import ItemNotes from "./ItemNotes"
 import { sortConcepts } from "../utils.js"
+import k10plusikt from "../../data/k10plus-ikt.json"
 
 export default {
   components: { ItemName, ItemNotes, ItemLabels, Icon },
@@ -120,6 +126,15 @@ export default {
       ancestors: [],
       narrower: [],
     }
+  },
+  computed: {
+    k10plus() {
+      const { scheme, selected } = this
+      if (!selected || !selected.notation) return
+      const ikt = k10plusikt[(scheme.CQLKEY || "").toUpperCase()]
+      const notation = selected.notation || []
+      return ikt ? `https://opac.k10plus.de/DB=2.299/CMD?ACT=SRCHA&IKT=${ikt}&TRM=${notation[0]}` : null
+    },
   },
   watch: {
     concept: {

@@ -7,4 +7,6 @@ This directory contains auxiliary vocabularies used in BARTOC.
 * Languages (`language-ids.csv`)
 * Formats (`formats.csv`)
 
+## Additional data
 
+* List of K10plus search IKTs (`k10plus-ikt.json`)
