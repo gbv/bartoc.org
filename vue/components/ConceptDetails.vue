@@ -21,6 +21,7 @@
           v-if="k10plus"
           :href="k10plus"
           title="search in K10plus library catalog"
+          style="padding-left: 0.5em"
           target="k10plus">📚</a>
       </div>
       <div v-if="selected.uri || (selected.identifier||[]).length">
