@@ -118,4 +118,15 @@ Data & Knowledge Engineer, Semantic Web Company
 </div>
 </div>
 
+<div class="row" style="padding-bottom: 1em;">
+<div class="col">
+
+<h2>Luxemburg</h2>
+
+Mihai Paunescu [](https://orcid.org/0000-0003-4093-3393)\
+[Publications Office of the EU](https://op.europa.eu/)
+
+</div>
+</div>
+
 See [contributing](/contributing) for additional information how to contribute to BARTOC.
