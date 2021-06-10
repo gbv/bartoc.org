@@ -102,10 +102,10 @@ University of Applied Sciences and Arts Northwestern Switzerland
 </div>
 
 <div class="col">
-<h2>United Kingdom</h2>
+<h2>Luxemburg</h2>
 
-**[Suzanne Barbalet](http://www.data-archive.ac.uk/about/staff?sid=sbarba)** \
-UK Data Service, University of Essex
+**Mihai Paunescu** [](https://orcid.org/0000-0003-4093-3393)\
+[Publications Office of the EU](https://op.europa.eu/)
 
 </div>
 
@@ -114,17 +114,6 @@ UK Data Service, University of Essex
 
 **[Heather Hedden](http://www.hedden-information.com/about/)** [](https://orcid.org/0000-0003-0034-7867) \
 Data & Knowledge Engineer, Semantic Web Company
-
-</div>
-</div>
-
-<div class="row" style="padding-bottom: 1em;">
-<div class="col">
-
-<h2>Luxemburg</h2>
-
-Mihai Paunescu [](https://orcid.org/0000-0003-4093-3393)\
-[Publications Office of the EU](https://op.europa.eu/)
 
 </div>
 </div>
