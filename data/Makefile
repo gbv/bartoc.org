@@ -22,6 +22,6 @@ bartoc-api-types.concepts.ndjson: bartoc-api-types.concepts.csv
 	jskos-convert -m -v -s bartoc-api-types.scheme.ndjson $< > $@
 
 k10plus-ikt.json:
-	curl -s https://kxp.k10plus.de/DB=2.0/XML=1.0/IKTLIST \
+	curl -s https://opac.k10plus.de/DB=2.299/XML=1.0/IKTLIST \
     | perl -n -E '/mnemonic="([^"]+)[^>]+>(\d+)/ and say "{\"$$1\":$$2}"' \
     | jq -s add > $@
