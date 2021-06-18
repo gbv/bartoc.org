@@ -118,4 +118,14 @@ Data & Knowledge Engineer, Semantic Web Company
 </div>
 </div>
 
+<div class="row" style="padding-bottom: 1em;">
+<div class="col">
+<h2>United Kingdom</h2>
+
+**Jeannine Beeken** [](https://orcid.org/0000-0001-8796-3923)\
+[UK Data Service](https://ukdataservice.ac.uk/)
+
+</div>
+</div>
+
 See [contributing](/contributing) for additional information how to contribute to BARTOC.
