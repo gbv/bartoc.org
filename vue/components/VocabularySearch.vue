@@ -97,6 +97,12 @@
           <form-row :label="'Subject'">
             <subject-editor v-model="subjects" />
           </form-row>
+          <form-row :label="'Registry'">
+            <input
+              v-model="partOf"
+              type="text"
+              class="form-control" />
+          </form-row>
           <form-row label="Sorting">
             <div class="form-inline">
               <select
@@ -165,7 +171,7 @@ export default {
         order: "asc",
       },
     ]
-    const { type, languages, subject, license, format, access, country, sort = "", order = "asc", search } = this.query
+    const { type, languages, subject, license, format, access, country, partOf, sort = "", order = "asc", search } = this.query
     const sorting = sortOptions.find(s => s.sort === sort && s.order === order)
     const subjects = (subject || "").split("|").map(uri => {
       const scheme = indexingSchemes.find(scheme => uri.indexOf(scheme.namespace) === 0)
@@ -178,6 +184,7 @@ export default {
       languages: (languages||"").split(","),
       subjects,
       license,
+      partOf,
       country, // TODO: https://github.com/gbv/bartoc.org/issues/24
       format, // TODO: https://github.com/gbv/bartoc.org/issues/25
       access, // TODO: https://github.com/gbv/bartoc.org/issues/42
@@ -208,8 +215,11 @@ export default {
       this.submit({ search: this.search })
     },
     submitFilter() {
-      const { type, languages, license } = this, sort = this.sorting && this.sorting.sort, order = this.sorting && this.sorting.order
-      const query = { type, languages: languages.join(","), license, sort, order }
+      const { type, languages, license } = this
+      const sort = this.sorting && this.sorting.sort
+      const order = this.sorting && this.sorting.order
+      const partOf = this.partOf
+      const query = { type, languages: languages.join(","), license, sort, order, partOf }
       if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join("|")
       this.submit(query)
     },
