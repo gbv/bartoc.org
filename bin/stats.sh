@@ -4,31 +4,27 @@ DUMP=data/dumps/latest.ndjson
 [[ -f "$DUMP" ]] || exit
 
 histogram() {
-  echo -n '"histogram": '
-  sort | uniq -c | perl -nE 'say "{\"$2\": $1}" if $_ =~ /(\d+)\s+(.+)/' | jq . | jq -s add
+  ABOUT=$1
+  QUERY=$2
+  echo "{ \"description\": \"number of $ABOUT\", \"histogram\": "
+  jq -r "$QUERY" $DUMP | sort | uniq -c | \
+    perl -nE 'say "{\"$2\": $1}" if $_ =~ /(\d+)\s+(.+)/' | jq . | jq -s add
+  echo "}"
 }
 
 stat() {
-  echo '{'
-  echo '  "description": "number of vocabularies by type",'
-  jq -r '.type[]' $DUMP | histogram
-  echo '}'
-
-  echo '{'
-  echo '  "description": "number of vocabularies by API type",'
-  jq -r '.API|select(.)|map(.type)|unique|.[]' $DUMP | histogram
-  echo "}"
-
-  echo '{'
-  echo '  "description": "number of vocabularies by country of publisher",'
-  jq -r '.ADDRESS|select(.)|.country' $DUMP | histogram
-  echo "}"
-
-  echo '{'
-  echo '  "description": "number of vocabularies by other registry they are listed in",'
-  jq -r '.partOf|select(.)|.[].uri' $DUMP | histogram
-  echo "}"
-
+  histogram 'vocabularies by type' \
+            '.type[]'
+  histogram 'vocabularies by API type' \
+            '.API|select(.)|map(.type)|unique|.[]'
+  histogram 'vocabularies by country of publisher' \
+            '.ADDRESS|select(.)|.country'
+  histogram 'vocabularies by other registry they are listed in' \
+            '.partOf|select(.)|.[].uri'
+  histogram 'api endpoints by domain' \
+            '.API[]?|.url|(split("/"))[:3]|join("/")'
+  histogram 'vocabularies by language' \
+            '.languages//[""]|.[]'
 }
 
 echo "Calculate statistics"
