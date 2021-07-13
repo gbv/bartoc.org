@@ -108,6 +108,6 @@ pm2 restart bartoc.org
 
 Note that `NODE_ENV` has to be set to `production`, otherwise Vue files will be requested from the dev server. This is given when using `npm run start`.
 
-## Database dumps
+## Database dumps and statistics
 
-To regularly update dumps, add a cronjob with command `npm run dump update`. Dumps will be placed in directory `data/dumps`. To compare two dump files run `npm run dump diff`.
+To regularly update dumps, add a cronjob with command `npm run dump update`. Dumps will be placed in directory `data/dumps` and statistics are placed in `data/reports`. To compare two dump files run `npm run dump diff`.
