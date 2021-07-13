@@ -18,7 +18,7 @@
   <a href="/vocabularies?uri=http%3A//w3id.org/nkos/nkostype">DCMI/NKOS KOS Type Vocabulary</a>:
 </p>
 <ul>
-<%# TODO: sort list %>
+<%# TODO: build via stats.json and sort list %>
 <% for (let item of Object.values(nkostypes)) { %>
 <li>
   <%- include('item', { item , base: '/vocabularies?type='}) %>
@@ -32,6 +32,11 @@
   We have catalogued <a href="/registries"><%= registries.length %> terminology registries</a>, including <a href="/registries?type=http://bartoc.org/full-repository">
   <%= repositories.length %> repositories or services</a> with full access to
   vocabulary content.
+</p>
+
+<h4>More Statistics</h4>
+<p>
+  See <a href="/data/reports/stats.json">this JSON file</a> for more detailled statistics.
 </p>
 
 <% if (reports.length) { %>

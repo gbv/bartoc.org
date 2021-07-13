@@ -5,7 +5,7 @@ DUMP=data/dumps/latest.ndjson
 
 histogram() {
   echo -n '"histogram": '
-  sort | uniq -c | awk '{printf "{\"%s\": %d}", $2, $1}' | jq -s add
+  sort | uniq -c | awk '{printf "{\"%s\": %d}", $2, $1}' | jq . | jq -s add
 }
 
 stat() {
@@ -20,5 +20,6 @@ stat() {
   echo "}"
 }
 
+echo "Calculate statistics"
 mkdir -p data/reports
 stat | jq -s . > data/reports/stats.json
