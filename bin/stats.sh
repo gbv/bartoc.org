@@ -5,7 +5,7 @@ DUMP=data/dumps/latest.ndjson
 
 histogram() {
   echo -n '"histogram": '
-  sort | uniq -c | awk '{printf "{\"%s\": %d}", $2, $1}' | jq . | jq -s add
+  sort | uniq -c | perl -nE 'say "{\"$2\": $1}" if $_ =~ /(\d+)\s+(.+)/' | jq . | jq -s add
 }
 
 stat() {
@@ -18,6 +18,17 @@ stat() {
   echo '  "description": "number of vocabularies by API type",'
   jq -r '.API|select(.)|map(.type)|unique|.[]' $DUMP | histogram
   echo "}"
+
+  echo '{'
+  echo '  "description": "number of vocabularies by country of publisher",'
+  jq -r '.ADDRESS|select(.)|.country' $DUMP | histogram
+  echo "}"
+
+  echo '{'
+  echo '  "description": "number of vocabularies by other registry they are listed in",'
+  jq -r '.partOf|select(.)|.[].uri' $DUMP | histogram
+  echo "}"
+
 }
 
 echo "Calculate statistics"
