@@ -4,8 +4,8 @@
 
 <table class="table">
   <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
-  <%- include('row', { icon: 'cog', label: 'API', content: include('link', { url: item.endpoint })}) %>
-
+  <%- include('row-list', { label: 'Services (API)', list: item.API,
+       view: s => `<service-link :scheme='{"uri":"${item.uri}"}' :endpoint='${JSON.stringify(s)}'></service-link>` }) %>
   <!-- TODO: alternative titles and English Title -->
   <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
   <%- include('row-list', { icon: 'star', label: 'Identifiers', list: item.identifier }) %>
@@ -29,7 +29,7 @@
     <% if ((item.type || [])[1] === "http://bartoc.org/full-repository") { %>
       <a href="/full-repository">
          terminology
-         <%= item.endpoint ? "service" : "repository" %>
+         <%= item.API ? "service" : "repository" %>
       </a>
     <% } else { %>
       terminology registry

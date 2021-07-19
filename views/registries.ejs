@@ -28,13 +28,13 @@
         <% } %>
       </td>
       <td>
-       <% if (item.endpoint) { %>
-        <%- include('link', { url: item.endpoint, label: "API" }) %></dd>
-       <% } %>
+  <% if (item.API ) { %>
+      <%- include('link', { url: item.API[0].url, label: "API" }) %>
+  <% } %>
       </td>
       <td>
        <% if (item.type[1] == "http://bartoc.org/full-repository") { %>
-         <b><%= item.endpoint ? "service" : "repository" %></b>
+         <b><%= item.API ? "service" : "repository" %></b>
        <% } else { %>
          registry
        <% } %>
