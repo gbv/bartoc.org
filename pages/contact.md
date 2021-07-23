@@ -51,6 +51,9 @@ English to Greek medical translator
 **[Claudio Gnoli](http://www-dimat.unipv.it/gnoli/)** [](https://orcid.org/0000-0002-4721-7448) [](https://twitter.com/scritur)\
 Science and Technology Library, University of Pavia
 
+**Kristin Kolshus** [](https://orcid.org/0000-0003-4560-1478)\
+Food and Agriculture Organization of the United Nations (FAO)
+
 </div>
 
 <div class="col">
