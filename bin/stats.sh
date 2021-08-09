@@ -15,6 +15,8 @@ histogram() {
 stat() {
   histogram 'vocabularies by type' \
             '.type[]'
+  histogram 'vocabularies by license' \
+            '.license[]?|.uri'
   histogram 'vocabularies by API type' \
             '.API|select(.)|map(.type)|unique|.[]'
   histogram 'vocabularies by country of publisher' \
