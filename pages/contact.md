@@ -31,7 +31,6 @@ Head Office of the GBV Common Library Network
 Jakob Voß [](https://orcid.org/0000-0002-7613-4123) [](https://twitter.com/Nichtich)\
 Uma Balakrishnan [](https://orcid.org/0000-0002-6076-9853) \
 Stefan Peters [](https://orcid.org/0000-0002-4087-8227) \
-Anne Schuchardt [](https://orcid.org/0000-0002-5205-6669)
 
 </div>
 </div>
