@@ -43,6 +43,15 @@ Stefan Peters [](https://orcid.org/0000-0002-4087-8227)
 English to Greek medical translator
 
 </div>
+  
+  <div class="row" style="padding-bottom: 1em;">
+<div class="col">
+<h2>India</h2>
+
+**[Dr. Biswanath Dutta](https://sites.google.com/site/dutta2005/home)** [](https://orcid.org/0000-0003-3059-8202) \
+Associate Professor, Indian Statistical Institute, Bangalore
+
+</div>
 
 <div class="col">
 <h2>Italy</h2>
