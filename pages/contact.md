@@ -44,7 +44,6 @@ English to Greek medical translator
 
 </div>
   
-  <div class="row" style="padding-bottom: 1em;">
 <div class="col">
 <h2>India</h2>
 
