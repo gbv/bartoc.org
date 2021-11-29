@@ -86,7 +86,7 @@
     <!-- Identifiers (identifiers, namespace, notation pattern, MARCspec, PICA path, CQL key) -->
     <table class="table table-borderless">
       <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
-      <%- include('row-list', { label: 'Identifiers', list: item.identifier }) %>
+      <%- include('row-list', { label: 'Identifiers', list: item.identifier, link: true }) %>
       <%- include('row', { label: 'Namespace', content: include('link', { url: item.namespace })}) %>
       <%- include('row', { label: 'Notation pattern', content: item.notationPattern }) %>
       <%- include('row', { label: 'URI pattern', content: item.uriPattern }) %>

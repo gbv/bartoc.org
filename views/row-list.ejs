@@ -2,9 +2,13 @@
 if (list && list.length) {
   let style = locals.style || "unstyled"
   let view = locals.view || utils.escapeXML
+  let link = s => s
+  if (locals.link) {
+    link = (s) => (s.match(/^https?:\/\//) ? `<a href="${s}">${s}</a>` : s)
+  }
   let items = style === "inline"
-    ? list.map(view).map(item => `<li class="list-inline-item">${item}</li>`)
-    : list.map(view).map(item => `<li>${item}</li>`)
+    ? list.map(view).map(link).map(item => `<li class="list-inline-item">${item}</li>`)
+    : list.map(view).map(link).map(item => `<li>${item}</li>`)
   let content = `<ul class="list-${style}">${items.join("\n")}</ul>`
 %>
   <%- include('row', { content }) %>
