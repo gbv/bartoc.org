@@ -51,7 +51,7 @@
     "jsondiffpatch": "^0.4.1",
     "jsonld": "^4.0.1",
     "lodash": "^4.17.21",
-    "marked": "^2.0.0",
+    "marked": "^4.0.10",
     "n-readlines": "^1.0.1",
     "rdflib": "^2.1.7",
     "timeago.js": "^4.0.2",
