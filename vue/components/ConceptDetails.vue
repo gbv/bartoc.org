@@ -2,7 +2,7 @@
   <div class="concept-details">
     <ul class="ancestors">
       <li
-        v-for="ancestor in ancestors"
+        v-for="ancestor in ancestors.filter(Boolean).reverse()"
         :key="ancestor.uri"
         @click="$emit('update:concept', ancestor)">
         <icon name="levelUp" />
