@@ -41,6 +41,7 @@ export default {
     language: {
       type: String,
       required: false,
+      default: null,
     },
   },
   computed: {

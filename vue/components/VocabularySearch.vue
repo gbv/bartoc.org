@@ -101,7 +101,7 @@
             <input
               v-model="partOf"
               type="text"
-              class="form-control" />
+              class="form-control">
           </form-row>
           <form-row label="Sorting">
             <div class="form-inline">

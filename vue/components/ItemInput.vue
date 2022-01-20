@@ -1,6 +1,6 @@
 <template>
   <item-select
-    v-show="this.hasFocus || !this.item.uri"
+    v-show="hasFocus || !item.uri"
     ref="input"
     v-model="item.uri"
     type="text"
@@ -10,7 +10,7 @@
     @close="hasFocus=false"
     @keyup.enter="$event.target.blur()" />
   <div
-    v-if="!this.hasFocus && this.item.uri"
+    v-if="!hasFocus && item.uri"
     class="itemInput"
     @click="edit()">
     <item-name
