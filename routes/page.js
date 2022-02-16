@@ -8,7 +8,7 @@ module.exports = (req, res) => {
 
   if (existsSync(file)) {
     const { attributes, body } = fm(readFileSync(file, "utf8"))
-    const content = marked(body)
+    const content = marked.parse(body)
     const { path } = req
     res.setHeader("Content-Type", "text/html")
     res.render("page", { config, content, path, ...attributes, page: path.replace(/^\/|\/$/g, "") })
