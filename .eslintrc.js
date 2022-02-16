@@ -17,6 +17,8 @@ module.exports = {
     parser: "babel-eslint",
   },
   rules: {
+    "vue/multi-word-component-names": "off",
+    "vue/v-on-event-hyphenation": "off",
     "template-curly-spacing": "off",
     indent: [
       "warn",
