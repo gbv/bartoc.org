@@ -1,4 +1,5 @@
-const { readFileSync } = require("fs")
+import { readFileSync } from "fs"
+
 const bartocUri = new RegExp("^http://bartoc.org/en/node/[1-9][0-9]+$")
 const isBartocUri = id => id.match(bartocUri)
 
@@ -19,7 +20,7 @@ function extendScheme (voc) {
   return voc
 } */
 
-module.exports = {
+export default {
   cleanupItem: item => {
     for (const key in item) { if (key[0] === "_") delete item[key] }
     return item

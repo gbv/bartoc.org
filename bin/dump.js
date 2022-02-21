@@ -1,10 +1,13 @@
-const config = require("../config")
-const fs = require("fs")
-const path = require("path")
-const cdk = require("cocoda-sdk")
-const _ = require("lodash")
-const diff = require("jsondiffpatch")
-const LineReader = require("n-readlines")
+import config from "../config/index.js"
+import fs from "fs"
+import path from "path"
+import cdk from "cocoda-sdk"
+import _ from "lodash"
+import diff from "jsondiffpatch"
+import LineReader from "n-readlines"
+
+import { fileURLToPath } from "url"
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const dumpsDir = path.join(__dirname, "../data/dumps")
 const [command, ...args] = process.argv.slice(2)

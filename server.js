@@ -1,19 +1,23 @@
-const config = require("./config")
-const page = require("./routes/page")
-const utils = require("./src/utils")
-const path = require("path")
-const jskos = require("jskos-tools")
-const { cdk } = require("cocoda-sdk")
-const fs = require("fs")
-const axios = require("axios")
-const querystring = require("querystring")
-const { rdfContentType, rdfSerialize } = require("./src/rdf")
+import config from "./config/index.js"
+import page from "./routes/page.js"
+import utils from "./src/utils.js"
+import path from "path"
+import jskos from "jskos-tools"
+import { cdk, errors } from "cocoda-sdk"
+import fs from "fs"
+import axios from "axios"
+import querystring from "querystring"
+import { rdfContentType, rdfSerialize } from "./src/rdf.js"
+import child_process from "child_process"
+import { fileURLToPath } from "url"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // build our vue project on first run if report.json can't be found
 // TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
 if (config.env !== "development") {
   console.log("Building Vue project in background... (old Vue files might be served in the meantime)")
-  require("child_process").exec("npm run build", { env: process.env }, (error) => {
+  child_process.exec("npm run build", { env: process.env }, (error) => {
     if (error) {
       console.warn("Vue build failed!", error)
     } else {
@@ -23,7 +27,7 @@ if (config.env !== "development") {
 }
 
 
-const proxy = require("express-http-proxy")
+import proxy from "express-http-proxy"
 
 let backend
 try {
@@ -46,7 +50,7 @@ const repositories = utils.indexByUri(Object.values(registries).filter(item => i
 config.log(`Read ${Object.keys(registries).length} registries, ${Object.keys(repositories).length} also being repositories or services.`)
 
 // Initialize express with settings
-const express = require("express")
+import express from "express"
 const app = express()
 app.set("json spaces", 2)
 
@@ -61,6 +65,8 @@ app.use("/data/reports/", express.static("data/reports"))
 app.use("/dist/", express.static("dist"))
 
 // redirect permanently moved URLs from legacy BARTOC.org
+import { createRequire } from "module"
+const require = createRequire(import.meta.url)
 const redirects = require("./data/redirects.json")
 
 for (const [from, to] of Object.entries(redirects)) {
@@ -267,9 +273,9 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   if (item) {
     path = "/registries"
   } else {
-    req.path = "/vocabularies"
+    path = "/vocabularies"
     req.query.uri = uri
-    return vocabulariesSearch(req, res, next)
+    return vocabulariesSearch({ path, ...req}, res, next)
     /*    path = '/vocabularies'
     // TODO: what if BARTOC URI is secondary identifier?
     item = await backend.getSchemes({ params: { uri } })
@@ -336,7 +342,6 @@ app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err)
   }
-  const errors = require("cocoda-sdk/errors")
   let message
   if (!backend) {
     message = "The backend was not configured properly."
@@ -357,4 +362,4 @@ app.listen(config.port, () => {
   config.log(`Listening on port ${config.port}`)
 })
 
-module.exports = { app }
+export default { app }

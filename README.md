@@ -22,7 +22,7 @@ Requires at least Node.js 10 and an instance of [jskos-server](https://github.co
 ~~~sh
 git clone https://github.com/gbv/bartoc.org.git
 cd bartoc.org
-npm install
+npm ci
 ~~~
 
 ## Setup

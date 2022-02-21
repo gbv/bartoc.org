@@ -1,12 +1,12 @@
-const config = require("./config")
+import config from "./config/index.js"
+
 const port = config.vue.port
 
-module.exports = {
+export default {
   // required for hot reloading
   publicPath: `http://localhost:${port}/`,
   devServer: {
     port,
-    progress: false,
     // required because Express server runs on a different origin than Vue dev server
     headers: {
       "Access-Control-Allow-Origin": "*",

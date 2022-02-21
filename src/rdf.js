@@ -1,11 +1,16 @@
-const jsonld = require("jsonld")
-const jskosContext = require("../static/context.json")
-const $rdf = require("rdflib")
+import jsonld from "jsonld"
+import $rdf from "rdflib"
+import util from "util"
 
-const util = require("util")
+// to load local JSON files
+import { createRequire } from "module"
+const require = createRequire(import.meta.url)
+
+const jskosContext = require("../static/context.json")
+
 const parseRDF = util.promisify($rdf.parse)
 
-const rdfContentType = {
+export const rdfContentType = {
   nt: "application/n-triples",
   ntriples: "application/n-triples",
   json: "application/json",
@@ -17,7 +22,7 @@ const rdfContentType = {
   xml: "application/rdf+xml",
 }
 
-const rdfNamespaces = {
+export const rdfNamespaces = {
   dct: "http://purl.org/dc/terms/",
   foaf: "http://xmlns.com/foaf/0.1/",
   nkostype: "http://w3id.org/nkos/nkostype#",
@@ -29,7 +34,7 @@ const rdfNamespaces = {
 }
 
 // serialize JSKOS item in RDF
-async function rdfSerialize(item, format) {
+export async function rdfSerialize(item, format) {
   const type = rdfContentType[format]
   if (!format) {
     throw new Error(`RDF serialization format ${format} not supported!`)
@@ -51,5 +56,3 @@ async function rdfSerialize(item, format) {
   store.namespaces = rdfNamespaces
   return $rdf.serialize($rdf.defaultGraph(), store, null, type)
 }
-
-module.exports = { rdfContentType, rdfSerialize, rdfNamespaces }

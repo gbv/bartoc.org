@@ -1,9 +1,13 @@
-const config = require("../config")
-const { existsSync, readFileSync } = require("fs")
-const fm = require("front-matter")
-const marked = require("marked")
+import config from "../config/index.js"
+import { existsSync, readFileSync } from "fs"
+import fm from "front-matter"
+import { marked } from "marked"
+import { dirname } from "path"
+import { fileURLToPath } from "url"
 
-module.exports = (req, res) => {
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+export default (req, res) => {
   const file = `${__dirname}/../pages/${req.params.page}.md`
 
   if (existsSync(file)) {

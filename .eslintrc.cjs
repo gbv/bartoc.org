@@ -12,9 +12,10 @@ module.exports = {
     SharedArrayBuffer: "readonly",
   },
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 2022,
     sourceType: "module",
-    parser: "babel-eslint",
+    parser: "@babel/eslint-parser",
+    requireConfigFile: false,
   },
   rules: {
     "vue/multi-word-component-names": "off",

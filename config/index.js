@@ -1,7 +1,12 @@
-const _ = require("lodash")
+import _ from "lodash"
+
+// to load local JSON files
+import { createRequire } from "module"
+const require = createRequire(import.meta.url)
 
 // Load default config
 const configDefault = require("./config.default.json")
+
 // Current environment
 const env = process.env.NODE_ENV || "development"
 // Load environment config
@@ -52,4 +57,4 @@ if (!config.baseUrl.endsWith("/")) {
 
 config.vue.assetPrefix = env === "development" ? `http://localhost:${config.vue.port}/` : "/dist/"
 
-module.exports = config
+export default config
