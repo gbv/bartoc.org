@@ -7,15 +7,17 @@ const suffix = (s, prefix) => s.startsWith(prefix) ? s.slice(prefix.length) : nu
 
 const conceptView = (id, uri) => `/en/node/${id}?uri=${encodeURIComponent(uri)}#content`
 
-// query uri at base
-router.get("/", async (req, res, next) => {
+router.get("/", uriRoute)
+router.get("/vocabularies", uriRoute)
+
+async function uriRoute (req, res, next) {
   const { uri } = req.query
   if (!uri) {
     next()
   } else {
 
     // BARTOC URI, URL or lookalike
-    const bartocUri = uri.match('^https?://(www\.)?bartoc.org/(.*)')
+    const bartocUri = uri.match("^https?://(www\\.)?bartoc.org/(.*)")
     if (bartocUri) {
       const localPart = bartocUri[2]
 
@@ -54,7 +56,7 @@ router.get("/", async (req, res, next) => {
           .map(s => suffix(s.uri, "http://bartoc.org/en/node/"))
           .filter(Boolean)
         if (schemes.length) {
-          res.redirect(conceptView(schemes[0], concept))
+          res.redirect(conceptView(schemes[0], uri))
           return
         }
       }
@@ -65,6 +67,6 @@ router.get("/", async (req, res, next) => {
 
     next()
   }
-})
+}
 
 export default router
