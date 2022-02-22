@@ -26,15 +26,9 @@ if (config.env !== "development") {
   })
 }
 
-let backend
-try {
-  backend = cdk.initializeRegistry(config.backend)
-} catch (error) {
-  backend = null
-  console.error("Error: The backend could not be initialized! Please check the backend configuration in config/config.json!")
-}
+const backend = config.registry
 
-// static data (this could also be loaded from backend on startup)
+// static data (this could also be loaded from registry on startup)
 const registries = utils.indexByUri(utils.readNdjson("./data/registries.ndjson"))
 const nkostypes = utils.indexByUri(utils.readNdjson("./data/nkostype.concepts.ndjson"))
 const accesstypes = utils.indexByUri(utils.readNdjson("./data/bartoc-access.concepts.ndjson"))
@@ -66,17 +60,18 @@ import redirectsRoute from "./routes/redirects.js"
 import apiRoute from "./routes/api.js"
 import pageRoute from "./routes/page.js"
 
+// Routes without server-side backend access
 app.use(redirectsRoute)
 app.use("/api", apiRoute)
+app.use(pageRoute)
 
-// if the backend was not initialize, throw error here
-app.use((req, res, next) => {
-  if (!backend) {
-    // Note: We don't need any explanation here because we're handling this case in the error handling route.
-    next(new Error())
-  }
-  next()
-})
+// render HTML page with EJS
+function render (req, res, view, locals) {
+  const { query, path } = req
+  // pass environment
+  const vars = { config, query, path, utils, querystring, registries, repositories, nkostypes, accesstypes, formats, page: path.replace(/^\/|\/$/g, "") }
+  return res.render(view, { ...vars, ...locals })
+}
 
 // edit form
 app.get("/edit", async (req, res, next) => {
@@ -146,14 +141,17 @@ async function enrichItem (item) {
 }
 
 // Statistics
-app.get("/stats", async (req, res) => {
-  const url = `http://localhost:${config.port}/api/voc?limit=1`
-  const totalCount = await axios.get(url).then(res => res.headers["x-total-count"])
-  const reports = fs.existsSync("data/reports") ? fs.readdirSync("data/reports/") : []
-  render(req, res, "stats", { title: "Statistics", totalCount, reports })
+app.get("/stats", async (req, res, next) => {
+  backend.getSchemes({ params: { limit: 1 } })
+    .then(schemes => {
+      const totalCount = schemes._totalCount
+      const reports = fs.existsSync("data/reports") ? fs.readdirSync("data/reports/") : []
+      render(req, res, "stats", { title: "Statistics", totalCount, reports })
+    })
+    .catch(e => { next(e) })
 })
 
-// Serve an individual concept
+// Serve an individual concept with given prefix
 function conceptPageHandler(prefix) {
   return async (req, res, next) => {
     const uri = prefix + req.params.id
@@ -163,17 +161,13 @@ function conceptPageHandler(prefix) {
   }
 }
 
-// ILC
-app.get("/ILC/1", (req, res) => res.redirect("/en/node/472"))
 
 app.get("/en/Format/:id", conceptPageHandler("http://bartoc.org/en/Format/") )
 
 app.get("/language/:id([a-z]{2,3})", conceptPageHandler("https://bartoc.org/language/") )
 
-// FIXME: ILC is not in the BARTOC backend yet
+// FIXME: ILC is not in the BARTOC registry yet
 app.get("/ILC/1/:id([a-z0-9-]+)", conceptPageHandler("https://bartoc.org/ILC/1/") )
-
-app.use(pageRoute)
 
 // list of terminology registries
 app.get("/registries", (req, res) => {
@@ -236,12 +230,6 @@ async function sendItem (req, res, item, vars = {}) {
   return true
 }
 
-function render (req, res, view, locals) {
-  const { query, path } = req
-  const vars = { config, query, path, utils, querystring, registries, repositories, nkostypes, accesstypes, formats, page: path.replace(/^\/|\/$/g, "") }
-  return res.render(view, { ...vars, ...locals })
-}
-
 // Error handling
 app.use((req, res) => {
   const title = "Not found"
@@ -261,19 +249,8 @@ app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err)
   }
-  let message
-  if (!backend) {
-    message = "The backend was not configured properly."
-  } else if (err instanceof errors.NetworkError) {
-    message = `The backend was not reachable (status: ${err.code || (err.relatedError && err.relatedError.code)})`
-  }
-  // TODO: Handle more errors here.
-  else {
-    message = err.message
-  }
-  // TODO: Should the error be logged to the console?
   res.status(500)
-  render(req, res, "500", { title: err.message, message })
+  render(req, res, "500", { title: err.message, message: err + "" })
 })
 
 // Start service

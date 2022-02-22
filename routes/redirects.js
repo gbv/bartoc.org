@@ -38,6 +38,9 @@ router.get("/([a-z][a-z])/:page([a-z-]+)", (req, res) => {
   res.redirect(`/${req.params.page}`)
 })
 
+// Redirec ILC1 URL to its URI
+router.get("/ILC/1", (req, res) => res.redirect("/en/node/472"))
+
 // redirect old subject URLs to vocabulary search
 
 for (const [url, uri] of readCsv("./data/eurovoc-ids.csv")) {

@@ -1,18 +1,19 @@
 import _ from "lodash"
+import { cdk } from "cocoda-sdk"
 
 // to load local JSON files
 import { createRequire } from "module"
-const require = createRequire(import.meta.url)
+const readJSON = createRequire(import.meta.url)
 
 // Load default config
-const configDefault = require("./config.default.json")
+const configDefault = readJSON("./config.default.json")
 
 // Current environment
 const env = process.env.NODE_ENV || "development"
 // Load environment config
 let configEnv
 try {
-  configEnv = require(`./config.${env}.json`)
+  configEnv = readJSON(`./config.${env}.json`)
 } catch (error) {
   configEnv = {}
 }
@@ -23,7 +24,7 @@ try {
   if (env === "test") {
     throw new Error()
   }
-  configUser = require("./config.json")
+  configUser = readJSON("./config.json")
 } catch (error) {
   configUser = {}
 }
@@ -56,5 +57,8 @@ if (!config.baseUrl.endsWith("/")) {
 }
 
 config.vue.assetPrefix = env === "development" ? `http://localhost:${config.vue.port}/` : "/dist/"
+
+// Initalize cocoda-sdk registry to access jskos-server backend
+config.registry = cdk.initializeRegistry(config.backend)
 
 export default config

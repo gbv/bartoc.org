@@ -7,7 +7,7 @@ export default (req, res, next) => {
     const query = req.url.slice(req.path.length)
     return res.redirect(301, `/api/${query}`)
   } else {
-    // Deconstruct backend API URL to properly proxy requests
+    // Deconstruct backend API URL to proxy requests
     const url = new URL(config.backend.api)
     proxy(url.origin, {
       proxyReqPathResolver(req) {
