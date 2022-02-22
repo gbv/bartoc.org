@@ -1,5 +1,16 @@
 <%- include('header') %>
 
-<p>Sorry, the resource could not be found!</p>
+<p>
+  Sorry, the resource could not be found!
+  Are you <a href="/vocabularies">looking for vocabularies</a>?
+</p>
+<p>
+<p>
+  Search by URI:
+  <form action="/" method="get">
+    <input type="text" name="uri" />
+    <input type="submit" />
+  </form>
+</p>
 
 <%- include('footer') %>

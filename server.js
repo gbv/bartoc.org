@@ -58,11 +58,12 @@ app.use("/dist/", express.static("dist"))
 
 import redirectsRoute from "./routes/redirects.js"
 import apiRoute from "./routes/api.js"
+import uriRoute from "./routes/uri.js"
 import pageRoute from "./routes/page.js"
 
-// Routes without server-side backend access
 app.use(redirectsRoute)
 app.use("/api", apiRoute)
+app.use(uriRoute)
 app.use(pageRoute)
 
 // render HTML page with EJS
@@ -161,12 +162,7 @@ function conceptPageHandler(prefix) {
   }
 }
 
-
-app.get("/en/Format/:id", conceptPageHandler("http://bartoc.org/en/Format/") )
-
-app.get("/language/:id([a-z]{2,3})", conceptPageHandler("https://bartoc.org/language/") )
-
-// FIXME: ILC is not in the BARTOC registry yet
+// TODO: ILC is not in the BARTOC registry yet
 app.get("/ILC/1/:id([a-z0-9-]+)", conceptPageHandler("https://bartoc.org/ILC/1/") )
 
 // list of terminology registries

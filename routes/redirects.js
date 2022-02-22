@@ -41,6 +41,12 @@ router.get("/([a-z][a-z])/:page([a-z-]+)", (req, res) => {
 // Redirec ILC1 URL to its URI
 router.get("/ILC/1", (req, res) => res.redirect("/en/node/472"))
 
+// Redirect local vocabulary URIs to URI search
+router.get("/en/Format/:id([a-zA-Z0-9_-]+)", (req, res) =>
+  res.redirect(`/?uri=http://bartoc.org/en/Format/${req.params.id}`))
+router.get("/language/:id([a-z]{2,3})", (req, res) =>
+  res.redirect(`/?uri=http://bartoc.org/language/${req.params.id}`))
+
 // redirect old subject URLs to vocabulary search
 
 for (const [url, uri] of readCsv("./data/eurovoc-ids.csv")) {
