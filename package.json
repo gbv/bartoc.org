@@ -1,6 +1,6 @@
 {
   "name": "bartoc.org",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "BARTOC.org web interface",
   "main": "server.js",
   "type": "module",
