@@ -1,4 +1,5 @@
-import { cdk } from "cocoda-sdk"
+import { cdk, addAllProviders } from "cocoda-sdk"
+addAllProviders()
 import jskos from "jskos-tools"
 
 const registryCache = {}
