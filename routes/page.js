@@ -1,17 +1,20 @@
-import config from "../config/index.js"
-import { existsSync, readFileSync } from "fs"
+import express from "express"
+const router = express.Router()
+
+import fs from "fs"
 import fm from "front-matter"
 import { marked } from "marked"
-import { dirname } from "path"
-import { fileURLToPath } from "url"
+import { URL } from "url"
+const __dirname = new URL(".", import.meta.url).pathname
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+import config from "../config/index.js"
 
-export default (req, res) => {
+// Markdown pages as HTML
+function pageRoute (req, res) {
   const file = `${__dirname}/../pages/${req.params.page}.md`
 
-  if (existsSync(file)) {
-    const { attributes, body } = fm(readFileSync(file, "utf8"))
+  if (fs.existsSync(file)) {
+    const { attributes, body } = fm(fs.readFileSync(file, "utf8"))
     const content = marked.parse(body)
     const { path } = req
     res.setHeader("Content-Type", "text/html")
@@ -20,3 +23,11 @@ export default (req, res) => {
     req.next()
   }
 }
+
+router.get("/:page([a-z-]+)", pageRoute)
+router.get("/", (req, res) => {
+  req.params = { page: "index" }
+  pageRoute(req, res)
+})
+
+export default router

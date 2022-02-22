@@ -28,8 +28,6 @@ export default {
 
   readNdjson: file => readLines(file).map(JSON.parse),
 
-  readCsv: file => readLines(file).map(row => row.split(",")),
-
   escapeXML: s => String(s).replace(/[<>&"']/g, c => "&#" + c.charCodeAt(0) + ";"),
 
   indexByUri: array => array.reduce((obj, item) => { obj[item.uri] = item; return obj }, {}),

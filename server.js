@@ -1,5 +1,4 @@
 import config from "./config/index.js"
-import page from "./routes/page.js"
 import utils from "./src/utils.js"
 import path from "path"
 import jskos from "jskos-tools"
@@ -9,9 +8,10 @@ import axios from "axios"
 import querystring from "querystring"
 import { rdfContentType, rdfSerialize } from "./src/rdf.js"
 import child_process from "child_process"
-import { fileURLToPath } from "url"
+import portfinder from "portfinder"
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+import { URL } from "url"
+const __dirname = new URL(".", import.meta.url).pathname
 
 // build our vue project on first run if report.json can't be found
 // TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
@@ -25,9 +25,6 @@ if (config.env !== "development") {
     }
   })
 }
-
-
-import proxy from "express-http-proxy"
 
 let backend
 try {
@@ -64,76 +61,13 @@ app.use("/data/dumps/", express.static("data/dumps"))
 app.use("/data/reports/", express.static("data/reports"))
 app.use("/dist/", express.static("dist"))
 
-// redirect permanently moved URLs from legacy BARTOC.org
-import { createRequire } from "module"
-const require = createRequire(import.meta.url)
-const redirects = require("./data/redirects.json")
 
-for (const [from, to] of Object.entries(redirects)) {
-  app.get(from, (req, res) => res.redirect(301, to))
-}
+import redirectsRoute from "./routes/redirects.js"
+import apiRoute from "./routes/api.js"
+import pageRoute from "./routes/page.js"
 
-// redirect non-language URLs to English URLs
-app.get("/node/:id([0-9]+)", (req, res) => {
-  res.redirect(`/en/node/${req.params.id}`)
-})
-
-// redirect non-English URLs to English URLs
-app.get("/:lang([a-z][a-z])/node/:id([0-9]+)", (req, res, next) => {
-  const { lang, id } = req.params
-  if (lang === "en") {
-    next()
-  } else {
-    res.redirect(`/en/node/${id}`)
-  }
-})
-
-// redirect old subject URLs to vocabulary search
-
-for (const [url, uri] of utils.readCsv("./data/eurovoc-ids.csv")) {
-  app.get(url, (req, res) => res.redirect(`/vocabularies?subject=${uri}`))
-}
-
-for (const [url, uri] of utils.readCsv("./data/ddc-ids.csv")) {
-  app.get(url, (req, res) => res.redirect(`/vocabularies?subject=${uri}`))
-}
-
-for (const [url, code] of utils.readCsv("./data/language-ids.csv")) {
-  app.get(url, (req, res) => res.redirect(`/language/${code}`))
-}
-
-for (const [url, uri] of utils.readCsv("./data/kostype-ids.csv")) {
-  app.get(url, (req, res) => res.redirect(`/vocabularies?type=${uri}`))
-}
-
-for (const [url, uri] of utils.readCsv("./data/license-ids.csv")) {
-  app.get(url, (req, res) => res.redirect(`/vocabularies?license=${uri}`))
-}
-
-for (const [url, uri] of utils.readCsv("./data/access-ids.csv")) {
-  app.get(url, (req, res) => res.redirect(`/vocabularies?access=${uri}`))
-}
-
-for (const [url, id] of utils.readCsv("./data/format-ids.csv")) {
-  app.get(url, (req, res) => res.redirect(`/vocabularies?format=http://bartoc.org/en/Format/${id}`))
-}
-
-// backend
-app.use("/api", (req, res, next) => {
-  if (!req.originalUrl.startsWith("/api/")) {
-    const query = req.url.slice(req.path.length)
-    return res.redirect(301, `/api/${query}`)
-  } else {
-    // Deconstruct backend API URL to properly proxy requests.
-    const url = new URL(config.backend.api)
-    proxy(url.origin, {
-      proxyReqPathResolver(req) {
-        const path = url.pathname.endsWith("/") ? url.pathname.slice(0, -1) : url.pathname
-        return path + req.url
-      },
-    })(req, res, next)
-  }
-})
+app.use(redirectsRoute)
+app.use("/api", apiRoute)
 
 // if the backend was not initialize, throw error here
 app.use((req, res, next) => {
@@ -235,26 +169,11 @@ app.get("/ILC/1", (req, res) => res.redirect("/en/node/472"))
 app.get("/en/Format/:id", conceptPageHandler("http://bartoc.org/en/Format/") )
 
 app.get("/language/:id([a-z]{2,3})", conceptPageHandler("https://bartoc.org/language/") )
-/*for (const [url, code] of utils.readCsv("./data/language-ids.csv")) {
-  app.get(url, (req, res) => res.redirect(`/vocabularies?languages=${code}`))
-}
-*/
 
 // FIXME: ILC is not in the BARTOC backend yet
 app.get("/ILC/1/:id([a-z0-9-]+)", conceptPageHandler("https://bartoc.org/ILC/1/") )
 
-
-// root page
-app.get("/", (req, res) => {
-  req.params = { page: "index" }
-  page(req, res)
-})
-
-// static pages
-app.get("/:page([a-z-]+)", page)
-app.get("/([a-z][a-z])/:page([a-z-]+)", (req, res) => {
-  res.redirect(`/${req.params.page}`)
-})
+app.use(pageRoute)
 
 // list of terminology registries
 app.get("/registries", (req, res) => {
@@ -357,9 +276,22 @@ app.use((err, req, res, next) => {
   render(req, res, "500", { title: err.message, message })
 })
 
-// Start server
-app.listen(config.port, () => {
-  config.log(`Listening on port ${config.port}`)
-})
+// Start service
+async function start() {
 
-export default { app }
+  // Find available port on test
+  let port = config.port
+  if (config.env == "test") {
+    portfinder.basePort = config.port
+    port = await portfinder.getPortPromise()
+  }
+
+  // Let's go!
+  app.listen(port, () => {
+    config.log(`Now listening on port ${port}`)
+  })
+}
+
+start()
+
+export default app
