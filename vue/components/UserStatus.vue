@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import LoginClient from "gbv-login-client"
+import { LoginClient } from "gbv-login-client"
 
 /**
  * Shows and manages login status.

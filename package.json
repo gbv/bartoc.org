@@ -47,7 +47,7 @@
     "express": "^4.17.3",
     "express-http-proxy": "^1.6.3",
     "front-matter": "^4.0.2",
-    "gbv-login-client": "^0.3.2",
+    "gbv-login-client": "^1.0.1",
     "jsondiffpatch": "^0.4.1",
     "jsonld": "^5.2.0",
     "lodash": "^4.17.21",
