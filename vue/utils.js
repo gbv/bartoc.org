@@ -23,6 +23,12 @@ export function registryForScheme(scheme) {
     if (!config.provider) return
 
     registryCache[url] = cdk.initializeRegistry(config)
+  } else {
+    const registry = registryCache[url]
+    // Check if scheme is part of registry already; if not, add it
+    if (Array.isArray(registry._api.schemes) && !jskos.isContainedIn(scheme, registry._api.schemes)) {
+      registry._api.schemes.push(scheme)
+    }
   }
 
   return registryCache[url]
