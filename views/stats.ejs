@@ -3,34 +3,16 @@
 <h4>Vocabularies</h4>
 <p>
   BARTOC contains information about
-  <a href="/vocabularies"><%= totalCount %> vocabularies</a>.
+  <a href="/vocabularies"><%= schemesCount %> vocabularies</a>.
   The data is <a href="/download">freely available for download</a>.
   See <a href="/tracker">recent changes</a> for modifications.
 </p>
 
-<!--h4>Content disciplines</h4>
-<p>...</p-->
-
-<h4>Vocabulary types</h4>
-<p>
-  Vocabularies are classified
-  into vocabulary types of the
-  <a href="/vocabularies?uri=http%3A//w3id.org/nkos/nkostype">DCMI/NKOS KOS Type Vocabulary</a>:
-</p>
-<ul>
-<%# TODO: build via stats.json and sort list %>
-<% for (let item of Object.values(nkostypes)) { %>
-<li>
-  <%- include('item', { item , base: '/vocabularies?type='}) %>
-</li>
-<% } %>
-</ul>
-
 <h4>Registries</h4>
 <p>
   BARTOC is not the only vocabulary registry.
-  We have catalogued <a href="/registries"><%= registries.length %> terminology registries</a>, including <a href="/registries?type=http://bartoc.org/full-repository">
-  <%= repositories.length %> repositories or services</a> with full access to
+  We have catalogued <a href="/registries"><%= registriesCount %> terminology registries</a>, including <a href="/registries?type=http://bartoc.org/full-repository">
+  <%= repositoriesCount %> repositories or services</a> with full access to
   vocabulary content.
 </p>
 

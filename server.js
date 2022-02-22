@@ -2,9 +2,7 @@ import config from "./config/index.js"
 import utils from "./src/utils.js"
 import path from "path"
 import jskos from "jskos-tools"
-import { cdk, errors } from "cocoda-sdk"
 import fs from "fs"
-import axios from "axios"
 import querystring from "querystring"
 import { rdfContentType, rdfSerialize } from "./src/rdf.js"
 import child_process from "child_process"
@@ -12,6 +10,9 @@ import portfinder from "portfinder"
 
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
+
+const readNDJSON = file => fs.readFileSync(`${__dirname}${file}`).toString()
+  .split(/\n|\n\r/).filter(Boolean).map(line => JSON.parse(line))
 
 // build our vue project on first run if report.json can't be found
 // TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
@@ -29,10 +30,10 @@ if (config.env !== "development") {
 const backend = config.registry
 
 // static data (this could also be loaded from registry on startup)
-const registries = utils.indexByUri(utils.readNdjson("./data/registries.ndjson"))
-const nkostypes = utils.indexByUri(utils.readNdjson("./data/nkostype.concepts.ndjson"))
-const accesstypes = utils.indexByUri(utils.readNdjson("./data/bartoc-access.concepts.ndjson"))
-const formats = utils.indexByUri(utils.readNdjson("./data/bartoc-formats.concepts.ndjson"))
+const registries = utils.indexByUri(readNDJSON("./data/registries.ndjson"))
+const nkostypes = utils.indexByUri(readNDJSON("./data/nkostype.concepts.ndjson"))
+const accesstypes = utils.indexByUri(readNDJSON("./data/bartoc-access.concepts.ndjson"))
+const formats = utils.indexByUri(readNDJSON("./data/bartoc-formats.concepts.ndjson"))
 
 config.log(`Running in ${config.env} mode.`)
 
@@ -145,9 +146,16 @@ async function enrichItem (item) {
 app.get("/stats", async (req, res, next) => {
   backend.getSchemes({ params: { limit: 1 } })
     .then(schemes => {
-      const totalCount = schemes._totalCount
-      const reports = fs.existsSync("data/reports") ? fs.readdirSync("data/reports/") : []
-      render(req, res, "stats", { title: "Statistics", totalCount, reports })
+      const schemesCount = schemes._totalCount
+      const reportsDir = `${__dirname}data/reports`
+      const reports = fs.existsSync(reportsDir) ? fs.readdirSync(reportsDir) : []
+      render(req, res, "stats", {
+        title: "Statistics",
+        reports,
+        schemesCount,
+        registriesCount: Object.keys(registries).length,
+        repositoriesCount: Object.keys(repositories).length
+      })
     })
     .catch(e => { next(e) })
 })
