@@ -96,7 +96,7 @@ npm run release:patch # or minor or major
 
 ## Deployment
 
-The application is deployed at <http://bartoc.org/>.
+The application is deployed at <https://bartoc.org/>.
 
 Update an existing installation:
 
