@@ -24,6 +24,7 @@
           <item-select
             v-model="api.type"
             :scheme="apiTypesScheme"
+            :depth="2"
             :extract-label="jskos.prefLabel" />
         </td><td class="col-1">
           <button

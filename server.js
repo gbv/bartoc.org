@@ -154,7 +154,7 @@ app.get("/stats", async (req, res, next) => {
         reports,
         schemesCount,
         registriesCount: Object.keys(registries).length,
-        repositoriesCount: Object.keys(repositories).length
+        repositoriesCount: Object.keys(repositories).length,
       })
     })
     .catch(e => { next(e) })

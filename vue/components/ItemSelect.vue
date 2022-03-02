@@ -50,6 +50,14 @@ export default {
       type: Boolean,
       default: false,
     },
+    allrepeatable: {
+      type: Boolean,
+      default: false,
+    },
+    depth: {
+      type: Number,
+      default: 1,
+    },
     scheme: {
       type: Object,
       required: true,
@@ -93,7 +101,9 @@ export default {
       if (query) {
         promise = this.registry.search({ search: query, scheme: this.scheme })
       } else {
-        promise = this.registry.getTop({ scheme: this.scheme })
+        const params = this.depth > 1 ? { properties: "*" } : null
+        promise = this.registry.getTop({ scheme: this.scheme, params })
+        // TODO: support more then 2 levels or better use another component for hierarchy browsing?
       }
       this.cancel = promise.cancel
 
@@ -103,6 +113,24 @@ export default {
         // for top concepts, sort them
         if (!query) {
           results = jskos.sortConcepts(results)
+            // add direct child concepts in between
+            .map(({narrower, ...concept}) => {
+              narrower = (narrower||[]).filter(Boolean).map(
+                c => {
+                  if (c.prefLabel) {
+                    for (let lang in c.prefLabel) {
+                      c.prefLabel[lang] = `— ${c.prefLabel[lang]}`
+                    }
+                  }
+                  return c
+                },
+              )
+              return [concept, ...narrower]
+            })
+            .flat()
+          if (this.scheme.uri === "http://bartoc.org/en/node/20002") {
+            console.log(results)
+          }
         }
       } catch (error) {
         if (error.message === "canceled") {
