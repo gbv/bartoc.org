@@ -128,9 +128,6 @@ export default {
               return [concept, ...narrower]
             })
             .flat()
-          if (this.scheme.uri === "http://bartoc.org/en/node/20002") {
-            console.log(results)
-          }
         }
       } catch (error) {
         if (error.message === "canceled") {
