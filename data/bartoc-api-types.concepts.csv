@@ -1,10 +1,11 @@
-notation,prefLabel,scopeNote
-jskos,JSKOS API,Base URL of a JSKOS Server instance or another service following its semantics
-skosmos,Skosmos API,Skosmos vocabulary information page without language code
-reconciliation,Reconciliation,Reconciliation Service API endpoint
-loc,Library of Congress,Vocabularies from Library of Congress Linked Data Service (id.loc.gov)
-lod,Linked Open Data (LOD),Resolveable URI that returns or links vocabulary data in RDF
-skohub,Skohub,Skohub vocabulary lookup API
-sparql,SPARQL endpoint,Public SPARQL endpoint
-tematres,TemaTres API,API of TemaTres vocabulary server
-webservice,Unspecified Webservice,Unspecified kind of webservice (JSON/XML...)
+level,notation,prefLabel,scopeNote
+0,jskos,JSKOS API,Base URL of a JSKOS Server instance or another service following its semantics
+0,skosmos,Skosmos API,Skosmos vocabulary information page without language code
+0,reconciliation,Reconciliation,Reconciliation Service API endpoint
+0,loc,Library of Congress,Vocabularies from Library of Congress Linked Data Service (id.loc.gov)
+0,lod,Linked Open Data (LOD),Resolveable URI that returns or links vocabulary data in RDF
+0,skohub,Skohub,Skohub vocabulary lookup API
+0,sparql,SPARQL endpoint,Public SPARQL endpoint
+1,mesh,MeSH SPARQL,SPARQL enpoint with Medical Subject Headings RDF vocabulary
+0,tematres,TemaTres API,API of TemaTres vocabulary server
+0,webservice,Unspecified Webservice,Unspecified kind of webservice (JSON/XML...)
