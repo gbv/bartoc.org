@@ -380,26 +380,11 @@ export default {
 
       const item = { ...this.item }
       const method = item.uri ? "PUT" : "POST"
-      if (item.uri) {
-        // TODO: check other user identities
-        // TODO: should be set at server
-        item.modified = (new Date()).toISOString()
-        if (this.user) {
-          if (!(item.creator || []).find(c => c.uri === this.user.uri)) {
-            item.contributor = item.contributor || []
-            if (!item.contributor.find(c => c.uri === this.user.uri)) {
-              item.contributor.push({ uri: this.user.uri, prefLabel: { en: this.user.name } })
-            }
-          }
-        }
-      } else { // guess an URI not taken yet
+      if (!item.uri) {
+        // Try to find an URI not taken yet.
+        // TODO: better use auto-increment at jskos-server? 
         const total = await fetch("/api/voc?limit=1").then(res => res.headers.get("x-total-count"))
-        item.uri = "http://bartoc.org/en/node/" + (17000 + 1 * total)
-        // TODO: should be set at server
-        item.created = (new Date()).toISOString()
-        if (this.user) {
-          item.creator = [{ uri: this.user.uri, prefLabel: { en: this.user.name } }]
-        }
+        item.uri = "http://bartoc.org/en/node/" + (17002 + 1 * total)
       }
       const body = JSON.stringify(this.cleanupItem(item), null, 2)
       const headers = { "Content-Type": "application/json" }
