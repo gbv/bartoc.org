@@ -86,6 +86,6 @@ export function loadConcepts(api, uri) {
 }
 
 export function sortConcepts(set, scheme) {
-  const numericNotations = (scheme.notationPattern || "").match(/^(\[1-9\])?\[0-9\][+*]$/)
-  return jskos.sortConcepts(set, numericNotations)
+  const numericalNotation = !!(scheme.DISPLAY && scheme.DISPLAY.numericalNotation)
+  return jskos.sortConcepts(set, numericalNotation)
 }

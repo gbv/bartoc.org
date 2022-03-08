@@ -32,7 +32,7 @@
 <script>
 import Multiselect from "@vueform/multiselect"
 import jskos from "jskos-tools"
-import { registryForScheme } from "../utils"
+import { registryForScheme, sortConcepts } from "../utils"
 
 // Select one or a list of item URIs
 export default {
@@ -112,7 +112,7 @@ export default {
         results = await promise
         // for top concepts, sort them
         if (!query) {
-          results = jskos.sortConcepts(results)
+          results = sortConcepts(results, this.scheme)
             // add direct child concepts in between
             .map(({narrower, ...concept}) => {
               narrower = (narrower||[]).filter(Boolean).map(
