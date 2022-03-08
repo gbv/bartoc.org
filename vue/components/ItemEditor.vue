@@ -141,6 +141,17 @@
         class="form-check-label">hide notation</label>
       it is only used as internal identifier
     </div>
+    <div class="form-check">
+      <input
+        id="numericalNotation"
+        v-model="item.DISPLAY.numericalNotation"
+        type="checkbox"
+        class="form-check-input">
+      <label
+        for="numericalNotation"
+        class="form-check-label">numerical notation</label>
+      concepts of this vocabulary will be sorted numerically when displayed as a list
+    </div>
   </form-row>
   <hr>
   <p>
