@@ -66,7 +66,7 @@ npm run import -- schemes $BARTOC/data/ilc.scheme.ndjson
 # Import latest dump
 ask "Do you want to import the latest BARTOC dump? (y/N) "
 if [ $? -eq 1 ]; then
-  npm run import -- schemes https://bartoc.org/data/dumps/latest.ndjson
+  npm run import -- schemes https://bartoc.org/api/voc?limit=10000
   echo
 fi
 
