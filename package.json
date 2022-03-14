@@ -12,7 +12,7 @@
     "lint-staged": "lint-staged",
     "data": "npm run data:nkostype; make -C data",
     "validate": "jskos-validate",
-    "dump": "js ./bin/dump.js update && ./bin/reports.sh && ./bin/stats.sh",
+    "dump": "node ./bin/dump.js update && ./bin/reports.sh && ./bin/stats.sh",
     "vue:serve": "vue-cli-service serve",
     "build": "vue-cli-service build --no-clean --report-json",
     "express:serve": "NODE_ENV=development nodemon server.js",

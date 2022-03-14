@@ -24,3 +24,5 @@ yarn-error.log*
 
 data/tmp.json
 data/languages.concepts.ndjson
+data/dumps/
+data/reports/

@@ -1,7 +1,7 @@
 import config from "../config/index.js"
 import fs from "fs"
 import path from "path"
-import cdk from "cocoda-sdk"
+import { cdk } from "cocoda-sdk"
 import _ from "lodash"
 import diff from "jsondiffpatch"
 import LineReader from "n-readlines"
