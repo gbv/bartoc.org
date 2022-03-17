@@ -2,37 +2,8 @@ import { cdk, addAllProviders } from "cocoda-sdk"
 addAllProviders()
 import jskos from "jskos-tools"
 
-const registryCache = {}
-export function registryForScheme(scheme) {
-  if (!scheme || !scheme.API || !scheme.API.length) return
-
-  const { url, type } = scheme.API[0]
-
-  if (!(url in registryCache)) {
-    const config = { schemes: [scheme] }
-    if (type === "http://bartoc.org/api-type/jskos") {
-      // use local database for bartoc.org
-      config.api = url.match(/^https?:\/\/bartoc.org\/api\/?/) ? "/api/" : url
-      config.provider = "ConceptApi"
-    } else if (type === "http://bartoc.org/api-type/skosmos") {
-      config.provider = "SkosmosApi"
-      const match = url.match(/(.+\/)([^/]+)\/$/)
-      if (!match) return
-      config.api = match[1] + "rest/v1/"
-      scheme.VOCID = match[2]
-    }
-    if (!config.provider) return
-
-    registryCache[url] = cdk.initializeRegistry(config)
-  } else {
-    const registry = registryCache[url]
-    // Check if scheme is part of registry already; if not, add it
-    if (Array.isArray(registry._api.schemes) && !jskos.isContainedIn(scheme, registry._api.schemes)) {
-      registry._api.schemes.push(scheme)
-    }
-  }
-
-  return registryCache[url]
+export function registryForScheme() {
+  return cdk.registryForScheme(...arguments)
 }
 
 export async function cdkLoadConcepts(scheme, uri) {
