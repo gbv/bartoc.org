@@ -38,8 +38,11 @@ router.get("/([a-z][a-z])/:page([a-z-]+)", (req, res) => {
   res.redirect(`/${req.params.page}`)
 })
 
-// Redirec ILC1 URL to its URI
+// Redirec ILC1 URIs
 router.get("/ILC/1", (req, res) => res.redirect("/en/node/472"))
+for (const [ilc1, ilc2] of readCsv("./data/ilc1-ilc2.csv")) {
+  router.get(ilc1, (req, res) => res.redirect(`/vocabularies?subject=${ilc2}`))
+}
 
 // Redirect local vocabulary URIs to URI search
 router.get("/en/Format/:id([a-zA-Z0-9_-]+)", (req, res) =>
