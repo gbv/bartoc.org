@@ -32,11 +32,11 @@ export const indexingSchemes = [
     API: [{url:"https://bartoc-skosmos.unibas.ch/EuroVoc/",type:"http://bartoc.org/api-type/skosmos"}],
   },
   {
-    uri: "https://bartoc.org/ILC/1",
+    uri: "http://www.iskoi.org/ilc/2/scheme",
     identifier: ["http://bartoc.org/de/node/472"],
-    namespace: "https://bartoc.org/ILC/1/",
+    namespace: "http://www.iskoi.org/ilc/2/class/",
     notation: ["ILC"],
-    API: [{url:"https://bartoc-skosmos.unibas.ch/ILC/",type:"http://bartoc.org/api-type/skosmos"}],
+    API: [{url:"https://bartoc-skosmos.unibas.ch/ilc2/",type:"http://bartoc.org/api-type/skosmos"}],
   },
 ]
 
