@@ -127,7 +127,7 @@ async function vocabulariesSearch (req, res, next) {
 }
 
 async function enrichItem (item) {
-  const subjects = item.subject || []
+  const subjects = item && item.subject || []
   if (subjects.length) {
     const found = await backend.getConcepts({ concepts: item.subject })
     item.subject = found.map(jskos.clean)
