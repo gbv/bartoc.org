@@ -90,6 +90,7 @@ app.get("/edit", async (req, res, next) => {
       delete item.topConcepts
     } else {
       next()
+      return
     }
   }
 
