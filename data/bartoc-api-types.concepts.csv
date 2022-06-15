@@ -8,4 +8,5 @@ level,notation,prefLabel,scopeNote
 0,sparql,SPARQL endpoint,Public SPARQL endpoint
 1,mesh,MeSH SPARQL,SPARQL enpoint with Medical Subject Headings RDF vocabulary
 0,tematres,TemaTres API,API of TemaTres vocabulary server
+0,ols,Ontology Lookup Service (OLS),
 0,webservice,Unspecified Webservice,Unspecified kind of webservice (JSON/XML...)
