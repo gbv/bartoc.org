@@ -29,7 +29,7 @@
       </td>
       <td>
   <% if (item.API ) { %>
-      <%- include('link', { url: item.API[0].url, label: "API" }) %>
+      <%- include('link', { url: item.API[0].url, label: (item.API[0].type.split("/").pop()) }) %>
   <% } %>
       </td>
       <td>
