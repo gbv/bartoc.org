@@ -58,6 +58,9 @@
     "timeago.js": "^4.0.2",
     "vue": "^3.2.31"
   },
+  "optionalDependencies": {
+    "fsevents": "2.3.2"
+  },
   "devDependencies": {
     "@babel/eslint-parser": "^7.17.0",
     "@vue/cli-plugin-babel": "^5.0.3",
