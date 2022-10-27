@@ -91,14 +91,22 @@ export default {
   },
   watch: {
     selected(concept) {
+      // Update URL with new selected concept
+      const hash = window.location.hash
+      const urlParams = new URLSearchParams(window.location.search)
       if (concept && concept.uri) {
-        // Update URL with new selected concept
-        const hash = window.location.hash
-        const urlParams = new URLSearchParams(window.location.search)
         urlParams.set("uri", concept.uri)
-        // Note that hash/fragment needs to be at the end of the URL, otherwise the search params will be considered part of the hash!
-        window.history.replaceState({}, "", `${window.location.href.replace(hash, "").replace(window.location.search, "")}?${urlParams.toString()}${hash}`)
+      } else {
+        urlParams.delete("uri")
       }
+      // Build new URL
+      let url = `${window.location.href.replace(hash, "").replace(window.location.search, "")}`
+      if (urlParams.toString()) {
+        url += `?${urlParams.toString()}`
+      }
+      // Note that hash/fragment needs to be at the end of the URL, otherwise the search params will be considered part of the hash!
+      url += hash
+      window.history.replaceState({}, "", url)
     },
   },
   async mounted() {
