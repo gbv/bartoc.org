@@ -126,7 +126,7 @@ export default {
       if (registry) {
         this.registry = registry
 
-        accessScheme.VOCID = registry._jskos.schemes[0].VOCID // TODO: this is a hack
+        accessScheme.VOCID = registry._jskos.schemes && registry._jskos.schemes.length ? registry._jskos.schemes[0].VOCID : undefined // TODO: this is a hack
         this.accessScheme = accessScheme
 
         var results = []
