@@ -15,7 +15,7 @@ All parts are published as Open Source. In particular these are:
 
 BARTOC content is curated by an [international group of editors and collaborators](/contact). Please contact one of your choice to contribute missing vocabularies or to supply corrections!
 
-Editors and collaborators are authentificated via their [ORCID iD](https://orcid.org/), Wikimedia acount or GitHub account so no additional passwords are required. Once a user has been logged in via login server (see "login" link in the upper right corner), its user name is shown in the menu. 
+Editors and collaborators are authenticated via their [ORCID iD](https://orcid.org/), Wikimedia acount or GitHub account so no additional passwords are required. Once a user has been logged in via login server (see "login" link in the upper right corner), its user name is shown in the menu. 
 BARTOC is configured with a list of trusted users: if the user is trusted, an <a class="btn btn-success btn-sm" href="/edit">add</a> button is shown in the menu and an <a class="btn btn-success btn-sm">edit</a> button is shown next to each vocabulary title.
 
 Adding and editing vocabularies is possible with a web form. Its fields are documented in the form. In doubt feel free to ask so we can improve documentation!
