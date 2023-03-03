@@ -22,10 +22,5 @@ title:
 <vocabulary-search></vocabulary-search>
 
 <p>
-  BARTOC is continuously <a href="https://github.com/gbv/bartoc.org/issues">improved</a>. Preliminary search and browsing in selected vocabularies is possible via <a href="https://bartoc-fast.ub.unibas.ch/bartocfast">BARTOC FAST</a>:
+  BARTOC is continuously being <a href="https://github.com/gbv/bartoc.org/issues">extended and improved</a>. A beta version of BARTOC Skosmos vocabulary hosting is available at <a href="https://skosmos.bartoc.org/">skosmos.bartoc.org</a>.
 </p>
-
-<form class="form-inline" action="https://bartoc-fast.ub.unibas.ch/bartocfast/" method="get">
-  <input type="text" name="searchword" class="form-control mb-2 mr-sm-2">
-  <button type="submit" class="btn btn-primary mb-2">Search</button>
-</form>
