@@ -26,3 +26,6 @@ data/tmp.json
 data/languages.concepts.ndjson
 data/dumps/
 data/reports/
+
+# pm2 ecosystem file
+ecosystem.config.json
