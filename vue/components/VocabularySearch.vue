@@ -203,8 +203,7 @@ export default {
           this[name] = set
         })
 
-    // TODO: use local backend
-    loadVoc("kostypes", "https://bartoc.org/api/", "http://w3id.org/nkos/nkostype")
+    loadVoc("kostypes", "/api/voc/top", "http://w3id.org/nkos/nkostype")
     // TODO: remove dependency on DANTE
     loadVoc("licenses", "https://api.dante.gbv.de/voc/top", "http://uri.gbv.de/terminology/license/")
   },

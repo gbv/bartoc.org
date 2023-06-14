@@ -369,7 +369,7 @@ export default {
   created() {
     loadConcepts("https://api.dante.gbv.de/voc/top", "http://uri.gbv.de/terminology/license/")
       .then(set => { this.licenses = set })
-    loadConcepts("https://bartoc.org/api/", "http://w3id.org/nkos/nkostype")
+    loadConcepts("/api/voc/top", "http://w3id.org/nkos/nkostype")
       .then(set => { this.kostypes = set })
     loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000")
       .then(set => { this.formats = set })
