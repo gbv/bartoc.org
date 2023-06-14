@@ -196,15 +196,17 @@ export default {
     }
   },
   created() {
-    const loadVoc = (name, uri) =>
-      loadConcepts("https://api.dante.gbv.de/voc/top", uri)
+    const loadVoc = (name, api, uri) =>
+      loadConcepts(api, uri)
         .then(set => {
           set.unshift({ uri: "", prefLabel: { en: "" } })
           this[name] = set
         })
 
-    loadVoc("kostypes", "http://w3id.org/nkos/nkostype")
-    loadVoc("licenses", "http://uri.gbv.de/terminology/license/")
+    // TODO: use local backend
+    loadVoc("kostypes", "https://bartoc.org/api/", "http://w3id.org/nkos/nkostype")
+    // TODO: remove dependency on DANTE
+    loadVoc("licenses", "https://api.dante.gbv.de/voc/top", "http://uri.gbv.de/terminology/license/")
   },
   methods: {
     submit(query) {

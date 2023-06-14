@@ -369,7 +369,7 @@ export default {
   created() {
     loadConcepts("https://api.dante.gbv.de/voc/top", "http://uri.gbv.de/terminology/license/")
       .then(set => { this.licenses = set })
-    loadConcepts("https://api.dante.gbv.de/voc/top", "http://w3id.org/nkos/nkostype")
+    loadConcepts("https://bartoc.org/api/", "http://w3id.org/nkos/nkostype")
       .then(set => { this.kostypes = set })
     loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000")
       .then(set => { this.formats = set })
@@ -393,7 +393,7 @@ export default {
       const method = item.uri ? "PUT" : "POST"
       if (!item.uri) {
         // Try to find an URI not taken yet.
-        // TODO: better use auto-increment at jskos-server? 
+        // TODO: better use auto-increment at jskos-server?
         const total = await fetch("/api/voc?limit=1").then(res => res.headers.get("x-total-count"))
         item.uri = "http://bartoc.org/en/node/" + (17002 + 1 * total)
       }
