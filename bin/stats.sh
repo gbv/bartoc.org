@@ -13,6 +13,8 @@ histogram() {
 }
 
 stat() {
+  today=$(date -I)
+  echo "{ \"date\": \"$(date -I)\" }"
   histogram 'vocabularies by type' \
             '.type[]'
   histogram 'vocabularies by license' \
