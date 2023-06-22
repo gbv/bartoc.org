@@ -29,6 +29,7 @@ Read more about BARTOC in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](ht
 
 **Publications**
 
+* [NKOS 2022](https://nkos.dublincore.org/2022NKOSworkshop/Park-Collecting%20Distributed%20KOS.pdf)
 * [Code4Lib 2021](https://doi.org/10.5281/zenodo.4629366)
 * [ISKO Aalborg 2020](https://doi.org/10.5771/9783956507762-200)
 * [MTSR 2019](https://doi.org/10.1007/978-3-030-14401-2_1)
