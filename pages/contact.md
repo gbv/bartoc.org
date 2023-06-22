@@ -30,8 +30,7 @@ Head Office of the GBV Common Library Network
 
 Jakob Voß [](https://orcid.org/0000-0002-7613-4123) [](https://twitter.com/Nichtich)\
 Uma Balakrishnan [](https://orcid.org/0000-0002-6076-9853) \
-Stefan Peters [](https://orcid.org/0000-0002-4087-8227) \
-David-Benjamin Rohrer [](https://orcid.org/0000-0001-9377-6294)
+Stefan Peters [](https://orcid.org/0000-0002-4087-8227)
 
 </div>
 </div>
@@ -44,7 +43,7 @@ David-Benjamin Rohrer [](https://orcid.org/0000-0001-9377-6294)
 English to Greek medical translator
 
 </div>
-  
+
 <div class="col">
 <h2>India</h2>
 
