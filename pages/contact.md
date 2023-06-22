@@ -31,7 +31,6 @@ Head Office of the GBV Common Library Network
 Jakob Voß [](https://orcid.org/0000-0002-7613-4123) [](https://twitter.com/Nichtich)\
 Uma Balakrishnan [](https://orcid.org/0000-0002-6076-9853) \
 Stefan Peters [](https://orcid.org/0000-0002-4087-8227)
-
 </div>
 </div>
 
@@ -138,5 +137,16 @@ Data & Knowledge Engineer, Semantic Web Company
 
 </div>
 </div>
+
+Additional contributors include
+Anne Schuchardt [](https://orcid.org/0000-0002-5205-6669)
+Christian Rüter [](https://orcid.org/0000-0003-2653-3799),
+David-Benjamin Rohrer [](https://orcid.org/0000-0001-9377-6294),
+Erik Stubkjaer [](https://orcid.org/0000-0001-5920-8672),
+Jarmo Saarikko [](https://orcid.org/0000-0002-6801-6151),
+Ralph Hafner [](https://orcid.org/0000-0001-5737-3906),
+Sabrina Gaab [](https://orcid.org/0000-0002-5049-0808),
+Susanne Arndt [](https://orcid.org/0000-0002-1019-9151),
+Volkan Çağdaş [](https://orcid.org/0000-0002-5200-0075)
 
 See [contributing](/contributing) for additional information how to contribute to BARTOC.
