@@ -1,7 +1,3 @@
-
-> bartoc.org@1.1.11 jskos-convert
-> cd $INIT_CWD; jskos-convert -m -v -s bartoc-api-types.scheme.ndjson bartoc-api-types.concepts.csv
-
 {"uri":"http://bartoc.org/api-type/jskos","notation":["jskos"],"inScheme":[{"uri":"http://bartoc.org/en/node/20002"}],"prefLabel":{"en":"JSKOS API"},"scopeNote":{"en":["Base URL of a JSKOS Server instance or another service following its semantics"]},"topConceptOf":[{"uri":"http://bartoc.org/en/node/20002"}]}
 {"uri":"http://bartoc.org/api-type/skosmos","notation":["skosmos"],"inScheme":[{"uri":"http://bartoc.org/en/node/20002"}],"prefLabel":{"en":"Skosmos API"},"scopeNote":{"en":["Skosmos vocabulary information page without language code"]},"topConceptOf":[{"uri":"http://bartoc.org/en/node/20002"}]}
 {"uri":"http://bartoc.org/api-type/reconciliation","notation":["reconciliation"],"inScheme":[{"uri":"http://bartoc.org/en/node/20002"}],"prefLabel":{"en":"Reconciliation"},"scopeNote":{"en":["Reconciliation Service API endpoint"]},"topConceptOf":[{"uri":"http://bartoc.org/en/node/20002"}]}
