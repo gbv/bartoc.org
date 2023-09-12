@@ -29,9 +29,10 @@
         <% } %>
       </td>
       <td>
-  <% for (api of (item.API||[])) { %>
-      <%- include('link', { url: api.url, label: (api.type.split("/").pop()) }) %>&#xA0;
-  <% } %>
+      <% for (let [i,api] of Object.entries(item.API||[])) { %>
+      <% if (i) { %><br><% } %>
+      <%- include('link', { url: api.url, label: (api.type.split("/").pop()) }) %>
+      <% } %>
       </td>
       <td>
        <% if (item.type[1] == "http://bartoc.org/full-repository") { %>
@@ -41,8 +42,9 @@
        <% } %>
       </td>
       <td>
-       <% if(item.startDate) { %><%= item.startDate %><% } %>
-       <% if(item.endDate) { %>-<%= item.endDate %><% } %>
+       <% if(item.startDate) { %><%= item.startDate %><% }
+          if(item.startDate || item.endDate) { %>-<% }
+          if(item.endDate) { %>-<%= item.endDate %><% } %>
       </td>
     </tr>
    <% }) %>
