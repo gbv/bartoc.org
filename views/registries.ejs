@@ -28,8 +28,8 @@
         <% } %>
       </td>
       <td>
-  <% if (item.API ) { %>
-      <%- include('link', { url: item.API[0].url, label: (item.API[0].type.split("/").pop()) }) %>
+  <% for (api of (item.API||[])) { %>
+      <%- include('link', { url: api.url, label: (api.type.split("/").pop()) }) %>
   <% } %>
       </td>
       <td>
