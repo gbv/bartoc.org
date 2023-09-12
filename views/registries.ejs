@@ -13,15 +13,20 @@
 <table class="table table-borderless table-hover">
   <thead>
     <th>Name</th>
+    <th>Year</th>
     <th colspan="2">Links</th>
     <th>Type</th>
-    <th>Year</th>
   </thead>
   <tbody>
    <% Object.values(items).forEach(item => { %>
     <tr>
       <td>
         <a href="/en/node/<%= item.uri.split("/").pop() %>"><%= item.prefLabel.en %></a>
+      </td>
+      <td>
+       <% if(item.startDate) { %><%= item.startDate %><% }
+          if(item.startDate || item.endDate) { %>-<% }
+          if(item.endDate) { %><%= item.endDate %><% } %>
       </td>
       <td>
        <% if (item.url) { %>
@@ -40,11 +45,6 @@
        <% } else { %>
          registry
        <% } %>
-      </td>
-      <td>
-       <% if(item.startDate) { %><%= item.startDate %><% }
-          if(item.startDate || item.endDate) { %>-<% }
-          if(item.endDate) { %>-<%= item.endDate %><% } %>
       </td>
     </tr>
    <% }) %>
