@@ -30,7 +30,7 @@
       </td>
       <td>
       <% for (let [i,api] of Object.entries(item.API||[])) { %>
-      <% if (i) { %><br><% } %>
+      <% if (i > 0) { %><br><% } %>
       <%- include('link', { url: api.url, label: (api.type.split("/").pop()) }) %>
       <% } %>
       </td>
