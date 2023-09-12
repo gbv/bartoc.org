@@ -15,6 +15,7 @@
     <th>Name</th>
     <th colspan="2">Links</th>
     <th>Type</th>
+    <th>Year</th>
   </thead>
   <tbody>
    <% Object.values(items).forEach(item => { %>
@@ -29,7 +30,7 @@
       </td>
       <td>
   <% for (api of (item.API||[])) { %>
-      <%- include('link', { url: api.url, label: (api.type.split("/").pop()) }) %>
+      <%- include('link', { url: api.url, label: (api.type.split("/").pop()) }) %>&#xA0;
   <% } %>
       </td>
       <td>
@@ -38,6 +39,10 @@
        <% } else { %>
          registry
        <% } %>
+      </td>
+      <td>
+       <% if(item.startDate) { %><%= item.startDate %><% } %>
+       <% if(item.endDate) { %>-<%= item.endDate %><% } %>
       </td>
     </tr>
    <% }) %>
