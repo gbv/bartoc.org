@@ -10,6 +10,7 @@ level,notation,prefLabel,scopeNote
 0,tematres,TemaTres API,API of TemaTres vocabulary server
 0,ols,Ontology Lookup Service (OLS),
 0,ontoportal,OntoPortal,API of OntoPortal
+0,opentheso,Opentheso,
 0,sru,Search/Retrieve via URL (SRU),
 0,oaipmh,OAI-PMH,
 0,rss,RSS,
