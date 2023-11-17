@@ -17,4 +17,5 @@ level,notation,prefLabel,scopeNote
 0,mycore,MyCoRE Classification API,
 0,graphql,GraphQL,
 0,noterms,Network of Terms,based on GraphQL
+0,lobid-gnd,Lobid GND API,
 0,webservice,Unspecified Webservice,Unspecified kind of webservice (JSON/XML...)
