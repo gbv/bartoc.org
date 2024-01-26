@@ -3,7 +3,9 @@ import fs from "fs"
 import path from "path"
 import { cdk } from "cocoda-sdk"
 import _ from "lodash"
-import diff from "jsondiffpatch"
+import * as diff from "jsondiffpatch"
+import * as consoleFormatter from "jsondiffpatch/formatters/console"
+import * as jsonpatchFormatter from "jsondiffpatch/formatters/jsonpatch"
 import LineReader from "n-readlines"
 
 import { fileURLToPath } from "url"
@@ -13,8 +15,7 @@ const dumpsDir = path.join(__dirname, "../data/dumps")
 const [command, ...args] = process.argv.slice(2)
 
 if (command === "diff" || command === "jsonpatch") {
-  const formatter = command === "diff" ? diff.console.log
-    : delta => console.log(JSON.stringify(diff.formatters.jsonpatch.format(delta)))
+  const formatter = delta => console.log(JSON.stringify((command === "diff" ? consoleFormatter : jsonpatchFormatter).format(delta)))
 
   if (args.length === 2) {
     dumpDiff(...args, formatter)

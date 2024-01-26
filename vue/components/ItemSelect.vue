@@ -12,7 +12,6 @@
     :delay="200"
     :searchable="true"
     :loading="isLoading"
-    :max-height="300"
     @change="$emit('update:modelValue', $event)" />
   <Multiselect
     v-else
@@ -25,7 +24,6 @@
     :delay="200"
     :searchable="true"
     :loading="isLoading"
-    :max-height="300"
     @change="$emit('update:modelValue', $event)" />
 </template>
 
@@ -157,8 +155,8 @@ export default {
 <style>
 /* Adjust for Bootstrap CSS */
 div.multiselect {
-  border: 0;
   padding: 0;
+  --ms-max-height: 300px;
 }
 div.multiselect-input, div.multiselect-options {
   border: 1px solid #ced4da;
