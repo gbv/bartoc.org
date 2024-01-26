@@ -39,7 +39,9 @@ export default {
     },
   },
   computed: {
-    icon() { return knownIcons[this.name] },
+    icon() {
+      return knownIcons[this.name] 
+    },
   },
 }
 </script>

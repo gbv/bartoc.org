@@ -50,10 +50,14 @@ export default {
     }
   },
   created() {
-    this.$watch("value", value => { this.$emit("update:modelValue", value) })
+    this.$watch("value", value => {
+      this.$emit("update:modelValue", value) 
+    })
   },
   methods: {
-    repeatable() { return Array.isArray(this.modelValue) },
+    repeatable() {
+      return Array.isArray(this.modelValue) 
+    },
   },
 }
 </script>

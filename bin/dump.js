@@ -37,7 +37,9 @@ function usage (syntax) {
 function normalize (item) {
   return _.cloneDeepWith(item, value => {
     // apply Unicode normalization to strings
-    if (_.isString(value)) return value.normalize()
+    if (_.isString(value)) {
+      return value.normalize()
+    }
     // sort keys and remove keys starting with "_"
     if (_.isPlainObject(item)) {
       const keys = Object.keys(item).filter(key => key[0] !== "_").sort()
@@ -50,7 +52,9 @@ function normalize (item) {
 }
 
 function updateDump () {
-  if (!fs.existsSync(dumpsDir)) fs.mkdirSync(dumpsDir)
+  if (!fs.existsSync(dumpsDir)) {
+    fs.mkdirSync(dumpsDir)
+  }
 
   const backend = cdk.initializeRegistry({
     provider: "ConceptApi",
@@ -78,11 +82,15 @@ function dumpDiff (fileA, fileB, showDelta) {
 
   const next = reader => {
     const line = reader.next()
-    if (line) return normalize(JSON.parse(line))
+    if (line) {
+      return normalize(JSON.parse(line))
+    }
   }
 
   const addedDelta = item => {
-    for (const key in item) { item[key] = [item[key]] }
+    for (const key in item) {
+      item[key] = [item[key]]
+    }
     return item
   }
 

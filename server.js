@@ -124,7 +124,9 @@ async function vocabulariesSearch (req, res, next) {
     })
   }
 
-  search.catch(e => { next(e) })
+  search.catch(e => {
+    next(e) 
+  })
 }
 
 async function enrichItem (item) {
@@ -158,7 +160,9 @@ app.get("/stats", async (req, res, next) => {
         repositoriesCount: Object.keys(repositories).length,
       })
     })
-    .catch(e => { next(e) })
+    .catch(e => {
+      next(e) 
+    })
 })
 
 // Serve an individual concept with given prefix

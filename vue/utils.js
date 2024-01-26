@@ -8,7 +8,9 @@ export function registryForScheme() {
 
 export async function cdkLoadConcepts(scheme, uri) {
   const registry = registryForScheme(scheme)
-  if (!registry || !uri) return []
+  if (!registry || !uri) {
+    return []
+  }
 
   const result = await registry.getConcepts({ concepts: [{ uri, inScheme: [scheme] }] })
   return result
@@ -52,7 +54,9 @@ export const apiTypesScheme = {
 
 // TODO: use cdk instead
 export function loadConcepts(api, uri) {
-  if (uri) api = `${api}?uri=${encodeURIComponent(uri)}`
+  if (uri) {
+    api = `${api}?uri=${encodeURIComponent(uri)}`
+  }
   return fetch(api).then(res => res ? res.json() : [])
 }
 

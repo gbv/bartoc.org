@@ -22,7 +22,11 @@ function extendScheme (voc) {
 
 export default {
   cleanupItem: item => {
-    for (const key in item) { if (key[0] === "_") delete item[key] }
+    for (const key in item) {
+      if (key[0] === "_") {
+        delete item[key]
+      } 
+    }
     return item
   },
 
@@ -30,7 +34,9 @@ export default {
 
   escapeXML: s => String(s).replace(/[<>&"']/g, c => "&#" + c.charCodeAt(0) + ";"),
 
-  indexByUri: array => array.reduce((obj, item) => { obj[item.uri] = item; return obj }, {}),
+  indexByUri: array => array.reduce((obj, item) => {
+    obj[item.uri] = item; return obj 
+  }, {}),
 
   // TODO: move utility function to jskos-tools
   label (labels, language, fallback = "") {

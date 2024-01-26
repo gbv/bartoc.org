@@ -117,7 +117,9 @@ export default {
     },
     display: {
       type: Object,
-      default() { return {} },
+      default() {
+        return {} 
+      },
     },
   },
   emits: ["update:concept"],
@@ -131,7 +133,9 @@ export default {
   computed: {
     k10plus() {
       const { scheme, selected } = this
-      if (!selected || !selected.notation) return
+      if (!selected || !selected.notation) {
+        return
+      }
       const ikt = k10plusikt[(scheme.CQLKEY || "").toUpperCase()]
       const notation = selected.notation || []
       return ikt ? `https://opac.k10plus.de/DB=2.299/CMD?ACT=SRCHA&IKT=${ikt}&TRM=${notation[0]}` : null

@@ -327,9 +327,17 @@ export default {
     // make sure item has iterable fields
     const item = this.current || {};
     ["prefLabel", "altLabel", "definition", "ADDRESS", "DISPLAY"]
-      .forEach(key => { if (!item[key]) item[key] = {} });
+      .forEach(key => {
+        if (!item[key]) {
+          item[key] = {}
+        } 
+      });
     ["notation", "identifier", "languages", "license", "type", "subject", "subjectOf", "partOf", "FORMAT", "API", "ACCESS", "publisher"]
-      .forEach(key => { if (!item[key]) item[key] = [] })
+      .forEach(key => {
+        if (!item[key]) {
+          item[key] = []
+        } 
+      })
 
     const examples = (item.notationExamples || []).join(", ")
 
@@ -338,8 +346,11 @@ export default {
 
     // make non-English abstract to language code "und"
     for (const code in item.definition) {
-      if (code === "en") abstractEn = item.definition[code][0]
-      else abstractUnd = item.definition[code][0]
+      if (code === "en") {
+        abstractEn = item.definition[code][0]
+      } else {
+        abstractUnd = item.definition[code][0]
+      }
     }
 
     return {
@@ -356,11 +367,17 @@ export default {
     }
   },
   computed: {
-    type() { return this.item.type.map(uri => ({ uri })) },
+    type() {
+      return this.item.type.map(uri => ({ uri })) 
+    },
   },
   watch: {
-    abstractEn: function (s) { this.item.definition.en = [s] },
-    abstractUnd: function (s) { this.item.definition.und = [s] },
+    abstractEn: function (s) {
+      this.item.definition.en = [s] 
+    },
+    abstractUnd: function (s) {
+      this.item.definition.und = [s] 
+    },
     examples: function (s) {
       this.item.notationExamples = s.split(",").map(s => s.trim()).filter(s => s !== "")
     },
@@ -368,15 +385,25 @@ export default {
 
   created() {
     loadConcepts("https://api.dante.gbv.de/voc/top", "http://uri.gbv.de/terminology/license/")
-      .then(set => { this.licenses = set })
+      .then(set => {
+        this.licenses = set 
+      })
     loadConcepts("/api/voc/top", "http://w3id.org/nkos/nkostype")
-      .then(set => { this.kostypes = set })
+      .then(set => {
+        this.kostypes = set 
+      })
     loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000")
-      .then(set => { this.formats = set })
+      .then(set => {
+        this.formats = set 
+      })
     loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001")
-      .then(set => { this.access = set })
+      .then(set => {
+        this.access = set 
+      })
     loadConcepts("/registries?format=jskos")
-      .then(set => { this.registries = set })
+      .then(set => {
+        this.registries = set 
+      })
   },
   methods: {
     itemError() {
@@ -387,7 +414,9 @@ export default {
     },
     async saveItem() {
       this.error = this.itemError()
-      if (this.error) return
+      if (this.error) {
+        return
+      }
 
       const item = { ...this.item }
       const method = item.uri ? "PUT" : "POST"
@@ -399,7 +428,9 @@ export default {
       }
       const body = JSON.stringify(this.cleanupItem(item), null, 2)
       const headers = { "Content-Type": "application/json" }
-      if (this.auth) headers.Authorization = `Bearer ${this.auth.token}`
+      if (this.auth) {
+        headers.Authorization = `Bearer ${this.auth.token}`
+      }
 
       const onError = (error, res) => {
         var message = error.message || res.StatusText
@@ -422,7 +453,9 @@ export default {
     },
     cleanupItem(item) {
       const type = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
-      if (item.type[0] !== type) item.type.unshift(type)
+      if (item.type[0] !== type) {
+        item.type.unshift(type)
+      }
       item = filtered(item)
       if (item.API) {
         item.API = item.API.filter(endpoint => endpoint.url)
@@ -450,7 +483,9 @@ function filtered(value) {
           : Object.keys(value).filter(key => key[0] !== "_").sort()
       const obj = keys.reduce((obj, key) => {
         const fieldValue = filtered(value[key])
-        if (fieldValue) obj[key] = fieldValue
+        if (fieldValue) {
+          obj[key] = fieldValue
+        }
         return obj
       }, {})
       return Object.keys(obj).length ? obj : null

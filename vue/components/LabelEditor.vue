@@ -65,7 +65,9 @@ export default {
 
         labels.forEach(({ label, language }) => {
           label = label.trim()
-          if (label === "") return
+          if (label === "") {
+            return
+          }
           const code = language || "und"
           if (code in altLabel) {
             altLabel[code].push(label)

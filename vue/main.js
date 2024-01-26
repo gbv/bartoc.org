@@ -27,7 +27,9 @@ const app = createApp({
     // no need to use a Vue component, plain old JavaScript
     // See https://github.com/hustcc/timeago.js/issues/230
     const nodes = document.querySelectorAll(".timeago")
-    if (nodes.length) render(nodes)
+    if (nodes.length) {
+      render(nodes)
+    }
   },
   methods: {
     updateUser(user) {
@@ -42,7 +44,9 @@ const app = createApp({
       if (this.auth) {
         const url = "/api/checkAuth?type=schemes&action=create"
         const headers = { Authorization: `Bearer ${this.auth.token}` }
-        fetch(url, { headers }).then(res => { this.userCanAdd = res.ok })
+        fetch(url, { headers }).then(res => {
+          this.userCanAdd = res.ok 
+        })
       } else {
         this.userCanAdd = false
       }

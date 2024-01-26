@@ -221,7 +221,9 @@ export default {
       const order = this.sorting && this.sorting.order
       const partOf = this.partOf
       const query = { type, languages: languages.join(","), license, sort, order, partOf }
-      if (this.subjects.length) query.subject = this.subjects.map(({ uri }) => uri).join("|")
+      if (this.subjects.length) {
+        query.subject = this.subjects.map(({ uri }) => uri).join("|")
+      }
       this.submit(query)
     },
   },
