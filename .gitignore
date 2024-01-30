@@ -29,3 +29,6 @@ data/reports/
 
 # pm2 ecosystem file
 ecosystem.config.json
+
+docker/data
+!docker/ecosystem.config.json

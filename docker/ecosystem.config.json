@@ -1,0 +1,18 @@
+{
+  "apps": [
+    {
+      "name": "bartoc.org",
+      "script": "./bartoc.org/server.js",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "name": "jskos-server",
+      "script": "./jskos-server/server.js",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}

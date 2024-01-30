@@ -1,0 +1,10 @@
+version: "3"
+services:
+
+  bartoc.org:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ./data/config:/config
+    restart: unless-stopped
