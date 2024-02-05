@@ -1,10 +1,24 @@
 version: "3"
-services:
 
-  bartoc.org:
+services:
+  bartoc:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    depends_on:
+      - mongo
     volumes:
       - ./data/config:/config
+    environment:
+      # BASE_URL is required and will be used for both BARTOC and JSKOS Server
+      - BASE_URL=http://localhost:3883/
+    ports:
+      - 3883:3883
+    restart: unless-stopped
+
+  # MongoDB required for JSKOS Server; you can use an external MongoDB as well (needs to be configured in data/config/jskos-server.json)
+  mongo:
+    image: mongo:7
+    volumes:
+      - ./data/db:/data/db
     restart: unless-stopped

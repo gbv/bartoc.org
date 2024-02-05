@@ -5,23 +5,25 @@ WORKDIR /usr/src/app
 RUN node -v
 RUN npm -v
 
-## We need bash and git.
-RUN apk add --no-cache bash
-RUN apk add --no-cache git
+## We need bash, git, jq
+RUN apk add bash
+RUN apk add git
+RUN apk add jq
 
-# Copy and install dependencies
-RUN mkdir ./bartoc.org
-COPY package-lock.json ./bartoc.org
-RUN cd bartoc.org && npm ci
+## Copy source and install dependencies
+RUN mkdir ./bartoc
+COPY . ./bartoc
+RUN cd bartoc && npm ci
 
-# Bundle app source
-COPY . ./bartoc.org
-COPY docker/entrypoint.sh .
 COPY docker/ecosystem.config.json .
 
-## Get jskos-server source code
+## Make Docker-related scripts available in root folder
+COPY docker/*.sh .
+
+## Get latest JSKOS Server and install dependencies
 RUN git clone https://github.com/gbv/jskos-server.git && cd jskos-server && npm ci
 
+## Folder for configuration files (to be mapped as volume)
 RUN mkdir /config
 
 # Use pm2 to run app
