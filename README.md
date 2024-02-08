@@ -15,7 +15,7 @@ This repository contains the [new web interface of BARTOC.org](https://bartoc.or
 
 ## Requirements
 
-Requires at least Node.js 10 and an instance of [jskos-server](https://github.com/gbv/jskos-server) to connect to. Additional dependencies are listed in `package.json`.
+Requires at least Node.js 18 and an instance of [jskos-server](https://github.com/gbv/jskos-server) to connect to. Additional dependencies are listed in `package.json`.
 
 ## Install from sources
 
@@ -24,6 +24,10 @@ git clone https://github.com/gbv/bartoc.org.git
 cd bartoc.org
 npm ci
 ~~~
+
+## Docker
+
+You can also set up BARTOC via Docker. Please refer to our [Docker docs](./docker/README.md).
 
 ## Setup
 A setup script is provided in `./bin/setup.sh`. It must be called with the path to your jskos-server installation, e.g.:
