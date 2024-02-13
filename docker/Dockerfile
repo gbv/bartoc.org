@@ -9,6 +9,8 @@ RUN npm -v
 RUN apk add bash
 RUN apk add git
 RUN apk add jq
+# Perl needed for some scripts
+RUN apk add perl
 
 ## Copy source and install dependencies
 RUN mkdir ./bartoc

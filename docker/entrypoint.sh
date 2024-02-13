@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ -f /etc/cron.d/cron ]; then
+  echo "Found cron file, initializing crontab"
+  crontab /etc/cron.d/cron
+  crond start
+fi
+
 if [[ -z "$BASE_URL" ]]; then
   echo "Error: BASE_URL environment variable is required."
   exit 1
