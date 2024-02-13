@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ -f /etc/cron.d/cron ]; then
+if [ -f /config/cron ]; then
   echo "Found cron file, initializing crontab"
-  crontab /etc/cron.d/cron
+  crontab /config/cron
   crond start
 fi
 

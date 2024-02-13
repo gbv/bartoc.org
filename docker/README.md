@@ -25,8 +25,6 @@ services:
       - mongo
     volumes:
       - ./data/config:/config
-      # To run dumps on a schedule, you can define cronjobs with this file
-      # - ./data/cron:/etc/cron.d/cron
       - ./data/dumps:/usr/src/app/bartoc/data/dumps
       - ./data/reports:/usr/src/app/bartoc/data/reports
     environment:
@@ -104,7 +102,7 @@ For more info about how to use these commands, please refer to [this section](ht
 **Note:** If local files are imported, these have to be mounted into the container first, and the path inside the container has to be given. For example, you could mount the host folder `./data/imports` to `/imports` inside the container and then use the path `/imports/myfile.ndjson` with the import command.
 
 ### Scheduled Dumps
-Cron is configured inside the container to allow scheduled dumps. You can provide a cronfile by mounting it into `/etc/cron.d/cron`. Example cronfile:
+Cron is configured inside the container to allow scheduled dumps. You can provide a cronfile by mounting it into `/config/cron`. Example cronfile:
 
 ```cron
 00 04 * * * cd /usr/src/app/bartoc && npm run dump update > /proc/1/fd/1 2>/proc/1/fd/2

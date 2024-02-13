@@ -9,8 +9,6 @@ services:
       - mongo
     volumes:
       - ./data/config:/config
-      # To run dumps on a schedule, you can define cronjobs with this file
-      # - ./data/cron:/etc/cron.d/cron
       - ./data/dumps:/usr/src/app/bartoc/data/dumps
       - ./data/reports:/usr/src/app/bartoc/data/reports
     environment:
