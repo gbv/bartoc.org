@@ -139,6 +139,7 @@ Data & Knowledge Engineer, Semantic Web Company
 </div>
 
 Additional contributors include
+Anja Gerber [](https://orcid.org/0000-0003-2576-1511),
 Anne Schuchardt [](https://orcid.org/0000-0002-5205-6669)
 Christian Rüter [](https://orcid.org/0000-0003-2653-3799),
 David-Benjamin Rohrer [](https://orcid.org/0000-0001-9377-6294),
