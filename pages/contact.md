@@ -46,7 +46,7 @@ English to Greek medical translator
 <div class="col">
 <h2>India</h2>
 
-**[Dr. Biswanath Dutta](https://sites.google.com/site/dutta2005/home)** [](https://orcid.org/0000-0003-3059-8202) \
+**[Dr. Biswanath Dutta](https://sites.google.com/view/bdutta)** [](https://orcid.org/0000-0003-3059-8202) \
 Associate Professor, Indian Statistical Institute, Bangalore
 
 </div>
