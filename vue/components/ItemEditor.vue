@@ -9,8 +9,8 @@
   </form-row>
   <form-row :label="'Title'">
     <label-editor
-      v-model:prefLabel="item.prefLabel"
-      v-model:altLabel="item.altLabel" />
+      v-model:pref-label="item.prefLabel"
+      v-model:alt-label="item.altLabel" />
     The first of each language is used as preferred title, more as
     aliases, translations... Please provide at least an English title.
   </form-row>
@@ -271,13 +271,15 @@ const PublisherEditor = {
   emits: ["update:modelValue"],
   template: `
   <table class="table table-sm table-borderless">
-    <tr>
-      <td><input type="text" class="form-control" v-model="name"/></td>
-      <td>Name</td>
-    </tr><tr>
-      <td><input type="text" class="form-control" v-model="viaf"/></td>
-      <td><a href="http://viaf.org/">VIAF</a> URI</td>
-    </tr>
+    <tbody>
+      <tr>
+        <td><input type="text" class="form-control" v-model="name"/></td>
+        <td>Name</td>
+      </tr><tr>
+        <td><input type="text" class="form-control" v-model="viaf"/></td>
+        <td><a href="http://viaf.org/">VIAF</a> URI</td>
+      </tr>
+    </tbody>
   </table>`,
   props: {
     modelValue: Array,
@@ -330,19 +332,18 @@ export default {
       .forEach(key => {
         if (!item[key]) {
           item[key] = {}
-        } 
+        }
       });
     ["notation", "identifier", "languages", "license", "type", "subject", "subjectOf", "partOf", "FORMAT", "API", "ACCESS", "publisher"]
       .forEach(key => {
         if (!item[key]) {
           item[key] = []
-        } 
+        }
       })
 
     const examples = (item.notationExamples || []).join(", ")
 
-    var abstractEn = ""
-    var abstractUnd = ""
+    let abstractEn = "", abstractUnd = ""
 
     // make non-English abstract to language code "und"
     for (const code in item.definition) {
@@ -368,15 +369,15 @@ export default {
   },
   computed: {
     type() {
-      return this.item.type.map(uri => ({ uri })) 
+      return this.item.type.map(uri => ({ uri }))
     },
   },
   watch: {
     abstractEn: function (s) {
-      this.item.definition.en = [s] 
+      this.item.definition.en = [s]
     },
     abstractUnd: function (s) {
-      this.item.definition.und = [s] 
+      this.item.definition.und = [s]
     },
     examples: function (s) {
       this.item.notationExamples = s.split(",").map(s => s.trim()).filter(s => s !== "")
@@ -386,23 +387,23 @@ export default {
   created() {
     loadConcepts("https://api.dante.gbv.de/voc/top", "http://uri.gbv.de/terminology/license/")
       .then(set => {
-        this.licenses = set 
+        this.licenses = set
       })
     loadConcepts("/api/voc/top", "http://w3id.org/nkos/nkostype")
       .then(set => {
-        this.kostypes = set 
+        this.kostypes = set
       })
     loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000")
       .then(set => {
-        this.formats = set 
+        this.formats = set
       })
     loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001")
       .then(set => {
-        this.access = set 
+        this.access = set
       })
     loadConcepts("/registries?format=jskos")
       .then(set => {
-        this.registries = set 
+        this.registries = set
       })
   },
   methods: {
@@ -433,11 +434,11 @@ export default {
       }
 
       const onError = (error, res) => {
-        var message = error.message || res.StatusText
-        var issue = "This JSKOS record could not be saved:\n\n~~~json\n" + body + "\n~~~\n" +
+        const message = error.message || res.StatusText
+        const issue = "This JSKOS record could not be saved:\n\n~~~json\n" + body + "\n~~~\n" +
           "The request included " + (this.auth ? "a token for authentification." : "no token.")
-        var url = githubIssueUrl(`Error ${res.status} when saving`, issue)
-        var html = `If you think this is a bug, please
+        const url = githubIssueUrl(`Error ${res.status} when saving`, issue)
+        const html = `If you think this is a bug, please
                   <a href='${url}'>open a GitHub issue</a> including the current JSKOS record!`
         this.error = { message, status: res.status, html }
       }
@@ -447,7 +448,7 @@ export default {
           window.location.href = "/vocabularies?uri=" + encodeURIComponent(item.uri)
         } else {
           res.json().then(err => onError(err, res))
-            .catch(() => onError({}, res)) // eslint-disable-line handle-callback-err
+            .catch(() => onError({}, res))
         }
       })
     },

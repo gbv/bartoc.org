@@ -1,62 +1,64 @@
 <template>
   <table class="table table-sm table-borderless">
-    <tr
-      v-for="(subject,i) in set"
-      :key="i">
-      <td>
-        <item-name
-          v-if="subject.uri"
-          :item="findScheme(subject.inScheme[0].uri)"
-          :notation="true"
-          :pref-label="false" />
-        <select
-          v-else
-          v-model="subject.inScheme[0].uri"
-          class="form-control">
-          <option
-            v-for="s in indexingSchemes"
-            :key="s.uri"
-            :value="s.uri">
-            <item-name
-              :item="s"
-              :notation="true"
-              :pref-label="false" />
-          </option>
-        </select>
-      </td>
-      <td class="item-input">
-        <!-- use :key to force re-init of either subject uri or scheme changed -->
-        <item-input
-          :key="subject.uri + subject.inScheme[0].uri"
-          v-model="set[i]"
-          :scheme="findScheme(subject.inScheme[0].uri)" />
-      </td><td>
-        <div
-          v-if="set.length > 1"
-          class="btn-group">
-          <button
-            :disabled="!i"
-            type="button"
-            class="btn btn-outline-secondary"
-            @click="up(i)">
-            &#9650;
-          </button>
-          <button
-            :disabled="i > set.length-2"
-            type="button"
-            class="btn btn-outline-secondary"
-            @click="down(i)">
-            &#9660;
-          </button>
-          <button
-            type="button"
-            class="btn btn-outline-secondary"
-            @click="remove(i)">
-            &times;
-          </button>
-        </div>
-      </td>
-    </tr>
+    <tbody>
+      <tr
+        v-for="(subject,i) in set"
+        :key="i">
+        <td>
+          <item-name
+            v-if="subject.uri"
+            :item="findScheme(subject.inScheme[0].uri)"
+            :notation="true"
+            :pref-label="false" />
+          <select
+            v-else
+            v-model="subject.inScheme[0].uri"
+            class="form-control">
+            <option
+              v-for="s in indexingSchemes"
+              :key="s.uri"
+              :value="s.uri">
+              <item-name
+                :item="s"
+                :notation="true"
+                :pref-label="false" />
+            </option>
+          </select>
+        </td>
+        <td class="item-input">
+          <!-- use :key to force re-init of either subject uri or scheme changed -->
+          <item-input
+            :key="subject.uri + subject.inScheme[0].uri"
+            v-model="set[i]"
+            :scheme="findScheme(subject.inScheme[0].uri)" />
+        </td><td>
+          <div
+            v-if="set.length > 1"
+            class="btn-group">
+            <button
+              :disabled="!i"
+              type="button"
+              class="btn btn-outline-secondary"
+              @click="up(i)">
+              &#9650;
+            </button>
+            <button
+              :disabled="i > set.length-2"
+              type="button"
+              class="btn btn-outline-secondary"
+              @click="down(i)">
+              &#9660;
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              @click="remove(i)">
+              &times;
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
   </table>
 </template>
 

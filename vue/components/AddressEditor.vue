@@ -1,54 +1,56 @@
 <template>
   <table class="table-sm">
-    <tr>
-      <td>Street address</td>
-      <td>
-        <input
-          v-model="street"
-          type="text"
-          class="form-control">
-      </td>
-    </tr><tr>
-      <td />
-      <td>
-        <input
-          v-model="ext"
-          type="text"
-          class="form-control">
-      </td>
-    </tr><tr>
-      <td>City</td>
-      <td>
-        <input
-          v-model="locality"
-          type="text"
-          class="form-control">
-      </td>
-    </tr><tr>
-      <td>Region/State</td>
-      <td>
-        <input
-          v-model="region"
-          type="text"
-          class="form-control">
-      </td>
-    </tr><tr>
-      <td>Postal code</td>
-      <td>
-        <input
-          v-model="code"
-          type="text"
-          class="form-control">
-      </td>
-    </tr><tr>
-      <td>Country</td>
-      <td>
-        <input
-          v-model="country"
-          type="text"
-          class="form-control">
-      </td>
-    </tr>
+    <tbody>
+      <tr>
+        <td>Street address</td>
+        <td>
+          <input
+            v-model="street"
+            type="text"
+            class="form-control">
+        </td>
+      </tr><tr>
+        <td />
+        <td>
+          <input
+            v-model="ext"
+            type="text"
+            class="form-control">
+        </td>
+      </tr><tr>
+        <td>City</td>
+        <td>
+          <input
+            v-model="locality"
+            type="text"
+            class="form-control">
+        </td>
+      </tr><tr>
+        <td>Region/State</td>
+        <td>
+          <input
+            v-model="region"
+            type="text"
+            class="form-control">
+        </td>
+      </tr><tr>
+        <td>Postal code</td>
+        <td>
+          <input
+            v-model="code"
+            type="text"
+            class="form-control">
+        </td>
+      </tr><tr>
+        <td>Country</td>
+        <td>
+          <input
+            v-model="country"
+            type="text"
+            class="form-control">
+        </td>
+      </tr>
+    </tbody>
   </table>
 </template>
 

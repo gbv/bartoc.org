@@ -97,10 +97,9 @@ function dumpDiff (fileA, fileB, showDelta) {
 
   const removedDelta = item => ({ uri: [item.uri, 0, 0] })
 
-  var before = next(a)
-  var after = next(b)
+  let before = next(a), after = next(b)
 
-  while (before && after) { // eslint-disable-line
+  while (before && after) {  
 
     while (after && after.uri < before.uri) {
       showDelta(addedDelta(after))
@@ -125,7 +124,7 @@ function dumpDiff (fileA, fileB, showDelta) {
     }
   }
 
-  var item
+  let item
   while (before = next(a)) { // eslint-disable-line
     showDelta(removedDelta(before))
   }

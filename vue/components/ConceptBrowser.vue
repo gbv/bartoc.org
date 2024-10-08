@@ -129,7 +129,7 @@ export default {
         accessScheme.VOCID = registry._jskos.schemes && registry._jskos.schemes.length ? registry._jskos.schemes[0].VOCID : undefined // TODO: this is a hack
         this.accessScheme = accessScheme
 
-        var results = []
+        let results = []
         try {
           results = await this.registry.getTop({ scheme: this.accessScheme })
         } catch (e) {

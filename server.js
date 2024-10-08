@@ -78,8 +78,7 @@ function render (req, res, view, locals) {
 // edit form
 app.get("/edit", async (req, res, next) => {
   const { uri } = req.query
-  var item
-  var title = "Add vocabulary"
+  let item, title = "Add vocabulary"
 
   if (uri) {
     item = await backend.getSchemes({ params: { uri } }).then(result => result[0])
@@ -103,7 +102,7 @@ app.get("/vocabularies", vocabulariesSearch)
 async function vocabulariesSearch (req, res, next) {
   const { query } = req
 
-  var search = query.search
+  let search = query.search
     ? backend.vocSearch({ properties: "*", search: query.search })
     : backend.getSchemes({ properties: "*", params: query })
 
@@ -125,7 +124,7 @@ async function vocabulariesSearch (req, res, next) {
   }
 
   search.catch(e => {
-    next(e) 
+    next(e)
   })
 }
 
@@ -161,7 +160,7 @@ app.get("/stats", async (req, res, next) => {
       })
     })
     .catch(e => {
-      next(e) 
+      next(e)
     })
 })
 
@@ -189,8 +188,8 @@ app.get("/registries", (req, res) => {
 // BARTOC ID => registry or vocabulary (if found)
 app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   const uri = `http://bartoc.org/en/node/${req.params.id}`
-  var { path } = req
-  var item = registries[uri]
+  let { path } = req
+  const item = registries[uri]
 
   if (item) {
     path = "/registries"

@@ -1,29 +1,31 @@
 <template>
   <table class="table table-sm table-borderless">
-    <tr
-      v-for="(label,i) in labels"
-      :key="i"
-      class="d-flex">
-      <td class="col-8">
-        <input
-          v-model="label.label"
-          type="text"
-          class="form-control">
-      </td><td class="col-3">
-        <language-select
-          v-model="label.language"
-          class="form-control" />
-      </td><td class="col-1">
-        <button
-          v-if="labels.length > 1"
-          type="button"
-          title="remove"
-          class="btn btn-outline-secondary button-remove"
-          @click="remove(i)">
-          &times;
-        </button>
-      </td>
-    </tr>
+    <tbody>
+      <tr
+        v-for="(label,i) in labels"
+        :key="i"
+        class="d-flex">
+        <td class="col-8">
+          <input
+            v-model="label.label"
+            type="text"
+            class="form-control">
+        </td><td class="col-3">
+          <language-select
+            v-model="label.language"
+            class="form-control" />
+        </td><td class="col-1">
+          <button
+            v-if="labels.length > 1"
+            type="button"
+            title="remove"
+            class="btn btn-outline-secondary button-remove"
+            @click="remove(i)">
+            &times;
+          </button>
+        </td>
+      </tr>
+    </tbody>
   </table>
 </template>
 
