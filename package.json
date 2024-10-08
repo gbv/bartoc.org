@@ -7,8 +7,8 @@
   "scripts": {
     "start": "NODE_ENV=production node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint '**/*.js'; ejslint views/*.ejs; vue-cli-service lint --no-fix vue/**/*.vue",
-    "fix": "eslint --fix '**/*.js'; vue-cli-service lint vue/**/*.vue",
+    "lint": "eslint; ejslint views/*.ejs",
+    "fix": "eslint --fix",
     "lint-staged": "lint-staged",
     "data": "npm run data:nkostype; make -C data",
     "validate": "jskos-validate",
@@ -25,7 +25,7 @@
   },
   "lint-staged": {
     "*.js": "eslint --fix",
-    "*.vue": "vue-cli-service lint"
+    "*.vue": "eslint --fix"
   },
   "pre-commit": "lint-staged",
   "author": "Jakob Voß",
@@ -64,19 +64,12 @@
     "fsevents": "2.3.3"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.23.10",
-    "@vue/cli-plugin-babel": "^5.0.8",
-    "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.4.16",
     "concurrently": "^8.2.2",
     "ejs-lint": "^2.0.0",
-    "eslint": "^8.56.0",
-    "eslint-config-gbv": "^1.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-vue": "^9.21.1",
+    "eslint": "~9.12",
+    "eslint-config-gbv": "~2.2",
     "lint-staged": "^15.2.2",
     "nodemon": "^3.0.3",
     "portfinder": "^1.0.32",
