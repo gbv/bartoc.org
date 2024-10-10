@@ -419,20 +419,7 @@ export default {
         return
       }
 
-      const item = { ...this.item }
-      const method = item.uri ? "PUT" : "POST"
-      if (!item.uri) {
-        // Try to find an URI not taken yet.
-        // TODO: better use auto-increment at jskos-server?
-        const total = await fetch("/api/voc?limit=1").then(res => res.headers.get("x-total-count"))
-        item.uri = "http://bartoc.org/en/node/" + (17002 + 1 * total)
-      }
-      const body = JSON.stringify(this.cleanupItem(item), null, 2)
-      const headers = { "Content-Type": "application/json" }
-      if (this.auth) {
-        headers.Authorization = `Bearer ${this.auth.token}`
-      }
-
+      let body
       const onError = (error, res) => {
         const message = error.message || res.StatusText
         const issue = "This JSKOS record could not be saved:\n\n~~~json\n" + body + "\n~~~\n" +
@@ -441,6 +428,26 @@ export default {
         const html = `If you think this is a bug, please
                   <a href='${url}'>open a GitHub issue</a> including the current JSKOS record!`
         this.error = { message, status: res.status, html }
+      }
+
+      const item = { ...this.item }
+      const method = item.uri ? "PUT" : "POST"
+      if (!item.uri) {
+        const base = "http://bartoc.org/en/node/"
+        // Try to find an URI not taken yet.
+        try {
+          const latestUri = (await fetch("/api/voc?sort=counter&order=desc&limit=1").then(res => res.json()))[0].uri
+          const latestId = parseInt(latestUri.replace(base, ""))
+          item.uri = base + (latestId + 1)
+        } catch (error) {
+          onError(new Error("Could not determine URI for new record."), { status: "determining new URI" })
+          return
+        }
+      }
+      body = JSON.stringify(this.cleanupItem(item), null, 2)
+      const headers = { "Content-Type": "application/json" }
+      if (this.auth) {
+        headers.Authorization = `Bearer ${this.auth.token}`
       }
 
       fetch("/api/voc", { method, body, headers }).then(res => {
