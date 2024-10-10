@@ -1,24 +1,19 @@
-# This workflow will release a package at npmjs and at GitHub releases
-
-name: Release
+name: GitHub Release
 
 on:
   push:
     tags:
-      - v*
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
-  github:
+  github-release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: BARTOC.org ${{ github.ref }}
-        body: TODO
-        draft: true
-        prerelease: false
+      - name: Create GitHub release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: BARTOC.org ${{ github.ref_name }}
+          body: TODO
+          draft: true
+          prerelease: false
