@@ -14,8 +14,8 @@
     "validate": "jskos-validate",
     "jskos-convert": "cd $INIT_CWD; jskos-convert",
     "dump": "node ./bin/dump.js update && ./bin/reports.sh && ./bin/stats.sh",
-    "vue:serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --no-clean --report-json",
+    "vue:serve": "vite",
+    "build": "vite build",
     "express:serve": "NODE_ENV=development nodemon server.js",
     "dev": "concurrently \"npm:express:serve\" \"npm:vue:serve\"",
     "release": "git checkout dev && git pull && npm version $SEMVER && git push && git checkout main && git merge dev && git push --follow-tags && git checkout dev",
@@ -41,9 +41,11 @@
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
+    "@vitejs/plugin-vue": "^5.1.4",
     "@vueform/multiselect": "^2.6.10",
     "axios": "^1.7.7",
     "cocoda-sdk": "^3.4.12",
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.21.0",
     "express-http-proxy": "^2.1.1",
@@ -58,14 +60,13 @@
     "n-readlines": "^1.0.1",
     "rdflib": "^2.2.35",
     "timeago.js": "^4.0.2",
+    "vite": "^5.4.8",
     "vue": "^3.5.11"
   },
   "optionalDependencies": {
     "fsevents": "2.3.3"
   },
   "devDependencies": {
-    "@vue/cli-service": "^5.0.8",
-    "@vue/compiler-sfc": "^3.5.11",
     "concurrently": "^9.0.1",
     "ejs-lint": "^2.0.0",
     "eslint": "~9.12",

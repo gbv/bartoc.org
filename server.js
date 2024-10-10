@@ -13,6 +13,7 @@ const __dirname = new URL(".", import.meta.url).pathname
 
 const readNDJSON = file => fs.readFileSync(`${__dirname}${file}`).toString()
   .split(/\n|\n\r/).filter(Boolean).map(line => JSON.parse(line))
+const readJSON = file => JSON.parse(fs.readFileSync(`${__dirname}${file}`).toString())
 
 // build our vue project on first run if report.json can't be found
 // TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
@@ -23,6 +24,13 @@ if (config.env !== "development") {
       console.warn("Vue build failed!", error)
     } else {
       console.log("Vue project built successfully.")
+      // Add manifest to config
+      const file = "dist/.vite/manifest.json"
+      try {
+        config.vue.manifest = readJSON(file)
+      } catch(error) {
+        console.warn(`Could not read Vite manifest in ${file}, there might be issues with the front end build.`)
+      }
     }
   })
 }
