@@ -55,25 +55,25 @@ export default {
   created () {
     const { connect, disconnect, login, logout, update, token, about, error } = LoginClient.events
     this.client.addEventListener(about, ({ publicKey }) => {
-      this.auth.publicKey = publicKey; this._updateAuth() 
+      this.auth.publicKey = publicKey; this._updateAuth()
     })
     this.client.addEventListener(connect, () => {
-      this.connected = true 
+      this.connected = true
     })
     this.client.addEventListener(disconnect, () => {
-      this.connected = false 
+      this.connected = false
     })
     this.client.addEventListener(login, ({ user }) => {
-      this._setUser(user) 
+      this._setUser(user)
     })
     this.client.addEventListener(update, ({ user }) => {
-      this._updadeUser(user) 
+      this._updadeUser(user)
     })
     this.client.addEventListener(logout, () => {
-      this._setUser(null) 
+      this._setUser(null)
     })
     this.client.addEventListener(token, ({ token }) => {
-      this.auth.token = token; this._updateAuth() 
+      this.auth.token = token; this._updateAuth()
     })
     this.client.addEventListener(error, (e) => {
       if (e.error instanceof LoginClient.errors.ThirdPartyCookiesBlockedError) {

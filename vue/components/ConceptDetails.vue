@@ -118,7 +118,7 @@ export default {
     display: {
       type: Object,
       default() {
-        return {} 
+        return {}
       },
     },
   },
