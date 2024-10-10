@@ -24,7 +24,7 @@
 
 <script>
 import ItemName from "./ItemName.vue"
-import ItemSelect from "./ItemSelect"
+import ItemSelect from "./ItemSelect.vue"
 import { cdkLoadConcepts } from "../utils.js"
 
 /**

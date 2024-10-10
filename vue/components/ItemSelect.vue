@@ -30,7 +30,7 @@
 <script>
 import Multiselect from "@vueform/multiselect"
 import jskos from "jskos-tools"
-import { registryForScheme, sortConcepts } from "../utils"
+import { registryForScheme, sortConcepts } from "../utils.js"
 
 // Select one or a list of item URIs
 export default {

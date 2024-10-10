@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import ItemSelect from "./ItemSelect"
+import ItemSelect from "./ItemSelect.vue"
 import jskos from "jskos-tools"
 import { apiTypesScheme } from "../utils.js"
 

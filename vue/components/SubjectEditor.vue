@@ -64,8 +64,8 @@
 
 <script>
 import SetEditorMixin from "./SetEditorMixin.js"
-import ItemName from "./ItemName"
-import ItemInput from "./ItemInput"
+import ItemName from "./ItemName.vue"
+import ItemInput from "./ItemInput.vue"
 import { indexingSchemes } from "../utils.js"
 import jskos from "jskos-tools"
 

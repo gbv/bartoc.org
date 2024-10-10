@@ -9,9 +9,8 @@
 </template>
 
 <script>
-import ItemName from "./ItemName"
-import { apiTypesScheme } from "../utils.js"
-import { registryForScheme } from "../utils"
+import ItemName from "./ItemName.vue"
+import { apiTypesScheme, registryForScheme } from "../utils.js"
 
 const registry = registryForScheme(apiTypesScheme)
 

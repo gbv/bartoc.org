@@ -61,11 +61,11 @@
 </template>
 
 <script>
-import ConceptDetails from "./ConceptDetails"
-import Icon from "./Icon"
-import ItemName from "./ItemName"
-import ItemSelect from "./ItemSelect"
-import ServiceLink from "./ServiceLink"
+import ConceptDetails from "./ConceptDetails.vue"
+import Icon from "./Icon.vue"
+import ItemName from "./ItemName.vue"
+import ItemSelect from "./ItemSelect.vue"
+import ServiceLink from "./ServiceLink.vue"
 import { registryForScheme, sortConcepts } from "../utils.js"
 
 export default {

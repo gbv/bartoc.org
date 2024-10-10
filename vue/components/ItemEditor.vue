@@ -264,7 +264,7 @@ import LanguageSelect from "./LanguageSelect.vue"
 import LabelEditor from "./LabelEditor.vue"
 import SubjectEditor from "./SubjectEditor.vue"
 import ListEditor from "./ListEditor.vue"
-import AddressEditor from "./AddressEditor"
+import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
 
 const PublisherEditor = {

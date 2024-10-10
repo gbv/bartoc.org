@@ -93,10 +93,10 @@
 </template>
 
 <script>
-import Icon from "./Icon"
-import ItemLabels from "./ItemLabels"
-import ItemName from "./ItemName"
-import ItemNotes from "./ItemNotes"
+import Icon from "./Icon.vue"
+import ItemLabels from "./ItemLabels.vue"
+import ItemName from "./ItemName.vue"
+import ItemNotes from "./ItemNotes.vue"
 import { sortConcepts } from "../utils.js"
 import k10plusikt from "../../data/k10plus-ikt.json"
 
