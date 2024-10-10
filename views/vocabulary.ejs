@@ -114,10 +114,16 @@
 
 <script type="application/javascript">
   // Logic to change Bootstrap tabs
-  const linkList = document.getElementById("vocabulary-tabs").querySelectorAll(".nav-link")
-  const paneList = document.getElementById("vocabulary-tabs-content").querySelectorAll(".tab-pane")
+  const lists = {
+    get links() {
+      return document.getElementById("vocabulary-tabs").querySelectorAll(".nav-link")
+    },
+    get panes() {
+      return document.getElementById("vocabulary-tabs-content").querySelectorAll(".tab-pane")
+    },
+  }
   function changeTab(id) {
-    linkList.forEach((element, key) => {
+    lists.links.forEach((element, key) => {
       if (key === id) {
         element.classList.add("active")
         element.setAttribute("aria-selected", "true")
@@ -126,7 +132,7 @@
         element.setAttribute("aria-selected", "false")
       }
     })
-    paneList.forEach((element, key) => {
+    lists.panes.forEach((element, key) => {
       if (key === id) {
         element.classList.add("show")
         element.classList.add("active")
@@ -137,14 +143,14 @@
     })
   }
   // Find empty panes and disable the associated link
-  paneList.forEach((element, key) => {
+  lists.panes.forEach((element, key) => {
     if (element.textContent.length === 0) {
-      linkList[key].classList.add("d-none")
+      lists.links[key].classList.add("d-none")
     }
   })
   // Open specific tab on page load if necessary
   if (window.location.hash) {
-    const index = Array.from(linkList).findIndex(el => el.getAttribute("href") === window.location.hash)
+    const index = Array.from(lists.links).findIndex(el => el.getAttribute("href") === window.location.hash)
     if (index != -1) {
       changeTab(index)
     }
