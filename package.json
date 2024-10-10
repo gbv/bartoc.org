@@ -58,6 +58,7 @@
     "lodash": "^4.17.21",
     "marked": "^14.1.2",
     "n-readlines": "^1.0.1",
+    "portfinder": "^1.0.32",
     "rdflib": "^2.2.35",
     "timeago.js": "^4.0.2",
     "vite": "^5.4.8",
@@ -73,7 +74,6 @@
     "eslint-config-gbv": "~2.2",
     "lint-staged": "^15.2.10",
     "nodemon": "^3.1.7",
-    "portfinder": "^1.0.32",
     "pre-commit": "^1.2.2"
   },
   "nodemonConfig": {
