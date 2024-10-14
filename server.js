@@ -246,8 +246,21 @@ async function sendItem (req, res, item, vars = {}) {
   return true
 }
 
-// Error handling
-app.use((req, res) => {
+// Some vocabularies use the BARTOC namespace; we should cover these with a redirect
+const schemesWithBartocNamespacePromise = backend.getSchemes({}).then(schemes => schemes.filter(s => s.namespace?.startsWith("http://bartoc.org")))
+
+// BARTOC namespace redirect + error handling
+app.use(async (req, res) => {
+
+  // Try to find whether the URL belongs to one of the vocabularies that use the BARTOC namespace
+  const schemesWithBartocNamespace = await schemesWithBartocNamespacePromise
+  const matchingScheme = schemesWithBartocNamespace.find(scheme => req.url.startsWith(scheme.namespace.replace("http://bartoc.org", "")))
+  if (matchingScheme) {
+    // If found, redirect to the "Content" tab
+    return res.redirect(`${matchingScheme.uri.replace("http://bartoc.org", "")}?uri=${encodeURIComponent("http://bartoc.org" + req.url)}#content`)
+  }
+
+  // Handle 404
   const title = "Not found"
 
   res.status(404)
