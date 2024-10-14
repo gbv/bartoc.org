@@ -4,7 +4,17 @@ if (list && list.length) {
   let view = locals.view || utils.escapeXML
   let link = s => s
   if (locals.link) {
-    link = (s) => (s.match(/^https?:\/\//) ? `<a href="${s}">${s}</a>` : s)
+    link = (s) => {
+      if (!s.match(/^https?:\/\//)) {
+        return s
+      }
+      let html = `<a href="${s}"`
+      if (!s.startsWith(config.baseUrl)) {
+        html += " target=\"blank\""
+      }
+      html += `>${s}</a>`
+      return html
+    }
   }
   let items = style === "inline"
     ? list.map(view).map(link).map(item => `<li class="list-inline-item">${item}</li>`)

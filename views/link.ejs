@@ -1,1 +1,1 @@
-<% if (url) { %><a href="<%= url %>"><%= locals.label ? label : url %></a><% } %>
+<% if (url) { %><a href="<%= url %>"<% if (!url.startsWith(config.baseUrl)) { %> target="blank"<% } %>><%= locals.label ? label : url %></a><% } %>
