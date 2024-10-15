@@ -29,6 +29,6 @@ RUN git clone https://github.com/gbv/jskos-server.git && cd jskos-server && npm 
 RUN mkdir /config
 
 # Use pm2 to run app
-RUN npm i -g pm2
+RUN npm i -g pm2 wait-on
 
 CMD ["bash", "entrypoint.sh"]

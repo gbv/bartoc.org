@@ -3,7 +3,7 @@
     {
       "name": "bartoc",
       "cwd": "./bartoc",
-      "script": "./server.js",
+      "script": "wait-on http://localhost:3000/status && node ./server.js",
       "env": {
         "NODE_ENV": "production"
       }
