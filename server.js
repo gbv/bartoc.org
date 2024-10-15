@@ -114,26 +114,20 @@ async function vocabulariesSearch (req, res, next) {
     ? backend.vocSearch({ properties: "*", search: query.search })
     : backend.getSchemes({ properties: "*", params: query })
 
-  if (query.uri) {
-    search = search.then(result => {
-      if (result.length) {
-        return result[0]
-      } else {
-        next()
+  try {
+    const result = await search
+    if (query.uri) {
+      if (!result.length) {
+        return next()
       }
-    })
-      .then(enrichItem)
-      .then(item => sendItem(req, res, item))
-  } else {
-    search =
-    search.then(result => {
+      const item = await enrichItem(result[0])
+      sendItem(req, res, item)
+    } else {
       render(req, res, "vocabularies", { title: "Vocabularies", result, api: "voc" })
-    })
+    }
+  } catch (error) {
+    next(error)
   }
-
-  search.catch(e => {
-    next(e)
-  })
 }
 
 async function enrichItem (item) {
