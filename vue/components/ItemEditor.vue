@@ -101,7 +101,7 @@
   </form-row>
   <form-row :label="'Access'">
     <set-select
-      :model-value="item.ACCESS"
+      v-model="item.ACCESS"
       :options="access" />
     Do you have to register to view the KOS, is it 'hidden' in a licensed database or is it free online?
   </form-row>
