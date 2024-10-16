@@ -123,6 +123,10 @@
     },
   }
   function changeTab(id) {
+    // Deselect concept via Vue component (workaround)
+    if (id !== 2 && window.selectConcept) {
+      window.selectConcept(null)
+    }
     lists.links.forEach((element, key) => {
       if (key === id) {
         element.classList.add("active")

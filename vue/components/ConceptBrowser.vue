@@ -110,6 +110,11 @@ export default {
     },
   },
   async mounted() {
+    // Define global method to select concept, even from EJS template
+    window.selectConcept = (concept) => {
+      this.selected = concept
+    }
+
     const { scheme } = this
 
     // Get URI for selected concept from URL
