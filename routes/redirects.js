@@ -11,6 +11,10 @@ const readJSON = file => JSON.parse(fs.readFileSync(`${__dirname}${file}`))
 const readCsv = file => fs.readFileSync(file).toString()
   .split(/\n|\n\r/).filter(Boolean).map(row => row.split(","))
 
+// redirect to home page (#219)
+router.get("/en/node/", (req, res) => {
+  res.redirect("/")
+})
 
 // redirect permanently moved URLs from legacy BARTOC.org
 const redirects = readJSON("../data/redirects.json")
