@@ -68,7 +68,7 @@ ln -s /config/bartoc.json ./bartoc/config/config.json
 # Build indexes on every container start in background (to make sure search is always up-to-date)
 (
   cd ./jskos-server || exit
-  npm run import -- schemes --indexes
+  npm run import -- schemes --indexes &
 )
 
 pm2-runtime ecosystem.config.json
