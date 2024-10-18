@@ -8,7 +8,7 @@ while (<>) {
     $_ =~ /<option value="(\d+)">-*(\d+\s*)?([^<]+)/ or next;
     my ( $id, $label ) = ( $1, $3 );
 
-    my $url = "http://bartoc-skosmos.unibas.ch/EuroVoc/en/search?clang=en&q="
+    my $url = "https://skosmos.bartoc.org/rest/v1/15/search?clang=en&q="
       . uri_escape($label);
 
     my $res = HTTP::Tiny->new->get($url);
