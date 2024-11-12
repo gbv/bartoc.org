@@ -58,7 +58,7 @@ if (!config.baseUrl.endsWith("/")) {
 
 config.vue.assetPrefix = env === "development" ? `http://localhost:${config.vue.port}/` : "/dist/"
 try {
-  config.vue.manifest = readJSON("./dist/.vite/manifest.json")
+  config.vue.manifest = readJSON("../dist/.vite/manifest.json")
 } catch (error) {
   // Will be filled after Vue build is complete
   config.vue.manifest = {}

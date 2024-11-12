@@ -13,14 +13,16 @@
       <script type="module" src="<%= config.vue.assetPrefix %>vue/main.js"></script>
     <% } else { %>
       <!-- Main script file -->
-      <script type="module" src="<%= config.vue.assetPrefix %><%= config.vue.manifest['vue/main.js'].file %>"></script>
+      <% if (config.vue.manifest['vue/main.js']?.file) { %>
+        <script type="module" src="<%= config.vue.assetPrefix %><%= config.vue.manifest['vue/main.js'].file %>"></script>
+      <% } %>
       <!-- CSS files -->
-      <% for (let file of config.vue.manifest['vue/main.js'].css) { %>
+      <% for (let file of config.vue.manifest['vue/main.js']?.css || []) { %>
         <link rel="stylesheet" href="<%= config.vue.assetPrefix %><%= file %>">
       <% } %>
       <!-- Chunks (each with file and CSS) -->
       <!-- TODO: In theory, this should be recursive. Also we don't cover `dynamicImports`, but having neither of those, it should be fine. -->
-      <% for (let chunk of config.vue.manifest["vue/main.js"].imports || []) { %>
+      <% for (let chunk of config.vue.manifest["vue/main.js"]?.imports || []) { %>
         <script type="module" src="<%= config.vue.assetPrefix %><%= config.vue.manifest[chunk].file %>"></script>
         <% for (let file of config.vue.manifest[chunk].css) { %>
           <link rel="stylesheet" href="<%= config.vue.assetPrefix %><%= file %>">
