@@ -95,15 +95,16 @@ graph TD
     terminologies -- JSKOS API, Skosmos, ... --> client
     server -- RDF & JSKOS --> applications(applications)
     client <-- browser --> user(user)
-    subgraph app [ ]
+    subgraph app [**bartoc.org**]
         database <-- JSKOS API --> client
         database -- JSKOS API --> server
         server -- HTML+JS --> client
         search -.-> server
-        server -. Search API .-> client
+        server -.-> client
         database -.-> search
-        database -- JSKOS API --> applications
     end
+    database -- JSKOS API --> applications
+    server -.-> applications
     login --> client
 ```
 
