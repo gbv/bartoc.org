@@ -1,23 +1,24 @@
 # BARTOC.org
 
-> Relaunch of BARTOC.org web interface
+> Basic Register of Thesauri, Ontologies & Classifications (BARTOC)
 
-This repository contains the [new web interface of BARTOC.org](https://bartoc.org), run by [VZG](https://www.gbv.de/).
+This repository contains the [web interface of BARTOC.org](https://bartoc.org), run by [VZG](https://www.gbv.de/).
 
-## Functional Requirements
+The application is currently being reconstructed funded by DFG.
 
-* Keep all BARTOC URIs and most URLs
-* Provide a nice web interface, possibly multilingual
-* Use JSKOS API as backend
-* Serve HTML, JSKOS, and RDF
+## Table of Contents
 
+- [Install](#install)
+- [Data flow](#data-flow)
+- ...
+ 
 ## Install
 
-## Requirements
+### Requirements
 
 Requires at least Node.js 18 and an instance of [jskos-server](https://github.com/gbv/jskos-server) to connect to. Additional dependencies are listed in `package.json`.
 
-## Install from sources
+### Install from sources
 
 ~~~sh
 git clone https://github.com/gbv/bartoc.org.git
@@ -25,11 +26,11 @@ cd bartoc.org
 npm ci
 ~~~
 
-## Docker
+### Docker
 
 You can also set up BARTOC via Docker. Please refer to our [Docker docs](./docker/README.md).
 
-## Setup
+### Setup
 A setup script is provided in `./bin/setup.sh`. It must be called with the path to your jskos-server installation, e.g.:
 
 ```bash
@@ -81,7 +82,32 @@ To be able to use the full functionality of BARTOC, your jskos-server installati
 
 Via an array `identities` under `schemes`, you can limit which identity URIs can write vocabulary data.
 
-## Run for testing
+## Data flow
+
+```mermaid
+graph TD
+    server[**server**: express]
+    client[**client**: Vue]
+    login(login-server)
+    search[**search**]
+    database[**database**: jskos-server]
+    terminologies(terminology services)
+    terminologies -- JSKOS API, Skosmos, ... --> client
+    server -- RDF & JSKOS --> applications(applications)
+    client <-- browser --> user(user)
+    subgraph app [ ]
+        database <-- JSKOS API --> client
+        database -- JSKOS API --> server
+        server -- HTML+JS --> client
+        search -.-> server
+        server -. Search API .-> client
+        database -.-> search
+        database -- JSKOS API --> applications
+    end
+    login --> client
+```
+
+## Development
 
 ~~~sh
 npm run dev
@@ -89,7 +115,7 @@ npm run dev
 
 The application is made available at <http://localhost:3883/>.
 
-## Publish
+### Publish
 **For maintainers only**
 
 Never work on the main branch directly. Always make changes on `dev` and then run the release script:
@@ -98,7 +124,7 @@ Never work on the main branch directly. Always make changes on `dev` and then ru
 npm run release:patch # or minor or major
 ```
 
-## Deployment
+### Deployment
 
 The application is deployed at <https://bartoc.org/>.
 
