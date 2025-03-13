@@ -84,6 +84,8 @@ Via an array `identities` under `schemes`, you can limit which identity URIs can
 
 ## Data flow
 
+Dotted elements are not implemented yet.
+
 ```mermaid
 graph TD
     server[**server**: express]
@@ -102,10 +104,14 @@ graph TD
         search -.-> server
         server -.-> client
         database -.-> search
+        reports[**reports**]
+        database -.-> reports
     end
-    database -- JSKOS API --> applications
     server -.-> applications
+    database -- JSKOS API --> applications
     login --> client
+    reports -.-> client
+    reports -.-> applications
 ```
 
 ## Development
