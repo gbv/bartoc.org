@@ -7,6 +7,7 @@ level,notation,prefLabel,scopeNote
 0,skohub,Skohub,Skohub vocabulary lookup API
 0,sparql,SPARQL endpoint,Public SPARQL endpoint
 1,mesh,MeSH SPARQL,SPARQL enpoint with Medical Subject Headings RDF vocabulary
+0,mod,MOD-API,API for semantic artefact catalogues
 0,tematres,TemaTres API,API of TemaTres vocabulary server
 0,ols,Ontology Lookup Service (OLS),
 0,ontoportal,OntoPortal,API of OntoPortal
