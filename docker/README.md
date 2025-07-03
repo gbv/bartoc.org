@@ -2,9 +2,6 @@
 
 See https://bartoc.org/about or [GitHub](https://github.com/gbv/bartoc.org) for more information about the project.
 
-## Supported Architectures
-Currently, only `x86-64` is supported, but we are planning to add more architectures soon.
-
 ## Available Tags
 - The current release version is available under `latest`. However, new major versions might break compatibility of the previously used config file, therefore it is recommended to use a version tag instead.
 - We follow SemVer for versioning the application. Therefore, `x` offers the latest image for the major version x, `x.y` offers the latest image for the minor version x.y, and `x.y.z` offers the image for a specific patch version x.y.z.
