@@ -1,12 +1,18 @@
 #!/bin/bash
+set -euo pipefail
 
-DUMP=data/dumps/latest.ndjson
-[[ -f "$DUMP" ]] || exit
+fail() { echo "$@" >&2; exit 1; }
+
+DUMP=${1:-data/dumps/latest.ndjson}
+[[ -f "$DUMP" ]] || fail "Missing file: $DUMP"
 
 mkdir -p data/reports
 
 report() {
-  jq "select($1)|{uri,prefLabel,modified}" $DUMP | jq --arg name "$2" -s '{title:$name,schemes:.}' > "data/reports/$2.json"
+  report=data/reports/$2.json
+  csv=data/reports/$2.csv
+  jq "select($1)|{uri,prefLabel,modified,type:(.type[1:]|map(sub(\".+#\";\"\")))}" $DUMP | jq --arg name "$2" -s '{title:$name,schemes:.}' > $report
+  jq -r '.schemes[]|[.uri,.prefLabel.en,(.type|join("|")),.modified]|@csv' $report > data/reports/$2.csv
 }
 
 report '.extent|not' 'no-extent'

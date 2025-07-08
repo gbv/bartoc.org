@@ -1,7 +1,10 @@
 #!/bin/bash
+set -euo pipefail
 
-DUMP=data/dumps/latest.ndjson
-[[ -f "$DUMP" ]] || exit
+fail() { echo "$@" >&2; exit 1; }
+
+DUMP=${1:-data/dumps/latest.ndjson}
+[[ -f "$DUMP" ]] || fail "Missing file: $DUMP"
 
 histogram() {
   ABOUT=$1
