@@ -37,3 +37,7 @@ stat() {
 echo "Calculate statistics"
 mkdir -p data/reports
 stat | jq -s . > data/reports/stats.json
+
+# monthly growth
+echo "month,growth" > data/reports/growth.csv
+jq -s -r 'map(.created[:7])|sort|group_by(.)[]|[.[0],length]|@csv' $DUMP >> data/reports/growth.csv
