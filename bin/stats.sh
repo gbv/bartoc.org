@@ -11,7 +11,7 @@ histogram() {
   QUERY=$2
   echo "{ \"description\": \"number of $ABOUT\", \"histogram\": "
   jq -r "$QUERY" $DUMP | sort | uniq -c | \
-    perl -nE 'say "{\"$2\": $1}" if $_ =~ /(\d+)\s+(.+)/' | jq . | jq -s add
+    awk '{print "{\""$2"\":",$1"}"}' | jq . | jq -s add
   echo "}"
 }
 
@@ -38,6 +38,6 @@ echo "Calculate statistics"
 mkdir -p data/reports
 stat | jq -s . > data/reports/stats.json
 
-# monthly growth
+echo "Calculate monthly growth"
 echo "month,growth" > data/reports/growth.csv
 jq -s -r 'map(.created[:7])|sort|group_by(.)[]|[.[0],length]|@csv' $DUMP >> data/reports/growth.csv
