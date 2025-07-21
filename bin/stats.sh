@@ -11,7 +11,8 @@ histogram() {
   QUERY=$2
   echo "{ \"description\": \"number of $ABOUT\", \"histogram\": "
   jq -r "$QUERY" $DUMP | sort | uniq -c | \
-    awk '{print "{\""$2"\":",$1"}"}' | jq . | jq -s add
+    perl -nE 'say "{\"$2\": $1}" if $_ =~ /(\d+)\s+(.+)/' | sed 's/\t/\\t/g' | \
+    jq . | jq -s add
   echo "}"
 }
 
