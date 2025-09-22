@@ -28,9 +28,9 @@ R&D Engineer, Mondeca
 **[Project coli-conc](https://coli-conc.gbv.de/)** \
 Head Office of the GBV Common Library Network
 
-Jakob Voß [](https://orcid.org/0000-0002-7613-4123) [](https://twitter.com/Nichtich)\
+Jakob Voß [](https://orcid.org/0000-0002-7613-4123) \
 Uma Balakrishnan [](https://orcid.org/0000-0002-6076-9853) \
-Stefan Peters [](https://orcid.org/0000-0002-4087-8227)
+Mareike Röhl [](https://orcid.org/0000-0003-1763-3026)
 </div>
 </div>
 
@@ -54,7 +54,7 @@ Associate Professor, Indian Statistical Institute, Bangalore
 <div class="col">
 <h2>Italy</h2>
 
-**[Claudio Gnoli](http://www-dimat.unipv.it/gnoli/)** [](https://orcid.org/0000-0002-4721-7448) [](https://twitter.com/scritur)\
+**[Claudio Gnoli](http://www-dimat.unipv.it/gnoli/)** [](https://orcid.org/0000-0002-4721-7448) \
 Science and Technology Library, University of Pavia
 
 **Kristin Kolshus** [](https://orcid.org/0000-0003-4560-1478)\
@@ -85,10 +85,10 @@ University of Oslo Library
 <div class="col">
 <h2>South Korea</h2>
 
-**[Prof. Ziyoung Park](http://www.hansung.ac.kr/web/kis/508593)** [](https://orcid.org/0000-0002-8985-9991) [](https://twitter.com/ParkZiyoung)\
+**[Prof. Ziyoung Park](http://www.hansung.ac.kr/web/kis/508593)** [](https://orcid.org/0000-0002-8985-9991) \
 Department of Knowledge & Information, Hansung University
 
-**Dr. So Young Yoon** [](https://orcid.org/0000-0001-7677-4158) [](https://twitter.com/SoyoungCorba99)\
+**Dr. So Young Yoon** [](https://orcid.org/0000-0001-7677-4158) \
 Department of Knowledge & Information, Hansung University
 
 </div>
