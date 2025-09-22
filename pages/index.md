@@ -22,5 +22,9 @@ title:
 <vocabulary-search></vocabulary-search>
 
 <p>
+  <a href="https://coli-conc.gbv.de/bartoc-search-dev/">New BARTOC Search</a> coming soon!
+</p>
+
+<p>
   BARTOC is continuously being <a href="https://github.com/gbv/bartoc.org/issues">extended and improved</a>. A beta version of BARTOC Skosmos vocabulary hosting is available at <a href="https://skosmos.bartoc.org/">skosmos.bartoc.org</a>.
 </p>
