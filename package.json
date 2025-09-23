@@ -22,13 +22,13 @@
     "release": "test $(git rev-parse --abbrev-ref HEAD) = dev && git pull && npm version $SEMVER && npm run --silent yesno && (git push && git checkout main && git merge dev && git push --follow-tags && git checkout dev) || (git tag -d $(git describe --tags) && git reset --hard HEAD~1)",
     "release:patch": "SEMVER=patch npm run release",
     "release:minor": "SEMVER=minor npm run release",
-    "release:major": "SEMVER=major npm run release"
+    "release:major": "SEMVER=major npm run release",
+    "prepare": "husky"
   },
   "lint-staged": {
     "*.js": "eslint --fix",
     "*.vue": "eslint --fix"
   },
-  "pre-commit": "lint-staged",
   "author": "Jakob Voß",
   "license": "MIT",
   "repository": {
@@ -42,7 +42,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
-    "@vitejs/plugin-vue": "^5.1.5",
+    "@vitejs/plugin-vue": "^6.0.1",
     "@vueform/multiselect": "^2.6.10",
     "axios": "^1.7.7",
     "cocoda-sdk": "^3.4.12",
@@ -54,7 +54,7 @@
     "gbv-login-client": "^2.0.1",
     "jskos-cli": "^0.8.2",
     "jskos-tools": "^1.0.42",
-    "jsondiffpatch": "^0.6.0",
+    "jsondiffpatch": "^0.7.3",
     "jsonld": "^8.3.2",
     "lodash": "^4.17.21",
     "marked": "^15.0.0",
@@ -62,7 +62,7 @@
     "portfinder": "^1.0.32",
     "rdflib": "^2.2.35",
     "timeago.js": "^4.0.2",
-    "vite": "^5.4.11",
+    "vite": "^7.1.7",
     "vue": "^3.5.12"
   },
   "optionalDependencies": {
@@ -71,11 +71,11 @@
   "devDependencies": {
     "concurrently": "^9.1.0",
     "ejs-lint": "^2.0.1",
-    "eslint": "~9.22",
-    "eslint-config-gbv": "~2.6",
+    "eslint": "^9.36.0",
+    "eslint-config-gbv": "^1.1.0",
+    "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "nodemon": "^3.1.7",
-    "pre-commit": "^1.2.2",
     "yesno": "^0.4.0"
   },
   "nodemonConfig": {
