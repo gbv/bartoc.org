@@ -216,7 +216,7 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
 const viewsByType = {
   "http://www.w3.org/2004/02/skos/core#Concept": "concept",
   "http://www.w3.org/2004/02/skos/core#ConceptScheme": "vocabulary",
-  "http://purl.org/cld/cdtype/CatalogueOrIndex": "registry",
+  "http://www.w3.org/ns/dcat#Catalog": "registry",
 }
 
 async function sendItem (req, res, item, vars = {}) {
