@@ -151,24 +151,39 @@ export default {
   data() {
     const sortOptions = [
       {
-        name: "newest first",
+        name: "Relevance",
+        sort: "relevance",
+        order: "desc",
+      },
+      {
+        name: "Created latest",
         sort: "created",
         order: "desc",
       },
       {
-        name: "oldest first",
+        name: "Created first",
         sort: "created",
         order: "asc",
       },
       {
-        name: "recently changed",
+        name: "Modified latest",
         sort: "modified",
         order: "desc",
       },
       {
-        name: "by label",
+        name: "Modified first",
+        sort: "modified",
+        order: "asc",
+      },
+      {
+        name: "Title (A-Z)",
         sort: "label",
         order: "asc",
+      },
+      {
+        name: "Title (Z-A)",
+        sort: "label",
+        order: "desc",
       },
     ]
     const { type, languages, subject, license, format, access, country, partOf, sort = "", order = "asc", search } = this.query
