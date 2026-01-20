@@ -16,7 +16,7 @@
     "dump": "node ./bin/dump.js update && ./bin/reports.sh && ./bin/stats.sh",
     "vue:serve": "vite",
     "build": "vite build",
-    "express:serve": "NODE_ENV=development nodemon server.js",
+    "express:serve": "NODE_ENV=development nodemon -L --ext js,mjs,cjs,json,ejs,ndjson server.js",
     "dev": "concurrently -k \"npm:express:serve\" \"npm:vue:serve\"",
     "yesno": "node -e \"const yesno = require('yesno'); yesno({ question: 'Are you sure you want to continue?' }).then(ok => process.exit(ok ? 0 : 1));\"",
     "release": "test $(git rev-parse --abbrev-ref HEAD) = dev && git pull && npm version $SEMVER && npm run --silent yesno && (git push && git checkout main && git merge dev && git push --follow-tags && git checkout dev) || (git tag -d $(git describe --tags) && git reset --hard HEAD~1)",
