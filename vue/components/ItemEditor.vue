@@ -11,15 +11,16 @@
     <label-editor
       v-model:pref-label="item.prefLabel"
       v-model:alt-label="item.altLabel" />
-    The first of each language is used as preferred title, more as
-    aliases, translations... Please provide at least an English title.
+    The first of each language is used as preferred title, more as aliases,
+    translations... Please provide at least an English title.
   </form-row>
   <form-row :label="'Abbreviation'">
     <input
       v-model="item.notation[0]"
       type="text"
       class="form-control">
-    Common, unique abbreviation, acronym, or notation the vocabulary is known under.
+    Common, unique abbreviation, acronym, or notation the vocabulary is known
+    under.
   </form-row>
   <form-row :label="'Identifier'">
     <list-editor v-model="item.identifier" />
@@ -39,7 +40,8 @@
       v-model="abstractUnd"
       class="form-control"
       rows="8" />
-    Use quotation marks and original language if copied from another source (e.g. homepage).
+    Use quotation marks and original language if copied from another source
+    (e.g. homepage).
   </form-row>
   <form-row :label="'Languages'">
     <language-select
@@ -52,19 +54,21 @@
       v-model="item.extent"
       type="text"
       class="form-control">
-    Number of classes, subclasses, taxa, terms, concepts etc. Please add date in parenthesis (YYYY-MM).
+    Number of classes, subclasses, taxa, terms, concepts etc. Please add date in
+    parenthesis (YYYY-MM).
   </form-row>
   <form-row :label="'KOS Types'">
     <set-select
       :model-value="type"
       :options="kostypes"
-      @update:modelValue="item.type=$event.map(t=>t.uri)" />
+      @update:modelValue="item.type = $event.map((t) => t.uri)" />
     Use Shift key to deselect or select multiple types.
   </form-row>
   <form-row :label="'Subjects'">
     <subject-editor v-model="item.subject" />
     Please assign at least a DDC main class.
-    <!-- TODO: --> More convenient selection of subjects will be added later!
+    <!-- TODO: -->
+    More convenient selection of subjects will be added later!
   </form-row>
   <hr>
   <p>How the vocabulary is made available:</p>
@@ -90,8 +94,8 @@
   </form-row>
   <form-row :label="'Additional links'">
     <list-editor
-      :model-value="item.subjectOf.map(s=>s.url)"
-      @update:modelValue="item.subjectOf=$event.map(url=>({url}))" />
+      :model-value="item.subjectOf.map((s) => s.url)"
+      @update:modelValue="item.subjectOf = $event.map((url) => ({ url }))" />
   </form-row>
   <form-row :label="'Formats'">
     <set-select
@@ -103,7 +107,8 @@
     <set-select
       v-model="item.ACCESS"
       :options="access" />
-    Do you have to register to view the KOS, is it 'hidden' in a licensed database or is it free online?
+    Do you have to register to view the KOS, is it 'hidden' in a licensed
+    database or is it free online?
   </form-row>
   <form-row :label="'Publisher'">
     <publisher-editor v-model="item.publisher" />
@@ -121,10 +126,11 @@
   </form-row>
   <form-row label="Listed In">
     <list-editor
-      :model-value="item.partOf.map(({uri})=>uri)"
-      @update:modelValue="item.partOf=$event.map(uri=>({uri}))" />
+      :model-value="item.partOf.map(({ uri }) => uri)"
+      @update:modelValue="item.partOf = $event.map((uri) => ({ uri }))" />
     Which <a href="/registries">terminology registries</a> list the vocabulary?
-    Please use registry URIs, a more convenient editing form will be added later!
+    Please use registry URIs, a more convenient editing form will be added
+    later!
   </form-row>
   <form-row :label="'Vocabulary services'">
     <endpoints-editor v-model="item.API" />
@@ -150,13 +156,12 @@
       <label
         for="numericalNotation"
         class="form-check-label">numerical notation</label>
-      concepts of this vocabulary will be sorted numerically when displayed as a list
+      concepts of this vocabulary will be sorted numerically when displayed as a
+      list
     </div>
   </form-row>
   <hr>
-  <p>
-    Relevant only if concept notations are mapped to concept URIs:
-  </p>
+  <p>Relevant only if concept notations are mapped to concept URIs:</p>
   <form-row :label="'namespace'">
     <input
       v-model="item.namespace"
@@ -183,9 +188,7 @@
     Please use comma to separate multiple notations.
   </form-row>
   <hr>
-  <p>
-    Relevant only for vocabularies used in PICA or MARC databases:
-  </p>
+  <p>Relevant only for vocabularies used in PICA or MARC databases:</p>
   <form-row :label="'MARCSpec'">
     <input
       v-model="item.MARCSPEC"
@@ -206,8 +209,8 @@
   </form-row>
   <hr>
   <p>
-    By saving you agree to publish the vocabulary metadata as public domain.
-    All metadata is editable by the community of
+    By saving you agree to publish the vocabulary metadata as public domain. All
+    metadata is editable by the community of
     <a href="/contact">the BARTOC.org editors</a>.
   </p>
   <div class="form-group row">
@@ -225,7 +228,7 @@
         @click="saveItem">
         authentification required!
       </button>
-&nbsp;
+      &nbsp;
       <button
         class="btn btn-warning"
         onclick="location.reload()">
@@ -236,7 +239,8 @@
       <input
         id="showJSKOS"
         v-model="showJSKOS"
-        type="checkbox">&nbsp;<label for="showJSKOS">show JSKOS record</label>
+        type="checkbox">&nbsp;<label
+          for="showJSKOS">show JSKOS record</label>
     </div>
   </div>
   <div
@@ -285,7 +289,7 @@ const PublisherEditor = {
     modelValue: Array,
   },
   data() {
-    const publisher = ((this.modelValue || [])[0] || {})
+    const publisher = (this.modelValue || [])[0] || {}
     return {
       viaf: publisher.uri,
       name: (publisher.prefLabel || {}).en,
@@ -293,7 +297,9 @@ const PublisherEditor = {
   },
   created() {
     const update = function () {
-      this.$emit("update:modelValue", [{ uri: this.viaf, prefLabel: { en: this.name } }])
+      this.$emit("update:modelValue", [
+        { uri: this.viaf, prefLabel: { en: this.name } },
+      ])
     }
     this.$watch("name", update)
     this.$watch("viaf", update)
@@ -301,16 +307,30 @@ const PublisherEditor = {
 }
 
 function githubIssueUrl(title, body) {
-  return "https://github.com/gbv/bartoc.org/issues/new" +
-    "?title=" + encodeURIComponent(title) +
-    "&body=" + encodeURIComponent(body)
+  return (
+    "https://github.com/gbv/bartoc.org/issues/new" +
+    "?title=" +
+    encodeURIComponent(title) +
+    "&body=" +
+    encodeURIComponent(body)
+  )
 }
 
 /**
  * Web form to modify and create vocabulary metadata.
  */
 export default {
-  components: { FormRow, LabelEditor, LanguageSelect, SetSelect, ListEditor, SubjectEditor, AddressEditor, PublisherEditor, EndpointsEditor },
+  components: {
+    FormRow,
+    LabelEditor,
+    LanguageSelect,
+    SetSelect,
+    ListEditor,
+    SubjectEditor,
+    AddressEditor,
+    PublisherEditor,
+    EndpointsEditor,
+  },
   props: {
     user: {
       type: Object,
@@ -328,22 +348,36 @@ export default {
   data() {
     // make sure item has iterable fields
     const item = this.current || {};
-    ["prefLabel", "altLabel", "definition", "ADDRESS", "DISPLAY"]
-      .forEach(key => {
+    ["prefLabel", "altLabel", "definition", "ADDRESS", "DISPLAY"].forEach(
+      (key) => {
         if (!item[key]) {
           item[key] = {}
         }
-      });
-    ["notation", "identifier", "languages", "license", "type", "subject", "subjectOf", "partOf", "FORMAT", "API", "ACCESS", "publisher"]
-      .forEach(key => {
-        if (!item[key]) {
-          item[key] = []
-        }
-      })
+      },
+    );
+    [
+      "notation",
+      "identifier",
+      "languages",
+      "license",
+      "type",
+      "subject",
+      "subjectOf",
+      "partOf",
+      "FORMAT",
+      "API",
+      "ACCESS",
+      "publisher",
+    ].forEach((key) => {
+      if (!item[key]) {
+        item[key] = []
+      }
+    })
 
     const examples = (item.notationExamples || []).join(", ")
 
-    let abstractEn = "", abstractUnd = ""
+    let abstractEn = "",
+      abstractUnd = ""
 
     // make non-English abstract to language code "und"
     for (const code in item.definition) {
@@ -369,7 +403,7 @@ export default {
   },
   computed: {
     type() {
-      return this.item.type.map(uri => ({ uri }))
+      return this.item.type.map((uri) => ({ uri }))
     },
   },
   watch: {
@@ -380,31 +414,38 @@ export default {
       this.item.definition.und = [s]
     },
     examples: function (s) {
-      this.item.notationExamples = s.split(",").map(s => s.trim()).filter(s => s !== "")
+      this.item.notationExamples = s
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s !== "")
     },
   },
 
   created() {
-    loadConcepts("https://api.dante.gbv.de/voc/top", "http://uri.gbv.de/terminology/license/")
-      .then(set => {
-        this.licenses = set
-      })
-    loadConcepts("/api/voc/top", "http://w3id.org/nkos/nkostype")
-      .then(set => {
+    loadConcepts(
+      "https://api.dante.gbv.de/voc/top",
+      "http://uri.gbv.de/terminology/license/",
+    ).then((set) => {
+      this.licenses = set
+    })
+    loadConcepts("/api/voc/top", "http://w3id.org/nkos/nkostype").then(
+      (set) => {
         this.kostypes = set
-      })
-    loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000")
-      .then(set => {
+      },
+    )
+    loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000").then(
+      (set) => {
         this.formats = set
-      })
-    loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001")
-      .then(set => {
+      },
+    )
+    loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001").then(
+      (set) => {
         this.access = set
-      })
-    loadConcepts("/registries?format=jskos")
-      .then(set => {
-        this.registries = set
-      })
+      },
+    )
+    loadConcepts("/registries?format=jskos").then((set) => {
+      this.registries = set
+    })
   },
   methods: {
     itemError() {
@@ -422,8 +463,12 @@ export default {
       let body
       const onError = (error, res) => {
         const message = error.message || res.StatusText
-        const issue = "This JSKOS record could not be saved:\n\n~~~json\n" + body + "\n~~~\n" +
-          "The request included " + (this.auth ? "a token for authentification." : "no token.")
+        const issue =
+          "This JSKOS record could not be saved:\n\n~~~json\n" +
+          body +
+          "\n~~~\n" +
+          "The request included " +
+          (this.auth ? "a token for authentification." : "no token.")
         const url = githubIssueUrl(`Error ${res.status} when saving`, issue)
         const html = `If you think this is a bug, please
                   <a href='${url}'>open a GitHub issue</a> including the current JSKOS record!`
@@ -436,11 +481,17 @@ export default {
         const base = "http://bartoc.org/en/node/"
         // Try to find an URI not taken yet.
         try {
-          const latestUri = (await fetch("/api/voc?sort=counter&order=desc&limit=1").then(res => res.json()))[0].uri
+          const latestUri = (
+            await fetch("/api/voc?sort=counter&order=desc&limit=1").then(
+              (res) => res.json(),
+            )
+          )[0].uri
           const latestId = parseInt(latestUri.replace(base, ""))
           item.uri = base + (latestId + 1)
         } catch (error) {
-          onError(new Error("Could not determine URI for new record."), { status: "determining new URI" })
+          onError(new Error("Could not determine URI for new record."), {
+            status: "determining new URI",
+          })
           return
         }
       }
@@ -450,11 +501,13 @@ export default {
         headers.Authorization = `Bearer ${this.auth.token}`
       }
 
-      fetch("/api/voc", { method, body, headers }).then(res => {
+      fetch("/api/voc", { method, body, headers }).then((res) => {
         if (res.ok) {
-          window.location.href = "/vocabularies?uri=" + encodeURIComponent(item.uri)
+          window.location.href = `/en/node/${item.uri.split("/").pop()}`
         } else {
-          res.json().then(err => onError(err, res))
+          res
+            .json()
+            .then((err) => onError(err, res))
             .catch(() => onError({}, res))
         }
       })
@@ -466,12 +519,12 @@ export default {
       }
       item = filtered(item)
       if (item.API) {
-        item.API = item.API.filter(endpoint => endpoint.url)
+        item.API = item.API.filter((endpoint) => endpoint.url)
       }
       if (item.subject) {
-        item.subject = item.subject.map(({uri,inScheme,notation}) => {
-          inScheme = inScheme.map(({uri}) => ({uri}))
-          return {uri,inScheme,notation}
+        item.subject = item.subject.map(({ uri, inScheme, notation }) => {
+          inScheme = inScheme.map(({ uri }) => ({ uri }))
+          return { uri, inScheme, notation }
         })
       }
       return item
@@ -487,8 +540,11 @@ function filtered(value) {
       return value.length ? value : null
     } else {
       const keys =
-        ("uri" in value && !value.uri) ? [] // remove object without URI
-          : Object.keys(value).filter(key => key[0] !== "_").sort()
+        "uri" in value && !value.uri
+          ? [] // remove object without URI
+          : Object.keys(value)
+            .filter((key) => key[0] !== "_")
+            .sort()
       const obj = keys.reduce((obj, key) => {
         const fieldValue = filtered(value[key])
         if (fieldValue) {
