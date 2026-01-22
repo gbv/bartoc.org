@@ -1,21 +1,27 @@
 <template>
   <div class="form-group row">
-    <label class="col-form-label col-sm-2">{{ label }}</label>
-    <div class="col-sm-10 font-weight-light">
+    <label
+      v-if="hasLabel"
+      class="col-form-label col-sm-2">{{ label }}</label>
+    <div
+      :class="contentClass"
+      class="font-weight-light">
       <slot />
     </div>
   </div>
 </template>
 
 <script>
-/**
- * A row in a tabular form.
- */
 export default {
   props: {
-    label: {
-      type: String,
-      default: "",
+    label: { type: String, default: "" },
+  },
+  computed: {
+    hasLabel() {
+      return this.label.trim().length > 0
+    },
+    contentClass() {
+      return this.hasLabel ? "col-sm-10" : "col-sm-12"
     },
   },
 }

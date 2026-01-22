@@ -1,147 +1,49 @@
 <template>
   <div class="vocabulary-search">
-    <ul
-      class="nav nav-tabs"
-      role="tablist">
-      <li
-        class="nav-item"
-        role="presentation">
-        <a
-          class="nav-link"
-          :class="{
-            active: tab === 0,
-          }"
-          href=""
-          data-toggle="tab"
-          role="tab"
-          :aria-selected="tab === 0"
-          @click.prevent="tab = 0">Search</a>
-      </li>
-      <li
-        class="nav-item"
-        role="presentation">
-        <a
-          class="nav-link"
-          :class="{
-            active: tab === 1,
-          }"
-          href=""
-          role="tab"
-          :aria-selected="tab === 1"
-          @click.prevent="tab = 1">Filter</a>
-      </li>
-    </ul>
-    <div
-      class="tab-content p-3">
-      <div
-        class="tab-pane fade"
-        :class="{
-          show: tab === 0,
-          active: tab === 0,
-        }"
-        role="tabpanel"
-        aria-labelledby="home-tab">
-        <form @submit.prevent="submitSearch">
-          <form-row :label="'Search'">
-            <div class="row">
-              <div class="col col-md-10">
-                <input
-                  v-model="search"
-                  type="text"
-                  class="form-control">
-              </div>
-              <div class="col col-md-2">
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  @click="submitSearch">
-                  search
-                </button>
-              </div>
-            </div>
-          </form-row>
-          <form-row>
-            <small class="form-text text-muted label-help">
-              Full-text search across vocabulary description, ranked by relevance
-            </small>
-          </form-row>
-        </form>
-      </div>
-      <div
-        class="tab-pane fade"
-        :class="{
-          show: tab === 1,
-          active: tab === 1,
-        }"
-        role="tabpanel"
-        aria-labelledby="profile-tab">
-        <form @submit.prevent="submitFilter">
-          <form-row :label="'KOS Type'">
-            <set-select
-              :model-value="{uri:type}"
-              :options="kostypes"
-              @update:modelValue="type=$event.uri" />
-          </form-row>
-          <form-row :label="'Languages'">
-            <language-select
-              v-model="languages"
-              :repeatable="true"
-              class="form-control" />
-          </form-row>
-          <form-row :label="'License'">
-            <set-select
-              :model-value="{uri:license}"
-              :options="licenses"
-              @update:modelValue="license=$event.uri" />
-          </form-row>
-          <form-row :label="'Subject'">
-            <subject-editor v-model="subjects" />
-          </form-row>
-          <form-row :label="'Registry'">
+    <form @submit.prevent="submitSearch">
+      <form-row>
+        <div class="row">
+          <div class="col col-md-5">
             <input
-              v-model="partOf"
+              v-model="search"
               type="text"
+              placeholder="Title, Publisher..."
               class="form-control">
-          </form-row>
-          <form-row label="Sorting">
+          </div>
+          <form-row>
             <div class="form-inline">
               <select
-                v-model="sorting"
+                v-model="fields"
                 class="form-control">
                 <option
-                  v-for="option in sortOptions"
-                  :key="option.name"
-                  :value="option">
-                  {{ option.name }}
+                  v-for="field in searchFields"
+                  :key="field.label"
+                  :value="field.value">
+                  {{ field.label }}
                 </option>
               </select>
             </div>
           </form-row>
-          <form-row>
+          <div class="col col-md-3">
             <button
               type="submit"
               class="btn btn-primary"
-              @click="submitFilter">
-              filter
+              @click="submitSearch">
+              search
             </button>
-          </form-row>
-        </form>
-      </div>
-    </div>
+          </div>
+        </div>
+      </form-row>
+    </form>
   </div>
 </template>
 
 <script>
 import FormRow from "./FormRow.vue"
-import SetSelect from "./SetSelect.vue"
-import LanguageSelect from "./LanguageSelect.vue"
-import SubjectEditor from "./SubjectEditor.vue"
-
-import { indexingSchemes, loadConcepts } from "../utils.js"
 
 // search form
 export default {
-  components: { FormRow, SetSelect, LanguageSelect, SubjectEditor },
+  components: { FormRow },
   props: {
     query: {
       type: Object,
@@ -149,97 +51,38 @@ export default {
     },
   },
   data() {
-    const sortOptions = [
+    const searchFields = [
       {
-        name: "Relevance",
-        sort: "relevance",
-        order: "desc",
+        label: "All Fields",
+        value: "allfields",
       },
       {
-        name: "Created latest",
-        sort: "created",
-        order: "desc",
+        label: "Title",
+        value: "title_search",
       },
       {
-        name: "Created first",
-        sort: "created",
-        order: "asc",
-      },
-      {
-        name: "Modified latest",
-        sort: "modified",
-        order: "desc",
-      },
-      {
-        name: "Modified first",
-        sort: "modified",
-        order: "asc",
-      },
-      {
-        name: "Title (A-Z)",
-        sort: "label",
-        order: "asc",
-      },
-      {
-        name: "Title (Z-A)",
-        sort: "label",
-        order: "desc",
+        label: "Publisher",
+        value: "publisher_en",
       },
     ]
-    const { type, languages, subject, license, format, access, country, partOf, sort = "", order = "asc", search } = this.query
-    const sorting = sortOptions.find(s => s.sort === sort && s.order === order)
-    const subjects = (subject || "").split("|").map(uri => {
-      const scheme = indexingSchemes.find(scheme => uri.indexOf(scheme.namespace) === 0)
-      return scheme ? { uri, inScheme: [scheme] } : false
-    }).filter(Boolean)
-    const tab = (Object.keys(this.query).includes("search") && search) || !Object.keys(this.query).length ? 0 : 1
-    return {
-      type,
-      search,
-      languages: (languages||"").split(","),
-      subjects,
-      license,
-      partOf,
-      country, // TODO: https://github.com/gbv/bartoc.org/issues/24
-      format, // TODO: https://github.com/gbv/bartoc.org/issues/25
-      access, // TODO: https://github.com/gbv/bartoc.org/issues/42
-      kostypes: [],
-      licenses: [],
-      tab,
-      sortOptions,
-      sorting,
-    }
-  },
-  created() {
-    const loadVoc = (name, api, uri) =>
-      loadConcepts(api, uri)
-        .then(set => {
-          set.unshift({ uri: "", prefLabel: { en: "" } })
-          this[name] = set
-        })
+    const { search, field = "allfields" } = this.query
 
-    loadVoc("kostypes", "/api/voc/top", "http://w3id.org/nkos/nkostype")
-    // TODO: remove dependency on DANTE
-    loadVoc("licenses", "https://api.dante.gbv.de/voc/top", "http://uri.gbv.de/terminology/license/")
+    return {
+      search,
+      searchFields,
+      fields: field,
+    }
   },
   methods: {
     submit(query) {
-      Object.keys(query).filter(key => !query[key]).forEach(key => delete query[key])
-      window.location.href = "/vocabularies?" + (new URLSearchParams(query).toString())
+      Object.keys(query)
+        .filter((key) => !query[key])
+        .forEach((key) => delete query[key])
+      window.location.href =
+        "/vocabularies?" + new URLSearchParams(query).toString()
     },
     submitSearch() {
-      this.submit({ search: this.search })
-    },
-    submitFilter() {
-      const { type, languages, license } = this
-      const sort = this.sorting && this.sorting.sort
-      const order = this.sorting && this.sorting.order
-      const partOf = this.partOf
-      const query = { type, languages: languages.join(","), license, sort, order, partOf }
-      if (this.subjects.length) {
-        query.subject = this.subjects.map(({ uri }) => uri).join("|")
-      }
-      this.submit(query)
+      this.submit({ search: this.search, field: this.fields })
     },
   },
 }
@@ -248,14 +91,5 @@ export default {
 <style>
 .vocabulary-search {
   padding: 1em 0em;
-}
-.tab-content {
-  border: 1px solid #dee2e6;
-  border-top: none;
-  border-bottom-left-radius: .25rem;
-  border-bottom-right-radius: .25rem;
-}
-.form-group:last-of-type {
-  margin-bottom: 0;
 }
 </style>
