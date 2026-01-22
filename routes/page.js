@@ -10,15 +10,35 @@ const __dirname = new URL(".", import.meta.url).pathname
 import config from "../config/index.js"
 
 // Markdown pages as HTML
-function pageRoute (req, res) {
+async function pageRoute(req, res) {
   const file = `${__dirname}/../pages/${req.params.page}.md`
 
   if (fs.existsSync(file)) {
     const { attributes, body } = fm(fs.readFileSync(file, "utf8"))
-    const content = marked.parse(body)
+    let content = marked.parse(body)
     const { path } = req
+
+    // Only on home page: inject schemesCount into <vocabulary-search ...>
+    if (req.params.page === "index") {
+      const schemes = await config.registry.getSchemes({
+        params: { limit: 1 },
+      })
+      const schemesCount = schemes?._totalCount ?? 0
+
+      content = content.replace(
+        /<vocabulary-search\b[^>]*><\/vocabulary-search>/,
+        `<vocabulary-search schemes-count="${schemesCount}"></vocabulary-search>`,
+      )
+    }
+
     res.setHeader("Content-Type", "text/html")
-    res.render("page", { config, content, path, ...attributes, page: path.replace(/^\/|\/$/g, "") })
+    res.render("page", {
+      config,
+      content,
+      path,
+      ...attributes,
+      page: path.replace(/^\/|\/$/g, ""),
+    })
   } else {
     req.next()
   }

@@ -3,11 +3,10 @@
     <form @submit.prevent="submitSearch">
       <form-row>
         <div class="row">
-          <div class="col col-md-5">
+          <div class="col col-md-7">
             <input
               v-model="search"
               type="text"
-              placeholder="Title, Publisher..."
               class="form-control">
           </div>
           <form-row>
@@ -34,6 +33,13 @@
           </div>
         </div>
       </form-row>
+      <form-row v-if="hasSchemesCount">
+        <div class="text">
+          Search in metadata about
+          <span>{{ schemesCount }}</span>
+          terminologies
+        </div>
+      </form-row>
     </form>
   </div>
 </template>
@@ -49,6 +55,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    schemesCount: { type: Number, default: null },
   },
   data() {
     const searchFields = [
@@ -73,6 +80,11 @@ export default {
       fields: field,
     }
   },
+  computed: {
+    hasSchemesCount() {
+      return this.schemesCount !== 0 && this.schemesCount !== null
+    },
+  },
   methods: {
     submit(query) {
       Object.keys(query)
@@ -91,5 +103,12 @@ export default {
 <style>
 .vocabulary-search {
   padding: 1em 0em;
+}
+.text {
+  color: #666;
+  font-weight: 700;
+}
+.form-group:first-child {
+  margin-bottom: 0;
 }
 </style>
