@@ -273,17 +273,23 @@ export default {
   display: flex;
   gap: 8px;
   align-items: flex-start;
+  flex-direction: column;
 }
 
 /* Let the input grow */
 .search-col {
   flex: 1 1 auto;
+  width: 100%;
 }
 
 /* Scroll container for results and tree */
 .panel {
   max-height: 320px;
   overflow: auto;
+}
+.panel-col {
+  flex: 1 1 auto;
+  width: 100%;
 }
 
 /* Small padding to visually separate from border */
