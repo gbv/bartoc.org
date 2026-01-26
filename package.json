@@ -74,6 +74,7 @@
     "eslint": "^9.36.0",
     "eslint-config-gbv": "~2.6",
     "husky": "^9.1.7",
+    "jskos-vue": "^0.3.19",
     "lint-staged": "^15.2.10",
     "nodemon": "^3.1.7",
     "yesno": "^0.4.0"

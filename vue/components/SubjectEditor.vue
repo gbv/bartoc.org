@@ -95,7 +95,7 @@ table {
   margin-bottom: 0;
 }
 table tr td {
-  vertical-align: middle;
+  vertical-align: baseline;
   padding: 0;
 }
 table tr td > span {

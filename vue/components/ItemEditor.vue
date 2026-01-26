@@ -66,9 +66,6 @@
   </form-row>
   <form-row :label="'Subjects'">
     <subject-editor v-model="item.subject" />
-    Please assign at least a DDC main class.
-    <!-- TODO: -->
-    More convenient selection of subjects will be added later!
   </form-row>
   <hr>
   <p>How the vocabulary is made available:</p>

@@ -1,14 +1,12 @@
 <template>
-  <item-select
-    v-show="hasFocus || !item.uri"
-    ref="input"
-    v-model="item.uri"
-    type="text"
-    class="form-control"
-    :scheme="scheme"
-    @open="hasFocus=true"
-    @close="hasFocus=false"
-    @keyup.enter="$event.target.blur()" />
+  <div v-show="hasFocus || !item.uri">
+    <subject-concept-picker
+      ref="picker"
+      v-model="item.uri"
+      :scheme="scheme"
+      @pick="hasFocus = false" />
+  </div>
+
   <div
     v-if="!hasFocus && item.uri"
     class="itemInput"
@@ -24,14 +22,14 @@
 
 <script>
 import ItemName from "./ItemName.vue"
-import ItemSelect from "./ItemSelect.vue"
+import SubjectConceptPicker from "./SubjectConceptPicker.vue"
 import { cdkLoadConcepts } from "../utils.js"
 
 /**
  * Input form with typeahead.
  */
 export default {
-  components: { ItemName, ItemSelect },
+  components: { ItemName, SubjectConceptPicker },
   props: {
     modelValue: {
       type: Object,
@@ -74,7 +72,7 @@ export default {
     },
     loadDetails() {
       const { uri, inScheme } = this.item
-      cdkLoadConcepts(this.scheme, uri).then(res => {
+      cdkLoadConcepts(this.scheme, uri).then((res) => {
         this.item = res && res.length ? res[0] : { uri, inScheme }
       })
     },
@@ -85,6 +83,6 @@ export default {
 <style>
 .itemInput {
   border: 1px solid #ced4da;
-  padding: .375rem .75rem;
+  padding: 0.375rem 0.75rem;
 }
 </style>

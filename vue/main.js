@@ -12,6 +12,7 @@ import configUser from "../config/config.json"
 const login = Object.assign({}, configDefault.login, configUser.login || {})
 
 import { render } from "../node_modules/timeago.js/"
+import "jskos-vue/dist/style.css"
 
 const app = createApp({
   components: { UserStatus, ItemEditor, VocabularySearch, ServiceLink, ConceptBrowser },
@@ -45,7 +46,7 @@ const app = createApp({
         const url = "/api/checkAuth?type=schemes&action=create"
         const headers = { Authorization: `Bearer ${this.auth.token}` }
         fetch(url, { headers }).then(res => {
-          this.userCanAdd = res.ok 
+          this.userCanAdd = res.ok
         })
       } else {
         this.userCanAdd = false
