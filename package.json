@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "NODE_ENV=production node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
     "lint": "eslint; ejslint views/*.ejs",
     "fix": "eslint --fix",
     "lint-staged": "lint-staged",
@@ -69,6 +71,7 @@
     "fsevents": "2.3.3"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
     "concurrently": "^9.1.0",
     "ejs-lint": "^2.0.1",
     "eslint": "^9.36.0",
@@ -77,6 +80,7 @@
     "jskos-vue": "^0.3.19",
     "lint-staged": "^15.2.10",
     "nodemon": "^3.1.7",
+    "vitest": "^4.0.18",
     "yesno": "^0.4.0"
   },
   "nodemonConfig": {
