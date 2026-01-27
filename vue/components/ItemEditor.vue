@@ -257,7 +257,7 @@
 </template>
 
 <script>
-import { loadConcepts } from "../utils.js"
+import { loadConcepts, trimItemIdentifiers } from "../utils.js"
 
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
@@ -492,7 +492,12 @@ export default {
           return
         }
       }
-      body = JSON.stringify(this.cleanupItem(item), null, 2)
+
+      const cleanedItem = this.cleanupItem(item) // remove empty fields
+      trimItemIdentifiers(cleanedItem) // trim strings in identifiers
+
+      body = JSON.stringify(cleanedItem, null, 2)
+
       const headers = { "Content-Type": "application/json" }
       if (this.auth) {
         headers.Authorization = `Bearer ${this.auth.token}`
@@ -509,15 +514,20 @@ export default {
         }
       })
     },
+    //
     cleanupItem(item) {
+      // vocabulary record should always be a ConceptScheme.
       const type = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
       if (item.type[0] !== type) {
         item.type.unshift(type)
       }
+      // Remove empty fields recursively:
       item = filtered(item)
+      // If there are API endpoints, keep only those that have a URL.
       if (item.API) {
         item.API = item.API.filter((endpoint) => endpoint.url)
       }
+      // Normalize subjects: keep only the fields needed by the backend.
       if (item.subject) {
         item.subject = item.subject.map(({ uri, inScheme, notation }) => {
           inScheme = inScheme.map(({ uri }) => ({ uri }))
