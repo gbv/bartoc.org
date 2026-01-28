@@ -1,5 +1,10 @@
 # BARTOC.org
 
+
+[![License](https://img.shields.io/github/license/gbv/bartoc-search.svg)](https://github.com/gbv/bartoc.org/blob/master/LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-ghcr.io%2Fgbv%2Fjskos--server-informational)](https://github.com/gbv/bartoc.org/blob/master/docker/README.md)
+[![Test](https://github.com/gbv/bartoc-search/actions/workflows/test.yml/badge.svg)](https://github.com/gbv/bartoc.org/actions/workflows/test.yml)
+
 > Basic Register of Thesauri, Ontologies & Classifications (BARTOC)
 
 This repository contains the [web interface of BARTOC.org](https://bartoc.org), run by [VZG](https://www.gbv.de/).
@@ -11,7 +16,7 @@ The application is currently being reconstructed funded by DFG.
 - [Install](#install)
 - [Data flow](#data-flow)
 - ...
- 
+
 ## Install
 
 ### Requirements

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { trimItemIdentifiers } from "../vue/utils.js"
+import { trimItemIdentifiers } from "../../vue/utils"
 
 describe("trimItemIdentifiers", () => {
   it("trims strings and removes empty entries", () => {
