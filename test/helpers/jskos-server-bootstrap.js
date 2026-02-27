@@ -85,12 +85,15 @@ export async function startJskosServer({
     .withExposedPorts(3000)
     .withEnvironment({
       NODE_ENV: "test",
-      CONFIG_FILE: "/config/config.json",
     })
     .withCopyContentToContainer([
       {
         content: JSON.stringify(jskosConfig, null, 2),
-        target: "/config/config.json",
+        target: "/usr/src/app/config/config.test.json",
+      },
+      {
+        content: JSON.stringify(jskosConfig, null, 2),
+        target: "/usr/src/app/config/config.json",
       },
     ])
     .withCopyDirectoriesToContainer(copyDirs)
