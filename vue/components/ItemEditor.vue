@@ -13,6 +13,8 @@
       v-model:alt-label="item.altLabel" />
     The first of each language is used as preferred title, more as aliases,
     translations... Please provide at least an English title.
+    For other languages select always a value,
+    it could be also "undetermined" if you do not know the language.
   </form-row>
   <form-row :label="'Abbreviation'">
     <input
@@ -35,13 +37,24 @@
     Please provide a short description. Better brief than nothing!
   </form-row>
   <form-row :label="'Non-English Abstract'">
-    <textarea
-      id="abstract"
-      v-model="abstractUnd"
-      class="form-control"
-      rows="8" />
-    Use quotation marks and original language if copied from another source
-    (e.g. homepage).
+    <div
+      class="form-inline"
+      style="gap: 8px; align-items: flex-start;">
+      <textarea
+        id="abstract"
+        v-model="abstractText"
+        class="form-control"
+        rows="8"
+        style="flex: 1 1 auto;" />
+      <language-select
+        v-model="abstractLang"
+        class="form-control"
+        style="max-width: 240px; flex: 1 1 auto;"
+        :repeatable="false" />
+    </div>
+    Choose <i>always</i> a language for the non-English abstract (you can also select “undetermined”).
+
+    If you copy text, use quotation marks and keep the original language (e.g., from the homepage).
   </form-row>
   <form-row :label="'Languages'">
     <language-select
@@ -253,7 +266,7 @@
       </div>
     </div>
   </div>
-  <pre v-show="showJSKOS">{{ cleanupItem(item) }}</pre>
+  <pre v-show="showJSKOS">{{ jskosPreview }}</pre>
 </template>
 
 <script>
@@ -373,23 +386,29 @@ export default {
 
     const examples = (item.notationExamples || []).join(", ")
 
-    let abstractEn = "",
-      abstractUnd = ""
+    let abstractEn = ""
+    let abstractLang = ""
+    let abstractText = ""
 
-    // make non-English abstract to language code "und"
-    for (const code in item.definition) {
-      if (code === "en") {
-        abstractEn = item.definition[code][0]
-      } else {
-        abstractUnd = item.definition[code][0]
-      }
+    const def = item.definition || {}
+    if (def.en?.length) {
+      abstractEn = def.en[0] || ""
+    }
+
+    // pick und key
+    const nonEnKeys = Object.keys(def).filter(k => k !== "en")
+    const undKey = nonEnKeys.find(k => k === "und")
+    if (undKey) {
+      abstractLang = undKey
+      abstractText = def[undKey]?.[0] || ""
     }
 
     return {
       item,
       examples,
       abstractEn,
-      abstractUnd,
+      abstractText,
+      abstractLang,
       kostypes: [],
       licenses: [],
       formats: [],
@@ -402,13 +421,24 @@ export default {
     type() {
       return this.item.type.map((uri) => ({ uri }))
     },
+    jskosPreview() {
+      // clone to avoid mutating the live form state
+      const clone = JSON.parse(JSON.stringify(this.item))
+      const cleaned = this.cleanupItem(clone)
+      trimItemIdentifiers(cleaned)
+      return JSON.stringify(cleaned, null, 2)
+    },
   },
   watch: {
-    abstractEn: function (s) {
+    abstractEn(s) {
+    // Keep English definition synced
       this.item.definition.en = [s]
     },
-    abstractUnd: function (s) {
-      this.item.definition.und = [s]
+    abstractText() {
+      this.syncNonEnglishAbstract()
+    },
+    abstractLang(newLang, oldLang) {
+      this.syncNonEnglishAbstract({ oldLang })
     },
     examples: function (s) {
       this.item.notationExamples = s
@@ -448,6 +478,12 @@ export default {
     itemError() {
       if (!Object.keys(this.item.prefLabel).length) {
         return { message: "item must have at least a title!" }
+      }
+      const hasNonEnText = (this.abstractText ?? "").trim().length > 0
+      const hasLang = !!(this.abstractLang && this.abstractLang.trim().length)
+
+      if (hasNonEnText && !hasLang) {
+        return { message: "Choose a language for the non-English abstract (you can also pick 'und')." }
       }
       // TODO: add more validation
     },
@@ -534,7 +570,51 @@ export default {
           return { uri, inScheme, notation }
         })
       }
+      if (item.definition && typeof item.definition === "object") {
+        delete item.definition[""]
+      }
       return item
+    },
+    ensureDefinition() {
+      if (!this.item.definition || typeof this.item.definition !== "object") {
+        this.item.definition = {}
+      }
+    },
+    dropEmptyLangKey() {
+      if (this.item.definition && this.item.definition[""]) {
+        delete this.item.definition[""]
+      }
+    },
+    syncNonEnglishAbstract({ oldLang } = {}) {
+      this.ensureDefinition()
+      this.dropEmptyLangKey()
+
+      const lang = this.abstractLang || null
+      const text = (this.abstractText ?? "")
+      const hasText = text.trim().length > 0
+
+      // if the language has changed and there was an old language key (that is not English), remove the old language key
+      if (oldLang && oldLang !== "en" && oldLang !== lang) {
+        delete this.item.definition[oldLang]
+      }
+
+      // if there is no text, remove the current language key (if non-English)
+      if (!hasText) {
+        if (lang && lang !== "en") {
+          delete this.item.definition[lang]
+        }
+        return
+      }
+
+      // if there is text but no language, stop (the user has to select a language first)
+      if (!lang) {
+        return
+      }
+
+      // write text to the current language key (if non-English)
+      if (lang !== "en") {
+        this.item.definition[lang] = [text]
+      }
     },
   },
 }

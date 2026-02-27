@@ -4,7 +4,8 @@
     :repeatable="repeatable"
     :scheme="scheme"
     :extract-value="extractValue"
-    :extract-label="extractLabel" />
+    :extract-label="extractLabel"
+    :placeholder="placeholder" />
 </template>
 
 <script>
@@ -23,11 +24,15 @@ export default {
   props: {
     modelValue: {
       type: [String, Array],
-      default: () => this.repeatable ? [] : "",
+      default: null,
     },
     repeatable: {
       type: Boolean,
       default: false,
+    },
+    placeholder: {
+      type: String,
+      default: "Choose a language…",
     },
   },
   emits: ["update:modelValue"],
@@ -46,10 +51,25 @@ export default {
      */
     value: {
       get() {
-        return this.modelValue || "und"
+        if (this.repeatable) {
+        // always return array
+          if (Array.isArray(this.modelValue)) {
+            return this.modelValue
+          }
+          return this.modelValue ? [this.modelValue] : []
+        }
+        // always return string
+        return typeof this.modelValue === "string" ? this.modelValue : ""
       },
       set(val) {
-        this.$emit("update:modelValue", val)
+        if (this.repeatable) {
+        // always emit array
+          const arr = Array.isArray(val) ? val : (val ? [val] : [])
+          this.$emit("update:modelValue", arr)
+        } else {
+        // always emit string
+          this.$emit("update:modelValue", typeof val === "string" ? val : "")
+        }
       },
     },
   },

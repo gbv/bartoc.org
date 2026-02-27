@@ -70,13 +70,18 @@
   "optionalDependencies": {
     "fsevents": "2.3.3"
   },
+  "overrides": {
+    "minimatch": "^9.0.6"
+  },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.18",
+    "@vue/test-utils": "^2.4.6",
     "concurrently": "^9.1.0",
     "ejs-lint": "^2.0.1",
     "eslint": "^9.39.0",
     "eslint-config-gbv": "~2.7",
     "husky": "^9.1.7",
+    "jsdom": "^28.1.0",
     "jskos-vue": "^0.3.19",
     "lint-staged": "^15.2.10",
     "nodemon": "^3.1.7",

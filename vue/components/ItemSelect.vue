@@ -12,6 +12,7 @@
     :delay="200"
     :searchable="true"
     :loading="isLoading"
+    :placeholder="placeholder"
     @change="$emit('update:modelValue', $event)" />
   <Multiselect
     v-else
@@ -24,6 +25,7 @@
     :delay="200"
     :searchable="true"
     :loading="isLoading"
+    :placeholder="placeholder"
     @change="$emit('update:modelValue', $event)" />
 </template>
 
@@ -67,6 +69,10 @@ export default {
     extractLabel: {
       type: Function,
       default: (concept) => `${jskos.notation(concept)} ${jskos.prefLabel(concept)}`,
+    },
+    placeholder: {
+      type: String,
+      default: "Search…",
     },
   },
   emits: ["update:modelValue"],
