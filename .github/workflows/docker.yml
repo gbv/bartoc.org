@@ -7,6 +7,7 @@ on:
       - docker
     tags:
       - v*
+  workflow_dispatch: {}
 
 # Adapted from:
 # - https://github.com/docker/metadata-action#semver
