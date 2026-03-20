@@ -28,7 +28,7 @@
     <list-editor v-model="item.identifier" />
     Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
-  <form-row :label="'English Abstract'">
+  <!-- <form-row :label="'English Abstract'">
     <textarea
       id="abstract-en"
       v-model="abstractEn"
@@ -55,7 +55,12 @@
     Choose <i>always</i> a language for the non-English abstract (you can also select “undetermined”).
 
     If you copy text, use quotation marks and keep the original language (e.g., from the homepage).
+  </form-row> -->
+
+  <form-row :label="'Abstracts'">
+    <abstracts-editor v-model="item.definition" />
   </form-row>
+
   <form-row :label="'Languages'">
     <language-select
       v-model="item.languages"
@@ -275,6 +280,7 @@ import { loadConcepts, trimItemIdentifiers } from "../utils.js"
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
 import LanguageSelect from "./LanguageSelect.vue"
+import AbstractsEditor from "./AbstractsEditor.vue"
 import LabelEditor from "./LabelEditor.vue"
 import SubjectEditor from "./SubjectEditor.vue"
 import ListEditor from "./ListEditor.vue"
@@ -340,6 +346,7 @@ export default {
     AddressEditor,
     PublisherEditor,
     EndpointsEditor,
+    AbstractsEditor,
   },
   props: {
     user: {
@@ -386,29 +393,9 @@ export default {
 
     const examples = (item.notationExamples || []).join(", ")
 
-    let abstractEn = ""
-    let abstractLang = ""
-    let abstractText = ""
-
-    const def = item.definition || {}
-    if (def.en?.length) {
-      abstractEn = def.en[0] || ""
-    }
-
-    // pick und key
-    const nonEnKeys = Object.keys(def).filter(k => k !== "en")
-    const undKey = nonEnKeys.find(k => k === "und")
-    if (undKey) {
-      abstractLang = undKey
-      abstractText = def[undKey]?.[0] || ""
-    }
-
     return {
       item,
       examples,
-      abstractEn,
-      abstractText,
-      abstractLang,
       kostypes: [],
       licenses: [],
       formats: [],
@@ -430,16 +417,6 @@ export default {
     },
   },
   watch: {
-    abstractEn(s) {
-    // Keep English definition synced
-      this.item.definition.en = [s]
-    },
-    abstractText() {
-      this.syncNonEnglishAbstract()
-    },
-    abstractLang(newLang, oldLang) {
-      this.syncNonEnglishAbstract({ oldLang })
-    },
     examples: function (s) {
       this.item.notationExamples = s
         .split(",")
@@ -479,11 +456,14 @@ export default {
       if (!Object.keys(this.item.prefLabel).length) {
         return { message: "item must have at least a title!" }
       }
-      const hasNonEnText = (this.abstractText ?? "").trim().length > 0
-      const hasLang = !!(this.abstractLang && this.abstractLang.trim().length)
+      const englishAbstracts = Array.isArray(this.item.definition?.en)
+        ? this.item.definition.en
+        : []
 
-      if (hasNonEnText && !hasLang) {
-        return { message: "Choose a language for the non-English abstract (you can also pick 'und')." }
+      const hasEnglishAbstract = englishAbstracts.some(text => (text || "").trim())
+
+      if (!hasEnglishAbstract) {
+        return { message: "Please provide at least one English abstract." }
       }
       // TODO: add more validation
     },
@@ -575,47 +555,7 @@ export default {
       }
       return item
     },
-    ensureDefinition() {
-      if (!this.item.definition || typeof this.item.definition !== "object") {
-        this.item.definition = {}
-      }
-    },
-    dropEmptyLangKey() {
-      if (this.item.definition && this.item.definition[""]) {
-        delete this.item.definition[""]
-      }
-    },
-    syncNonEnglishAbstract({ oldLang } = {}) {
-      this.ensureDefinition()
-      this.dropEmptyLangKey()
 
-      const lang = this.abstractLang || null
-      const text = (this.abstractText ?? "")
-      const hasText = text.trim().length > 0
-
-      // if the language has changed and there was an old language key (that is not English), remove the old language key
-      if (oldLang && oldLang !== "en" && oldLang !== lang) {
-        delete this.item.definition[oldLang]
-      }
-
-      // if there is no text, remove the current language key (if non-English)
-      if (!hasText) {
-        if (lang && lang !== "en") {
-          delete this.item.definition[lang]
-        }
-        return
-      }
-
-      // if there is text but no language, stop (the user has to select a language first)
-      if (!lang) {
-        return
-      }
-
-      // write text to the current language key (if non-English)
-      if (lang !== "en") {
-        this.item.definition[lang] = [text]
-      }
-    },
   },
 }
 

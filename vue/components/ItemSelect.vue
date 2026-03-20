@@ -91,6 +91,14 @@ export default {
       return this.registry ? this.search : (this.scheme.concepts || [])
     },
   },
+  watch: {
+    modelValue: {
+      immediate: true,
+      handler(value) {
+        this.value = value || (this.repeatable ? [] : "")
+      },
+    },
+  },
   methods: {
     async search(query) {
       if (!this.registry) {

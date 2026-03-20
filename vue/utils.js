@@ -1,4 +1,6 @@
 import { cdk, addAllProviders } from "cocoda-sdk"
+import { franc } from "franc-min"
+import convert3To1 from "iso-639-3-to-1"
 addAllProviders()
 import jskos from "jskos-tools"
 
@@ -147,4 +149,21 @@ export function trimItemIdentifiers(item) {
 
   return item
 }
+
+export function guessLanguage(text) {
+  const value = (text || "").trim()
+
+  if (value.length < 10) {
+    return "und"
+  }
+
+  const code3 = franc(value, { minLength: 20 })
+
+  if (!code3 || code3 === "und") {
+    return "und"
+  }
+
+  return convert3To1(code3) || code3
+}
+
 
