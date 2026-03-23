@@ -150,20 +150,11 @@ export function trimItemIdentifiers(item) {
   return item
 }
 
-export function guessLanguage(text) {
-  const value = (text || "").trim()
-
-  if (value.length < 10) {
-    return "und"
-  }
-
-  const code3 = franc(value, { minLength: 20 })
-
-  if (!code3 || code3 === "und") {
-    return "und"
-  }
-
+/**
+ * Detect language from string with fallback to code `und`.
+ * Returns ISO-639-1 code if avaialble, ISO-639-2 otherwise.
+ */
+export function guessLanguage(text, minLength=20) {
+  const code3 = franc(text || "", { minLength })
   return convert3To1(code3) || code3
 }
-
-
