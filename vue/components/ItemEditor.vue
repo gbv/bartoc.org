@@ -28,35 +28,6 @@
     <list-editor v-model="item.identifier" />
     Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
-  <!-- <form-row :label="'English Abstract'">
-    <textarea
-      id="abstract-en"
-      v-model="abstractEn"
-      class="form-control"
-      rows="8" />
-    Please provide a short description. Better brief than nothing!
-  </form-row>
-  <form-row :label="'Non-English Abstract'">
-    <div
-      class="form-inline"
-      style="gap: 8px; align-items: flex-start;">
-      <textarea
-        id="abstract"
-        v-model="abstractText"
-        class="form-control"
-        rows="8"
-        style="flex: 1 1 auto;" />
-      <language-select
-        v-model="abstractLang"
-        class="form-control"
-        style="max-width: 240px; flex: 1 1 auto;"
-        :repeatable="false" />
-    </div>
-    Choose <i>always</i> a language for the non-English abstract (you can also select “undetermined”).
-
-    If you copy text, use quotation marks and keep the original language (e.g., from the homepage).
-  </form-row> -->
-
   <form-row :label="'Abstracts'">
     <abstracts-editor v-model="item.definition" />
   </form-row>
