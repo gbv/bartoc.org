@@ -4,6 +4,11 @@ import ItemEditor from "./components/ItemEditor.vue"
 import VocabularySearch from "./components/VocabularySearch.vue"
 import ServiceLink from "./components/ServiceLink.vue"
 import ConceptBrowser from "./components/ConceptBrowser.vue"
+import { library } from "@fortawesome/fontawesome-svg-core"
+import { faLanguage } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
+// Add icons to the library, in this case language
+library.add(faLanguage)
 
 import UserStatus from "./components/UserStatus.vue"
 // Note: Using the JSON files directly because Lodash is used in config/index.js
@@ -54,4 +59,7 @@ const app = createApp({
     },
   },
 })
+
+app.component("FontAwesomeIcon", FontAwesomeIcon)
+
 app.mount("#app")
