@@ -13,7 +13,8 @@
         </td><td class="col-3">
           <language-select
             v-model="label.language"
-            class="form-control" />
+            class="form-control"
+            :guess-from="label.label" />
         </td><td class="col-1">
           <button
             v-if="labels.length > 1"
