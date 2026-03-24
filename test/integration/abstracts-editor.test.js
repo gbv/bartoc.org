@@ -1,19 +1,7 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect } from "vitest"
 import { mount } from "@vue/test-utils"
 import AbstractsEditor from "../../vue/components/AbstractsEditor.vue"
-
-vi.mock("../../vue/utils/guessLanguage.js", () => ({
-  guessLanguage: vi.fn((text) => {
-    if ((text || "").includes("Deutsch Deutsch Deutsch")) {
-      return "de"
-    }
-    if ((text || "").includes("Italiano Italiano Italiano")) {
-      return "it"
-    }
-    return "und"
-  }),
-}))
 
 const LanguageSelectStub = {
   props: ["modelValue", "repeatable"],
@@ -142,29 +130,6 @@ describe("AbstractsEditor", () => {
     expect(last).toEqual({
       en: ["English abstract"],
       de: ["Text to classify"],
-    })
-  })
-
-  it("guess language updates the right row and emits updated definition", async () => {
-    const w = mountAbstracts({
-      modelValue: {
-        en: ["English abstract"],
-        und: ["Deutsch ist ein Beispieltext."],
-      },
-    })
-
-    const guessButtons = w.findAll("button").filter(
-      b => b.text().trim() === "guess language",
-    )
-
-    expect(guessButtons.length).toBe(2)
-
-    await guessButtons[1].trigger("click")
-
-    const last = w.emitted("update:modelValue").at(-1)[0]
-    expect(last).toEqual({
-      en: ["English abstract"],
-      de: ["Deutsch ist ein Beispieltext."],
     })
   })
 

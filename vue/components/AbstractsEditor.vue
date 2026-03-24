@@ -23,14 +23,8 @@
           v-model="row.lang"
           class="form-control"
           :repeatable="false"
+          :guess-from="row.text"
           @update:modelValue="emitValue" />
-
-        <button
-          type="button"
-          class="btn btn-primary"
-          @click="guessRowLanguage(row.id)">
-          guess language
-        </button>
 
         <button
           type="button"
@@ -52,7 +46,6 @@
 
 <script>
 import LanguageSelect from "./LanguageSelect.vue"
-import { guessLanguage } from "../utils"
 
 function definitionToRows(definition = {}) {
   let id = 0
@@ -157,11 +150,6 @@ export default {
   methods: {
     emitValue() {
       this.$emit("update:modelValue", rowsToDefinition(this.rows))
-    },
-    guessRowLanguage(id) {
-      const row = this.rows.find(row => row.id === id)
-      row.lang = guessLanguage(row.text)
-      this.emitValue()
     },
     addRow() {
       this.rows.push({

@@ -14,6 +14,7 @@
       v-if="guessFrom !== undefined"
       type="button"
       class="guess-language-btn"
+      data-testid="guess-language"
       :title="canGuess ? 'Guess language from text' : 'Text too short to guess language'"
       :aria-label="canGuess ? 'Guess language from text' : 'Text too short to guess language'"
       :disabled="!canGuess"
