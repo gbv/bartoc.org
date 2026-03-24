@@ -58,9 +58,9 @@ describe("AbstractsEditor", () => {
     })
 
     const textareas = w.findAll("textarea")
-    expect(textareas.length).toBe(3)
-    expect(textareas[1].element.value).toBe("abstract italiano")
-    expect(textareas[2].element.value).toBe("Deutsch abstract")
+    expect(textareas.length).toBe(2)
+    expect(textareas[0].element.value).toBe("abstract italiano")
+    expect(textareas[1].element.value).toBe("Deutsch abstract")
   })
 
   it("supports multiple abstracts in the same language", () => {
@@ -71,9 +71,9 @@ describe("AbstractsEditor", () => {
     })
 
     const textareas = w.findAll("textarea")
-    expect(textareas.length).toBe(3)
-    expect(textareas[1].element.value).toBe("First English")
-    expect(textareas[2].element.value).toBe("Second English")
+    expect(textareas.length).toBe(2)
+    expect(textareas[0].element.value).toBe("First English")
+    expect(textareas[1].element.value).toBe("Second English")
   })
 
   it("adds another abstract row", async () => {
@@ -83,9 +83,9 @@ describe("AbstractsEditor", () => {
       },
     })
 
-    expect(w.findAll("textarea").length).toBe(2)
+    expect(w.findAll("textarea").length).toBe(1)
     await w.findAll("button").find(b => b.text() === "add another abstract").trigger("click")
-    expect(w.findAll("textarea").length).toBe(3)
+    expect(w.findAll("textarea").length).toBe(2)
   })
 
   it("removes one abstract row and emits updated definition", async () => {
@@ -96,11 +96,11 @@ describe("AbstractsEditor", () => {
       },
     })
 
-    expect(w.findAll("textarea").length).toBe(3)
+    expect(w.findAll("textarea").length).toBe(2)
 
     await w.findAll("button").find(b => b.text() === "remove abstract").trigger("click")
 
-    expect(w.findAll("textarea").length).toBe(2)
+    expect(w.findAll("textarea").length).toBe(1)
 
     const last = w.emitted("update:modelValue").at(-1)[0]
     console.log("Emitted value after removing abstract:", last)
@@ -116,7 +116,7 @@ describe("AbstractsEditor", () => {
       },
     })
 
-    const ta = w.findAll("textarea")[1]
+    const ta = w.findAll("textarea")[0]
     await ta.setValue("Abstract italiano aggiornato")
 
     const last = w.emitted("update:modelValue").at(-1)[0]

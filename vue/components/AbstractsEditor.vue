@@ -5,19 +5,6 @@
       :key="row.id"
       class="abstract-row">
       <div
-        v-if="row.id === 0"
-        class="abstract-main">
-        <textarea
-          v-model="row.text"
-          placeholder="English abstract..."
-          class="form-control"
-          rows="6"
-          @input="emitValue"
-          @blur="pruneEmptyRow(row.id)" />
-        Please provide the English abstract with a short description (better brief than nothing!).
-      </div>
-
-      <div
         v-if="row.id !== 0"
         class="abstract-main">
         <textarea
@@ -58,7 +45,7 @@
       type="button"
       class="btn btn-primary"
       @click="addRow()">
-      add another abstract
+      {{ addLabel }}
     </button>
   </div>
 </template>
@@ -146,6 +133,11 @@ export default {
       rows,
       nextId: Math.max(...rows.map(row => row.id), 0) + 1,
     }
+  },
+  computed: {
+    addLabel() {
+      return this.rows.length > 1 ? "add another abstract" : "add abstract"
+    },
   },
   watch: {
     modelValue: {
