@@ -31,7 +31,6 @@
   <form-row :label="'Abstracts'">
     <abstracts-editor v-model="item.definition" />
   </form-row>
-
   <form-row :label="'Languages'">
     <language-select
       v-model="item.languages"
