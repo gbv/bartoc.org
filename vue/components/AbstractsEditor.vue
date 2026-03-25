@@ -80,7 +80,17 @@ function definitionToRows(definition = {}) {
 function rowsToDefinition(rows = []) {
   const definition = {}
 
-  for (const row of rows) {
+  const sortedRows = [...rows].sort((a, b) => {
+    if (a.lang === "en" && b.lang !== "en") {
+      return -1
+    }
+    if (a.lang !== "en" && b.lang === "en") {
+      return 1
+    }
+    return 0
+  })
+
+  for (const row of sortedRows) {
     const lang = (row.lang || "").trim()
     const text = row.text || ""
 
@@ -98,6 +108,8 @@ function rowsToDefinition(rows = []) {
     definition[lang].push(text)
   }
 
+  console.log("rowsToDefinition", definition)
+
   return definition
 }
 
@@ -114,15 +126,9 @@ export default {
   },
   emits: ["update:modelValue"],
   data() {
-    const rowEn = {
-      id: 0,
-      lang: "en",
-      text: "",
-    }
-    const rows = [rowEn, ...definitionToRows(this.modelValue)]
+    const rows = [...definitionToRows(this.modelValue)]
 
     return {
-      rowEn,
       rows,
       nextId: Math.max(...rows.map(row => row.id), 0) + 1,
     }

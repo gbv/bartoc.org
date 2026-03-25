@@ -529,26 +529,30 @@ export default {
   },
 }
 
-// recursively remove empty JSKOS fields
-function filtered(value) {
+function filtered(value, parentKey = null) {
   if (value && typeof value === "object") {
     if (Array.isArray(value)) {
-      value = value.map(filtered).filter(Boolean)
+      value = value.map((v) => filtered(v, parentKey)).filter(Boolean)
       return value.length ? value : null
     } else {
-      const keys =
+      let keys =
         "uri" in value && !value.uri
-          ? [] // remove object without URI
-          : Object.keys(value)
-            .filter((key) => key[0] !== "_")
-            .sort()
+          ? []
+          : Object.keys(value).filter((key) => key[0] !== "_")
+
+      // keep insertion order for definition language keys
+      if (parentKey !== "definition") {
+        keys.sort()
+      }
+
       const obj = keys.reduce((obj, key) => {
-        const fieldValue = filtered(value[key])
+        const fieldValue = filtered(value[key], key)
         if (fieldValue) {
           obj[key] = fieldValue
         }
         return obj
       }, {})
+
       return Object.keys(obj).length ? obj : null
     }
   } else {
