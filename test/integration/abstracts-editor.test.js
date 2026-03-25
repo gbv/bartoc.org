@@ -72,7 +72,9 @@ describe("AbstractsEditor", () => {
     })
 
     expect(w.findAll("textarea").length).toBe(1)
-    await w.findAll("button").find(b => b.text() === "add another abstract").trigger("click")
+
+    await w.findAll("button").find(b => b.text() === "add abstract").trigger("click")
+
     expect(w.findAll("textarea").length).toBe(2)
   })
 
