@@ -3,10 +3,22 @@ import { describe, it, expect, vi } from "vitest"
 import { mount } from "@vue/test-utils"
 import ItemEditor from "../../vue/components/ItemEditor.vue"
 
-vi.mock("../../vue/utils.js", () => ({
-  loadConcepts: () => Promise.resolve([]),
-  trimItemIdentifiers: vi.fn(),
-}))
+vi.mock("../../vue/utils.js", async (importOriginal) => {
+  const actual = await importOriginal()
+
+  return {
+    ...actual,
+    loadConcepts: () => Promise.resolve([]),
+    trimItemIdentifiers: vi.fn(),
+    createConceptApiProvider: vi.fn(() => ({
+      loadTop: () => Promise.resolve([]),
+      loadSelected: () => Promise.resolve([]),
+      search: () => Promise.resolve(["", [], [], []]),
+      loadNarrower: () => Promise.resolve(),
+      toModel: (items) => items,
+    })),
+  }
+})
 
 const FormRowStub = {
   props: ["label"],
@@ -69,6 +81,8 @@ function mountEditor(current = {}) {
         SetSelect: true,
         AddressEditor: true,
         EndpointsEditor: true,
+        ItemSelect: true,
+        ItemSelected: true,
       },
     },
   })

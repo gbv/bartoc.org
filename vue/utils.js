@@ -105,12 +105,27 @@ export function trimItemIdentifiers(item) {
   item.identifier = trimStringArray(item.identifier)
   item.languages = trimStringArray(item.languages)
   item.notation = trimStringArray(item.notation)
-  item.license = trimStringArray(item.license)
   item.type = trimStringArray(item.type)
-  item.FORMAT = trimStringArray(item.FORMAT)
-  item.ACCESS = trimStringArray(item.ACCESS)
 
   // arrays of objects with url/uri
+  if (Array.isArray(item.license)) {
+    item.license = item.license
+      .map(l => ({ ...l, uri: trimString(l.uri) }))
+      .filter(l => l.uri)
+  }
+
+  if (Array.isArray(item.FORMAT)) {
+    item.FORMAT = item.FORMAT
+      .map(f => ({ ...f, uri: trimString(f.uri) }))
+      .filter(f => f.uri)
+  }
+
+  if (Array.isArray(item.ACCESS)) {
+    item.ACCESS = item.ACCESS
+      .map(a => ({ ...a, uri: trimString(a.uri) }))
+      .filter(a => a.uri)
+  }
+
   if (Array.isArray(item.subjectOf)) {
     item.subjectOf = item.subjectOf
       .map(s => ({ ...s, url: trimString(s.url) }))
@@ -157,4 +172,108 @@ export function trimItemIdentifiers(item) {
 export function guessLanguage(text, minLength=20) {
   const code3 = franc(text || "", { minLength })
   return convert3To1(code3) || code3
+}
+
+/**
+ * Create a provider for concept selection from API endpoints.
+ * It loads top concepts, selected concepts, search results,
+ * and narrower concepts for one scheme.
+ */
+export function createConceptApiProvider({
+  schemeUri,
+  topUrl,
+  conceptsUrl,
+  suggestUrl,
+  narrowerUrl,
+  toModel = (items) => items,
+}) {
+  return {
+    // Load the top concepts of the scheme.
+    async loadTop() {
+      const url = new URL(topUrl, window.location.origin)
+      url.searchParams.set("uri", schemeUri)
+
+      const res = await fetch(url)
+      if (!res.ok) {
+        return []
+      }
+
+      return await res.json()
+    },
+
+    // Load the full concept objects for the current model value.
+    async loadSelected(modelValue) {
+      const uris = (modelValue || [])
+        .map(item => item?.uri)
+        .filter(Boolean)
+
+      if (!uris.length) {
+        return []
+      }
+
+      const url = new URL(conceptsUrl, window.location.origin)
+      url.searchParams.set("uri", uris.join("|"))
+      url.searchParams.set("voc", schemeUri)
+
+      const res = await fetch(url)
+      if (!res.ok) {
+        return []
+      }
+
+      return await res.json()
+    },
+
+    // Search concepts for the autocomplete field.
+    async search(search) {
+      const query = (search || "").trim()
+      if (!query) {
+        return ["", [], [], []]
+      }
+
+      const url = new URL(suggestUrl, window.location.origin)
+      url.searchParams.set("search", query)
+      url.searchParams.set("voc", schemeUri)
+
+      const res = await fetch(url)
+      if (!res.ok) {
+        return [query, [], [], []]
+      }
+
+      const concepts = await res.json()
+
+      // Return data in the format expected by item-select.
+      return [
+        query,
+        concepts.map(c => c.prefLabel?.en || c.notation?.[0] || c.uri || ""),
+        concepts.map(() => ""),
+        concepts.map(c => c.uri),
+      ]
+    },
+
+    // Load narrower concepts for one tree node.
+    async loadNarrower(concept) {
+      if (!concept?.uri || !narrowerUrl) {
+        return
+      }
+
+      // Do not load again if narrower concepts are already there.
+      if (
+        concept.narrower &&
+        !concept.narrower.includes(null) &&
+        concept.narrower.length
+      ) {
+        return
+      }
+
+      const url = new URL(narrowerUrl, window.location.origin)
+      url.searchParams.set("uri", concept.uri)
+      url.searchParams.set("voc", schemeUri)
+
+      const res = await fetch(url)
+      concept.narrower = res.ok ? await res.json() : []
+    },
+
+    // Convert selected concept objects to the wanted model format.
+    toModel,
+  }
 }

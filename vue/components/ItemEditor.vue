@@ -66,10 +66,11 @@
     The year when the KOS was first created (YYYY).
   </form-row>
   <form-row :label="'License'">
-    <set-select
+    Select one or more licenses.
+    <concept-scheme-picker
       v-model="item.license"
-      :options="licenses" />
-    Use Shift key to deselect or select multiple licenses.
+      :provider="licenseProvider"
+      placeholder="Search licenses…" />
   </form-row>
   <form-row :label="'URL'">
     <input
@@ -83,10 +84,11 @@
       @update:modelValue="item.subjectOf = $event.map((url) => ({ url }))" />
   </form-row>
   <form-row :label="'Formats'">
-    <set-select
-      v-model="item.FORMAT"
-      :options="formats" />
     Select the format(s) in which the KOS is available.
+    <concept-scheme-picker
+      v-model="item.FORMAT"
+      :provider="formatProvider"
+      placeholder="Search format types…" />
   </form-row>
   <form-row :label="'Access'">
     <set-select
@@ -245,7 +247,7 @@
 </template>
 
 <script>
-import { loadConcepts, trimItemIdentifiers } from "../utils.js"
+import { loadConcepts, trimItemIdentifiers, createConceptApiProvider } from "../utils.js"
 
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
@@ -256,6 +258,7 @@ import SubjectEditor from "./SubjectEditor.vue"
 import ListEditor from "./ListEditor.vue"
 import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
+import ConceptSchemePicker from "./ConceptSchemePicker.vue"
 
 const PublisherEditor = {
   emits: ["update:modelValue"],
@@ -317,6 +320,7 @@ export default {
     PublisherEditor,
     EndpointsEditor,
     AbstractsEditor,
+    ConceptSchemePicker,
   },
   props: {
     user: {
@@ -372,6 +376,30 @@ export default {
       access: [],
       error: null,
       showJSKOS: false,
+      formatScheme: {
+        uri: "http://bartoc.org/en/node/20000",
+      },
+      formatProvider: createConceptApiProvider({
+        schemeUri: "http://bartoc.org/en/node/20000",
+        topUrl: "/api/voc/top",
+        conceptsUrl: "/api/concepts",
+        suggestUrl: "/api/concepts/suggest",
+        narrowerUrl: "/api/concepts/narrower",
+        toModel: (items) => items
+          .filter(item => item?.uri)
+          .map(({ uri }) => ({ uri })),
+      }),
+      licenseProvider: createConceptApiProvider({
+        schemeUri: "http://uri.gbv.de/terminology/license/",
+        topUrl: "https://api.dante.gbv.de/voc/top",
+        conceptsUrl: "/api/concepts",
+        suggestUrl: "/api/concepts/suggest",
+        narrowerUrl: "/api/concepts/narrower",
+        toModel: (items) => items
+          .filter(item => item?.uri)
+          .map(({ uri }) => ({ uri })),
+      }),
+
     }
   },
   computed: {
