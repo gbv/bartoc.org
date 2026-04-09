@@ -90,13 +90,10 @@ a[href*="orcid.org"]:before {
 
 /* Search bar */
 .search-bar__wrapper {
-  margin-top: 36px;
+  margin-top: 24px;
   padding: 24px;
-  background: #fcfcfc;
-  border: 1px solid rgba(0, 0, 0, 0.045);
-  border-radius: 12px;
   box-sizing: border-box;
-  width: 824px;
+
 }
 .search-bar__wrapper input,
 .search-bar__wrapper select {
@@ -142,18 +139,19 @@ a[href*="orcid.org"]:before {
 .search-bar__wrapper p {
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
   line-height: 1.45;
   color: #6e7b90;
   margin-bottom: 0;
 }
 .search-bar__text {
   font-size: 18px;
-  line-height: 1.6;
-  color: #2f3744;
+  line-height: 2.0;
+  text-align: center;
+  width: 80%;
+  margin: 0 auto;
 }
 .search-bar__text a {
-  color: #5b86e5;
+  color: #8b2406;
   text-decoration: none;
   font-weight: 600;
 }
@@ -162,6 +160,16 @@ a[href*="orcid.org"]:before {
 }
 
 /* Vocabulary Search Bar */
+.vocabulary-search {
+  margin-top: 12px;
+  padding: 48px 24px;
+  background: #fcfcfc;
+  border: 1px solid rgba(0, 0, 0, 0.045);
+  border-radius: 12px;
+  width: 80%;
+  margin: 0 auto;
+}
+
 .vocabulary-search .row {
   gap: 12px;
   margin: 0;
@@ -170,10 +178,9 @@ a[href*="orcid.org"]:before {
   padding: 0;
 }
 .metadata-count-text {
-  font-size: 14px;
-  color: #666;
+  color: #8b2406;
   font-weight: bold;
-  padding-top: 24px;
+  padding-bottom: 24px;
 }
 
 /* Footer */

@@ -1,6 +1,13 @@
 <template>
   <div class="vocabulary-search">
     <form @submit.prevent="submitSearch">
+      <form-row v-if="hasSchemesCount">
+        <div class="metadata-count-text">
+          Search in metadata about
+          <span>{{ schemesCount }}</span>
+          terminologies
+        </div>
+      </form-row>
       <form-row>
         <div class="row">
           <div class="col col-md-7">
@@ -28,16 +35,9 @@
               type="submit"
               class="btn btn-primary"
               @click="submitSearch">
-              search
+              Simple Search
             </button>
           </div>
-        </div>
-      </form-row>
-      <form-row v-if="hasSchemesCount">
-        <div class="metadata-count-text">
-          Search in metadata about
-          <span>{{ schemesCount }}</span>
-          terminologies
         </div>
       </form-row>
     </form>

@@ -11,7 +11,7 @@ title:
   <div class="search-bar__text">
     BARTOC unites information about
     <a href="/vocabularies">vocabularies</a>
-    and <a href="/registries">terminology registries</a><br>
+    and <a href="/registries">terminology registries</a>
     to facilitate use of knowledge organization systems.
   </div>
 

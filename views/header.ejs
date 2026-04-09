@@ -50,7 +50,7 @@
         </div>
         <ul class="navbar-nav mr-auto">
           <li class="nav-item <%= path == '/contact' ? 'active' : '' %>">
-            <a class="nav-link" href="/contact">Contacts & Editors</a>
+            <a style="padding-right: 24px; "class="nav-link" href="/contact">Contacts & Editors</a>
           </li>
           <li v-cloak>
             <user-status :login="login" @update:user="updateUser" @update:auth="updateAuth"/>
