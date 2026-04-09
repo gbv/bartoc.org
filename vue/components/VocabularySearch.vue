@@ -23,7 +23,7 @@
               </select>
             </div>
           </form-row>
-          <div class="col col-md-3">
+          <div class="col">
             <button
               type="submit"
               class="btn btn-primary"
@@ -34,7 +34,7 @@
         </div>
       </form-row>
       <form-row v-if="hasSchemesCount">
-        <div class="text">
+        <div class="metadata-count-text">
           Search in metadata about
           <span>{{ schemesCount }}</span>
           terminologies
@@ -101,13 +101,6 @@ export default {
 </script>
 
 <style>
-.vocabulary-search {
-  padding: 1em 0em;
-}
-.text {
-  color: #666;
-  font-weight: 700;
-}
 .form-group:first-child {
   margin-bottom: 0;
 }

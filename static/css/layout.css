@@ -1,13 +1,21 @@
-footer {
-  padding: 25px 0 55px 0;
+/* General */
+body {
+  background: #F6F3F3;
 }
-footer a {
-  color: #fff;
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-.logos img {
-  transform: scale(0.8);
-  margin-left: -0.5em;
+#app > header,
+#app > footer {
+  flex-shrink: 0;
 }
+#app > .container,
+#app > main {
+  flex: 1 0 auto;
+}
+
 header {
   margin-bottom: 1.5em;
 }
@@ -22,9 +30,6 @@ ul.list-inline > li.list-inline-item:not(:last-child)::after {
   content: "\A0|\A0";
   color: #ddd;
 }
-footer ul.list-inline > li.list-inline-item:not(:last-child)::after {
-  color: #6c757d;
-}
 ul.list-inline > li.list-inline-item:not(:last-child) {
   margin-right: 0;
 }
@@ -34,10 +39,12 @@ td > ul {
 li.current-page {
   font-weight: bold;
 }
-
-label { font-weight: bold; }
-[v-cloak] { display: none; }
-
+label {
+  font-weight: bold;
+}
+[v-cloak] {
+  display: none;
+}
 a[href*="twitter.com"]:before {
   font-family: "Font Awesome 5 Brands";
   content: "\f099";
@@ -62,3 +69,146 @@ a[href*="orcid.org"]:before {
 .timeago {
   white-space: nowrap;
 }
+
+/* Home page hero wrapper */
+.hero__wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 0;
+}
+
+/* Logo */
+.bartoc-logo {
+  display: flex;
+  justify-content: center;
+  padding-top: 90px;
+}
+.bartoc-logo img {
+  max-width: 350px;
+}
+
+/* Search bar */
+.search-bar__wrapper {
+  margin-top: 36px;
+  padding: 24px;
+  background: #fcfcfc;
+  border: 1px solid rgba(0, 0, 0, 0.045);
+  border-radius: 12px;
+  box-sizing: border-box;
+  width: 824px;
+}
+.search-bar__wrapper input,
+.search-bar__wrapper select {
+  height: 45px;
+  border: 1px solid #cfd5dd;
+  border-radius: 3px;
+  color: #2f3744;
+  box-shadow: none;
+}
+.search-bar__wrapper select {
+  padding: 0 2.5rem 0 1rem;
+}
+.search-bar__wrapper input:focus,
+.search-bar__wrapper select:focus {
+  outline: none;
+  border-color: #bcc5cf;
+  box-shadow: none;
+}
+.search-bar__wrapper .btn-primary,
+.vocabulary-search button {
+  width: auto;
+  min-width: 96px;
+  height: 45px;
+  background: #a12b08;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 0 1.5rem;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+.search-bar__wrapper .btn-primary:hover,
+.search-bar__wrapper .btn-primary:focus,
+.vocabulary-search button:hover,
+.vocabulary-search button:focus {
+  background: #8b2406;
+  color: #fff;
+}
+.search-bar__wrapper p {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  line-height: 1.45;
+  color: #6e7b90;
+  margin-bottom: 0;
+}
+.search-bar__text {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #2f3744;
+}
+.search-bar__text a {
+  color: #5b86e5;
+  text-decoration: none;
+  font-weight: 600;
+}
+.search-bar__text a:hover {
+  text-decoration: underline;
+}
+
+/* Vocabulary Search Bar */
+.vocabulary-search .row {
+  gap: 12px;
+  margin: 0;
+}
+.vocabulary-search .row > div {
+  padding: 0;
+}
+.metadata-count-text {
+  font-size: 14px;
+  color: #666;
+  font-weight: bold;
+  padding-top: 24px;
+}
+
+/* Footer */
+footer {
+  padding: 36px 0 36px 0;
+}
+footer a {
+  color: #fff;
+  font-weight: bold;
+}
+footer ul.list-inline > li.list-inline-item:not(:last-child)::after {
+  color: #6c757d;
+}
+footer .container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.navbar {
+  font-weight: 600;
+  color: #A1A8B0;
+}
+.navbar-brand .bartoc-logo__image {
+  height: 48px;
+  max-height: none;
+  width: auto;
+}
+.navbar-dark .navbar-nav .nav-link {
+  color: #E3E7EC;
+  opacity: 0.95;
+  text-decoration: none;
+}
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: #E3E7EC;
+  opacity: 0.95;
+  text-decoration: underline;
+}
+
