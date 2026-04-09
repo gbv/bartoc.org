@@ -247,7 +247,7 @@
 </template>
 
 <script>
-import { loadConcepts, trimItemIdentifiers, createConceptApiProvider } from "../utils.js"
+import { loadConcepts, trimItemIdentifiers, createConceptApiProvider, validatePublisher } from "../utils.js"
 
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
@@ -259,41 +259,7 @@ import ListEditor from "./ListEditor.vue"
 import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
 import ConceptSchemePicker from "./ConceptSchemePicker.vue"
-
-const PublisherEditor = {
-  emits: ["update:modelValue"],
-  template: `
-  <table class="table table-sm table-borderless">
-    <tbody>
-      <tr>
-        <td><input type="text" class="form-control" v-model="name"/></td>
-        <td>Name</td>
-      </tr><tr>
-        <td><input type="text" class="form-control" v-model="viaf"/></td>
-        <td><a href="http://viaf.org/">VIAF</a> URI</td>
-      </tr>
-    </tbody>
-  </table>`,
-  props: {
-    modelValue: Array,
-  },
-  data() {
-    const publisher = (this.modelValue || [])[0] || {}
-    return {
-      viaf: publisher.uri,
-      name: (publisher.prefLabel || {}).en,
-    }
-  },
-  created() {
-    const update = function () {
-      this.$emit("update:modelValue", [
-        { uri: this.viaf, prefLabel: { en: this.name } },
-      ])
-    }
-    this.$watch("name", update)
-    this.$watch("viaf", update)
-  },
-}
+import PublisherEditor from "./PublisherEditor.vue"
 
 function githubIssueUrl(title, body) {
   return (
@@ -463,6 +429,13 @@ export default {
       if (!hasEnglishAbstract) {
         return { message: "Please provide at least one English abstract." }
       }
+
+      // Publisher validation
+      const publisherError = validatePublisher(this.item.publisher?.[0])
+      if (publisherError) {
+        return publisherError
+      }
+
       // TODO: add more validation
     },
     async saveItem() {
