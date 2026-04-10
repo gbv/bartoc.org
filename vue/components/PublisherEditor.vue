@@ -53,7 +53,7 @@ export default {
   },
   computed: {
     uriInvalid() {
-      return !isValidUrl(this.uri)
+      return (this.uri || this.name) && !isValidUrl(this.uri)
     },
   },
   watch: {
