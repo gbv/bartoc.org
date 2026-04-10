@@ -20,7 +20,7 @@
           <div
             v-if="uriInvalid"
             class="invalid-feedback d-block">
-            Please enter a valid URL.
+            Please enter a valid HTTP(S) URI
           </div>
         </td>
         <td>URI</td>
@@ -53,7 +53,7 @@ export default {
   },
   computed: {
     uriInvalid() {
-      return !!this.uri && !isValidUrl(this.uri)
+      return !isValidUrl(this.uri)
     },
   },
   watch: {
@@ -83,22 +83,12 @@ export default {
     emitValue() {
       const name = this.name.trim()
       const uri = this.uri.trim()
-
-      if (!name && !uri) {
+      if (name && uri) {
+        const publisher = { uri, prefLabel: { en: name } }
+        this.$emit("update:modelValue", [publisher])
+      } else {
         this.$emit("update:modelValue", [])
-        return
       }
-
-      const publisher = {}
-
-      if (name) {
-        publisher.prefLabel = { en: name }
-      }
-      if (uri) {
-        publisher.uri = uri
-      }
-
-      this.$emit("update:modelValue", [publisher])
     },
   },
 }

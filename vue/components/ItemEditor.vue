@@ -66,7 +66,6 @@
     The year when the KOS was first created (YYYY).
   </form-row>
   <form-row :label="'License'">
-    Select one or more licenses.
     <concept-scheme-picker
       v-model="item.license"
       :provider="licenseProvider"
@@ -84,7 +83,6 @@
       @update:modelValue="item.subjectOf = $event.map((url) => ({ url }))" />
   </form-row>
   <form-row :label="'Formats'">
-    Select the format(s) in which the KOS is available.
     <concept-scheme-picker
       v-model="item.FORMAT"
       :provider="formatProvider"
@@ -173,26 +171,6 @@
       type="text"
       class="form-control">
     Please use comma to separate multiple notations.
-  </form-row>
-  <hr>
-  <p>Relevant only for vocabularies used in PICA or MARC databases:</p>
-  <form-row :label="'MARCSpec'">
-    <input
-      v-model="item.MARCSPEC"
-      type="text"
-      class="form-control">
-  </form-row>
-  <form-row :label="'PICA path'">
-    <input
-      v-model="item.PICAPATH"
-      type="text"
-      class="form-control">
-  </form-row>
-  <form-row :label="'CQL key'">
-    <input
-      v-model="item.CQLKEY"
-      type="text"
-      class="form-control">
   </form-row>
   <hr>
   <p>
@@ -420,20 +398,15 @@ export default {
       if (!Object.keys(this.item.prefLabel).length) {
         return { message: "item must have at least a title!" }
       }
-      const englishAbstracts = Array.isArray(this.item.definition?.en)
-        ? this.item.definition.en
-        : []
-
-      const hasEnglishAbstract = englishAbstracts.some(text => (text || "").trim())
-
-      if (!hasEnglishAbstract) {
+      if (!this.item.definition?.en?.some(text => text?.trim() || "")) {
         return { message: "Please provide at least one English abstract." }
       }
 
-      // Publisher validation
-      const publisherError = validatePublisher(this.item.publisher?.[0])
-      if (publisherError) {
-        return publisherError
+      if (this.item.publisher?.length) {
+        const error = validatePublisher(this.item.publisher[0])
+        if (error) {
+          return error
+        }
       }
 
       // TODO: add more validation
