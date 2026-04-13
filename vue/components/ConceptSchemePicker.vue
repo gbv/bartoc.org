@@ -1,7 +1,3 @@
-Thought for a few seconds
-
-Sure — here is a version with simple comments, without overdoing it:
-
 <template>
   <!-- Search and select concepts from one scheme -->
   <item-select
