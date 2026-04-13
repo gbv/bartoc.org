@@ -1,4 +1,13 @@
 <template>
+  <!-- Show selected concepts before the search -->
+  <div class="selected-items">
+    <item-selected
+      v-model="selected"
+      view="table"
+      orderable
+      removable />
+  </div>
+
   <!-- Search and select concepts from one scheme -->
   <item-select
     :search="provider.search"
@@ -7,14 +16,6 @@
     :tree-concepts="treeConcepts"
     :tree-load-narrower="provider.loadNarrower"
     @select="addSelected" />
-
-  <!-- Show selected concepts below the search -->
-  <div class="selected-items">
-    <item-selected
-      v-model="selected"
-      view="list"
-      removable />
-  </div>
 </template>
 
 <script>
@@ -127,6 +128,7 @@ export default {
 <style scoped>
 .selected-items {
   margin-top: 0.75rem;
+  padding-bottom: 24px;;
 }
 
 .selected-items :deep(.jskos-vue-itemList) {
