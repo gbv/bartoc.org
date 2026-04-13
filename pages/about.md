@@ -2,30 +2,47 @@
 title: About
 ---
 
-The **Basic Register of Thesauri, Ontologies & Classifications (BARTOC)** is
-a database of Knowledge Organization Systems and KOS related registries.
 
-The main goal of BARTOC is
-to list as many Knowledge Organization Systems as possible at one place
-in order to achieve greater visibility, highlight their features, make
-them searchable and comparable, and foster knowledge sharing. BARTOC
-includes any kind of KOS from any subject area, in any language, any
-publication format, and any form of accessibility. BARTOC’s search
-interface is available in 20 European languages and provides two search
-options: Basic Search by keywords, and Advanced Search by taxonomy
-terms. A [circle of editors](/contact) has gathered around BARTOC from all across
-Europe and BARTOC has been approved by
-the [International Society for Knowledge Organization (ISKO)](http://www.isko.org/).
+<div class="about__wrapper">
+  <div class="about__content">
+  The <span style="font-weight: bold;">Basic Register of Thesauri, Ontologies & Classifications (BARTOC)</span> is
+  a database of Knowledge Organization Systems and KOS related registries.
 
-BARTOC was founded by Andreas Ledl as the Basel Register of Thesauri,
-Ontologies & Classifications at [Basel University Library, Switzerland](https://www.ub.unibas.ch/).
-In 2020 the database moved to the Verbundzentrale des GBV (VZG), Germany and
-got renamed and ported from Drupal to a new [technical infrastructure](/contributing).
-The implementation is [fully available](https://github.com/gbv/bartoc.org) as Open Source.
+  The main goal of BARTOC is
+  to list as many Knowledge Organization Systems as possible at one place
+  in order to achieve greater visibility, highlight their features, make
+  them searchable and comparable, and foster knowledge sharing. BARTOC
+  includes any kind of KOS from any subject area, in any language, any
+  publication format, and any form of accessibility. BARTOC’s search
+  interface is available in 20 European languages and provides two search
+  options: Basic Search by keywords, and Advanced Search by taxonomy
+  terms. A [circle of editors](/contact) has gathered around BARTOC from all across
+  Europe and BARTOC has been approved by
+  the [International Society for Knowledge Organization (ISKO)](http://www.isko.org/).
 
-Read more about BARTOC in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](https://en.wikipedia.org/wiki/BARTOC).
+  BARTOC was founded by Andreas Ledl as the Basel Register of Thesauri,
+  Ontologies & Classifications at [Basel University Library, Switzerland](https://www.ub.unibas.ch/).
+  In 2020 the database moved to the Verbundzentrale des GBV (VZG), Germany and
+  got renamed and ported from Drupal to a new [technical infrastructure](/contributing).
+  The implementation is [fully available](https://github.com/gbv/bartoc.org) as Open Source.
 
-<img src="/img/bartoc-logo.svg" />
+  Read more about BARTOC in Wikipedia at [https://en.wikipedia.org/wiki/BARTOC](https://en.wikipedia.org/wiki/BARTOC).
+
+  </div>
+
+  <div class="about__logos">
+    <img src="/img/logo-isko.png" />
+    <img src="/img/danslogo.png" />
+    <img src="/img/logo-tematres-home.png" />
+  </div>
+
+
+
+</div>
+
+
+
+
 
 **Publications**
 
