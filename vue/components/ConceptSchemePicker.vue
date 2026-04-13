@@ -149,7 +149,6 @@ export default {
 
 .selected-items :deep(.jskos-vue-itemName-notation) {
   font-weight: 600;
-  color: #0d6efd;
 }
 
 .selected-items :deep(.jskos-vue-itemSelected-listRemove) {
