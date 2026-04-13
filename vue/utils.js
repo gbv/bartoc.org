@@ -277,3 +277,26 @@ export function createConceptApiProvider({
     toModel,
   }
 }
+
+// Check if a value is a valid HTTP(S) URL
+export function isValidUrl(value) {
+  try {
+    const url = new URL(value)
+    return url.protocol === "http:" || url.protocol === "https:"
+  } catch {
+    return false
+  }
+}
+
+// validate publisher object with fields `prefLabel.en` and `uri`
+export function validatePublisher(publisher) {
+  if (!publisher.prefLabel?.en?.trim()) {
+    return { message: "Publisher name is required!" }
+  }
+
+  if (!publisher.uri) {
+    return { message: "Publisher URI is required!" }
+  } else if (!isValidUrl(publisher.uri)) {
+    return { message: "Publisher URI must be a valid HTTP(S) URL!" }
+  }
+}

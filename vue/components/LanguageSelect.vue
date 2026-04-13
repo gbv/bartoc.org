@@ -52,7 +52,7 @@ export default {
     },
     placeholder: {
       type: String,
-      default: "Choose a language…",
+      default: "language…",
     },
     guessFrom: {
       type: String,

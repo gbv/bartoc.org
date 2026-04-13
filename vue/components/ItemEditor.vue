@@ -66,7 +66,6 @@
     The year when the KOS was first created (YYYY).
   </form-row>
   <form-row :label="'License'">
-    Select one or more licenses.
     <concept-scheme-picker
       v-model="item.license"
       :provider="licenseProvider"
@@ -84,7 +83,6 @@
       @update:modelValue="item.subjectOf = $event.map((url) => ({ url }))" />
   </form-row>
   <form-row :label="'Formats'">
-    Select the format(s) in which the KOS is available.
     <concept-scheme-picker
       v-model="item.FORMAT"
       :provider="formatProvider"
@@ -175,26 +173,6 @@
     Please use comma to separate multiple notations.
   </form-row>
   <hr>
-  <p>Relevant only for vocabularies used in PICA or MARC databases:</p>
-  <form-row :label="'MARCSpec'">
-    <input
-      v-model="item.MARCSPEC"
-      type="text"
-      class="form-control">
-  </form-row>
-  <form-row :label="'PICA path'">
-    <input
-      v-model="item.PICAPATH"
-      type="text"
-      class="form-control">
-  </form-row>
-  <form-row :label="'CQL key'">
-    <input
-      v-model="item.CQLKEY"
-      type="text"
-      class="form-control">
-  </form-row>
-  <hr>
   <p>
     By saving you agree to publish the vocabulary metadata as public domain. All
     metadata is editable by the community of
@@ -247,7 +225,7 @@
 </template>
 
 <script>
-import { loadConcepts, trimItemIdentifiers, createConceptApiProvider } from "../utils.js"
+import { loadConcepts, trimItemIdentifiers, createConceptApiProvider, validatePublisher } from "../utils.js"
 
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
@@ -259,41 +237,7 @@ import ListEditor from "./ListEditor.vue"
 import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
 import ConceptSchemePicker from "./ConceptSchemePicker.vue"
-
-const PublisherEditor = {
-  emits: ["update:modelValue"],
-  template: `
-  <table class="table table-sm table-borderless">
-    <tbody>
-      <tr>
-        <td><input type="text" class="form-control" v-model="name"/></td>
-        <td>Name</td>
-      </tr><tr>
-        <td><input type="text" class="form-control" v-model="viaf"/></td>
-        <td><a href="http://viaf.org/">VIAF</a> URI</td>
-      </tr>
-    </tbody>
-  </table>`,
-  props: {
-    modelValue: Array,
-  },
-  data() {
-    const publisher = (this.modelValue || [])[0] || {}
-    return {
-      viaf: publisher.uri,
-      name: (publisher.prefLabel || {}).en,
-    }
-  },
-  created() {
-    const update = function () {
-      this.$emit("update:modelValue", [
-        { uri: this.viaf, prefLabel: { en: this.name } },
-      ])
-    }
-    this.$watch("name", update)
-    this.$watch("viaf", update)
-  },
-}
+import PublisherEditor from "./PublisherEditor.vue"
 
 function githubIssueUrl(title, body) {
   return (
@@ -454,15 +398,17 @@ export default {
       if (!Object.keys(this.item.prefLabel).length) {
         return { message: "item must have at least a title!" }
       }
-      const englishAbstracts = Array.isArray(this.item.definition?.en)
-        ? this.item.definition.en
-        : []
-
-      const hasEnglishAbstract = englishAbstracts.some(text => (text || "").trim())
-
-      if (!hasEnglishAbstract) {
+      if (!this.item.definition?.en?.some(text => text?.trim() || "")) {
         return { message: "Please provide at least one English abstract." }
       }
+
+      if (this.item.publisher?.length) {
+        const error = validatePublisher(this.item.publisher[0])
+        if (error) {
+          return error
+        }
+      }
+
       // TODO: add more validation
     },
     async saveItem() {
