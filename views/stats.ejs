@@ -1,39 +1,72 @@
 <%- include('header') %>
 
-<h4>Vocabularies</h4>
-<p>
-  BARTOC contains information about
-  <a href="/vocabularies"><%= schemesCount %> vocabularies</a>.
-  The data is <a href="/download">freely available for download</a>.
-  See <a href="/tracker">recent changes</a> for modifications.
-</p>
+<div class="container py-4">
 
-<h4>Registries</h4>
-<p>
-  BARTOC is not the only vocabulary registry.
-  We have catalogued <a href="/registries"><%= registriesCount %> terminology registries</a>, including <a href="/registries?type=http://bartoc.org/full-repository">
-  <%= repositoriesCount %> repositories or services</a> with full access to
-  vocabulary content.
-</p>
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h4 class="card-title">Vocabularies</h4>
+          <p class="card-text">
+            BARTOC contains information about
+            <a href="/vocabularies"><%= schemesCount %> vocabularies</a>.
+            The data is <a href="/download">freely available for download</a>.
+            See <a href="/tracker">recent changes</a> for modifications.
+          </p>
+        </div>
+      </div>
+    </div>
 
-<h4>More Statistics</h4>
-<p>
-  See <a href="/data/reports/growth.csv">growth.csv</a> for monthly growth
-  and <a href="/data/reports/stats.json">this JSON file</a> for more detailled statistics.
-</p>
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h4 class="card-title">Registries</h4>
+          <p class="card-text">
+            BARTOC is not the only vocabulary registry.
+            We have catalogued
+            <a href="/registries"><%= registriesCount %> terminology registries</a>,
+            including
+            <a href="/registries?type=http://bartoc.org/full-repository">
+              <%= repositoriesCount %> repositories or services
+            </a>
+            with full access to vocabulary content.
+          </p>
+        </div>
+      </div>
+    </div>
 
-<% if (reports.length) { %>
-<h4>Daily Data Quality Reports</h4>
-<p>
-  <ul class="list-inline">
-  <% for (file of reports) { %>
-    <li class="list-inline-item">
-      <a href="/data/reports/<%= file %>"><%= file %></a>
-    </li>
-  <% } %>
-  </ul>
-</p>
-<% } %>
+    <div style="padding-top: 24px;" class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">More Statistics</h4>
+          <p class="card-text mb-0">
+            See <a href="/data/reports/growth.csv">growth.csv</a> for monthly growth
+            and <a href="/data/reports/stats.json">this JSON file</a> for more detailed statistics.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <% if (reports.length) { %>
+      <div class="col-12 pt-4">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title">Daily Data Quality Reports</h4>
+            <div class="d-flex flex-wrap">
+              <% for (file of reports) { %>
+                <a
+                  href="/data/reports/<%= file %>"
+                  class="btn btn-outline-secondary btn-sm mr-3 mt-3">
+                  <%= file %>
+                </a>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>
 
 <%- include('footer') %>
 
