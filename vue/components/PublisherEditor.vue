@@ -83,12 +83,20 @@ export default {
     emitValue() {
       const name = this.name.trim()
       const uri = this.uri.trim()
-      if (name && uri) {
-        const publisher = { uri, prefLabel: { en: name } }
-        this.$emit("update:modelValue", [publisher])
-      } else {
+      if (!name && !uri) {
         this.$emit("update:modelValue", [])
+        return
       }
+
+      const publisher = {}
+
+      if (name) {
+        publisher.prefLabel = { en: name }
+      }
+      if (uri) {
+        publisher.uri = uri
+      }
+      this.$emit("update:modelValue", [publisher])
     },
   },
 }
