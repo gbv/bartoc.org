@@ -1,6 +1,8 @@
 <template>
   <!-- Show selected concepts before the search -->
-  <div class="selected-items">
+  <div
+    v-if="showSelected"
+    class="selected-items">
     <item-selected
       v-model="selected"
       view="table"
@@ -59,8 +61,12 @@ export default {
       type: Boolean,
       default: true,
     },
+    showSelected: {
+      type: Boolean,
+      default: true,
+    },
   },
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "pick"],
   data() {
     return {
       // Top concepts for the tree.
@@ -120,6 +126,7 @@ export default {
       const exists = this.selected.some(i => i?.uri === item.uri)
       if (!exists) {
         this.selected = [...this.selected, item]
+        this.$emit("pick", item)
       }
     },
   },
@@ -128,39 +135,97 @@ export default {
 <style scoped>
 .selected-items {
   margin-top: 0.75rem;
-  padding-bottom: 24px;;
+  padding-bottom: 24px;
 }
 
-.selected-items :deep(.jskos-vue-itemList) {
+.selected-items :deep(.jskos-vue-itemSelected-table) {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 8px;
+  border: none;
+  border-radius: 0;
 }
 
-.selected-items :deep(.jskos-vue-itemList-item) {
+.selected-items :deep(.jskos-vue-itemSelected-row) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: stretch;
+  column-gap: 0.5rem;
+  border: none;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-cell) {
+  background: #fff;
+  padding: 0.5rem 0.75rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid #dee2e6;
-  border-radius: 0.5rem;
+  min-width: 0;
+  border: 1px solid #adb5bd;
+  border-radius: 6px;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actions) {
+  display: flex;
+  align-items: stretch;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionGroup) {
+  display: flex;
+  border-radius: 0;
+  border: 1px solid #adb5bd;
+  border-radius: 6px;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn) {
+  min-width: 38px;
+  height: 100%;
+  padding: 0;
   background: #fff;
+  color: #6c757d;
+  line-height: 1;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn):nth-child(2) {
+  border-left: 1px solid;
+  border-right: 1px solid;
+
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn:hover:not(:disabled)) {
+  background: #6c757d;
+  color: #fff;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn:disabled) {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .selected-items :deep(.jskos-vue-itemName-notation) {
   font-weight: 600;
 }
 
-.selected-items :deep(.jskos-vue-itemSelected-listRemove) {
-  border: none;
-  background: transparent;
-  color: #6c757d;
-  font-size: 1.1rem;
-  cursor: pointer;
+/* Center the arrow inside the button */
+.selected-items :deep(.jskos-vue-arrow) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
-.selected-items :deep(.jskos-vue-itemSelected-listRemove:hover) {
-  color: #dc3545;
+.selected-items :deep(.jskos-vue-arrow-up),
+.selected-items :deep(.jskos-vue-arrow-down) {
+  display: none;
 }
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn[aria-label="Move up"] .jskos-vue-arrow)::before {
+  content: "\25B2";
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn[aria-label="Move down"] .jskos-vue-arrow)::before {
+  content: "\25BC";
+}
+
 </style>
 
