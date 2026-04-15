@@ -20,7 +20,8 @@
     @select="addSelected" />
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref, watch } from "vue"
 import { ItemSelect, ItemSelected } from "jskos-vue"
 
 // Compare two lists by URI only.
@@ -30,108 +31,101 @@ function sameUris(a = [], b = []) {
   return JSON.stringify(aUris) === JSON.stringify(bUris)
 }
 
-/**
- * Generic picker for concepts from one scheme.
- * It uses a provider to load top concepts, selected concepts,
- * search results, and narrower concepts.
- */
-export default {
-  components: {
-    ItemSelect,
-    ItemSelected,
+const props = defineProps({
+  // Current model value from the parent component.
+  modelValue: {
+    type: Array,
+    default: () => [],
   },
-  props: {
-    // Current model value from the parent component.
-    modelValue: {
-      type: Array,
-      default: () => [],
-    },
-    // Provider with API methods for this scheme.
-    provider: {
-      type: Object,
-      required: true,
-    },
-    // Placeholder text for the search field.
-    placeholder: {
-      type: String,
-      default: "",
-    },
-    // Show or hide the tree in item-select.
-    showTree: {
-      type: Boolean,
-      default: true,
-    },
-    showSelected: {
-      type: Boolean,
-      default: true,
-    },
+  // Provider with API methods for this scheme.
+  provider: {
+    type: Object,
+    required: true,
   },
-  emits: ["update:modelValue", "pick"],
-  data() {
-    return {
-      // Top concepts for the tree.
-      treeConcepts: [],
-      // Full selected concept objects.
-      selected: [],
+  // Placeholder text for the search field.
+  placeholder: {
+    type: String,
+    default: "",
+  },
+  // Show or hide the tree in item-select.
+  showTree: {
+    type: Boolean,
+    default: true,
+  },
+  // Show or hide the selected items block.
+  showSelected: {
+    type: Boolean,
+    default: true,
+  },
+})
+
+const emit = defineEmits(["update:modelValue", "pick"])
+
+// Top concepts for the tree.
+const treeConcepts = ref([])
+
+// Full selected concept objects.
+const selected = ref([])
+
+// Keep internal selected concepts in sync with the parent model value.
+watch(
+  () => props.modelValue,
+  async (value) => {
+    const currentModel = props.provider.toModel
+      ? props.provider.toModel(selected.value)
+      : selected.value
+
+    // Do nothing if the URIs are the same.
+    if (sameUris(value, currentModel)) {
+      return
     }
-  },
-  watch: {
-    modelValue: {
-      deep: true,
-      async handler(value) {
-        const currentModel = this.provider.toModel
-          ? this.provider.toModel(this.selected)
-          : this.selected
 
-        // Do nothing if the URIs are the same.
-        if (sameUris(value, currentModel)) {
-          return
-        }
-
-        // Reload selected concepts from the new model value.
-        this.selected = this.provider.loadSelected
-          ? await this.provider.loadSelected(value)
-          : [...value]
-      },
-    },
-    selected: {
-      deep: true,
-      handler(value) {
-        const model = this.provider.toModel
-          ? this.provider.toModel(value)
-          : value
-
-        // Send the updated model value to the parent.
-        this.$emit("update:modelValue", model)
-      },
-    },
+    // Reload selected concepts from the new model value.
+    selected.value = props.provider.loadSelected
+      ? await props.provider.loadSelected(value)
+      : [...value]
   },
-  async created() {
-    // Load tree concepts when the component starts.
-    this.treeConcepts = this.provider.loadTop
-      ? await this.provider.loadTop()
-      : []
+  { deep: true },
+)
 
-    // Load full selected concepts for the initial model value.
-    this.selected = this.provider.loadSelected
-      ? await this.provider.loadSelected(this.modelValue)
-      : [...this.modelValue]
+// Emit model updates when selected concepts change.
+watch(
+  selected,
+  (value) => {
+    const model = props.provider.toModel
+      ? props.provider.toModel(value)
+      : value
+
+    emit("update:modelValue", model)
   },
-  methods: {
-    // Add one selected concept if it is not already in the list.
-    addSelected(item) {
-      if (!item?.uri) {
-        return
-      }
-      const exists = this.selected.some(i => i?.uri === item.uri)
-      if (!exists) {
-        this.selected = [...this.selected, item]
-        this.$emit("pick", item)
-      }
-    },
-  },
+  { deep: true },
+)
+
+// Load top concepts and initial selected concepts on mount.
+onMounted(async () => {
+  treeConcepts.value = props.provider.loadTop
+    ? await props.provider.loadTop()
+    : []
+
+  selected.value = props.provider.loadSelected
+    ? await props.provider.loadSelected(props.modelValue)
+    : [...props.modelValue]
+})
+
+// Add one selected concept if it is not already in the list.
+function addSelected(item) {
+  if (!item?.uri) {
+    return
+  }
+
+  const exists = selected.value.some(i => i?.uri === item.uri)
+  if (!exists) {
+    selected.value = [...selected.value, item]
+    emit("pick", item)
+  }
 }
 </script>
+
 <style scoped>
 .selected-items {
   margin-top: 0.75rem;
@@ -188,7 +182,6 @@ export default {
 .selected-items :deep(.jskos-vue-itemSelected-actionBtn):nth-child(2) {
   border-left: 1px solid;
   border-right: 1px solid;
-
 }
 
 .selected-items :deep(.jskos-vue-itemSelected-actionBtn:hover:not(:disabled)) {
@@ -226,6 +219,4 @@ export default {
 .selected-items :deep(.jskos-vue-itemSelected-actionBtn[aria-label="Move down"] .jskos-vue-arrow)::before {
   content: "\25BC";
 }
-
 </style>
-
