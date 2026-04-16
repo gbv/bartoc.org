@@ -278,6 +278,150 @@ export function createConceptApiProvider({
   }
 }
 
+
+/**
+ * Resolve the working registry and API scheme for one indexing scheme.
+ * We first try the main scheme URI and then optional identifier URIs.
+ */
+export async function resolveRegistryScheme(scheme) {
+  const possibleUris = [scheme.uri, ...((scheme.identifier) || [])]
+
+  for (const uri of possibleUris) {
+    const accessScheme = { ...scheme, uri }
+    const registry = registryForScheme(accessScheme)
+
+    if (!registry) {
+      continue
+    }
+
+    try {
+      await registry.getTop({ scheme: accessScheme })
+      return { registry, accessScheme }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  return {
+    registry: registryForScheme(scheme),
+    accessScheme: scheme,
+  }
+}
+
+/**
+ * Create a provider for subject concepts from one indexing scheme.
+ * This is meant for ConceptSchemePicker and reuses indexingSchemes data.
+ */
+export function createSubjectProvider(scheme) {
+  // Resolve registry and access scheme once and reuse the result.
+  const resolved = resolveRegistryScheme(scheme)
+
+  return {
+    // Load top concepts for the tree.
+    async loadTop() {
+      const { registry, accessScheme } = await resolved
+      if (!registry || !accessScheme) {
+        return []
+      }
+
+      try {
+        const top = await registry.getTop({ scheme: accessScheme })
+        return sortConcepts(top || [], scheme)
+      } catch (e) {
+        console.error(e)
+        return []
+      }
+    },
+
+    // Load full concept objects for the current selected subjects.
+    async loadSelected(modelValue) {
+      const { accessScheme } = await resolved
+      const uris = (modelValue || [])
+        .map(subject => subject?.uri)
+        .filter(Boolean)
+
+      if (!uris.length || !accessScheme) {
+        return []
+      }
+
+      const loaded = await Promise.all(
+        uris.map(uri => cdkLoadConcepts(accessScheme, uri).catch(() => [])),
+      )
+
+      return loaded.flat().filter(Boolean)
+    },
+
+    // Search concepts in the active indexing scheme.
+    async search(search) {
+      const query = (search || "").trim()
+      if (!query) {
+        return ["", [], [], []]
+      }
+
+      const { registry, accessScheme } = await resolved
+      if (!registry || !accessScheme) {
+        return [query, [], [], []]
+      }
+
+      try {
+        const concepts = await registry.search({
+          search: query,
+          scheme: accessScheme,
+        })
+
+        return [
+          query,
+          (concepts || []).map(c => c.prefLabel?.en || c.notation?.[0] || c.uri || ""),
+          (concepts || []).map(() => ""),
+          (concepts || []).map(c => c.uri),
+        ]
+      } catch (e) {
+        console.error(e)
+        return [query, [], [], []]
+      }
+    },
+
+    // Load narrower concepts for one tree node.
+    async loadNarrower(concept) {
+      if (!concept?.uri) {
+        return
+      }
+
+      if (
+        concept.narrower &&
+        !concept.narrower.includes(null) &&
+        concept.narrower.length
+      ) {
+        return
+      }
+
+      const { accessScheme } = await resolved
+      const url = new URL("/api/concepts/narrower", window.location.origin)
+      url.searchParams.set("uri", concept.uri)
+
+      if (accessScheme?.uri) {
+        url.searchParams.set("voc", accessScheme.uri)
+      }
+
+      const res = await fetch(url)
+      const kids = res.ok ? await res.json() : []
+      concept.narrower = sortConcepts(kids, scheme)
+    },
+
+    // Convert selected concepts back to subject objects.
+    toModel(items) {
+      return (items || [])
+        .filter(item => item?.uri)
+        .map(item => ({
+          uri: item.uri,
+          notation: item.notation,
+          prefLabel: item.prefLabel,
+          inScheme: [{ uri: scheme.uri }],
+        }))
+    },
+  }
+}
+
 // Check if a value is a valid HTTP(S) URL
 export function isValidUrl(value) {
   try {

@@ -1,8 +1,15 @@
-Thought for a few seconds
-
-Sure — here is a version with simple comments, without overdoing it:
-
 <template>
+  <!-- Show selected concepts before the search -->
+  <div
+    v-if="showSelected"
+    class="selected-items">
+    <item-selected
+      v-model="selected"
+      view="table"
+      orderable
+      removable />
+  </div>
+
   <!-- Search and select concepts from one scheme -->
   <item-select
     :search="provider.search"
@@ -11,17 +18,10 @@ Sure — here is a version with simple comments, without overdoing it:
     :tree-concepts="treeConcepts"
     :tree-load-narrower="provider.loadNarrower"
     @select="addSelected" />
-
-  <!-- Show selected concepts below the search -->
-  <div class="selected-items">
-    <item-selected
-      v-model="selected"
-      view="list"
-      removable />
-  </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref, watch } from "vue"
 import { ItemSelect, ItemSelected } from "jskos-vue"
 
 // Compare two lists by URI only.
@@ -31,139 +31,192 @@ function sameUris(a = [], b = []) {
   return JSON.stringify(aUris) === JSON.stringify(bUris)
 }
 
-/**
- * Generic picker for concepts from one scheme.
- * It uses a provider to load top concepts, selected concepts,
- * search results, and narrower concepts.
- */
-export default {
-  components: {
-    ItemSelect,
-    ItemSelected,
+const props = defineProps({
+  // Current model value from the parent component.
+  modelValue: {
+    type: Array,
+    default: () => [],
   },
-  props: {
-    // Current model value from the parent component.
-    modelValue: {
-      type: Array,
-      default: () => [],
-    },
-    // Provider with API methods for this scheme.
-    provider: {
-      type: Object,
-      required: true,
-    },
-    // Placeholder text for the search field.
-    placeholder: {
-      type: String,
-      default: "",
-    },
-    // Show or hide the tree in item-select.
-    showTree: {
-      type: Boolean,
-      default: true,
-    },
+  // Provider with API methods for this scheme.
+  provider: {
+    type: Object,
+    required: true,
   },
-  emits: ["update:modelValue"],
-  data() {
-    return {
-      // Top concepts for the tree.
-      treeConcepts: [],
-      // Full selected concept objects.
-      selected: [],
+  // Placeholder text for the search field.
+  placeholder: {
+    type: String,
+    default: "",
+  },
+  // Show or hide the tree in item-select.
+  showTree: {
+    type: Boolean,
+    default: true,
+  },
+  // Show or hide the selected items block.
+  showSelected: {
+    type: Boolean,
+    default: true,
+  },
+})
+
+const emit = defineEmits(["update:modelValue", "pick"])
+
+// Top concepts for the tree.
+const treeConcepts = ref([])
+
+// Full selected concept objects.
+const selected = ref([])
+
+// Keep internal selected concepts in sync with the parent model value.
+watch(
+  () => props.modelValue,
+  async (value) => {
+    const currentModel = props.provider.toModel
+      ? props.provider.toModel(selected.value)
+      : selected.value
+
+    // Do nothing if the URIs are the same.
+    if (sameUris(value, currentModel)) {
+      return
     }
-  },
-  watch: {
-    modelValue: {
-      deep: true,
-      async handler(value) {
-        const currentModel = this.provider.toModel
-          ? this.provider.toModel(this.selected)
-          : this.selected
 
-        // Do nothing if the URIs are the same.
-        if (sameUris(value, currentModel)) {
-          return
-        }
-
-        // Reload selected concepts from the new model value.
-        this.selected = this.provider.loadSelected
-          ? await this.provider.loadSelected(value)
-          : [...value]
-      },
-    },
-    selected: {
-      deep: true,
-      handler(value) {
-        const model = this.provider.toModel
-          ? this.provider.toModel(value)
-          : value
-
-        // Send the updated model value to the parent.
-        this.$emit("update:modelValue", model)
-      },
-    },
+    // Reload selected concepts from the new model value.
+    selected.value = props.provider.loadSelected
+      ? await props.provider.loadSelected(value)
+      : [...value]
   },
-  async created() {
-    // Load tree concepts when the component starts.
-    this.treeConcepts = this.provider.loadTop
-      ? await this.provider.loadTop()
-      : []
+  { deep: true },
+)
 
-    // Load full selected concepts for the initial model value.
-    this.selected = this.provider.loadSelected
-      ? await this.provider.loadSelected(this.modelValue)
-      : [...this.modelValue]
+// Emit model updates when selected concepts change.
+watch(
+  selected,
+  (value) => {
+    const model = props.provider.toModel
+      ? props.provider.toModel(value)
+      : value
+
+    emit("update:modelValue", model)
   },
-  methods: {
-    // Add one selected concept if it is not already in the list.
-    addSelected(item) {
-      if (!item?.uri) {
-        return
-      }
-      const exists = this.selected.some(i => i?.uri === item.uri)
-      if (!exists) {
-        this.selected = [...this.selected, item]
-      }
-    },
-  },
+  { deep: true },
+)
+
+// Load top concepts and initial selected concepts on mount.
+onMounted(async () => {
+  treeConcepts.value = props.provider.loadTop
+    ? await props.provider.loadTop()
+    : []
+
+  selected.value = props.provider.loadSelected
+    ? await props.provider.loadSelected(props.modelValue)
+    : [...props.modelValue]
+})
+
+// Add one selected concept if it is not already in the list.
+function addSelected(item) {
+  if (!item?.uri) {
+    return
+  }
+
+  const exists = selected.value.some(i => i?.uri === item.uri)
+  if (!exists) {
+    selected.value = [...selected.value, item]
+    emit("pick", item)
+  }
 }
 </script>
+
 <style scoped>
 .selected-items {
   margin-top: 0.75rem;
+  padding-bottom: 24px;
 }
 
-.selected-items :deep(.jskos-vue-itemList) {
+.selected-items :deep(.jskos-vue-itemSelected-table) {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 8px;
+  border: none;
+  border-radius: 0;
 }
 
-.selected-items :deep(.jskos-vue-itemList-item) {
+.selected-items :deep(.jskos-vue-itemSelected-row) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: stretch;
+  column-gap: 0.5rem;
+  border: none;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-cell) {
+  background: #fff;
+  padding: 0.5rem 0.75rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid #dee2e6;
-  border-radius: 0.5rem;
+  min-width: 0;
+  border: 1px solid #adb5bd;
+  border-radius: 6px;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actions) {
+  display: flex;
+  align-items: stretch;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionGroup) {
+  display: flex;
+  border-radius: 0;
+  border: 1px solid #adb5bd;
+  border-radius: 6px;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn) {
+  min-width: 38px;
+  height: 100%;
+  padding: 0;
   background: #fff;
+  color: #6c757d;
+  line-height: 1;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn):nth-child(2) {
+  border-left: 1px solid;
+  border-right: 1px solid;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn:hover:not(:disabled)) {
+  background: #6c757d;
+  color: #fff;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn:disabled) {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .selected-items :deep(.jskos-vue-itemName-notation) {
   font-weight: 600;
-  color: #0d6efd;
 }
 
-.selected-items :deep(.jskos-vue-itemSelected-listRemove) {
-  border: none;
-  background: transparent;
-  color: #6c757d;
-  font-size: 1.1rem;
-  cursor: pointer;
+/* Center the arrow inside the button */
+.selected-items :deep(.jskos-vue-arrow) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
-.selected-items :deep(.jskos-vue-itemSelected-listRemove:hover) {
-  color: #dc3545;
+.selected-items :deep(.jskos-vue-arrow-up),
+.selected-items :deep(.jskos-vue-arrow-down) {
+  display: none;
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn[aria-label="Move up"] .jskos-vue-arrow)::before {
+  content: "\25B2";
+}
+
+.selected-items :deep(.jskos-vue-itemSelected-actionBtn[aria-label="Move down"] .jskos-vue-arrow)::before {
+  content: "\25BC";
 }
 </style>
-
