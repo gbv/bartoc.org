@@ -241,3 +241,79 @@ footer .container {
   max-height: none;
   width: auto;
 }
+
+
+/* Contact Page */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.contact-card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.contact-card h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+}
+
+.contact-card p:last-child {
+  margin-bottom: 0;
+}
+
+.contact-footer {
+  margin-top: 1.5rem;
+}
+
+.contact-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.contact-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.contact-name {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.contact-name:hover {
+  text-decoration: underline;
+}
+
+.contact-orcid-icon {
+  text-decoration: none;
+}
+
+.contact-orcid-icon::before {
+  font-family: "Font Awesome 5 Brands";
+  content: "\f8d2";
+  color: #A6CE39;
+  display: inline-block;
+}
+
+.contact-role {
+  font-size: 0.95rem;
+}
+
+.contact-mail a {
+  text-decoration: none;
+}
+
+.contact-mail a:hover {
+  text-decoration: underline;
+}
