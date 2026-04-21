@@ -69,4 +69,11 @@ if [ $? -eq 1 ]; then
   echo
 fi
 
+ask "Do you want to import the initial registries from file? (y/N) "
+if [ $? -eq 1 ]; then
+  npm run import -- registry $BARTOC/data/registries.ndjson -n
+  echo
+fi
+
+
 cd $BARTOC
