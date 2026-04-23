@@ -444,3 +444,33 @@ export function validatePublisher(publisher) {
     return { message: "Publisher URI must be a valid HTTP(S) URL!" }
   }
 }
+
+/**
+ * Compare two item lists by URI only.
+ */
+export function sameUris(a = [], b = []) {
+  const aUris = a.map(i => i?.uri).filter(Boolean).sort()
+  const bUris = b.map(i => i?.uri).filter(Boolean).sort()
+  return JSON.stringify(aUris) === JSON.stringify(bUris)
+}
+
+/**
+ * Extract the BARTOC node id from a terminology URI.
+ */
+export function getBartocNodeId(uri) {
+  return uri?.split("/").pop() || ""
+}
+
+/**
+ * Convert a BARTOC terminology record to a simple UI item.
+ * The node id is shown as notation, e.g. "node 520".
+ */
+export function toTerminologySelectedItem(record) {
+  const nodeId = getBartocNodeId(record.uri)
+
+  return {
+    uri: record.uri,
+    prefLabel: record.prefLabel,
+    notation: nodeId ? [`node ${nodeId}`] : [],
+  }
+}
