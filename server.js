@@ -143,6 +143,46 @@ async function enrichItem (item) {
       }
     }
   }
+
+  const versionOf = item?.versionOf || []
+  if (versionOf.length) {
+    const found = await Promise.all(
+      versionOf.map(({ uri }) =>
+        backend.getSchemes({ params: { uri } })
+          .then(result => result[0] || null)
+          .catch(() => null),
+      ),
+    )
+    item.versionOfResolved = found.map(jskos.clean)
+
+    const uris = found.map(s => s.uri)
+    for (const rel of versionOf) {
+      if (!uris.find(uri => uri === rel.uri)) {
+        item.versionOfResolved.push(rel)
+      }
+    }
+  }
+
+  const basedOn = item?.basedOn || []
+  if (basedOn.length) {
+    const found = await Promise.all(
+      basedOn.map(({ uri }) =>
+        backend.getSchemes({ params: { uri } })
+          .then(result => result[0] || null)
+          .catch(() => null),
+      ),
+    )
+
+    item.basedOnResolved = found.map(jskos.clean)
+
+    const uris = found.map(s => s.uri)
+    for (const rel of basedOn) {
+      if (!uris.find(uri => uri === rel.uri)) {
+        item.basedOnResolved.push(rel)
+      }
+    }
+  }
+
   return item
 }
 

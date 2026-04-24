@@ -108,8 +108,6 @@ function rowsToDefinition(rows = []) {
     definition[lang].push(text)
   }
 
-  console.log("rowsToDefinition", definition)
-
   return definition
 }
 
