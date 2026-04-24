@@ -1,10 +1,14 @@
 import { readFileSync } from "fs"
+import config from "../config/index.js"
+import { join } from "path"
+
 
 const bartocUri = new RegExp("^http://bartoc.org/en/node/[1-9][0-9]+$")
 const isBartocUri = id => id.match(bartocUri)
 
-const readLines = file => readFileSync(file).toString()
-  .split(/\n|\n\r/).filter(Boolean)
+const readLines = (baseDir, file) => readFileSync(join(baseDir, file), "utf8")
+  .split(/\r?\n/)
+  .filter(Boolean)
 
 /* TODO: this is not used yet
 function extendScheme (voc) {
@@ -30,7 +34,11 @@ export default {
     return item
   },
 
-  readNdjson: file => readLines(file).map(JSON.parse),
+  readJson: (baseDir, file) =>
+    JSON.parse(readFileSync(join(baseDir, file), "utf8")),
+
+  readNdjson: (baseDir, file) =>
+    readLines(baseDir, file).map(line => JSON.parse(line)),
 
   escapeXML: s => String(s).replace(/[<>&"']/g, c => "&#" + c.charCodeAt(0) + ";"),
 
@@ -59,4 +67,14 @@ export default {
     ? "/en/node/" + uri.split("/").pop()
     : "/vocabularies?uri=" + escape(uri),
 
+  // Build an absolute backend URL based on config.backend.api.
+  backendUrl: path => {
+    const base = config.backend.api.endsWith("/")
+      ? config.backend.api
+      : `${config.backend.api}/`
+
+    return new URL(path, base)
+  },
+
 }
+

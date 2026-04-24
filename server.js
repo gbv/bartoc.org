@@ -7,13 +7,9 @@ import querystring from "querystring"
 import { rdfContentType, rdfSerialize } from "./src/rdf.js"
 import child_process from "child_process"
 import portfinder from "portfinder"
-
+import { loadRegistriesFromFile, getRepositories, refreshRegistries } from "./src/registries.js"
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
-
-const readNDJSON = file => fs.readFileSync(`${__dirname}${file}`).toString()
-  .split(/\n|\n\r/).filter(Boolean).map(line => JSON.parse(line))
-const readJSON = file => JSON.parse(fs.readFileSync(`${__dirname}${file}`).toString())
 
 // build our vue project on first run if report.json can't be found
 // TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
@@ -27,7 +23,7 @@ if (config.env !== "development") {
       // Add manifest to config
       const file = "dist/.vite/manifest.json"
       try {
-        config.vue.manifest = readJSON(file)
+        config.vue.manifest = utils.readJson(__dirname, file)
       } catch(error) {
         console.warn(`Could not read Vite manifest in ${file}, there might be issues with the front end build.`)
       }
@@ -37,16 +33,20 @@ if (config.env !== "development") {
 
 const backend = config.registry
 
-// static data (this could also be loaded from registry on startup)
-const registries = utils.indexByUri(readNDJSON("./data/registries.ndjson"))
-const nkostypes = utils.indexByUri(readNDJSON("./data/nkostype.concepts.ndjson"))
-const accesstypes = utils.indexByUri(readNDJSON("./data/bartoc-access.concepts.ndjson"))
-const formats = utils.indexByUri(readNDJSON("./data/bartoc-formats.concepts.ndjson"))
-
 config.log(`Running in ${config.env} mode.`)
 
-const repoType = "http://bartoc.org/full-repository"
-const repositories = utils.indexByUri(Object.values(registries).filter(item => item.type.find(type => type === repoType)))
+// static data (this could also be loaded from registry on startup)
+// const registries = utils.indexByUri(readNDJSON("./data/registries.ndjson"))
+const nkostypes = utils.indexByUri((utils.readNdjson(__dirname,"./data/nkostype.concepts.ndjson")))
+const accesstypes = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-access.concepts.ndjson"))
+const formats = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-formats.concepts.ndjson"))
+
+
+// Initial data: use the local file so the app has data immediately.
+// This is replaced by backend data during startup if loading succeeds.
+let registries = loadRegistriesFromFile()
+let repositories = getRepositories(registries)
+
 config.log(`Read ${Object.keys(registries).length} registries, ${Object.keys(repositories).length} also being repositories or services.`)
 
 // Initialize express with settings
@@ -318,6 +318,10 @@ app.use((err, req, res, next) => {
 
 // Start service
 async function start() {
+  // Refresh registries from backend. If this fails, the app will keep using the local file as fallback.
+  const refreshed = await refreshRegistries()
+  registries = refreshed.registries
+  repositories = refreshed.repositories
 
   // Find available port on test
   let port = config.port
