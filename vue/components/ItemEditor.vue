@@ -55,6 +55,18 @@
   <form-row :label="'Subjects'">
     <subject-editor v-model="item.subject" />
   </form-row>
+  <form-row :label="'Version of'">
+    <terminology-relation-editor
+      v-model="item.versionOf"
+      :multiple="false"
+      placeholder="Select another terminology from BARTOC" />
+  </form-row>
+  <form-row :label="'Based on'">
+    <terminology-relation-editor
+      v-model="item.basedOn"
+      :multiple="true"
+      placeholder="Select another terminology from BARTOC" />
+  </form-row>
   <hr>
   <p>How the vocabulary is made available:</p>
   <form-row :label="'Created'">
@@ -171,18 +183,6 @@
       type="text"
       class="form-control">
     Please use comma to separate multiple notations.
-  </form-row>
-  <form-row :label="'Version of'">
-    <terminology-relation-editor
-      v-model="item.versionOf"
-      :multiple="false"
-      placeholder="Search BARTOC terminologies for versionOf…" />
-  </form-row>
-  <form-row :label="'Based on'">
-    <terminology-relation-editor
-      v-model="item.basedOn"
-      :multiple="true"
-      placeholder="Search BARTOC terminologies for basedOn…" />
   </form-row>
   <hr>
   <p>
