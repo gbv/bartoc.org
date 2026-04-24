@@ -162,6 +162,18 @@ export function trimItemIdentifiers(item) {
       .filter(s => s.uri)
   }
 
+  if (Array.isArray(item.versionOf)) {
+    item.versionOf = item.versionOf
+      .map(v => ({ ...v, uri: trimString(v.uri) }))
+      .filter(v => v.uri)
+  }
+
+  if (Array.isArray(item.basedOn)) {
+    item.basedOn = item.basedOn
+      .map(v => ({ ...v, uri: trimString(v.uri) }))
+      .filter(v => v.uri)
+  }
+
   return item
 }
 

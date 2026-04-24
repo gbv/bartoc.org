@@ -30,6 +30,8 @@
       <%- include('row-list', { label: 'Links', list: item.subjectOf, view: s => include('link', s) }) %>
       <%- include('row-list', { label: 'Subject', list: item.subject, style: 'inline',
         view: s => include('item', { item: s, base: '/vocabularies?subject=', withNotation: true }) }) %>
+      <%- include('row-list', { label: 'Version of', list: item.versionOfResolved, view: s => include('item', { item: s }) }) %>
+      <%- include('row-list', { label: 'Based on', list: item.basedOnResolved, view: s => include('item', { item: s }) }) %>
       <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
       <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
       <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>

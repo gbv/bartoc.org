@@ -172,6 +172,18 @@
       class="form-control">
     Please use comma to separate multiple notations.
   </form-row>
+  <form-row :label="'Version of'">
+    <terminology-relation-editor
+      v-model="item.versionOf"
+      :multiple="false"
+      placeholder="Search BARTOC terminologies for versionOf…" />
+  </form-row>
+  <form-row :label="'Based on'">
+    <terminology-relation-editor
+      v-model="item.basedOn"
+      :multiple="true"
+      placeholder="Search BARTOC terminologies for basedOn…" />
+  </form-row>
   <hr>
   <p>
     By saving you agree to publish the vocabulary metadata as public domain. All
@@ -238,6 +250,7 @@ import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
 import ConceptSchemePicker from "./ConceptSchemePicker.vue"
 import PublisherEditor from "./PublisherEditor.vue"
+import TerminologyRelationEditor from "./TerminologyRelationEditor.vue"
 
 function githubIssueUrl(title, body) {
   return (
@@ -265,6 +278,7 @@ export default {
     EndpointsEditor,
     AbstractsEditor,
     ConceptSchemePicker,
+    TerminologyRelationEditor,
   },
   props: {
     user: {
@@ -303,6 +317,8 @@ export default {
       "API",
       "ACCESS",
       "publisher",
+      "versionOf",
+      "basedOn",
     ].forEach((key) => {
       if (!item[key]) {
         item[key] = []
@@ -497,6 +513,21 @@ export default {
       if (item.definition && typeof item.definition === "object") {
         delete item.definition[""]
       }
+
+      // VersionOf
+      if (item.versionOf) {
+        item.versionOf = item.versionOf
+          .map(({ uri }) => ({ uri }))
+          .filter(v => v.uri)
+      }
+
+      // BasedOn
+      if (item.basedOn) {
+        item.basedOn = item.basedOn
+          .map(({ uri }) => ({ uri }))
+          .filter(v => v.uri)
+      }
+
       return item
     },
 
