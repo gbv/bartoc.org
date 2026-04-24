@@ -65,7 +65,7 @@
     <terminology-relation-editor
       v-model="item.basedOn"
       :multiple="true"
-      placeholder="Select another terminologies from BARTOC" />
+      placeholder="Select another terminology from BARTOC" />
   </form-row>
   <hr>
   <p>How the vocabulary is made available:</p>
