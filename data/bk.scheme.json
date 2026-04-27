@@ -1,0 +1,265 @@
+[
+  {
+    "@context": "https://gbv.github.io/jskos/context.json",
+    "ACCESS": [
+      {
+        "uri": "http://bartoc.org/en/Access/Free"
+      }
+    ],
+    "ADDRESS": {
+      "country": "Germany",
+      "locality": "Göttingen"
+    },
+    "API": [
+      {
+        "type": "http://bartoc.org/api-type/jskos",
+        "url": "https://api.dante.gbv.de/"
+      },
+      {
+        "type": "http://bartoc.org/api-type/webservice",
+        "url": "https://service.tib.eu/ts4tib/api/ontologies/bk"
+      },
+      {
+        "type": "http://bartoc.org/api-type/jskos",
+        "url": "https://coli-conc.gbv.de/api/"
+      }
+    ],
+    "CQLKEY": "BKL",
+    "EXAMPLES": [
+      "86.78"
+    ],
+    "FORMAT": [
+      {
+        "uri": "http://bartoc.org/en/Format/JSON-LD"
+      },
+      {
+        "uri": "http://bartoc.org/en/Format/MARC"
+      },
+      {
+        "uri": "http://bartoc.org/en/Format/MARC"
+      },
+      {
+        "uri": "http://bartoc.org/en/Format/SKOS"
+      }
+    ],
+    "MARCSPEC": "080{$2=bkl}",
+    "PICAPATH": "045Q/01$a",
+    "contributor": [
+      {
+        "prefLabel": {
+          "en": "VZG/UB"
+        },
+        "uri": "https://coli-conc.gbv.de/login/users/bf445064-200f-4734-849c-4c0d10657280"
+      },
+      {
+        "prefLabel": {
+          "en": "https://orcid.org/0000-0002-1019-9151"
+        },
+        "uri": "https://coli-conc.gbv.de/login/users/fedd4cb0-21dd-48ad-8f37-6e13931d9d95"
+      },
+      {
+        "prefLabel": {
+          "en": "JakobVoss"
+        },
+        "uri": "https://coli-conc.gbv.de/login/users/3a1bb23f-8d60-4b7a-8bec-cc419d7f6ab6"
+      },
+      {
+        "prefLabel": {
+          "en": "Monty Bitto"
+        },
+        "uri": "https://bartoc.org/login/users/136b4b19-fc69-462c-b022-b83d768c468e"
+      },
+      {
+        "uri": "https://bartoc.org/login/users/254cac87-2a6c-47e5-a734-4bcf0f382c57",
+        "prefLabel": {
+          "en": "Mareike Röhl"
+        }
+      }
+    ],
+    "definition": {
+      "en": [
+        "German decimal classification system based on the Dutch Basic Classification (NBC)"
+      ],
+      "und": [
+        "Die (niederländische) Basisklassifikation (nl: Nederlandse basisclassificatie, BK oder NBC) ist ein durch niederländische Bibliotheken entwickeltes hierarchisches Klassifikationssystem, das speziell für wissenschaftliche Arbeiten entwickelt wurde.\n\nDie Klassifizierung wurde Ende der 1980er Jahre unter Leitung der Königlichen Bibliothek der Niederlande eingeführt und ist seit 1990 in Gebrauch. Seither wird sie immer wieder neu bearbeitet. Die BK wird vor allem in den Niederlanden sowie im Gemeinsamen Bibliotheksverbund (GBV) verwendet. Auch der Österreichische Bibliothekenverbund setzt seit 2009 die Basisklassifikation als zusätzliches Schema zur Sacherschließung ein."
+      ]
+    },
+    "distributions": [
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://api.dante.gbv.de/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      },
+      {
+        "download": "https://coli-conc.gbv.de/api/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=ndjson",
+        "format": "http://format.gbv.de/jskos",
+        "mimetype": "application/x-ndjson; charset=utf-8"
+      },
+      {
+        "download": "https://coli-conc.gbv.de/api/voc/concepts?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18785&download=json",
+        "mimetype": "application/json; charset=utf-8"
+      }
+    ],
+    "extent": "2.139 classes",
+    "identifier": [
+      "http://id.loc.gov/vocabulary/classSchemes/bkl",
+      "http://uri.gbv.de/terminology/bk/",
+      "http://www.wikidata.org/entity/Q29938469"
+    ],
+    "languages": [
+      "de"
+    ],
+    "license": [
+      {
+        "uri": "http://creativecommons.org/publicdomain/zero/1.0/"
+      }
+    ],
+    "modified": "2025-08-18T10:14:23.081Z",
+    "namespace": "http://uri.gbv.de/terminology/bk/",
+    "notation": [
+      "BK"
+    ],
+    "notationExamples": [
+      "54.10"
+    ],
+    "notationPattern": "(0|1-2|3-4|5|7-8|[0-9]{2}(\\.[0-9]{2})?)",
+    "partOf": [
+      {
+        "uri": "http://bartoc.org/en/node/18926"
+      },
+      {
+        "uri": "https://service.tib.eu/ts4tib/"
+      },
+      {
+        "uri": "http://bartoc.org/en/node/18934"
+      },
+      {
+        "uri": "http://bartoc.org/en/node/18966"
+      }
+    ],
+    "prefLabel": {
+      "de": "Basisklassifikation",
+      "en": "Basic Classification",
+      "nl": "Nederlandse basisclassificatie"
+    },
+    "publisher": [
+      {
+        "prefLabel": {
+          "en": "Verbundzentrale des GBV (VZG)"
+        },
+        "uri": "http://viaf.org/viaf/128669726"
+      }
+    ],
+    "startDate": "2004",
+    "subject": [
+      {
+        "uri": "http://dewey.info/class/0/e23/",
+        "inScheme": [
+          {
+            "uri": "http://bartoc.org/en/node/241"
+          }
+        ],
+        "notation": [
+          "0"
+        ]
+      },
+      {
+        "uri": "http://dewey.info/class/001/e23/",
+        "inScheme": [
+          {
+            "uri": "http://bartoc.org/en/node/241"
+          }
+        ],
+        "notation": [
+          "001"
+        ]
+      }
+    ],
+    "type": [
+      "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+      "http://w3id.org/nkos/nkostype#classification_schema"
+    ],
+    "uri": "http://bartoc.org/en/node/18785",
+    "url": "https://wiki.k10plus.de/display/K10PLUS/Basisklassifikation",
+    "creator": [],
+    "created": "2018-09-12T14:16:00Z",
+    "concepts": [],
+    "topConcepts": []
+  }
+]
