@@ -10,20 +10,6 @@ const readLines = (baseDir, file) => readFileSync(join(baseDir, file), "utf8")
   .split(/\r?\n/)
   .filter(Boolean)
 
-/* TODO: this is not used yet
-function extendScheme (voc) {
-  var { uri, identifier } = voc
-  if (identifier && !isBartocUri(uri)) {
-    const bartoc = identifier.find(isBartocUri)
-    if (bartoc) {
-      identifier = identifier.filter(id => !isBartocUri(id))
-      identifier.unshift(uri)
-      voc.uri = bartoc
-    }
-  }
-  return voc
-} */
-
 export default {
   cleanupItem: item => {
     for (const key in item) {
