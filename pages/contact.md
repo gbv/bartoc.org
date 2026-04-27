@@ -2,7 +2,7 @@
 title:
 ---
 
-<h1 style="font-weight: bold;">Contacts at the Head Office (VZG)</h1>
+<h1 style="font-weight: bold;">Contact at the Head Office (VZG)</h1>
   <p>If you have any questins or suggestions about BARTOC, please contact the BARTOC team</p>
   <div style="padding-top: 24px;" class="contact-grid">
     <div class="contact-entry">
