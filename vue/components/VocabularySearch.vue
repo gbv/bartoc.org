@@ -35,7 +35,7 @@
               type="submit"
               class="btn btn-primary"
               @click="submitSearch">
-              Simple Search
+              Search
             </button>
           </div>
         </div>

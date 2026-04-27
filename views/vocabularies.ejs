@@ -1,66 +1,8 @@
 <%- include('header') %>
 
-<vocabulary-search :query='<%- JSON.stringify(query).replace(/'/g,"&apos;") %>'></vocabulary-search>
-
-<% if (result.length) { %>
-
-<%- include("pagination", { result, query, api }) %>
-
-<table class="table table-borderless table-hover">
-  <thead>
-    <th>Name</th>
-    <th colspan="2">Links</th>
-    <% if (query.sort == "modified") { %>
-    <th>Modified</th>
-    <% } else if (query.sort == "created") { %>
-    <th>Created</th>
-    <% } %>
-  </thead>
-  <tbody>
-  <% for (let item of result) { %>
-    <tr>
-      <td>
-        <%- include('item', { item, base: '/vocabularies', withNotation: 1 }) %>
-        <% if (item.definition) { %>
-          <%= (((def) => {
-            if (def.en) { return def.en[0] }
-            for (var lang in def) { return def[lang][0] }
-          })(item.definition)).split(/\.\s/m)[0]+"..." %>
-        <% } %>
-      </td>
-      <td>
-       <% if (item.url) { %>
-        <a href="<%= item.url %>" title="homepage"><i class="fas fa-home"></i></a>
-        <% } %>
-      </td>
-      <td>
-       <% if (item.API && item.API.length) { %>
-<% if (utils.isBartocUri(item.uri)) {
-       url = "/en/node/" + item.uri.split("/").pop()
-    } else if (locals.base) {
-       var uri = escape(item.uri)
-       url = base + (base.endsWith("=") ? uri : `?uri=${uri}`)
-    } else {
-       url = item.uri
-    }
-%>
-         <%- include('link', { url: url + "#access", label: "API" }) %>
-       <% } %>
-      </td>
-      <% if (query.sort == "modified" || query.sort == "created") {
-         timestamp = item[query.sort] %>
-      <td><span class="timeago" title="<%= timestamp %>" datetime="<%= timestamp %>"><%= timestamp.split('T')[0] %></span></td>
-      <% } %>
-    </tr>
-  <% } %>
-  </tbody>
-</table>
-<%- include("pagination", { result, query, api }) %>
-
-<% } else { %>
-
-<em>No vocabularies found matching your query!</em>
-
-<% } %>
+<em>
+  BARTOC.org seems not fully configured yet. Please contact administrator to enable
+  <a href="https://github.com/gbv/bartoc-search/">bartoc-search</a> component!
+</em>
 
 <%- include('footer') %>

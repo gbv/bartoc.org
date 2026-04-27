@@ -104,31 +104,8 @@ app.get("/edit", async (req, res, next) => {
   render(req, res, "edit", { item, title, edit: true })
 })
 
-// vocabulary search
-app.get("/vocabularies", vocabulariesSearch)
-
-async function vocabulariesSearch (req, res, next) {
-  const { query } = req
-
-  let search = query.search
-    ? backend.vocSearch({ properties: "*", search: query.search })
-    : backend.getSchemes({ properties: "*", params: query })
-
-  try {
-    const result = await search
-    if (query.uri) {
-      if (!result.length) {
-        return next()
-      }
-      const item = await enrichItem(result[0])
-      sendItem(req, res, item)
-    } else {
-      render(req, res, "vocabularies", { title: "Vocabularies", result, api: "voc" })
-    }
-  } catch (error) {
-    next(error)
-  }
-}
+// vocabulary search should be delivered by bartoc-search instead
+app.get("/vocabularies", (req, res) => render(req, res, "vocabularies", { title: "Missing bartoc-search" }))
 
 async function enrichItem (item) {
   const subjects = item && item.subject || []
@@ -230,20 +207,20 @@ app.get("/registries", (req, res) => {
 // BARTOC ID => registry or vocabulary (if found)
 app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   const uri = `http://bartoc.org/en/node/${req.params.id}`
-  let { path } = req
-  const item = registries[uri]
+  let path = "/vocabularies"
+  let item = registries[uri]
 
   if (item) {
     path = "/registries"
   } else {
-    path = "/vocabularies"
-    req.query.uri = uri
-    return vocabulariesSearch({ path, ...req}, res, next)
-    /*    path = '/vocabularies'
-    // TODO: what if BARTOC URI is secondary identifier?
-    item = await backend.getSchemes({ params: { uri } })
-      .then(result => result[0])
-      .catch(next) */
+    try {
+      const result = await backend.getSchemes({ properties: "*", params: { uri } })
+      if (result.length === 1) {
+        item = await enrichItem(result[0])
+      }
+    } catch (error) {
+      next(error)
+    }
   }
 
   if (item) {
