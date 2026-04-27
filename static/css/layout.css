@@ -70,117 +70,43 @@ a[href*="orcid.org"]:before {
   white-space: nowrap;
 }
 
-/* Home page hero wrapper */
-.hero__wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 36px 0;
-}
-
-/* Logo */
-.bartoc-logo {
-  display: flex;
-  justify-content: center;
-  padding-top: 90px;
-}
-.bartoc-logo img {
-  max-width: 350px;
-}
-
-/* Search bar */
-.search-bar__wrapper {
-  margin-top: 24px;
-  padding: 24px;
-  box-sizing: border-box;
-
-}
-.search-bar__wrapper input,
-.search-bar__wrapper select {
-  height: 45px;
-  border: 1px solid #cfd5dd;
-  border-radius: 3px;
-  color: #2f3744;
-  box-shadow: none;
-}
-.search-bar__wrapper select {
-  padding: 0 2.5rem 0 1rem;
-}
-.search-bar__wrapper input:focus,
-.search-bar__wrapper select:focus {
-  outline: none;
-  border-color: #bcc5cf;
-  box-shadow: none;
-}
-.search-bar__wrapper .btn-primary,
-.vocabulary-search button {
-  width: auto;
-  min-width: 96px;
-  height: 45px;
-  background: #a12b08;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  padding: 0 1.5rem;
-  box-shadow: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  white-space: nowrap;
-}
-.search-bar__wrapper .btn-primary:hover,
-.search-bar__wrapper .btn-primary:focus,
-.vocabulary-search button:hover,
-.vocabulary-search button:focus {
-  background: #8b2406;
-  color: #fff;
-}
-.search-bar__wrapper p {
-  margin-top: 24px;
-  padding-top: 24px;
-  line-height: 1.45;
-  color: #6e7b90;
-  margin-bottom: 0;
-}
-.search-bar__text {
-  font-size: 18px;
-  line-height: 2.0;
-  text-align: center;
-  width: 80%;
-  margin: 0 auto;
-}
-.search-bar__text a {
+a, a:hover {
   color: #8b2406;
-  text-decoration: none;
-  font-weight: 600;
 }
-.search-bar__text a:hover {
-  text-decoration: underline;
+
+.homepage {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.homepage > * {
+  margin: 2em;
 }
 
 /* Vocabulary Search Bar */
 .vocabulary-search {
-  margin-top: 12px;
-  padding: 48px 24px;
+  padding: 2em;
   background: #fcfcfc;
-  border: 1px solid rgba(0, 0, 0, 0.045);
   border-radius: 12px;
   width: 80%;
-  margin: 0 auto;
 }
-
+.vocabulary-search button,
+.vocabulary-search button:hover,
+.vocabulary-search button:focus {
+  background: #8b2406;
+  color: #fff;
+  border: none;
+}
 .vocabulary-search .row {
-  gap: 12px;
+  gap: 1em;
   margin: 0;
 }
 .vocabulary-search .row > div {
   padding: 0;
 }
 .metadata-count-text {
-  color: #8b2406;
   font-weight: bold;
-  padding-bottom: 24px;
+  padding-bottom: 0.5em;
 }
 
 /* Footer */
@@ -200,8 +126,10 @@ footer .container {
   flex-direction: column;
 }
 .navbar {
-  font-weight: 600;
   color: #A1A8B0;
+}
+.nav-item.active {
+  font-weight: bold;
 }
 .navbar-brand .bartoc-logo__image {
   height: 48px;

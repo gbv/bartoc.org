@@ -2,20 +2,13 @@
 title:
 ---
 
-<div class="hero__wrapper">
-  <div class="bartoc-logo">
-    <img src="/img/bartoc-logo.svg" alt="BARTOC.org">
-  </div>
-
-  <div class="search-bar__wrapper">
-  <div class="search-bar__text">
+<div class="homepage">
+  <img src="/img/bartoc-logo.svg" alt="BARTOC.org" style="max-width: 350px;">
+  <vocabulary-search></vocabulary-search>
+  <div>
     BARTOC unites information about
-    <a href="/vocabularies">vocabularies</a>
-    and <a href="/registries">terminology registries</a>
+    <b><a href="/vocabularies">terminologies</a></b>
+    and <b><a href="/registries">terminology registries</a></b>
     to facilitate use of knowledge organization systems.
   </div>
-
-  <vocabulary-search></vocabulary-search>
-  </div>
-
 </div>
