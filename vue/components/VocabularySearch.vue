@@ -33,8 +33,7 @@
           <div class="col">
             <button
               type="submit"
-              class="btn btn-primary"
-              @click="submitSearch">
+              class="btn btn-primary">
               Search
             </button>
           </div>
@@ -70,6 +69,10 @@ export default {
       {
         label: "Publisher",
         value: "publisher_en",
+      },
+      {
+        label: "Subject notation",
+        value: "subject_notation",
       },
     ]
     const { search, field = "allfields" } = this.query
