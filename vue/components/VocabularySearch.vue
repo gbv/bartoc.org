@@ -74,6 +74,10 @@ export default {
         label: "Subject notation",
         value: "subject_notation",
       },
+      {
+        label: "Subject Uri",
+        value: "subject_uri",
+      },
     ]
     const { search, field = "allfields" } = this.query
 

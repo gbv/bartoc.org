@@ -104,4 +104,19 @@ describe("VocabularySearch Component", () => {
       "/vocabularies?field=publisher_en",
     )
   })
+
+  it("offers subject search fields", () => {
+    const wrapper = mountSearch()
+
+    const options = wrapper.findAll("option").map(option => ({
+      label: option.text(),
+      value: option.element.value,
+    }))
+
+    expect(options).toEqual(expect.arrayContaining([
+      { label: "Subject notation", value: "subject_notation" },
+      { label: "Subject Uri", value: "subject_uri" },
+    ]))
+  })
+
 })
