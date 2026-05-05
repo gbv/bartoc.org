@@ -7,7 +7,13 @@ import querystring from "querystring"
 import { rdfContentType, rdfSerialize } from "./src/rdf.js"
 import child_process from "child_process"
 import portfinder from "portfinder"
-import { loadRegistriesFromFile, getRepositories, refreshRegistries } from "./src/registries.js"
+import {
+  loadRegistriesFromFile,
+  getRepositories,
+  refreshRegistries,
+  registriesApiUrl,
+  jskosDataUrl,
+} from "./src/registries.js"
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
 
@@ -79,7 +85,21 @@ app.use(pageRoute)
 function render (req, res, view, locals) {
   const { query, path } = req
   // pass environment
-  const vars = { config, query, path, utils, querystring, registries, repositories, nkostypes, accesstypes, formats, page: path.replace(/^\/|\/$/g, "") }
+  const vars = {
+    config,
+    query,
+    path,
+    utils,
+    querystring,
+    registries,
+    repositories,
+    nkostypes,
+    accesstypes,
+    formats,
+    registriesApiUrl,
+    jskosDataUrl,
+    page: path.replace(/^\/|\/$/g, ""),
+  }
   return res.render(view, { ...vars, ...locals })
 }
 
