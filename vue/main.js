@@ -4,6 +4,7 @@ import ItemEditor from "./components/ItemEditor.vue"
 import VocabularySearch from "./components/VocabularySearch.vue"
 import ServiceLink from "./components/ServiceLink.vue"
 import ConceptBrowser from "./components/ConceptBrowser.vue"
+import RegistryList from "./components/RegistryList.vue"
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { faLanguage } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
@@ -20,7 +21,7 @@ import { render } from "../node_modules/timeago.js/"
 import "jskos-vue/dist/style.css"
 
 const app = createApp({
-  components: { UserStatus, ItemEditor, VocabularySearch, ServiceLink, ConceptBrowser },
+  components: { UserStatus, ItemEditor, VocabularySearch, ServiceLink, ConceptBrowser, RegistryList },
   data() {
     return {
       login,
