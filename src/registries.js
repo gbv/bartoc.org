@@ -5,6 +5,16 @@ const rootDir = new URL("../", import.meta.url).pathname
 // Registry records with this type are also full terminology repositories or services
 export const repoType = "http://bartoc.org/full-repository"
 
+export function registriesApiUrl() {
+  const params = new URLSearchParams({ limit: "10000" })
+  return `/api/registries?${params}`
+}
+
+export function jskosDataUrl(uri) {
+  const params = new URLSearchParams({ uri })
+  return `/api/data?${params}`
+}
+
 // read registries from the local NDJSON file.
 export function loadRegistriesFromFile() {
   return utils.indexByUri(utils.readNdjson(rootDir, "./data/registries.ndjson"))
