@@ -1,55 +1,21 @@
 <%- include('header') %>
 
-<% let items = query.type === "http://bartoc.org/full-repository" ? repositories : registries %>
+<% const fullRepositoryType = "http://bartoc.org/full-repository" %>
+<% const items = query.type === fullRepositoryType ? repositories : registries %>
+<% const registryCount = Object.keys(registries).length %>
+<% const repositoryCount = Object.keys(repositories).length %>
 <p>
-  BARTOC knows about <a href="/registries"><%= registries.length %> terminology registries</a>,
+  BARTOC knows about <a href="/registries"><%= registryCount %> terminology registries</a>,
   including itself.
-  <a href="/registries?type=http://bartoc.org/full-repository">
-    <%= repositories.length %> registries</a>
+  <a href="/registries?type=<%= fullRepositoryType %>">
+    <%= repositoryCount %> registries</a>
   also provide access to full terminologies
   either via an API (terminology <b>service</b>) or by other means
   (terminology <b>repository</b>).<sup><a href="#poster">*</a></sup>
 </p>
-<table class="table table-borderless table-hover">
-  <thead>
-    <th>Name</th>
-    <th>Year</th>
-    <th colspan="2">Links</th>
-    <th>Type</th>
-  </thead>
-  <tbody>
-   <% Object.values(items).forEach(item => { %>
-    <tr>
-      <td>
-        <a href="/en/node/<%= item.uri.split("/").pop() %>"><%= item.prefLabel.en %></a>
-      </td>
-      <td>
-       <% if(item.startDate) { %><%= item.startDate %><% }
-          if(item.startDate || item.endDate) { %>-<% }
-          if(item.endDate) { %><%= item.endDate %><% } %>
-      </td>
-      <td>
-       <% if (item.url) { %>
-        <a href="<%= item.url %>" title="homepage"><i class="fas fa-home"></i></a>
-        <% } %>
-      </td>
-      <td>
-      <% for (let [i,api] of Object.entries(item.API||[])) { %>
-      <% if (i > 0) { %><br><% } %>
-      <%- include('link', { url: api.url, label: (api.type.split("/").pop()) }) %>
-      <% } %>
-      </td>
-      <td>
-       <% if (item.type[1] == "http://bartoc.org/full-repository") { %>
-         <b><%= item.API ? "service" : "repository" %></b>
-       <% } else { %>
-         registry
-       <% } %>
-      </td>
-    </tr>
-   <% }) %>
-  </tbody>
-</table>
+<registry-list
+  :registries='<%- JSON.stringify(Object.values(items)).replace(/'/g, "&apos;") %>'>
+</registry-list>
 
 <hr>
 <p>
