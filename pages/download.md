@@ -23,3 +23,4 @@ BARTOC can be accessed at [https://bartoc.org/api/](/api/) via JSKOS API to quer
 ## Database dumps
 
 There is a [daily database dump](/data/dumps/latest.ndjson) in NDJSON format (each line a JSKOS record).
+Registry metadata can be downloaded from the [registries API](/api/registries?limit=10000) in JSKOS format.
