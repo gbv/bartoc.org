@@ -16,7 +16,9 @@ vi.mock("../../config/index.js", () => ({
 
 import {
   getRepositories,
+  jskosDataUrl,
   loadRegistriesFromBackend,
+  registriesApiUrl,
 } from "../../src/registries.js"
 
 const registryOnly = {
@@ -95,6 +97,16 @@ describe("registries", () => {
 
     await expect(loadRegistriesFromBackend()).rejects.toThrow(
       "Could not load registries",
+    )
+  })
+
+  it("builds the registries API download URL", () => {
+    expect(registriesApiUrl()).toBe("/api/registries?limit=10000")
+  })
+
+  it("builds an encoded JSKOS data URL", () => {
+    expect(jskosDataUrl("http://bartoc.org/en/node/18926")).toBe(
+      "/api/data?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18926",
     )
   })
 })
