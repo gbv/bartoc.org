@@ -24,15 +24,15 @@
   <%- include('row-list', { label: 'License', list: item.license }) %>
   <!-- TODO: Wikidata -->
   <tr>
-  <td>Type</td>
+  <td>Function</td>
   <td>
-    <% if ((item.type || [])[1] === "http://bartoc.org/full-repository") { %>
+    <% if ((item.type || []).includes("http://bartoc.org/full-repository")) { %>
       <a href="/full-repository">
          terminology
-         <%= item.API ? "service" : "repository" %>
+         <%= (item.API || []).length ? "service" : "repository" %>
       </a>
     <% } else { %>
-      terminology registry
+      metadata registry
     <% } %>
   </td>
   </tr>
