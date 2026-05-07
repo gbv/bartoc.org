@@ -9,17 +9,23 @@ vi.mock("../../config/index.js", () => ({
     backend: {
       api: "http://localhost:3000/",
     },
+    registry: {
+      getSchemes: vi.fn(),
+    },
     log: vi.fn(),
     warn: vi.fn(),
   },
 }))
 
 import {
+  enrichRegistriesWithTerminologiesCounts,
   getRepositories,
   jskosDataUrl,
   loadRegistriesFromBackend,
+  refreshRegistries,
   registriesApiUrl,
 } from "../../src/registries.js"
+import config from "../../config/index.js"
 
 const registryOnly = {
   uri: "http://bartoc.org/en/node/1",
@@ -36,68 +42,88 @@ const fullRepository = {
   ],
 }
 
-function response(data, ok = true) {
-  return {
+const registries = [registryOnly, fullRepository]
+const registriesByUri = {
+  [registryOnly.uri]: registryOnly,
+  [fullRepository.uri]: fullRepository,
+}
+
+function mockFetch(data, ok = true) {
+  const fetchMock = vi.fn(async () => ({
     ok,
     json: async () => data,
-  }
+  }))
+  vi.stubGlobal("fetch", fetchMock)
+  return fetchMock
+}
+
+function mockSchemeCounts(counts) {
+  config.registry.getSchemes.mockImplementation(async ({ params }) => {
+    const schemes = []
+    schemes._totalCount = counts[params.partOf] ?? 0
+    return schemes
+  })
 }
 
 describe("registries", () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.resetAllMocks()
     vi.restoreAllMocks()
   })
 
   it("filters registries that are also repositories or services", () => {
-    const registries = {
-      [registryOnly.uri]: registryOnly,
-      [fullRepository.uri]: fullRepository,
-    }
-
-    const repositories = getRepositories(registries)
+    const repositories = getRepositories(registriesByUri)
 
     expect(repositories).toEqual({
       [fullRepository.uri]: fullRepository,
     })
   })
 
-  it("loads registries from backend and indexes them by URI", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => response([registryOnly, fullRepository])),
-    )
+  it("loads all registries from backend and indexes them by URI", async () => {
+    const fetchMock = mockFetch(registries)
 
-    const registries = await loadRegistriesFromBackend()
+    const loaded = await loadRegistriesFromBackend()
 
-    expect(registries).toEqual({
-      [registryOnly.uri]: registryOnly,
-      [fullRepository.uri]: fullRepository,
-    })
-  })
-
-  it("requests all registries with an explicit limit", async () => {
-    const fetchMock = vi.fn(async () => response([]))
-    vi.stubGlobal("fetch", fetchMock)
-
-    await loadRegistriesFromBackend()
-
-    const url = fetchMock.mock.calls[0][0]
-
-    expect(url.toString()).toBe(
+    expect(loaded).toEqual(registriesByUri)
+    expect(fetchMock.mock.calls[0][0].toString()).toBe(
       "http://localhost:3000/registries?limit=10000",
     )
   })
 
   it("throws an error if backend loading fails", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => response([], false)),
-    )
+    mockFetch([], false)
 
     await expect(loadRegistriesFromBackend()).rejects.toThrow(
       "Could not load registries",
     )
+  })
+
+  it("refreshes registries without loading terminology counts", async () => {
+    mockFetch(registries)
+
+    const refreshed = await refreshRegistries()
+
+    expect(refreshed.source).toBe("backend")
+    expect(refreshed.registries).toEqual(registriesByUri)
+    expect(config.registry.getSchemes).not.toHaveBeenCalled()
+  })
+
+  it("adds terminology counts to registry records", async () => {
+    mockSchemeCounts({
+      [registryOnly.uri]: 2,
+    })
+
+    const records = {
+      [registryOnly.uri]: { ...registryOnly },
+      [fullRepository.uri]: { ...fullRepository },
+    }
+
+    await enrichRegistriesWithTerminologiesCounts(records)
+
+    expect(records[registryOnly.uri].terminologiesCount).toBe(2)
+    expect(records[fullRepository.uri].terminologiesCount).toBe(0)
+    expect(config.registry.getSchemes).toHaveBeenCalledTimes(2)
   })
 
   it("builds the registries API download URL", () => {
