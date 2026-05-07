@@ -8,6 +8,7 @@ import { rdfContentType, rdfSerialize } from "./src/rdf.js"
 import child_process from "child_process"
 import portfinder from "portfinder"
 import {
+  enrichRegistriesWithTerminologiesCounts,
   loadRegistriesFromFile,
   getRepositories,
   refreshRegistries,
@@ -41,8 +42,6 @@ const backend = config.registry
 
 config.log(`Running in ${config.env} mode.`)
 
-// static data (this could also be loaded from registry on startup)
-// const registries = utils.indexByUri(readNDJSON("./data/registries.ndjson"))
 const nkostypes = utils.indexByUri((utils.readNdjson(__dirname,"./data/nkostype.concepts.ndjson")))
 const accesstypes = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-access.concepts.ndjson"))
 const formats = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-formats.concepts.ndjson"))
@@ -54,6 +53,16 @@ let registries = loadRegistriesFromFile()
 let repositories = getRepositories(registries)
 
 config.log(`Read ${Object.keys(registries).length} registries, ${Object.keys(repositories).length} also being repositories or services.`)
+
+async function refreshRegistriesInBackground() {
+  const refreshed = await refreshRegistries()
+  registries = refreshed.registries
+  repositories = refreshed.repositories
+
+  if (refreshed.source === "backend") {
+    await enrichRegistriesWithTerminologiesCounts(registries)
+  }
+}
 
 // Initialize express with settings
 import express from "express"
@@ -315,11 +324,6 @@ app.use((err, req, res, next) => {
 
 // Start service
 async function start() {
-  // Refresh registries from backend. If this fails, the app will keep using the local file as fallback.
-  const refreshed = await refreshRegistries()
-  registries = refreshed.registries
-  repositories = refreshed.repositories
-
   // Find available port on test
   let port = config.port
   if (config.env == "test") {
@@ -327,9 +331,12 @@ async function start() {
     port = await portfinder.getPortPromise()
   }
 
-  // Let's go!
   app.listen(port, () => {
     config.log(`Now listening on port ${port}`)
+
+    refreshRegistriesInBackground().catch(error => {
+      config.warn("Could not refresh registries in background.", error)
+    })
   })
 }
 
