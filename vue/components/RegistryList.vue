@@ -266,6 +266,11 @@ const filteredRegistries = computed(() =>
   vertical-align: middle;
 }
 
+.registry-list-filters .btn-outline-secondary:hover {
+  color: #6c757d;
+  background-color: transparent;
+}
+
 .registry-homepage-link {
   display: inline-block;
   margin-left: 0.4rem;
