@@ -30,7 +30,7 @@
           <th>Function</th>
           <th>Description</th>
           <th class="registry-terminologies-count">
-            Terminologies
+            Terminologies in BARTOC
           </th>
           <th>API</th>
         </tr>

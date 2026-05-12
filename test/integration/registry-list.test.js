@@ -75,7 +75,7 @@ describe("RegistryList", () => {
       "Name",
       "Function",
       "Description",
-      "Terminologies",
+      "Terminologies in BARTOC",
       "API",
     ])
 
