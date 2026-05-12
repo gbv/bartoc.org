@@ -35,12 +35,19 @@
       </div>
     </div>
 
-    <button
-      type="button"
-      class="btn btn-primary"
-      @click="addRow()">
-      {{ addLabel }}
-    </button>
+    <div class="abstract-actions">
+      <span
+        v-if="showEnglishAbstractHint"
+        class="abstract-hint">
+        Every terminology should have an English abstract at least.
+      </span>
+      <button
+        type="button"
+        class="btn btn-primary"
+        @click="addRow()">
+        {{ addLabel }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -48,6 +55,7 @@
 import { computed, ref, watch } from "vue"
 import LanguageSelect from "./LanguageSelect.vue"
 
+// Convert the JSKOS definition object into editable rows.
 function definitionToRows(definition = {}) {
   let id = 0
 
@@ -78,6 +86,7 @@ function definitionToRows(definition = {}) {
   return rows
 }
 
+// Convert editable rows back into the JSKOS definition shape.
 function rowsToDefinition(rows = []) {
   const definition = {}
 
@@ -113,14 +122,21 @@ function rowsToDefinition(rows = []) {
 }
 
 const props = defineProps({
+  // JSKOS definition, e.g. { en: ["..."], de: ["..."] }.
   modelValue: {
     type: Object,
     default: () => ({}),
+  },
+  // New vocabularies should guide users toward an English abstract.
+  requireEnglish: {
+    type: Boolean,
+    default: false,
   },
 })
 
 const emit = defineEmits(["update:modelValue"])
 
+// Local row state is easier to edit than the language-keyed JSKOS object.
 const rows = ref(definitionToRows(props.modelValue))
 const nextId = ref(Math.max(...rows.value.map(row => row.id), 0) + 1)
 
@@ -128,6 +144,15 @@ const addLabel = computed(() =>
   rows.value.length > 1 ? "add another abstract" : "add abstract",
 )
 
+const hasEnglishAbstract = computed(() =>
+  rows.value.some(row => row.lang === "en" && row.text.trim()),
+)
+
+const showEnglishAbstractHint = computed(() =>
+  props.requireEnglish && !hasEnglishAbstract.value,
+)
+
+// Keep local rows in sync if the parent replaces modelValue from outside.
 watch(
   () => props.modelValue,
   (value) => {
@@ -207,8 +232,18 @@ function pruneEmptyRow(id) {
   margin-left: auto;
 }
 
-.abstracts-editor .btn {
+.abstract-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.abstract-hint {
+  color: #6c757d;
+}
+
+.abstract-actions .btn {
   width: fit-content;
-  margin-left: auto;
 }
 </style>

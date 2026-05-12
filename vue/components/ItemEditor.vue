@@ -29,7 +29,9 @@
     Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
   <form-row :label="'Abstracts'">
-    <abstracts-editor v-model="item.definition" />
+    <abstracts-editor
+      v-model="item.definition"
+      :require-english="!item.uri" />
   </form-row>
   <form-row :label="'Languages'">
     <language-select
