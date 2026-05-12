@@ -44,7 +44,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from "vue"
 import LanguageSelect from "./LanguageSelect.vue"
 
 function definitionToRows(definition = {}) {
@@ -111,76 +112,68 @@ function rowsToDefinition(rows = []) {
   return definition
 }
 
-export default {
-  name: "AbstractsEditor",
-  components: {
-    LanguageSelect,
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    default: () => ({}),
   },
-  props: {
-    modelValue: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
-  emits: ["update:modelValue"],
-  data() {
-    const rows = [...definitionToRows(this.modelValue)]
+})
 
-    return {
-      rows,
-      nextId: Math.max(...rows.map(row => row.id), 0) + 1,
+const emit = defineEmits(["update:modelValue"])
+
+const rows = ref(definitionToRows(props.modelValue))
+const nextId = ref(Math.max(...rows.value.map(row => row.id), 0) + 1)
+
+const addLabel = computed(() =>
+  rows.value.length > 1 ? "add another abstract" : "add abstract",
+)
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    const incoming = JSON.stringify(value || {})
+    const current = JSON.stringify(rowsToDefinition(rows.value))
+
+    if (incoming !== current) {
+      const nextRows = definitionToRows(value)
+      rows.value = nextRows
+      nextId.value = Math.max(...nextRows.map(row => row.id), 0) + 1
     }
   },
-  computed: {
-    addLabel() {
-      return this.rows.length > 1 ? "add another abstract" : "add abstract"
-    },
-  },
-  watch: {
-    modelValue: {
-      deep: true,
-      handler(value) {
-        const incoming = JSON.stringify(value || {})
-        const current = JSON.stringify(rowsToDefinition(this.rows))
+  { deep: true },
+)
 
-        if (incoming !== current) {
-          const rows = definitionToRows(value)
-          this.rows = rows
-          this.nextId = Math.max(...rows.map(row => row.id), 0) + 1
-        }
-      },
-    },
-  },
-  methods: {
-    emitValue() {
-      this.$emit("update:modelValue", rowsToDefinition(this.rows))
-    },
-    addRow() {
-      this.rows.push({
-        id: this.nextId++,
-        lang: "",
-        text: "",
-      })
-      this.emitValue()
-    },
-    removeRow(id) {
-      this.rows = this.rows.filter(row => row.id !== id)
-      this.emitValue()
-    },
-    pruneEmptyRow(id) {
-      const row = this.rows.find(row => row.id === id)
-      if (!row) {
-        return
-      }
+function emitValue() {
+  emit("update:modelValue", rowsToDefinition(rows.value))
+}
 
-      if (!row.text.trim() && this.rows.length > 1) {
-        this.removeRow(id)
-        return
-      }
+function addRow() {
+  rows.value.push({
+    id: nextId.value,
+    lang: "",
+    text: "",
+  })
+  nextId.value += 1
+  emitValue()
+}
 
-      this.emitValue()
-    },
-  },
+function removeRow(id) {
+  rows.value = rows.value.filter(row => row.id !== id)
+  emitValue()
+}
+
+function pruneEmptyRow(id) {
+  const row = rows.value.find(row => row.id === id)
+  if (!row) {
+    return
+  }
+
+  if (!row.text.trim() && rows.value.length > 1) {
+    removeRow(id)
+    return
+  }
+
+  emitValue()
 }
 </script>
 
