@@ -64,6 +64,30 @@ describe("AbstractsEditor", () => {
     expect(textareas[1].element.value).toBe("Second English")
   })
 
+  it("shows an English abstract hint when required and missing", () => {
+    const w = mountAbstracts({
+      modelValue: {},
+      requireEnglish: true,
+    })
+
+    expect(w.text()).toContain(
+      "Every terminology should have an English abstract at least.",
+    )
+  })
+
+  it("hides the English abstract hint when an English abstract exists", () => {
+    const w = mountAbstracts({
+      modelValue: {
+        en: ["English abstract"],
+      },
+      requireEnglish: true,
+    })
+
+    expect(w.text()).not.toContain(
+      "Every terminology should have an English abstract at least.",
+    )
+  })
+
   it("adds another abstract row", async () => {
     const w = mountAbstracts({
       modelValue: {
