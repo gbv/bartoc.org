@@ -31,7 +31,10 @@ const FormRowStub = {
 }
 
 const AbstractsEditorStub = {
-  props: ["modelValue", "requireEnglish"],
+  props: {
+    modelValue: Object,
+    requireEnglish: Boolean,
+  },
   emits: ["update:modelValue"],
   template: `
     <div data-testid="abstracts-editor">
@@ -118,7 +121,7 @@ describe("ItemEditor abstracts", () => {
     expect(w.get("[data-testid='require-english']").text()).toBe("true")
   })
 
-  it("does not require the new-item hint for existing items", () => {
+  it("requires an English abstract for existing items", () => {
     const w = mountEditor({
       uri: "http://bartoc.org/en/node/12345",
       definition: {},
@@ -126,7 +129,7 @@ describe("ItemEditor abstracts", () => {
       type: ["http://www.w3.org/2004/02/skos/core#ConceptScheme"],
     })
 
-    expect(w.get("[data-testid='require-english']").text()).toBe("false")
+    expect(w.get("[data-testid='require-english']").text()).toBe("true")
   })
 
   it("updates item.definition when AbstractsEditor emits a new value", async () => {

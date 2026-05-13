@@ -75,6 +75,41 @@ describe("AbstractsEditor", () => {
     )
   })
 
+  it("shows an empty English abstract row when required and missing", () => {
+    const w = mountAbstracts({
+      modelValue: {},
+      requireEnglish: true,
+    })
+
+    const textareas = w.findAll("textarea")
+    expect(textareas.length).toBe(1)
+    expect(textareas[0].element.value).toBe("")
+    expect(w.find("[data-testid='lang-val']").text()).toBe("\"en\"")
+    const addButton = w.findAll("button").find(b => b.text() === "add abstract")
+    expect(addButton.element.disabled).toBe(true)
+  })
+
+  it("shows an empty English row when required English is missing from existing abstracts", () => {
+    const w = mountAbstracts({
+      modelValue: {
+        it: ["Abstract italiano"],
+      },
+      requireEnglish: true,
+    })
+
+    expect(w.text()).toContain(
+      "Every terminology should have an English abstract at least.",
+    )
+    const textareas = w.findAll("textarea")
+    expect(textareas.length).toBe(2)
+    expect(textareas[0].element.value).toBe("")
+    expect(textareas[1].element.value).toBe("Abstract italiano")
+    expect(w.find("[data-testid='lang-val']").text()).toBe("\"en\"")
+
+    const addButton = w.findAll("button").find(b => b.text() === "add abstract")
+    expect(addButton.element.disabled).toBe(true)
+  })
+
   it("hides the English abstract hint when an English abstract exists", () => {
     const w = mountAbstracts({
       modelValue: {
@@ -102,6 +137,25 @@ describe("AbstractsEditor", () => {
     expect(w.findAll("textarea").length).toBe(2)
   })
 
+  it("clears the only required abstract row instead of removing it", async () => {
+    const w = mountAbstracts({
+      modelValue: {
+        en: ["English abstract"],
+      },
+      requireEnglish: true,
+    })
+
+    expect(w.findAll("textarea").length).toBe(1)
+
+    await w.findAll("button").find(b => b.text() === "remove abstract").trigger("click")
+
+    const textareas = w.findAll("textarea")
+    expect(textareas.length).toBe(1)
+    expect(textareas[0].element.value).toBe("")
+    expect(w.find("[data-testid='lang-val']").text()).toBe("\"en\"")
+    expect(w.emitted("update:modelValue").at(-1)[0]).toEqual({})
+  })
+
   it("removes one abstract row and emits updated definition", async () => {
     const w = mountAbstracts({
       modelValue: {
@@ -119,6 +173,30 @@ describe("AbstractsEditor", () => {
     const last = w.emitted("update:modelValue").at(-1)[0]
     console.log("Emitted value after removing abstract:", last)
     expect(last).toEqual({
+      de: ["Deutsch Abstract"],
+    })
+  })
+
+  it("keeps an empty English row after removing the required English abstract", async () => {
+    const w = mountAbstracts({
+      modelValue: {
+        en: ["English abstract"],
+        de: ["Deutsch Abstract"],
+      },
+      requireEnglish: true,
+    })
+
+    expect(w.findAll("textarea").length).toBe(2)
+
+    await w.findAll("button").find(b => b.text() === "remove abstract").trigger("click")
+    await w.vm.$nextTick()
+
+    const textareas = w.findAll("textarea")
+    expect(textareas.length).toBe(2)
+    expect(textareas[0].element.value).toBe("")
+    expect(textareas[1].element.value).toBe("Deutsch Abstract")
+    expect(w.find("[data-testid='lang-val']").text()).toBe("\"en\"")
+    expect(w.emitted("update:modelValue").at(-1)[0]).toEqual({
       de: ["Deutsch Abstract"],
     })
   })

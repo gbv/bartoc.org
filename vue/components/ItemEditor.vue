@@ -31,7 +31,7 @@
   <form-row :label="'Abstracts'">
     <abstracts-editor
       v-model="item.definition"
-      :require-english="!item.uri" />
+      require-english />
   </form-row>
   <form-row :label="'Languages'">
     <language-select

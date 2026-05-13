@@ -38,11 +38,12 @@
     <div class="abstract-actions">
       <span
         v-if="showEnglishAbstractHint"
-        class="abstract-hint">
+        class="abstract-hint alert alert-warning">
         Every terminology should have an English abstract at least.
       </span>
       <button
         type="button"
+        :disabled="hasEmptyRequiredEnglishRow"
         class="btn btn-primary"
         @click="addRow()">
         {{ addLabel }}
@@ -56,7 +57,7 @@ import { computed, ref, watch } from "vue"
 import LanguageSelect from "./LanguageSelect.vue"
 
 // Convert the JSKOS definition object into editable rows.
-function definitionToRows(definition = {}) {
+function definitionToRows(definition = {}, { requireEnglish = false } = {}) {
   let id = 0
 
   const rows = []
@@ -81,6 +82,14 @@ function definitionToRows(definition = {}) {
         text: text || "",
       })
     }
+  }
+
+  if (requireEnglish && !rows.some(row => row.lang === "en")) {
+    rows.unshift({
+      id: ++id,
+      lang: "en",
+      text: "",
+    })
   }
 
   return rows
@@ -137,12 +146,12 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"])
 
 // Local row state is easier to edit than the language-keyed JSKOS object.
-const rows = ref(definitionToRows(props.modelValue))
+const rows = ref(definitionToRows(props.modelValue, {
+  requireEnglish: props.requireEnglish,
+}))
 const nextId = ref(Math.max(...rows.value.map(row => row.id), 0) + 1)
 
-const addLabel = computed(() =>
-  rows.value.length > 1 ? "add another abstract" : "add abstract",
-)
+const addLabel = "add abstract"
 
 const hasEnglishAbstract = computed(() =>
   rows.value.some(row => row.lang === "en" && row.text.trim()),
@@ -152,15 +161,22 @@ const showEnglishAbstractHint = computed(() =>
   props.requireEnglish && !hasEnglishAbstract.value,
 )
 
+const hasEmptyRequiredEnglishRow = computed(() =>
+  props.requireEnglish &&
+  rows.value.some(row => row.lang === "en" && !row.text.trim()),
+)
+
 // Keep local rows in sync if the parent replaces modelValue from outside.
 watch(
-  () => props.modelValue,
-  (value) => {
+  () => [props.modelValue, props.requireEnglish],
+  ([value, requireEnglish]) => {
     const incoming = JSON.stringify(value || {})
     const current = JSON.stringify(rowsToDefinition(rows.value))
+    const needsRequiredRow = requireEnglish &&
+      !rows.value.some(row => row.lang === "en")
 
-    if (incoming !== current) {
-      const nextRows = definitionToRows(value)
+    if (incoming !== current || needsRequiredRow) {
+      const nextRows = definitionToRows(value, { requireEnglish })
       rows.value = nextRows
       nextId.value = Math.max(...nextRows.map(row => row.id), 0) + 1
     }
@@ -169,7 +185,21 @@ watch(
 )
 
 function emitValue() {
+  ensureRequiredEnglishRow()
   emit("update:modelValue", rowsToDefinition(rows.value))
+}
+
+function ensureRequiredEnglishRow() {
+  if (!props.requireEnglish || rows.value.some(row => row.lang === "en")) {
+    return
+  }
+
+  rows.value.unshift({
+    id: nextId.value,
+    lang: "en",
+    text: "",
+  })
+  nextId.value += 1
 }
 
 function addRow() {
@@ -183,7 +213,22 @@ function addRow() {
 }
 
 function removeRow(id) {
+  if (rows.value.length === 1) {
+    clearRow(id)
+    return
+  }
   rows.value = rows.value.filter(row => row.id !== id)
+  emitValue()
+}
+
+function clearRow(id) {
+  const row = rows.value.find(row => row.id === id)
+
+  if (!row) {
+    return
+  }
+
+  row.text = ""
   emitValue()
 }
 
@@ -241,6 +286,8 @@ function pruneEmptyRow(id) {
 
 .abstract-hint {
   color: #6c757d;
+  margin: 0;
+  padding: 8px;
 }
 
 .abstract-actions .btn {
