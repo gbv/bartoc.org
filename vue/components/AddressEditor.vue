@@ -54,29 +54,56 @@
   </table>
 </template>
 
-<script>
-export default {
-  props: {
-    modelValue: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+import { ref, watch } from "vue"
+
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    default: () => ({}),
   },
-  emits: ["update:modelValue"],
-  data() {
-    const { ext, street, locality, code, region, country } = (this.modelValue || {})
-    return { ext, street, locality, code, region, country }
-  },
-  created() {
-    for (const name of ["ext", "street", "locality", "code", "region", "country"]) {
-      this.$watch(name, this.update)
-    }
-  },
-  methods: {
-    update() {
-      const { ext, street, locality, code, region, country } = this
-      this.$emit("update:modelValue", { ext, street, locality, code, region, country })
-    },
-  },
+})
+
+const emit = defineEmits(["update:modelValue"])
+
+const ext = ref("")
+const street = ref("")
+const locality = ref("")
+const code = ref("")
+const region = ref("")
+const country = ref("")
+
+function setFields(value = {}) {
+  ext.value = value.ext || ""
+  street.value = value.street || ""
+  locality.value = value.locality || ""
+  code.value = value.code || ""
+  region.value = value.region || ""
+  country.value = value.country || ""
 }
+
+function update() {
+  emit("update:modelValue", {
+    ext: ext.value,
+    street: street.value,
+    locality: locality.value,
+    code: code.value,
+    region: region.value,
+    country: country.value,
+  })
+}
+
+setFields(props.modelValue)
+
+watch(
+  () => props.modelValue,
+  value => {
+    setFields(value)
+  },
+)
+
+watch(
+  [ext, street, locality, code, region, country],
+  update,
+)
 </script>
