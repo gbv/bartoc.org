@@ -60,7 +60,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref, watch } from "vue"
 import ConceptDetails from "./ConceptDetails.vue"
 import Icon from "./Icon.vue"
 import ItemName from "./ItemName.vue"
@@ -68,100 +69,90 @@ import ItemSelect from "./ItemSelect.vue"
 import ServiceLink from "./ServiceLink.vue"
 import { registryForScheme, sortConcepts } from "../utils.js"
 
-export default {
-  components: { ConceptDetails, ServiceLink, ItemName, ItemSelect, Icon },
-  props: {
-    scheme: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  scheme: {
+    type: Object,
+    required: true,
   },
-  data() {
-    return {
-      registry: null,
-      accessScheme: this.scheme,
-      topConcepts: [],
-      selected: {},
-    }
-  },
-  computed: {
-    display() {
-      return this.scheme.DISPLAY || {}
-    },
-  },
-  watch: {
-    selected(concept) {
-      // Update URL with new selected concept
-      const hash = window.location.hash
-      const urlParams = new URLSearchParams(window.location.search)
-      if (concept && concept.uri) {
-        urlParams.set("uri", concept.uri)
-      } else {
-        urlParams.delete("uri")
+})
+
+const registry = ref(null)
+const accessScheme = ref(props.scheme)
+const topConcepts = ref([])
+const selected = ref({})
+const display = computed(() => props.scheme.DISPLAY || {})
+
+watch(selected, concept => {
+  // Update URL with new selected concept
+  const hash = window.location.hash
+  const urlParams = new URLSearchParams(window.location.search)
+  if (concept && concept.uri) {
+    urlParams.set("uri", concept.uri)
+  } else {
+    urlParams.delete("uri")
+  }
+  // Build new URL
+  let url = `${window.location.href.replace(hash, "").replace(window.location.search, "")}`
+  if (urlParams.toString()) {
+    url += `?${urlParams.toString()}`
+  }
+  // Note that hash/fragment needs to be at the end of the URL, otherwise the search params will be considered part of the hash!
+  url += hash
+  window.history.replaceState({}, "", url)
+})
+
+onMounted(async () => {
+  // Define global method to select concept, even from EJS template
+  window.selectConcept = (concept) => {
+    selected.value = concept
+  }
+
+  const { scheme } = props
+
+  // Get URI for selected concept from URL
+  const urlParams = new URLSearchParams(window.location.search)
+  const selectedUri = urlParams.get("uri")
+
+  // FIXME: this requires the vocabulary to have top concepts. Better query example concept instead?
+  const possibleUris = [ scheme.uri, ...(scheme.identifier||[]) ]
+  for (let uri of possibleUris) {
+    const schemeWithUri = { ...scheme, uri }
+
+    // TODO: allow to manually switch API endpoints
+    const registryCandidate = registryForScheme(schemeWithUri)
+    if (registryCandidate) {
+      registry.value = registryCandidate
+
+      schemeWithUri.VOCID = registryCandidate._jskos.schemes && registryCandidate._jskos.schemes.length ? registryCandidate._jskos.schemes[0].VOCID : undefined // TODO: this is a hack
+      accessScheme.value = schemeWithUri
+
+      let results = []
+      try {
+        results = await registry.value.getTop({ scheme: accessScheme.value })
+      } catch (e) {
+        // TODO: catch CDKError
+        console.error(e)
       }
-      // Build new URL
-      let url = `${window.location.href.replace(hash, "").replace(window.location.search, "")}`
-      if (urlParams.toString()) {
-        url += `?${urlParams.toString()}`
-      }
-      // Note that hash/fragment needs to be at the end of the URL, otherwise the search params will be considered part of the hash!
-      url += hash
-      window.history.replaceState({}, "", url)
-    },
-  },
-  async mounted() {
-    // Define global method to select concept, even from EJS template
-    window.selectConcept = (concept) => {
-      this.selected = concept
-    }
-
-    const { scheme } = this
-
-    // Get URI for selected concept from URL
-    const urlParams = new URLSearchParams(window.location.search)
-    const selectedUri = urlParams.get("uri")
-
-    // FIXME: this requires the vocabulary to have top concepts. Better query example concept instead?
-    const possibleUris = [ scheme.uri, ...(scheme.identifier||[]) ]
-    for (let uri of possibleUris) {
-      const accessScheme = { ...scheme, uri }
-
-      // TODO: allow to manually switch API endpoints
-      const registry = registryForScheme(accessScheme)
-      if (registry) {
-        this.registry = registry
-
-        accessScheme.VOCID = registry._jskos.schemes && registry._jskos.schemes.length ? registry._jskos.schemes[0].VOCID : undefined // TODO: this is a hack
-        this.accessScheme = accessScheme
-
-        let results = []
-        try {
-          results = await this.registry.getTop({ scheme: this.accessScheme })
-        } catch (e) {
-          // TODO: catch CDKError
-          console.error(e)
-        }
-        if (results.length) {
-          sortConcepts(results, this.scheme)
-          this.topConcepts = [...results] // no clue why this is necessary (WTF?)
-          // Load selected concept if necessary
-          if (selectedUri) {
-            // ConceptDetails will load the details itself
-            this.selected = {
-              uri: selectedUri,
-              inScheme: [accessScheme],
-            }
+      if (results.length) {
+        sortConcepts(results, props.scheme)
+        topConcepts.value = [...results] // no clue why this is necessary (WTF?)
+        // Load selected concept if necessary
+        if (selectedUri) {
+          // ConceptDetails will load the details itself
+          selected.value = {
+            uri: selectedUri,
+            inScheme: [schemeWithUri],
           }
-          break
-        } else {
-          console.info(`Vocabulary ${uri} has no top concepts!`)
         }
+        break
       } else {
-        console.debug("Failed to get registry for scheme: ", this.accessScheme)
+        console.info(`Vocabulary ${uri} has no top concepts!`)
       }
+    } else {
+      console.debug("Failed to get registry for scheme: ", accessScheme.value)
     }
-  },
-}
+  }
+})
 </script>
 
 <style scoped>
