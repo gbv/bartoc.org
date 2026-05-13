@@ -147,7 +147,7 @@ describe("AbstractsEditor", () => {
 
     expect(w.findAll("textarea").length).toBe(1)
 
-    await w.findAll("button").find(b => b.text() === "remove abstract").trigger("click")
+    await w.findAll("button").find(b => b.text() === "clear abstract").trigger("click")
 
     const textareas = w.findAll("textarea")
     expect(textareas.length).toBe(1)

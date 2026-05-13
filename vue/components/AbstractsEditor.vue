@@ -30,7 +30,7 @@
           type="button"
           class="btn btn-danger"
           @click="removeRow(row.id)">
-          remove abstract
+          {{ rows.length > 1 ? "remove" : "clear" }} abstract
         </button>
       </div>
     </div>
