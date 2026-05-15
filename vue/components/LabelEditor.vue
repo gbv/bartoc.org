@@ -30,78 +30,68 @@
   </table>
 </template>
 
-<script>
+<script setup>
+import { watch, ref } from "vue"
 import LanguageSelect from "./LanguageSelect.vue"
 
-/**
- * Edit prefLabel (first of each language) and altLabel.
- */
-export default {
-  components: { LanguageSelect },
-  props: {
-    prefLabel: {
-      type: Object,
-      required: true,
-    },
-    altLabel: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  prefLabel: {
+    type: Object,
+    required: true,
   },
-  emits: ["update:prefLabel","update:altLabel"],
-  data() {
-    return {
-      labels: [],
-    }
+  altLabel: {
+    type: Object,
+    required: true,
   },
-  watch: {
-    labels: {
-      deep: true,
-      handler(labels) {
-        const prefLabel = {}
-        const altLabel = {}
+})
 
-        if (!labels.find(label => label.label.trim() === "")) {
-          this.add() // will trigger handler again
-          return
-        }
+const emit = defineEmits(["update:prefLabel","update:altLabel"])
 
-        labels.forEach(({ label, language }) => {
-          label = label.trim()
-          if (label === "") {
-            return
-          }
-          const code = language || "und"
-          if (code in altLabel) {
-            altLabel[code].push(label)
-          } else if (code in prefLabel) {
-            altLabel[code] = [label]
-          } else {
-            prefLabel[code] = label
-          }
-        })
-        this.$emit("update:prefLabel", prefLabel)
-        this.$emit("update:altLabel", altLabel)
-      },
-    },
-  },
-  created() {
-    for (const language in this.prefLabel) {
-      this.add({ label: this.prefLabel[language], language })
-    }
-    // this will move an altLabel to become a prefLabel if no prefLabel of its language exist!
-    for (const language in this.altLabel) {
-      this.altLabel[language].forEach(label => this.add({ label, language }))
-    }
-    this.add()
-  },
-  methods: {
-    add(label) {
-      this.labels.push(label || { label: "", language: "" })
-    },
-    remove(i) {
-      this.labels.splice(i, 1)
-    },
-  },
+const labels = ref([])
+
+for (const language in props.prefLabel) {
+  add({ label: props.prefLabel[language], language })
 }
+
+for (const language in props.altLabel) {
+  props.altLabel[language].forEach(label => add({ label, language }))
+}
+add()
+
+function add(label) {
+  labels.value.push(label || { label: "", language: "" })
+}
+function remove(i) {
+  labels.value.splice(i, 1)
+}
+
+
+watch(labels, (value) => {
+  const prefLabel = {}
+  const altLabel = {}
+
+  if (!value.find(label => label.label.trim() === "")) {
+    add() // will trigger handler again
+    return
+  }
+
+  value.forEach(({ label, language }) => {
+    label = label.trim()
+    if (label === "") {
+      return
+    }
+    const code = language || "und"
+    if (code in altLabel) {
+      altLabel[code].push(label)
+    } else if (code in prefLabel) {
+      altLabel[code] = [label]
+    } else {
+      prefLabel[code] = label
+    }
+  })
+  emit("update:prefLabel", prefLabel)
+  emit("update:altLabel", altLabel)
+
+}, { deep: true })
+
 </script>
