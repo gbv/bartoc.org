@@ -4,7 +4,7 @@
       <li
         v-for="ancestor in ancestors.filter(Boolean).reverse()"
         :key="ancestor.uri"
-        @click="$emit('update:concept', ancestor)">
+        @click="selectConcept(ancestor)">
         <icon name="levelUp" />
         <item-name
           :item="ancestor"
@@ -80,7 +80,7 @@
         <li
           v-for="child in narrower"
           :key="child.uri"
-          @click="$emit('update:concept', child)">
+          @click="selectConcept(child)">
           <icon name="levelDown" />
           <item-name
             :item="child"
@@ -92,7 +92,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from "vue"
 import Icon from "./Icon.vue"
 import ItemLabels from "./ItemLabels.vue"
 import ItemName from "./ItemName.vue"
@@ -100,70 +101,67 @@ import ItemNotes from "./ItemNotes.vue"
 import { sortConcepts } from "../utils.js"
 import k10plusikt from "../../data/k10plus-ikt.json"
 
-export default {
-  components: { ItemName, ItemNotes, ItemLabels, Icon },
-  props: {
-    concept: {
-      type: Object,
-      required: true,
-    },
-    registry: {
-      type: Object,
-      required: true,
-    },
-    scheme: {
-      type: Object,
-      required: true,
-    },
-    display: {
-      type: Object,
-      default() {
-        return {}
-      },
-    },
+const props = defineProps({
+  concept: {
+    type: Object,
+    required: true,
   },
-  emits: ["update:concept"],
-  data() {
-    return {
-      selected: {},
-      ancestors: [],
-      narrower: [],
+  registry: {
+    type: Object,
+    required: true,
+  },
+  scheme: {
+    type: Object,
+    required: true,
+  },
+  display: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
+const emit = defineEmits(["update:concept"])
+
+const selected = ref({})
+const ancestors = ref([])
+const narrower = ref([])
+
+const k10plus = computed(() => {
+  if (!selected.value || !selected.value.notation) {
+    return
+  }
+  const ikt = k10plusikt[(props.scheme.CQLKEY || "").toUpperCase()]
+  const notation = selected.value.notation || []
+  return ikt ? `https://opac.k10plus.de/DB=2.299/CMD?ACT=SRCHA&IKT=${ikt}&TRM=${notation[0]}` : null
+})
+
+watch(
+  () => props.concept,
+  async (concept) => {
+    selected.value = concept
+    ancestors.value = []
+    narrower.value = []
+
+    if (concept && concept.uri) {
+      // Load and merge details into the selected concept.
+      const details = (await props.registry.getConcepts({ concepts: [concept] }))[0]
+      selected.value = Object.assign(concept, details || {})
+
+      // Inject access scheme. Required to get VOCID. Should better be fixed in cocoda-sdk?
+      concept.inScheme = [props.scheme]
+
+      ancestors.value = await props.registry.getAncestors({ concept })
+      narrower.value = sortConcepts(
+        await props.registry.getNarrower({ concept }),
+        props.scheme,
+      )
     }
   },
-  computed: {
-    k10plus() {
-      const { scheme, selected } = this
-      if (!selected || !selected.notation) {
-        return
-      }
-      const ikt = k10plusikt[(scheme.CQLKEY || "").toUpperCase()]
-      const notation = selected.notation || []
-      return ikt ? `https://opac.k10plus.de/DB=2.299/CMD?ACT=SRCHA&IKT=${ikt}&TRM=${notation[0]}` : null
-    },
-  },
-  watch: {
-    concept: {
-      immediate: true,
-      async handler(concept) {
+  { immediate: true },
+)
 
-        this.selected = concept
-        this.ancestors = []
-        this.narrower = []
-
-        if (concept && concept.uri) {
-          // load and merge details into concept
-          const details = (await this.registry.getConcepts({ concepts: [concept] }))[0]
-          this.selected = Object.assign(concept, details || {})
-
-          // inject access scheme. Required to get VOCID. Should better be fixed in cocoda-sdk?
-          concept.inScheme = [this.scheme]
-
-          this.ancestors = await this.registry.getAncestors({ concept })
-          this.narrower = sortConcepts(await this.registry.getNarrower({ concept }), this.scheme)
-        }
-      },
-    },
-  },
+function selectConcept(concept) {
+  emit("update:concept", concept)
 }
 </script>
 
