@@ -29,75 +29,66 @@
   </table>
 </template>
 
-<script>
+<script setup>
 import { isValidUrl } from "../utils.js"
+import { computed, ref, watch } from "vue"
+
+const props = defineProps({
+  modelValue: {
+    type: Array,
+    default: () => [],
+  },
+})
+const publisher = firstPublisher(props.modelValue)
+const emit = defineEmits(["update:modelValue"])
+const name = ref((publisher.prefLabel || {}).en || "")
+const uri = ref(publisher.uri || "")
+
+const uriInvalid = computed(() => {
+  return (uri.value || name.value) && !isValidUrl(uri.value)
+})
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    const publisher = firstPublisher(value)
+    const nextName = (publisher.prefLabel || {}).en || ""
+    const nextUri = publisher.uri || ""
+
+    if (nextName !== name.value) {
+      name.value = nextName
+    }
+    if (nextUri !== uri.value) {
+      uri.value = nextUri
+    }
+  },
+  { deep: true },
+)
+
+watch([name, uri], () => {
+  emitValue()
+})
 
 function firstPublisher(modelValue) {
   return (modelValue || [])[0] || {}
 }
 
-export default {
-  props: {
-    modelValue: {
-      type: Array,
-      default: () => [],
-    },
-  },
-  emits: ["update:modelValue"],
-  data() {
-    const publisher = firstPublisher(this.modelValue)
-    return {
-      name: (publisher.prefLabel || {}).en || "",
-      uri: publisher.uri || "",
-    }
-  },
-  computed: {
-    uriInvalid() {
-      return (this.uri || this.name) && !isValidUrl(this.uri)
-    },
-  },
-  watch: {
-    name() {
-      this.emitValue()
-    },
-    uri() {
-      this.emitValue()
-    },
-    modelValue: {
-      deep: true,
-      handler(value) {
-        const publisher = firstPublisher(value)
-        const nextName = (publisher.prefLabel || {}).en || ""
-        const nextUri = publisher.uri || ""
+function emitValue() {
+  const nextName = name.value.trim()
+  const nextUri = uri.value.trim()
+  if (!nextName && !nextUri) {
+    emit("update:modelValue", [])
+    return
+  }
 
-        if (nextName !== this.name) {
-          this.name = nextName
-        }
-        if (nextUri !== this.uri) {
-          this.uri = nextUri
-        }
-      },
-    },
-  },
-  methods: {
-    emitValue() {
-      const name = this.name.trim()
-      const uri = this.uri.trim()
-      if (!name && !uri) {
-        this.$emit("update:modelValue", [])
-        return
-      }
+  const publisher = {}
 
-      const publisher = {}
-
-      if (name) {
-        publisher.prefLabel = { en: name }
-      }
-      if (uri) {
-        publisher.uri = uri
-      }
-      this.$emit("update:modelValue", [publisher])
-    },
-  },
+  if (nextName) {
+    publisher.prefLabel = { en: nextName }
+  }
+  if (nextUri) {
+    publisher.uri = nextUri
+  }
+  emit("update:modelValue", [publisher])
 }
 </script>
