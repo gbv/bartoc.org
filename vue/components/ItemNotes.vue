@@ -5,7 +5,7 @@
     class="list-inline">
     <li
       v-for="note in notes(type)"
-      :key="note"
+      :key="`${note.lang}:${note.note}`"
       :title="type">
       <span
         class="language-tag"
@@ -14,7 +14,9 @@
   </ul>
 </template>
 
-<script>
+<script setup>
+import { computed } from "vue"
+
 const noteTypeNames = [
   "scopeNote",
   "definition",
@@ -25,29 +27,26 @@ const noteTypeNames = [
   "example",
 ]
 
-export default {
-  props: {
-    item: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
   },
-  computed: {
-    noteTypes() {
-      return noteTypeNames.filter(name => this.item[name])
-    },
-  },
-  methods: {
-    notes(type) {
-      const languageMap = this.item[type] || {}
-      const allNotes = []
-      for (let lang in languageMap) {
-        for (let note of languageMap[lang]) {
-          allNotes.push({lang, note})
-        }
-      }
-      return allNotes
-    },
-  },
+})
+
+const noteTypes = computed(() => {
+  return noteTypeNames.filter(name => props.item[name])
+})
+
+function notes(type) {
+  const languageMap = props.item[type] || {}
+  const allNotes = []
+  for (let lang in languageMap) {
+    for (let note of languageMap[lang]) {
+      allNotes.push({lang, note})
+    }
+  }
+  return allNotes
 }
+
 </script>
