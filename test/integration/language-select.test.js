@@ -19,7 +19,7 @@ const ItemSelectStub = {
   props: ["modelValue", "repeatable"],
   emits: ["update:modelValue"],
   template: `
-    <div>
+    <div data-testid="item-select">
       <pre data-testid="val">{{ JSON.stringify(modelValue) }}</pre>
 
       <button data-testid="emit-string" @click="$emit('update:modelValue', 'de')">
@@ -57,6 +57,13 @@ describe("LanguageSelect", () => {
   it("non-repeatable: passes a string (or '') to ItemSelect", () => {
     const w = mountLang({ modelValue: null, repeatable: false })
     expect(w.get("[data-testid='val']").text()).toBe("\"\"")
+  })
+
+  it("passes fallthrough attributes to ItemSelect only", () => {
+    const w = mountLang({ modelValue: "", class: "form-control" })
+
+    expect(w.get(".language-select").classes()).not.toContain("form-control")
+    expect(w.get("[data-testid='item-select']").classes()).toContain("form-control")
   })
 
   it("non-repeatable: emits a string and ignores arrays", async () => {

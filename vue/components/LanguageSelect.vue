@@ -26,95 +26,83 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import ItemSelect from "./ItemSelect.vue"
 import jskos from "jskos-tools"
 import { guessLanguage } from "../utils"
+import { computed } from "vue"
 
-/**
- * Select one or a list of languages.
- *
- * Is simply a wrapper around ItemSelect since this is used in different places.
- */
-export default {
-  components: {
-    ItemSelect,
+defineOptions({ inheritAttrs: false })
+
+const props = defineProps({
+  modelValue: {
+    type: [String, Array],
+    default: null,
   },
-  inheritAttrs: false,
-  props: {
-    modelValue: {
-      type: [String, Array],
-      default: null,
-    },
-    repeatable: {
-      type: Boolean,
-      default: false,
-    },
-    placeholder: {
-      type: String,
-      default: "language…",
-    },
-    guessFrom: {
-      type: String,
-      default: undefined,
-    },
+  repeatable: {
+    type: Boolean,
+    default: false,
   },
-  emits: ["update:modelValue"],
-  data() {
-    return {
-      // TODO: Do not hardcode this.
-      scheme: {
-        uri: "http://bartoc.org/en/node/20287",
-        API: [{ url: "/api/", type: "http://bartoc.org/api-type/jskos" }],
-      },
+  placeholder: {
+    type: String,
+    default: "language…",
+  },
+  guessFrom: {
+    type: String,
+    default: undefined,
+  },
+})
+
+const emit = defineEmits(["update:modelValue"])
+
+const scheme = {
+  uri: "http://bartoc.org/en/node/20287",
+  API: [{ url: "/api/", type: "http://bartoc.org/api-type/jskos" }],
+}
+
+const value = computed({
+  get() {
+    if (props.repeatable) {
+      // always return array
+      if (Array.isArray(props.modelValue)) {
+        return props.modelValue
+      }
+      return props.modelValue ? [props.modelValue] : []
+    }
+    // always return string
+    return typeof props.modelValue === "string" ? props.modelValue : ""
+  },
+  set(val) {
+    if (props.repeatable) {
+      // always emit array
+      const arr = Array.isArray(val) ? val : (val ? [val] : [])
+      emit("update:modelValue", arr)
+    } else {
+      // always emit string
+      emit("update:modelValue", typeof val === "string" ? val : "")
     }
   },
-  computed: {
-    /**
-     * Passthrough model value.
-     */
-    value: {
-      get() {
-        if (this.repeatable) {
-        // always return array
-          if (Array.isArray(this.modelValue)) {
-            return this.modelValue
-          }
-          return this.modelValue ? [this.modelValue] : []
-        }
-        // always return string
-        return typeof this.modelValue === "string" ? this.modelValue : ""
-      },
-      set(val) {
-        if (this.repeatable) {
-        // always emit array
-          const arr = Array.isArray(val) ? val : (val ? [val] : [])
-          this.$emit("update:modelValue", arr)
-        } else {
-        // always emit string
-          this.$emit("update:modelValue", typeof val === "string" ? val : "")
-        }
-      },
-    },
-    canGuess() {
-      return (this.guessFrom || "").trim().length >= 20
-    },
-  },
-  methods: {
-    extractValue(concept) {
-      return jskos.notation(concept)
-    },
-    extractLabel(concept) {
-      return jskos.prefLabel(concept)
-    },
-    guess() {
-      if (!this.canGuess || this.repeatable) {
-        return
-      }
-      this.$emit("update:modelValue", guessLanguage(this.guessFrom))
-    },
-  },
+})
+
+const canGuess = computed(() => {
+  return (props.guessFrom || "").trim().length >= 20
+})
+
+function extractValue(concept) {
+  return jskos.notation(concept)
 }
+
+function extractLabel(concept) {
+  return jskos.prefLabel(concept)
+}
+
+function guess() {
+  if (!canGuess.value || props.repeatable) {
+    return
+  }
+  emit("update:modelValue", guessLanguage(props.guessFrom))
+}
+
 </script>
 
 <style scoped>
