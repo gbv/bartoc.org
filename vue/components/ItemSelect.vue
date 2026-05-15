@@ -13,7 +13,7 @@
     :searchable="true"
     :loading="isLoading"
     :placeholder="placeholder"
-    @change="$emit('update:modelValue', $event)" />
+    @change="emit('update:modelValue', $event)" />
   <Multiselect
     v-else
     ref="multiselect"
@@ -26,143 +26,135 @@
     :searchable="true"
     :loading="isLoading"
     :placeholder="placeholder"
-    @change="$emit('update:modelValue', $event)" />
+    @change="emit('update:modelValue', $event)" />
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from "vue"
 import Multiselect from "@vueform/multiselect"
 import jskos from "jskos-tools"
 import { registryForScheme, sortConcepts } from "../utils.js"
 
 // Select one or a list of item URIs
-export default {
-  components: {
-    Multiselect,
-  },
-  props: {
-    modelValue: {
-      type: [String, Array],
-      default(props) {
-        return props.repeatable ? [] : ""
-      },
-    },
-    repeatable: {
-      type: Boolean,
-      default: false,
-    },
-    allrepeatable: {
-      type: Boolean,
-      default: false,
-    },
-    depth: {
-      type: Number,
-      default: 1,
-    },
-    scheme: {
-      type: Object,
-      required: true,
-    },
-    extractValue: {
-      type: Function,
-      default: (concept) => concept.uri,
-    },
-    extractLabel: {
-      type: Function,
-      default: (concept) => `${jskos.notation(concept)} ${jskos.prefLabel(concept)}`,
-    },
-    placeholder: {
-      type: String,
-      default: "Search…",
+const props = defineProps({
+  modelValue: {
+    type: [String, Array],
+    default(props) {
+      return props.repeatable ? [] : ""
     },
   },
-  emits: ["update:modelValue"],
-  data() {
-    return {
-      value: this.modelValue || (this.repeatable ? [] : null),
-      isLoading: false,
-      cancel: null,
+  repeatable: {
+    type: Boolean,
+    default: false,
+  },
+  allrepeatable: {
+    type: Boolean,
+    default: false,
+  },
+  depth: {
+    type: Number,
+    default: 1,
+  },
+  scheme: {
+    type: Object,
+    required: true,
+  },
+  extractValue: {
+    type: Function,
+    default: (concept) => concept.uri,
+  },
+  extractLabel: {
+    type: Function,
+    default: (concept) => `${jskos.notation(concept)} ${jskos.prefLabel(concept)}`,
+  },
+  placeholder: {
+    type: String,
+    default: "Search…",
+  },
+})
+
+const emit = defineEmits(["update:modelValue"])
+
+const multiselect = ref(null)
+const value = ref(props.modelValue || (props.repeatable ? [] : null))
+const isLoading = ref(false)
+const cancel = ref(null)
+
+const registry = computed(() => registryForScheme(props.scheme))
+const options = computed(() => registry.value ? search : (props.scheme.concepts || []))
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    value.value = newValue || (props.repeatable ? [] : "")
+  },
+  { immediate: true },
+)
+
+async function search(query) {
+  if (!registry.value) {
+    return []
+  }
+
+  isLoading.value = true
+  // cancel previous request if necessary
+  cancel.value && cancel.value("canceled")
+
+  let promise
+  if (query) {
+    promise = registry.value.search({ search: query, scheme: props.scheme })
+  } else {
+    const params = props.depth > 1 ? { properties: "*" } : null
+    promise = registry.value.getTop({ scheme: props.scheme, params })
+    // TODO: support more then 2 levels or better use another component for hierarchy browsing?
+  }
+  cancel.value = promise.cancel
+
+  let results = []
+  try {
+    results = await promise
+    // for top concepts, sort them
+    if (!query) {
+      results = sortConcepts(results, props.scheme)
+        // add direct child concepts in between
+        .map(({ narrower, ...concept }) => {
+          narrower = (narrower || []).filter(Boolean).map(
+            c => {
+              if (c.prefLabel) {
+                for (let lang in c.prefLabel) {
+                  c.prefLabel[lang] = `— ${c.prefLabel[lang]}`
+                }
+              }
+              return c
+            },
+          )
+          return [concept, ...narrower]
+        })
+        .flat()
     }
-  },
-  computed: {
-    registry() {
-      return registryForScheme(this.scheme)
-    },
-    options() {
-      return this.registry ? this.search : (this.scheme.concepts || [])
-    },
-  },
-  watch: {
-    modelValue: {
-      immediate: true,
-      handler(value) {
-        this.value = value || (this.repeatable ? [] : "")
-      },
-    },
-  },
-  methods: {
-    async search(query) {
-      if (!this.registry) {
-        return []
-      }
+  } catch (error) {
+    if (error.message === "canceled") {
+      return
+    }
+    // seems to be a network error, logging to console
+    console.error(error)
+    results = []
+  }
 
-      this.isLoading = true
-      // cancel previous request if necessary
-      this.cancel && this.cancel("canceled")
+  cancel.value = null
+  isLoading.value = false
 
-      let promise
-      if (query) {
-        promise = this.registry.search({ search: query, scheme: this.scheme })
-      } else {
-        const params = this.depth > 1 ? { properties: "*" } : null
-        promise = this.registry.getTop({ scheme: this.scheme, params })
-        // TODO: support more then 2 levels or better use another component for hierarchy browsing?
-      }
-      this.cancel = promise.cancel
-
-      let results = []
-      try {
-        results = await promise
-        // for top concepts, sort them
-        if (!query) {
-          results = sortConcepts(results, this.scheme)
-            // add direct child concepts in between
-            .map(({narrower, ...concept}) => {
-              narrower = (narrower||[]).filter(Boolean).map(
-                c => {
-                  if (c.prefLabel) {
-                    for (let lang in c.prefLabel) {
-                      c.prefLabel[lang] = `— ${c.prefLabel[lang]}`
-                    }
-                  }
-                  return c
-                },
-              )
-              return [concept, ...narrower]
-            })
-            .flat()
-        }
-      } catch (error) {
-        if (error.message === "canceled") {
-          return
-        }
-        // seems to be a network error, logging to console
-        console.error(error)
-        results = []
-      }
-
-      this.cancel = null
-      this.isLoading = false
-
-      return results.map(c => ({
-        value: this.extractValue(c), label: this.extractLabel(c),
-      }))
-    },
-    focus() {
-      const input = this.$refs.multiselect && this.$refs.multiselect.input
-      input && input.focus()
-    },
-  },
+  return results.map(c => ({
+    value: props.extractValue(c), label: props.extractLabel(c),
+  }))
 }
+
+function focus() {
+  const input = multiselect.value && multiselect.value.input
+  input && input.focus()
+}
+
+defineExpose({ focus })
 </script>
 
 <style src="@vueform/multiselect/themes/default.css"></style>
