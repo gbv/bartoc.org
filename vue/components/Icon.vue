@@ -11,8 +11,9 @@
   </span>
 </template>
 
-<script>
+<script setup>
 // this component abstracts from font-awesome technical details
+import { computed } from "vue"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { faLevelUpAlt, faLevelDownAlt, faLink, faCalendar, faCalendarDay } from "@fortawesome/free-solid-svg-icons"
@@ -26,22 +27,16 @@ const knownIcons = {
   modified: ["calendar-day"],
 }
 
-export default {
-  components: { FontAwesomeIcon },
-  props: {
-    name: {
-      type: String,
-      required: true,
-    },
-    padding: {
-      type: String,
-      default: "0.5em",
-    },
+const props = defineProps({
+  name: {
+    type: String,
+    required: true,
   },
-  computed: {
-    icon() {
-      return knownIcons[this.name] 
-    },
+  padding: {
+    type: String,
+    default: "0.5em",
   },
-}
+})
+
+const icon = computed(() => knownIcons[props.name])
 </script>
