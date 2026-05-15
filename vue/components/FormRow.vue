@@ -11,18 +11,13 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    label: { type: String, default: "" },
-  },
-  computed: {
-    hasLabel() {
-      return this.label.trim().length > 0
-    },
-    contentClass() {
-      return this.hasLabel ? "col-sm-10" : "col-sm-12"
-    },
-  },
-}
+<script setup>
+import { computed } from "vue"
+
+const props = defineProps({
+  label: { type: String, default: "" },
+})
+
+const hasLabel = computed(() => props.label.trim().length > 0)
+const contentClass = computed(() => hasLabel.value ? "col-sm-10" : "col-sm-12")
 </script>
