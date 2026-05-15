@@ -244,11 +244,11 @@ import { loadConcepts, trimItemIdentifiers, createConceptApiProvider } from "../
 import {
   cleanupItem,
   conceptPickerModel,
-  githubIssueUrl,
   itemError as validateItem,
   normalizeEditableItem,
   parseNotationExamples,
 } from "../utils/itemEditor.js"
+import { saveVocabularyItem } from "../utils/itemEditorSave.js"
 
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
@@ -356,62 +356,17 @@ async function saveItem() {
     return
   }
 
-  let body
-  const onError = (responseError, res) => {
-    const message = responseError.message || res.StatusText
-    const issue =
-      "This JSKOS record could not be saved:\n\n~~~json\n" +
-      body +
-      "\n~~~\n" +
-      "The request included " +
-      (props.auth ? "a token for authentification." : "no token.")
-    const url = githubIssueUrl(`Error ${res.status} when saving`, issue)
-    const html = `If you think this is a bug, please
-                  <a href='${url}'>open a GitHub issue</a> including the current JSKOS record!`
-    error.value = { message, status: res.status, html }
-  }
-
-  const itemToSave = { ...item }
-  const method = itemToSave.uri ? "PUT" : "POST"
-  if (!itemToSave.uri) {
-    const base = "http://bartoc.org/en/node/"
-    // Try to find an URI not taken yet.
-    try {
-      const latestUri = (
-        await fetch("/api/voc?sort=counter&order=desc&limit=1").then(
-          (res) => res.json(),
-        )
-      )[0].uri
-      const latestId = parseInt(latestUri.replace(base, ""))
-      itemToSave.uri = base + (latestId + 1)
-    } catch {
-      onError(new Error("Could not determine URI for new record."), {
-        status: "determining new URI",
-      })
-      return
-    }
-  }
-
-  const cleanedItem = cleanupItem(itemToSave) // Remove empty fields.
-  trimItemIdentifiers(cleanedItem) // Trim strings in identifiers.
-
-  body = JSON.stringify(cleanedItem, null, 2)
-
-  const headers = { "Content-Type": "application/json" }
-  if (props.auth) {
-    headers.Authorization = `Bearer ${props.auth.token}`
-  }
-
-  fetch("/api/voc", { method, body, headers }).then((res) => {
-    if (res.ok) {
-      window.location.href = `/en/node/${itemToSave.uri.split("/").pop()}`
-    } else {
-      res
-        .json()
-        .then((err) => onError(err, res))
-        .catch(() => onError({}, res))
-    }
+  const result = await saveVocabularyItem({
+    item,
+    auth: props.auth,
+    trimItemIdentifiers,
   })
+
+  if (result.ok) {
+    window.location.href = `/en/node/${result.item.uri.split("/").pop()}`
+  } else {
+    error.value = result.error
+  }
 }
 
 defineExpose({
