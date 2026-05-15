@@ -1,6 +1,6 @@
 <template>
   <select
-    v-if="repeatable()"
+    v-if="repeatable"
     v-model="value"
     multiple
     :size="options.length"
@@ -8,7 +8,7 @@
     <option
       v-for="opt in options"
       :key="opt.uri"
-      :value="{ uri: opt.uri }">
+      :value="opt.uri">
       <item-name :item="opt" />
     </option>
   </select>
@@ -19,45 +19,49 @@
     <option
       v-for="opt in options"
       :key="opt.uri"
-      :value="{ uri: opt.uri }">
+      :value="opt.uri">
       <item-name :item="opt" />
     </option>
   </select>
 </template>
 
-<script>
+<script setup>
 import ItemName from "./ItemName.vue"
+import { computed } from "vue"
 
 /**
  * HTML Select form to select one or multiple values from a JSKOS set.
  */
-export default {
-  components: { ItemName },
-  props: {
-    modelValue: {
-      type: [Array, Object],
-      required: true,
-    },
-    options: {
-      type: Array,
-      required: true,
-    },
+const props = defineProps({
+  modelValue: {
+    type: [Array, Object],
+    required: true,
   },
-  emits: ["update:modelValue"],
-  data() {
-    return {
-      value: this.repeatable() ? [...this.modelValue] : this.modelValue,
-    }
+  options: {
+    type: Array,
+    required: true,
   },
-  created() {
-    this.$watch("value", value => {
-      this.$emit("update:modelValue", value) 
-    })
+})
+
+const emit = defineEmits(["update:modelValue"])
+
+const repeatable = computed(() => Array.isArray(props.modelValue))
+const value = computed({
+  get: () => toSelectValue(props.modelValue),
+  set: selectValue => {
+    emit("update:modelValue", toModelValue(selectValue))
   },
-  methods: {
-    repeatable() {
-      return Array.isArray(this.modelValue) 
-    },
-  },
+})
+
+function toSelectValue(modelValue) {
+  return Array.isArray(modelValue)
+    ? modelValue.map(item => item.uri)
+    : modelValue.uri || ""
+}
+
+function toModelValue(selectValue) {
+  return Array.isArray(selectValue)
+    ? selectValue.map(uri => ({ uri }))
+    : { uri: selectValue }
 }
 </script>
