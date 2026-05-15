@@ -40,22 +40,26 @@
   </table>
 </template>
 
-<script>
-import SetEditorMixin from "./SetEditorMixin.js"
+<script setup>
+import { useSetEditor } from "../composables/useSetEditor.js"
 
-/**
- * Edit a list of strings.
- */
-export default {
-  mixins: [SetEditorMixin],
-  methods: {
-    ensureEmpty() {
-      if (this.set.find(e => e.trim() === "") === undefined) {
-        this.set.push("")
-      }
-    },
+const props = defineProps({
+  modelValue: {
+    type: Array,
+    required: true,
   },
+})
+
+const emit = defineEmits(["update:modelValue"])
+
+function ensureEmpty(set) {
+  if (set.value.find(e => e.trim() === "") === undefined) {
+    set.value.push("")
+  }
 }
+
+const { set, remove, up, down } = useSetEditor(props, emit, ensureEmpty)
+
 </script>
 
 <style>
