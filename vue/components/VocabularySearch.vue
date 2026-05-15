@@ -22,10 +22,10 @@
                 v-model="fields"
                 class="form-control">
                 <option
-                  v-for="field in searchFields"
-                  :key="field.label"
-                  :value="field.value">
-                  {{ field.label }}
+                  v-for="searchField in searchFields"
+                  :key="searchField.label"
+                  :value="searchField.value">
+                  {{ searchField.label }}
                 </option>
               </select>
             </div>
@@ -43,67 +43,57 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from "vue"
 import FormRow from "./FormRow.vue"
 
-// search form
-export default {
-  components: { FormRow },
-  props: {
-    query: {
-      type: Object,
-      default: () => ({}),
-    },
-    schemesCount: { type: Number, default: null },
+const props = defineProps({
+  query: {
+    type: Object,
+    default: () => ({}),
   },
-  data() {
-    const searchFields = [
-      {
-        label: "All Fields",
-        value: "allfields",
-      },
-      {
-        label: "Title",
-        value: "title_search",
-      },
-      {
-        label: "Publisher",
-        value: "publisher_en",
-      },
-      {
-        label: "Subject notation",
-        value: "subject_notation",
-      },
-      {
-        label: "Subject Uri",
-        value: "subject_uri",
-      },
-    ]
-    const { search, field = "allfields" } = this.query
+  schemesCount: { type: Number, default: null },
+})
 
-    return {
-      search,
-      searchFields,
-      fields: field,
-    }
+const searchFields = [
+  {
+    label: "All Fields",
+    value: "allfields",
   },
-  computed: {
-    hasSchemesCount() {
-      return this.schemesCount !== 0 && this.schemesCount !== null
-    },
+  {
+    label: "Title",
+    value: "title_search",
   },
-  methods: {
-    submit(query) {
-      Object.keys(query)
-        .filter((key) => !query[key])
-        .forEach((key) => delete query[key])
-      window.location.href =
-        "/vocabularies?" + new URLSearchParams(query).toString()
-    },
-    submitSearch() {
-      this.submit({ search: this.search, field: this.fields })
-    },
+  {
+    label: "Publisher",
+    value: "publisher_en",
   },
+  {
+    label: "Subject notation",
+    value: "subject_notation",
+  },
+  {
+    label: "Subject Uri",
+    value: "subject_uri",
+  },
+]
+
+const { search: initialSearch, field: initialField = "allfields" } = props.query
+const search = ref(initialSearch)
+const fields = ref(initialField)
+
+const hasSchemesCount = computed(() => props.schemesCount !== 0 && props.schemesCount !== null)
+
+function submit(query) {
+  Object.keys(query)
+    .filter((key) => !query[key])
+    .forEach((key) => delete query[key])
+  window.location.href =
+    "/vocabularies?" + new URLSearchParams(query).toString()
+}
+
+function submitSearch() {
+  submit({ search: search.value, field: fields.value })
 }
 </script>
 

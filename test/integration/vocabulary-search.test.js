@@ -90,6 +90,18 @@ describe("VocabularySearch Component", () => {
     )
   })
 
+  it("redirects with the current search input and selected field", async () => {
+    const wrapper = mountSearch()
+
+    await wrapper.get("input").setValue("skos")
+    await wrapper.get("select").setValue("subject_notation")
+    await wrapper.get("form").trigger("submit")
+
+    expect(window.location.href).toBe(
+      "/vocabularies?search=skos&field=subject_notation",
+    )
+  })
+
   it("does not include empty search parameter", async () => {
     const wrapper = mountSearch({
       query: {
