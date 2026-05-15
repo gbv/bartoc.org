@@ -14,45 +14,40 @@
   </span>
 </template>
 
-<script>
+<script setup>
 import jskos from "jskos-tools"
+import { computed } from "vue"
 
 /**
  * Display the notation and/or prefLabel of an item. If neither can be shown, display it's URI.
  */
-export default {
-  props: {
-    // the item
-    item: {
-      type: Object,
-      default: () => ({}),
-    },
-    // whether to show item's notation
-    notation: {
-      type: Boolean,
-      default: false,
-    },
-    // whether to show item's prefLabel (always true if no notation is shown)
-    prefLabel: {
-      type: Boolean,
-      default: true,
-    },
-    // preferred language
-    language: {
-      type: String,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  item: {
+    type: Object,
+    default: () => ({}),
   },
-  computed: {
-    prefLabelToShow() {
-      const { item, language } = this
-      return item.prefLabel
-        ? jskos.prefLabel(item, { fallbackToUri: false, language })
-        : "???"
-    },
+  notation: {
+    type: Boolean,
+    default: false,
   },
-}
+  prefLabel: {
+    type: Boolean,
+    default: true,
+  },
+  language: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
+
+const prefLabelToShow = computed(() => {
+  const { item, language } = props
+  return item.prefLabel
+    ? jskos.prefLabel(item, { fallbackToUri: false, language })
+    : "???"
+})
+
 </script>
 
 <style>
