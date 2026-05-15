@@ -238,8 +238,17 @@
   <pre v-show="showJSKOS">{{ jskosPreview }}</pre>
 </template>
 
-<script>
-import { loadConcepts, trimItemIdentifiers, createConceptApiProvider, validatePublisher } from "../utils.js"
+<script setup>
+import { computed, reactive, ref, watch } from "vue"
+import { loadConcepts, trimItemIdentifiers, createConceptApiProvider } from "../utils.js"
+import {
+  cleanupItem,
+  conceptPickerModel,
+  githubIssueUrl,
+  itemError as validateItem,
+  normalizeEditableItem,
+  parseNotationExamples,
+} from "../utils/itemEditor.js"
 
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
@@ -254,316 +263,174 @@ import ConceptSchemePicker from "./ConceptSchemePicker.vue"
 import PublisherEditor from "./PublisherEditor.vue"
 import TerminologyRelationEditor from "./TerminologyRelationEditor.vue"
 
-function githubIssueUrl(title, body) {
-  return (
-    "https://github.com/gbv/bartoc.org/issues/new" +
-    "?title=" +
-    encodeURIComponent(title) +
-    "&body=" +
-    encodeURIComponent(body)
-  )
+const props = defineProps({
+  user: {
+    type: Object,
+    default: () => undefined,
+  },
+  auth: {
+    type: Object,
+    default: () => undefined,
+  },
+  current: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
+const item = reactive(normalizeEditableItem(props.current))
+const examples = ref((item.notationExamples || []).join(", "))
+const kostypes = ref([])
+const licenses = ref([])
+const formats = ref([])
+const access = ref([])
+const registries = ref([])
+const error = ref(null)
+const showJSKOS = ref(false)
+const formatScheme = {
+  uri: "http://bartoc.org/en/node/20000",
 }
 
-/**
- * Web form to modify and create vocabulary metadata.
- */
-export default {
-  components: {
-    FormRow,
-    LabelEditor,
-    LanguageSelect,
-    SetSelect,
-    ListEditor,
-    SubjectEditor,
-    AddressEditor,
-    PublisherEditor,
-    EndpointsEditor,
-    AbstractsEditor,
-    ConceptSchemePicker,
-    TerminologyRelationEditor,
-  },
-  props: {
-    user: {
-      type: Object,
-      default: () => undefined,
-    },
-    auth: {
-      type: Object,
-      default: () => undefined,
-    },
-    current: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
-  data() {
-    // make sure item has iterable fields
-    const item = this.current || {};
-    ["prefLabel", "altLabel", "definition", "ADDRESS", "DISPLAY"].forEach(
-      (key) => {
-        if (!item[key]) {
-          item[key] = {}
-        }
-      },
-    );
-    [
-      "notation",
-      "identifier",
-      "languages",
-      "license",
-      "type",
-      "subject",
-      "subjectOf",
-      "partOf",
-      "FORMAT",
-      "API",
-      "ACCESS",
-      "publisher",
-      "versionOf",
-      "basedOn",
-    ].forEach((key) => {
-      if (!item[key]) {
-        item[key] = []
-      }
-    })
+const formatProvider = createConceptApiProvider({
+  schemeUri: "http://bartoc.org/en/node/20000",
+  topUrl: "/api/voc/top",
+  conceptsUrl: "/api/concepts",
+  suggestUrl: "/api/concepts/suggest",
+  narrowerUrl: "/api/concepts/narrower",
+  toModel: conceptPickerModel,
+})
 
-    const examples = (item.notationExamples || []).join(", ")
+const licenseProvider = createConceptApiProvider({
+  schemeUri: "http://uri.gbv.de/terminology/license/",
+  topUrl: "https://api.dante.gbv.de/voc/top",
+  conceptsUrl: "/api/concepts",
+  suggestUrl: "/api/concepts/suggest",
+  narrowerUrl: "/api/concepts/narrower",
+  toModel: conceptPickerModel,
+})
 
-    return {
-      item,
-      examples,
-      kostypes: [],
-      licenses: [],
-      formats: [],
-      access: [],
-      error: null,
-      showJSKOS: false,
-      formatScheme: {
-        uri: "http://bartoc.org/en/node/20000",
-      },
-      formatProvider: createConceptApiProvider({
-        schemeUri: "http://bartoc.org/en/node/20000",
-        topUrl: "/api/voc/top",
-        conceptsUrl: "/api/concepts",
-        suggestUrl: "/api/concepts/suggest",
-        narrowerUrl: "/api/concepts/narrower",
-        toModel: (items) => items
-          .filter(item => item?.uri)
-          .map(({ uri }) => ({ uri })),
-      }),
-      licenseProvider: createConceptApiProvider({
-        schemeUri: "http://uri.gbv.de/terminology/license/",
-        topUrl: "https://api.dante.gbv.de/voc/top",
-        conceptsUrl: "/api/concepts",
-        suggestUrl: "/api/concepts/suggest",
-        narrowerUrl: "/api/concepts/narrower",
-        toModel: (items) => items
-          .filter(item => item?.uri)
-          .map(({ uri }) => ({ uri })),
-      }),
+const type = computed(() => item.type.map((uri) => ({ uri })))
 
-    }
-  },
-  computed: {
-    type() {
-      return this.item.type.map((uri) => ({ uri }))
-    },
-    jskosPreview() {
-      // clone to avoid mutating the live form state
-      const clone = JSON.parse(JSON.stringify(this.item))
-      const cleaned = this.cleanupItem(clone)
-      trimItemIdentifiers(cleaned)
-      return JSON.stringify(cleaned, null, 2)
-    },
-  },
-  watch: {
-    examples: function (s) {
-      this.item.notationExamples = s
-        .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s !== "")
-    },
-  },
+const jskosPreview = computed(() => {
+  // Clone to avoid mutating the live form state.
+  const clone = JSON.parse(JSON.stringify(item))
+  const cleaned = cleanupItem(clone)
+  trimItemIdentifiers(cleaned)
+  return JSON.stringify(cleaned, null, 2)
+})
 
-  created() {
-    loadConcepts(
-      "https://api.dante.gbv.de/voc/top",
-      "http://uri.gbv.de/terminology/license/",
-    ).then((set) => {
-      this.licenses = set
-    })
-    loadConcepts("/api/voc/top", "http://w3id.org/nkos/nkostype").then(
-      (set) => {
-        this.kostypes = set
-      },
-    )
-    loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000").then(
-      (set) => {
-        this.formats = set
-      },
-    )
-    loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001").then(
-      (set) => {
-        this.access = set
-      },
-    )
-    loadConcepts("/registries?format=jskos").then((set) => {
-      this.registries = set
-    })
-  },
-  methods: {
-    itemError() {
-      if (!Object.keys(this.item.prefLabel).length) {
-        return { message: "item must have at least a title!" }
-      }
-      if (!this.item.definition?.en?.some(text => text?.trim() || "")) {
-        return { message: "Please provide at least one English abstract." }
-      }
+watch(examples, (value) => {
+  item.notationExamples = parseNotationExamples(value)
+})
 
-      if (this.item.publisher?.length) {
-        const error = validatePublisher(this.item.publisher[0])
-        if (error) {
-          return error
-        }
-      }
+loadConcepts(
+  "https://api.dante.gbv.de/voc/top",
+  "http://uri.gbv.de/terminology/license/",
+).then((set) => {
+  licenses.value = set
+})
 
-      // TODO: add more validation
-    },
-    async saveItem() {
-      this.error = this.itemError()
-      if (this.error) {
-        return
-      }
+loadConcepts("/api/voc/top", "http://w3id.org/nkos/nkostype").then((set) => {
+  kostypes.value = set
+})
 
-      let body
-      const onError = (error, res) => {
-        const message = error.message || res.StatusText
-        const issue =
-          "This JSKOS record could not be saved:\n\n~~~json\n" +
-          body +
-          "\n~~~\n" +
-          "The request included " +
-          (this.auth ? "a token for authentification." : "no token.")
-        const url = githubIssueUrl(`Error ${res.status} when saving`, issue)
-        const html = `If you think this is a bug, please
-                  <a href='${url}'>open a GitHub issue</a> including the current JSKOS record!`
-        this.error = { message, status: res.status, html }
-      }
+loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000").then((set) => {
+  formats.value = set
+})
 
-      const item = { ...this.item }
-      const method = item.uri ? "PUT" : "POST"
-      if (!item.uri) {
-        const base = "http://bartoc.org/en/node/"
-        // Try to find an URI not taken yet.
-        try {
-          const latestUri = (
-            await fetch("/api/voc?sort=counter&order=desc&limit=1").then(
-              (res) => res.json(),
-            )
-          )[0].uri
-          const latestId = parseInt(latestUri.replace(base, ""))
-          item.uri = base + (latestId + 1)
-        } catch (error) {
-          onError(new Error("Could not determine URI for new record."), {
-            status: "determining new URI",
-          })
-          return
-        }
-      }
+loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001").then((set) => {
+  access.value = set
+})
 
-      const cleanedItem = this.cleanupItem(item) // remove empty fields
-      trimItemIdentifiers(cleanedItem) // trim strings in identifiers
+loadConcepts("/registries?format=jskos").then((set) => {
+  registries.value = set
+})
 
-      body = JSON.stringify(cleanedItem, null, 2)
-
-      const headers = { "Content-Type": "application/json" }
-      if (this.auth) {
-        headers.Authorization = `Bearer ${this.auth.token}`
-      }
-
-      fetch("/api/voc", { method, body, headers }).then((res) => {
-        if (res.ok) {
-          window.location.href = `/en/node/${item.uri.split("/").pop()}`
-        } else {
-          res
-            .json()
-            .then((err) => onError(err, res))
-            .catch(() => onError({}, res))
-        }
-      })
-    },
-    //
-    cleanupItem(item) {
-      // vocabulary record should always be a ConceptScheme.
-      const type = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
-      if (item.type[0] !== type) {
-        item.type.unshift(type)
-      }
-      // Remove empty fields recursively:
-      item = filtered(item)
-      // If there are API endpoints, keep only those that have a URL.
-      if (item.API) {
-        item.API = item.API.filter((endpoint) => endpoint.url)
-      }
-      // Normalize subjects: keep only the fields needed by the backend.
-      if (item.subject) {
-        item.subject = item.subject.map(({ uri, inScheme, notation }) => {
-          inScheme = inScheme.map(({ uri }) => ({ uri }))
-          return { uri, inScheme, notation }
-        })
-      }
-      if (item.definition && typeof item.definition === "object") {
-        delete item.definition[""]
-      }
-
-      // VersionOf
-      if (item.versionOf) {
-        item.versionOf = item.versionOf
-          .map(({ uri }) => ({ uri }))
-          .filter(v => v.uri)
-      }
-
-      // BasedOn
-      if (item.basedOn) {
-        item.basedOn = item.basedOn
-          .map(({ uri }) => ({ uri }))
-          .filter(v => v.uri)
-      }
-
-      return item
-    },
-
-  },
+function itemError() {
+  return validateItem(item)
 }
 
-function filtered(value, parentKey = null) {
-  if (value && typeof value === "object") {
-    if (Array.isArray(value)) {
-      value = value.map((v) => filtered(v, parentKey)).filter(Boolean)
-      return value.length ? value : null
-    } else {
-      let keys =
-        "uri" in value && !value.uri
-          ? []
-          : Object.keys(value).filter((key) => key[0] !== "_")
-
-      // keep insertion order for definition language keys
-      if (parentKey !== "definition") {
-        keys.sort()
-      }
-
-      const obj = keys.reduce((obj, key) => {
-        const fieldValue = filtered(value[key], key)
-        if (fieldValue) {
-          obj[key] = fieldValue
-        }
-        return obj
-      }, {})
-
-      return Object.keys(obj).length ? obj : null
-    }
-  } else {
-    return value
+async function saveItem() {
+  error.value = itemError()
+  if (error.value) {
+    return
   }
+
+  let body
+  const onError = (responseError, res) => {
+    const message = responseError.message || res.StatusText
+    const issue =
+      "This JSKOS record could not be saved:\n\n~~~json\n" +
+      body +
+      "\n~~~\n" +
+      "The request included " +
+      (props.auth ? "a token for authentification." : "no token.")
+    const url = githubIssueUrl(`Error ${res.status} when saving`, issue)
+    const html = `If you think this is a bug, please
+                  <a href='${url}'>open a GitHub issue</a> including the current JSKOS record!`
+    error.value = { message, status: res.status, html }
+  }
+
+  const itemToSave = { ...item }
+  const method = itemToSave.uri ? "PUT" : "POST"
+  if (!itemToSave.uri) {
+    const base = "http://bartoc.org/en/node/"
+    // Try to find an URI not taken yet.
+    try {
+      const latestUri = (
+        await fetch("/api/voc?sort=counter&order=desc&limit=1").then(
+          (res) => res.json(),
+        )
+      )[0].uri
+      const latestId = parseInt(latestUri.replace(base, ""))
+      itemToSave.uri = base + (latestId + 1)
+    } catch {
+      onError(new Error("Could not determine URI for new record."), {
+        status: "determining new URI",
+      })
+      return
+    }
+  }
+
+  const cleanedItem = cleanupItem(itemToSave) // Remove empty fields.
+  trimItemIdentifiers(cleanedItem) // Trim strings in identifiers.
+
+  body = JSON.stringify(cleanedItem, null, 2)
+
+  const headers = { "Content-Type": "application/json" }
+  if (props.auth) {
+    headers.Authorization = `Bearer ${props.auth.token}`
+  }
+
+  fetch("/api/voc", { method, body, headers }).then((res) => {
+    if (res.ok) {
+      window.location.href = `/en/node/${itemToSave.uri.split("/").pop()}`
+    } else {
+      res
+        .json()
+        .then((err) => onError(err, res))
+        .catch(() => onError({}, res))
+    }
+  })
 }
+
+defineExpose({
+  item,
+  examples,
+  kostypes,
+  licenses,
+  formats,
+  access,
+  registries,
+  error,
+  showJSKOS,
+  formatScheme,
+  formatProvider,
+  licenseProvider,
+  type,
+  jskosPreview,
+  itemError,
+  saveItem,
+  cleanupItem,
+})
 </script>
