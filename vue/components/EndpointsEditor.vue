@@ -40,45 +40,37 @@
   </table>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from "vue"
 import ItemSelect from "./ItemSelect.vue"
 import jskos from "jskos-tools"
 import { apiTypesScheme } from "../utils.js"
 
 // Form to select an API endpoint
-export default {
-  components: { ItemSelect },
-  props: {
-    modelValue: {
-      type: Array,
-      required: true,
-    },
+const props = defineProps({
+  modelValue: {
+    type: Array,
+    required: true,
   },
-  emits: ["update:modelValue"],
-  data() {
-    return {
-      apiTypesScheme,
-      // deep copy of modelValue
-      endpoints: this.modelValue.map(endpoint => ({...endpoint})),
-      jskos,
+})
+
+const emit = defineEmits(["update:modelValue"])
+
+// Deep copy of modelValue.
+const endpoints = ref(props.modelValue.map(endpoint => ({ ...endpoint })))
+
+watch(
+  endpoints,
+  (value) => {
+    if (!value.find(({ url }) => url.trim() === "")) {
+      value.push({ url: "", type: "http://bartoc.org/api-type/webservice" })
     }
+    emit("update:modelValue", value)
   },
-  watch: {
-    endpoints: {
-      deep: true,
-      immediate: true,
-      handler(endpoints) {
-        if(!endpoints.find(({ url}) => url.trim() === "")) {
-          endpoints.push({ url:"", type: "http://bartoc.org/api-type/webservice" })
-        }
-        this.$emit("update:modelValue", endpoints)
-      },
-    },
-  },
-  methods: {
-    remove(i) {
-      this.endpoints.splice(i, 1)
-    },
-  },
+  { deep: true, immediate: true },
+)
+
+function remove(i) {
+  endpoints.value.splice(i, 1)
 }
 </script>
