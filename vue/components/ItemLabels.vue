@@ -10,16 +10,46 @@
         :lang="lang">{{ label }}</span>
     </li>
   </ul>
-  <!-- TODO: altLabel and hiddenLabel -->
+  <ul
+    v-if="item.altLabel"
+    class="list-inline">
+    <template
+      v-for="(labels, lang) in item.altLabel"
+      :key="lang">
+      <li
+        v-for="label in labels"
+        :key="`${lang}:${label}`">
+        <span
+          class="language-tag"
+          :lang="lang">{{ label }}</span>
+      </li>
+    </template>
+  </ul>
+  <ul
+    v-if="item.hiddenLabel"
+    class="list-inline">
+    <template
+      v-for="(labels, lang) in item.hiddenLabel"
+      :key="lang">
+      <li
+        v-for="label in labels"
+        :key="`${lang}:${label}`">
+        <span
+          class="language-tag"
+          :lang="lang">{{ label }}</span>
+      </li>
+    </template>
+  </ul>
 </template>
 
-<script>
-export default {
-  props: {
-    item: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
   },
-}
+})
+
+const item = props.item
+
 </script>
