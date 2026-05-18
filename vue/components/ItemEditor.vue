@@ -80,7 +80,7 @@
     The year when the KOS was first created (YYYY).
   </form-row>
   <form-row :label="'License'">
-    <concept-scheme-picker
+    <jskos-item-picker
       v-model="item.license"
       :provider="licenseProvider"
       placeholder="Search licenses…" />
@@ -97,7 +97,7 @@
       @update:modelValue="item.subjectOf = $event.map((url) => ({ url }))" />
   </form-row>
   <form-row :label="'Formats'">
-    <concept-scheme-picker
+    <jskos-item-picker
       v-model="item.FORMAT"
       :provider="formatProvider"
       placeholder="Search format types…" />
@@ -124,12 +124,12 @@
     email address of anyone in charge of the vocabulary
   </form-row>
   <form-row label="Listed In">
-    <list-editor
-      :model-value="item.partOf.map(({ uri }) => uri)"
-      @update:modelValue="item.partOf = $event.map((uri) => ({ uri }))" />
+    <jskos-item-picker
+      v-model="item.partOf"
+      :provider="registryProvider"
+      placeholder="Search registries…"
+      :show-tree="false" />
     Which <a href="/registries">terminology registries</a> list the vocabulary?
-    Please use registry URIs, a more convenient editing form will be added
-    later!
   </form-row>
   <form-row :label="'Vocabulary services'">
     <endpoints-editor v-model="item.API" />
@@ -240,7 +240,12 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from "vue"
-import { loadConcepts, trimItemIdentifiers, createConceptApiProvider } from "../utils.js"
+import {
+  loadConcepts,
+  trimItemIdentifiers,
+  createConceptApiProvider,
+  createRegistryProvider,
+} from "../utils.js"
 import {
   cleanupItem,
   conceptPickerModel,
@@ -259,7 +264,7 @@ import SubjectEditor from "./SubjectEditor.vue"
 import ListEditor from "./ListEditor.vue"
 import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
-import ConceptSchemePicker from "./ConceptSchemePicker.vue"
+import JskosItemPicker from "./JskosItemPicker.vue"
 import PublisherEditor from "./PublisherEditor.vue"
 import TerminologyRelationEditor from "./TerminologyRelationEditor.vue"
 
@@ -291,6 +296,11 @@ const formatScheme = {
   uri: "http://bartoc.org/en/node/20000",
 }
 
+const registriesLoaded = loadConcepts("/registries?format=jskos").then((set) => {
+  registries.value = Array.isArray(set) ? set : Object.values(set || {})
+  return registries.value
+})
+
 const formatProvider = createConceptApiProvider({
   schemeUri: "http://bartoc.org/en/node/20000",
   topUrl: "/api/voc/top",
@@ -306,6 +316,10 @@ const licenseProvider = createConceptApiProvider({
   conceptsUrl: "/api/concepts",
   suggestUrl: "/api/concepts/suggest",
   narrowerUrl: "/api/concepts/narrower",
+  toModel: conceptPickerModel,
+})
+
+const registryProvider = createRegistryProvider(() => registriesLoaded, {
   toModel: conceptPickerModel,
 })
 
@@ -340,10 +354,6 @@ loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000").then((set) => {
 
 loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001").then((set) => {
   access.value = set
-})
-
-loadConcepts("/registries?format=jskos").then((set) => {
-  registries.value = set
 })
 
 function itemError() {
@@ -382,6 +392,7 @@ defineExpose({
   formatScheme,
   formatProvider,
   licenseProvider,
+  registryProvider,
   type,
   jskosPreview,
   itemError,

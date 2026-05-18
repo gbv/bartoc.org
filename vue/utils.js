@@ -290,6 +290,90 @@ export function createConceptApiProvider({
   }
 }
 
+function displayLabel(item) {
+  const label = jskos.prefLabel(item)
+  return Array.isArray(label)
+    ? label[0]
+    : label || item?.notation?.[0] || item?.uri || ""
+}
+
+function normalizeItemList(items) {
+  return (Array.isArray(items) ? items : Object.values(items || {}))
+    .filter(item => item?.uri)
+    .sort((a, b) => displayLabel(a).localeCompare(displayLabel(b)))
+}
+
+/**
+ * Create a provider for selecting registries with JskosItemPicker.
+ * Registries are a flat list, so this provider only supplies search/resolve.
+ */
+export function createRegistryProvider(loadRegistries, {
+  toModel = (items) => items,
+  limit = 50,
+} = {}) {
+  async function getRegistries() {
+    const items = typeof loadRegistries === "function"
+      ? await loadRegistries()
+      : await loadRegistries
+
+    return normalizeItemList(items)
+  }
+
+  async function findRegistry(uri) {
+    const registries = await getRegistries()
+    return registries.find(registry => registry.uri === uri)
+  }
+
+  return {
+    async loadSelected(modelValue) {
+      const registries = await getRegistries()
+      const byUri = new Map(registries.map(registry => [registry.uri, registry]))
+
+      return (modelValue || [])
+        .map(item => byUri.get(item?.uri) || item)
+        .filter(item => item?.uri)
+    },
+
+    async search(search) {
+      const query = (search || "").trim()
+      const queryLower = query.toLowerCase()
+      const registries = await getRegistries()
+
+      const matches = registries
+        .filter(registry => {
+          if (!queryLower) {
+            return true
+          }
+
+          return [
+            displayLabel(registry),
+            registry.uri,
+            registry.url,
+            ...(registry.notation || []),
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(queryLower)
+        })
+        .slice(0, limit)
+
+      return [
+        query,
+        matches.map(displayLabel),
+        matches.map(registry => registry.url || registry.uri),
+        matches.map(registry => registry.uri),
+      ]
+    },
+
+    resolve(uri) {
+      return findRegistry(uri)
+    },
+
+    toModel,
+  }
+}
+
 
 /**
  * Resolve the working registry and API scheme for one indexing scheme.
@@ -322,7 +406,7 @@ export async function resolveRegistryScheme(scheme) {
 
 /**
  * Create a provider for subject concepts from one indexing scheme.
- * This is meant for ConceptSchemePicker and reuses indexingSchemes data.
+ * This is meant for JskosItemPicker and reuses indexingSchemes data.
  */
 export function createSubjectProvider(scheme) {
   // Resolve registry and access scheme once and reuse the result.

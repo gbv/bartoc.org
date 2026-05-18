@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from "vitest"
 import { mount } from "@vue/test-utils"
 import { nextTick } from "vue"
-import ConceptSchemePicker from "../../vue/components/ConceptSchemePicker.vue"
+import JskosItemPicker from "../../vue/components/JskosItemPicker.vue"
 
 const ItemSelectStub = {
   props: [
@@ -11,6 +11,7 @@ const ItemSelectStub = {
     "showTree",
     "treeConcepts",
     "treeLoadNarrower",
+    "resolve",
   ],
   emits: ["select"],
   template: `
@@ -50,7 +51,7 @@ function createProvider(overrides = {}) {
 async function mountPicker(props = {}) {
   const provider = props.provider || createProvider()
 
-  const wrapper = mount(ConceptSchemePicker, {
+  const wrapper = mount(JskosItemPicker, {
     props: {
       modelValue: [],
       provider,
@@ -70,7 +71,7 @@ async function mountPicker(props = {}) {
   return { wrapper, provider }
 }
 
-describe("ConceptSchemePicker", () => {
+describe("JskosItemPicker", () => {
   it("loads top concepts and initial selected items on create", async () => {
     const modelValue = [{ uri: "http://example.org/a" }]
     const { wrapper, provider } = await mountPicker({ modelValue })
@@ -79,6 +80,18 @@ describe("ConceptSchemePicker", () => {
     expect(provider.loadSelected).toHaveBeenCalledWith(modelValue)
     expect(wrapper.vm.treeConcepts).toEqual([{ uri: "http://example.org/top" }])
     expect(wrapper.vm.selected).toEqual(modelValue)
+  })
+
+  it("does not load or pass tree concepts when the tree is hidden", async () => {
+    const provider = createProvider()
+    const { wrapper } = await mountPicker({
+      provider,
+      showTree: false,
+    })
+
+    expect(provider.loadTop).not.toHaveBeenCalled()
+    expect(wrapper.getComponent(ItemSelectStub).props("treeConcepts")).toBe(null)
+    expect(wrapper.getComponent(ItemSelectStub).props("treeLoadNarrower")).toBe(null)
   })
 
   it("adds a selected item and emits update:modelValue", async () => {

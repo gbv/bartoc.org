@@ -1,7 +1,7 @@
 <template>
   <!-- Show selected concepts before the search -->
   <div
-    v-if="showSelected"
+    v-if="showSelected && selected.length > 0"
     class="selected-items">
     <item-selected
       v-model="selected"
@@ -14,9 +14,9 @@
   <item-select
     :search="provider.search"
     :placeholder="placeholder"
-    :show-tree="showTree"
-    :tree-concepts="treeConcepts"
-    :tree-load-narrower="provider.loadNarrower"
+    :tree-concepts="showTree ? treeConcepts : null"
+    :tree-load-narrower="showTree ? provider.loadNarrower : null"
+    :resolve="provider.resolve"
     @select="addSelected" />
 </template>
 
@@ -103,7 +103,7 @@ watch(
 
 // Load top concepts and initial selected concepts on mount.
 onMounted(async () => {
-  treeConcepts.value = props.provider.loadTop
+  treeConcepts.value = props.showTree && props.provider.loadTop
     ? await props.provider.loadTop()
     : []
 
@@ -128,7 +128,7 @@ function addSelected(item) {
 
 <style scoped>
 .selected-items {
-  margin-top: 0.75rem;
+
   padding-bottom: 24px;
 }
 

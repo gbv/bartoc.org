@@ -54,7 +54,7 @@
       </tbody>
     </table>
 
-    <!-- Single picker area: one dropdown + one ConceptSchemePicker -->
+    <!-- Single picker area: one dropdown + one JskosItemPicker -->
     <div class="subject-picker">
       <div class="picker-scheme">
         <select
@@ -70,7 +70,7 @@
       </div>
 
       <div class="picker-main">
-        <concept-scheme-picker
+        <jskos-item-picker
           :key="activeSchemeUri"
           v-model="activeSubjects"
           :provider="activeProvider"
@@ -83,7 +83,7 @@
 
 <script setup>
 import { computed, ref } from "vue"
-import ConceptSchemePicker from "./ConceptSchemePicker.vue"
+import JskosItemPicker from "./JskosItemPicker.vue"
 import ItemName from "./ItemName.vue"
 import { indexingSchemes, createSubjectProvider } from "../utils.js"
 import jskos from "jskos-tools"
@@ -151,7 +151,7 @@ const activeScheme = computed(() =>
   findScheme(activeSchemeUri.value),
 )
 
-// Provider passed to ConceptSchemePicker for the active scheme.
+// Provider passed to JskosItemPicker for the active scheme.
 const activeProvider = computed(() =>
   createSubjectProvider(activeScheme.value),
 )

@@ -158,6 +158,65 @@ describe("ItemEditor abstracts", () => {
     expect(utilsMocks.loadConcepts).toHaveBeenCalledWith("/registries?format=jskos")
   })
 
+  it("uses the concept picker provider for listed-in registries", async () => {
+    utilsMocks.loadConcepts.mockImplementation((api) => {
+      if (api === "/registries?format=jskos") {
+        return Promise.resolve({
+          "http://bartoc.org/en/node/2": {
+            uri: "http://bartoc.org/en/node/2",
+            prefLabel: { en: "Beta Registry" },
+            url: "https://beta.example",
+          },
+          "http://bartoc.org/en/node/1": {
+            uri: "http://bartoc.org/en/node/1",
+            prefLabel: { en: "Alpha Registry" },
+            url: "https://alpha.example",
+          },
+        })
+      }
+
+      return Promise.resolve([])
+    })
+
+    const w = mountEditor({
+      prefLabel: { en: ["x"] },
+      definition: { en: ["English abstract"] },
+      type: [conceptSchemeType],
+      partOf: [
+        { uri: "http://bartoc.org/en/node/2" },
+        { uri: "http://bartoc.org/en/node/missing" },
+      ],
+    })
+
+    await flushPromises()
+
+    const registryPicker = w.findAllComponents({ name: "JskosItemPicker" })
+      .find(component => component.props("provider") === w.vm.registryProvider)
+
+    expect(registryPicker.props("showTree")).toBe(false)
+
+    const selected = await w.vm.registryProvider.loadSelected(w.vm.item.partOf)
+    expect(selected).toEqual([
+      {
+        uri: "http://bartoc.org/en/node/2",
+        prefLabel: { en: "Beta Registry" },
+        url: "https://beta.example",
+      },
+      { uri: "http://bartoc.org/en/node/missing" },
+    ])
+    expect(w.vm.registryProvider.toModel(selected)).toEqual([
+      { uri: "http://bartoc.org/en/node/2" },
+      { uri: "http://bartoc.org/en/node/missing" },
+    ])
+
+    await expect(w.vm.registryProvider.search("alpha")).resolves.toEqual([
+      "alpha",
+      ["Alpha Registry"],
+      ["https://alpha.example"],
+      ["http://bartoc.org/en/node/1"],
+    ])
+  })
+
   it("updates notation examples from the comma-separated input value", async () => {
     const w = mountEditor({
       prefLabel: { en: ["x"] },

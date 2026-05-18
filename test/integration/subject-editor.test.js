@@ -37,7 +37,7 @@ const ItemNameStub = {
   `,
 }
 
-const ConceptSchemePickerStub = {
+const JskosItemPickerStub = {
   props: ["modelValue", "provider", "showSelected", "placeholder"],
   emits: ["update:modelValue"],
   template: `
@@ -66,7 +66,7 @@ function mountEditor(modelValue = []) {
     global: {
       stubs: {
         ItemName: ItemNameStub,
-        ConceptSchemePicker: ConceptSchemePickerStub,
+        JskosItemPicker: JskosItemPickerStub,
       },
     },
   })
