@@ -127,6 +127,18 @@ function addSelected(item) {
 </script>
 
 <style scoped>
+:deep(.jskos-vue-itemSelect) {
+  position: relative;
+}
+
+:deep(.jskos-vue-itemSelect:focus-within) {
+  z-index: 1000;
+}
+
+:deep(.jskos-vue-itemSuggest-results) {
+  z-index: 1000;
+}
+
 .selected-items {
 
   padding-bottom: 24px;
