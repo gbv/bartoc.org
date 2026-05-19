@@ -164,10 +164,10 @@ watch(
 .terminology-relation-editor {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--cc-row-padding-x);
 }
 
 .selected-items {
-  padding-top: 0.25rem;
+  padding-top: var(--cc-space-xs);
 }
 </style>

@@ -50,13 +50,13 @@
         </div>
         <ul class="navbar-nav mr-auto">
           <li class="nav-item <%= path == '/contact' ? 'active' : '' %>">
-            <a style="padding-right: 24px; "class="nav-link" href="/contact">Contact & Editors</a>
+            <a class="nav-link nav-link-spaced" href="/contact">Contact & Editors</a>
           </li>
           <li v-cloak>
             <user-status :login="login" @update:user="updateUser" @update:auth="updateAuth"/>
           </li>
-          <li v-cloak v-if="userCanAdd">
-            <a class="btn btn-success" href="/edit">add</a>
+          <li v-cloak v-if="userCanAdd" class="nav-item">
+            <a class="cc-button cc-button-on-primary cc-button-sm" href="/edit">add</a>
           </li>
         </ul>
       </header>

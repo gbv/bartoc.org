@@ -12,8 +12,8 @@
         v-for="filter in functionFilters"
         :key="filter.id"
         type="button"
-        class="btn btn-sm mr-2 mb-2"
-        :class="activeFilters[filter.id] ? 'btn-secondary' : 'btn-outline-secondary'"
+        class="cc-button mr-2 mb-2"
+        :class="activeFilters[filter.id] ? 'cc-button-selected' : 'cc-button-ghost'"
         :aria-pressed="activeFilters[filter.id] ? 'true' : 'false'"
         @click="toggleFilter(filter.id)">
         {{ filter.title }}
@@ -266,14 +266,9 @@ const filteredRegistries = computed(() =>
   vertical-align: middle;
 }
 
-.registry-list-filters .btn-outline-secondary:hover {
-  color: #6c757d;
-  background-color: transparent;
-}
-
 .registry-homepage-link {
   display: inline-block;
-  margin-left: 0.4rem;
+  margin-left: var(--cc-space-sm);
   font-size: 0.875em;
 }
 

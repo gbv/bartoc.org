@@ -20,7 +20,7 @@
             v-if="labels.length > 1"
             type="button"
             title="remove"
-            class="btn btn-outline-secondary button-remove"
+            class="cc-button cc-button-secondary cc-button-icon button-remove"
             @click="remove(i)">
             &times;
           </button>

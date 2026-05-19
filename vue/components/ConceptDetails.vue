@@ -13,21 +13,20 @@
       </li>
     </ul>
     <div v-if="selected">
-      <div style="font-size:large">
+      <div class="concept-details-selected">
         <item-name
           :item="selected"
           :notation="!display.hideNotation" />
         <a
           v-if="k10plus"
           :href="k10plus"
+          class="concept-details-catalog-link"
           title="search in K10plus library catalog"
-          style="padding-left: 0.5em"
           target="k10plus">📚</a>
       </div>
       <div v-if="selected.uri || (selected.identifier||[]).length">
         <ul
-          class="list-inline"
-          style="margin-bottom: 0.2em">
+          class="list-inline concept-details-identifiers">
           <li
             v-if="selected.uri"
             class="list-inline-item">
@@ -167,14 +166,23 @@ function selectConcept(concept) {
 
 <style scoped>
 ul.narrower {
-  padding-top: 1em;
+  padding-top: var(--cc-space-md);
 }
 ul.narrower, ul.ancestors {
   list-style: none;
-  padding-left: 0.5em;
+  padding-left: var(--cc-space-sm);
 }
 .clickable:hover {
   text-decoration: underline;
   cursor: pointer;
+}
+.concept-details-selected {
+  font-size: var(--cc-font-size-lg);
+}
+.concept-details-catalog-link {
+  padding-left: var(--cc-space-sm);
+}
+.concept-details-identifiers {
+  margin-bottom: var(--cc-space-xs);
 }
 </style>

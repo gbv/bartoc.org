@@ -28,7 +28,7 @@
 
         <button
           type="button"
-          class="btn btn-danger"
+          class="cc-button cc-button-danger"
           @click="removeRow(row.id)">
           {{ rows.length > 1 ? "remove" : "clear" }} abstract
         </button>
@@ -44,7 +44,7 @@
       <button
         type="button"
         :disabled="hasEmptyRequiredEnglishRow"
-        class="btn btn-primary"
+        class="cc-button cc-button-secondary"
         @click="addRow()">
         {{ addLabel }}
       </button>
@@ -251,12 +251,12 @@ function pruneEmptyRow(id) {
 .abstracts-editor {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--cc-row-padding-x);
 }
 
 .abstract-row {
   display: flex;
-  gap: 8px;
+  gap: var(--cc-space-sm);
   align-items: flex-start;
 }
 
@@ -269,28 +269,28 @@ function pruneEmptyRow(id) {
   flex: 0 0 240px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--cc-space-md);
 }
 
-.abstract-side .btn {
+.abstract-side .cc-button {
   width: 60%;
   margin-left: auto;
 }
 
 .abstract-actions {
   display: flex;
-  gap: 12px;
+  gap: var(--cc-row-padding-x);
   align-items: center;
   justify-content: flex-end;
 }
 
 .abstract-hint {
-  color: #6c757d;
+  color: var(--cc-color-muted);
   margin: 0;
-  padding: 8px;
+  padding: var(--cc-space-sm);
 }
 
-.abstract-actions .btn {
+.abstract-actions .cc-button {
   width: fit-content;
 }
 </style>

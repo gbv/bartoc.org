@@ -27,24 +27,24 @@
 
           <!-- Reorder / remove buttons -->
           <td class="actions-col">
-            <div class="btn-group">
+            <div class="cc-button-group">
               <button
                 :disabled="!i"
                 type="button"
-                class="btn btn-outline-secondary"
+                class="cc-button cc-button-secondary cc-button-icon"
                 @click="up(i)">
                 &#9650;
               </button>
               <button
                 :disabled="i >= subjects.length - 1"
                 type="button"
-                class="btn btn-outline-secondary"
+                class="cc-button cc-button-secondary cc-button-icon"
                 @click="down(i)">
                 &#9660;
               </button>
               <button
                 type="button"
-                class="btn btn-outline-secondary"
+                class="cc-button cc-button-secondary cc-button-icon"
                 @click="remove(i)">
                 &times;
               </button>
@@ -212,7 +212,7 @@ function down(i) {
 .subject-editor {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--cc-row-padding-x);
 }
 
 .selected-subjects {
@@ -221,7 +221,7 @@ function down(i) {
 
 .selected-subjects td {
   vertical-align: middle;
-  padding: 0 0 6px 0;
+  padding: 0 0 var(--cc-space-sm) 0;
 }
 
 .selected-subjects tr:last-child td {
@@ -234,25 +234,25 @@ function down(i) {
 
 .subject-col {
   width: 100%;
-  padding-left: 0.5rem !important;
+  padding-left: var(--cc-space-sm) !important;
 }
 
 .subject-box {
-  border: 1px solid #adb5bd;
-  border-radius: 6px;
-  padding: 6px;
-  background: #fff;
+  border: 1px solid var(--cc-border-color-strong);
+  border-radius: var(--cc-radius-md);
+  padding: var(--cc-space-sm);
+  background: var(--cc-color-surface);
 }
 
 .actions-col {
-  padding-left: 0.5rem !important;
+  padding-left: var(--cc-space-sm) !important;
   white-space: nowrap;
 }
 
 .subject-picker {
   display: grid;
   grid-template-columns: 130px 1fr;
-  gap: 0.5rem;
+  gap: var(--cc-space-sm);
   align-items: start;
 }
 

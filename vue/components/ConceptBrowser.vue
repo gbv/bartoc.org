@@ -157,11 +157,11 @@ onMounted(async () => {
 
 <style scoped>
 h4 {
-  padding-top: 0.5em;
+  padding-top: var(--cc-row-padding-x);
 }
 ul.narrower {
   list-style: none;
-  padding-left: 0.5em;
+  padding-left: var(--cc-space-sm);
 }
 .clickable:hover {
   text-decoration: underline;

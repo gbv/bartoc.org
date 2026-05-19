@@ -1,5 +1,5 @@
 <template>
-  <p style="border-top: 1px solid #ddd">
+  <p style="border-top: 1px solid var(--cc-border-color)">
     Basic information about the vocabulary:
   </p>
   <form-row
@@ -197,19 +197,19 @@
     <div class="col-sm-4">
       <button
         v-if="auth"
-        class="btn btn-primary"
+        class="cc-button cc-button-primary"
         @click="saveItem">
         save
       </button>
       <button
         v-else
-        class="btn btn-danger"
+        class="cc-button cc-button-danger"
         @click="saveItem">
         authentification required!
       </button>
       &nbsp;
       <button
-        class="btn btn-warning"
+        class="cc-button cc-button-secondary"
         onclick="location.reload()">
         reset
       </button>

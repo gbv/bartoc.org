@@ -13,7 +13,7 @@
     <button
       v-if="guessFrom !== undefined"
       type="button"
-      class="guess-language-btn"
+      class="cc-button cc-button-ghost cc-button-icon guess-language-button"
       data-testid="guess-language"
       :title="canGuess ? 'Guess language from text' : 'Text too short to guess language'"
       :aria-label="canGuess ? 'Guess language from text' : 'Text too short to guess language'"
@@ -110,18 +110,7 @@ function guess() {
   display: flex;
   align-items: center;
 }
-.guess-language-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  margin-left: 12px;
-  cursor: pointer;
-}
-.guess-language-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.guess-language-btn:focus {
-  outline: none !important;
+.guess-language-button {
+  margin-left: var(--cc-space-sm);
 }
 </style>

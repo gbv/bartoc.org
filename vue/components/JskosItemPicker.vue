@@ -140,14 +140,13 @@ function addSelected(item) {
 }
 
 .selected-items {
-
-  padding-bottom: 24px;
+  padding-bottom: var(--cc-space-lg);
 }
 
 .selected-items :deep(.jskos-vue-itemSelected-table) {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--cc-space-sm);
   border: none;
   border-radius: 0;
 }
@@ -156,18 +155,18 @@ function addSelected(item) {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: stretch;
-  column-gap: 0.5rem;
+  column-gap: var(--cc-space-sm);
   border: none;
 }
 
 .selected-items :deep(.jskos-vue-itemSelected-cell) {
-  background: #fff;
-  padding: 0.5rem 0.75rem;
+  background: var(--cc-color-surface);
+  padding: var(--cc-row-padding-y) var(--cc-row-padding-x);
   display: flex;
   align-items: center;
   min-width: 0;
-  border: 1px solid #adb5bd;
-  border-radius: 6px;
+  border: 1px solid var(--cc-border-color-strong);
+  border-radius: var(--cc-radius-md);
 }
 
 .selected-items :deep(.jskos-vue-itemSelected-actions) {
@@ -178,16 +177,16 @@ function addSelected(item) {
 .selected-items :deep(.jskos-vue-itemSelected-actionGroup) {
   display: flex;
   border-radius: 0;
-  border: 1px solid #adb5bd;
-  border-radius: 6px;
+  border: 1px solid var(--cc-border-color-strong);
+  border-radius: var(--cc-radius-md);
 }
 
 .selected-items :deep(.jskos-vue-itemSelected-actionBtn) {
   min-width: 38px;
   height: 100%;
   padding: 0;
-  background: #fff;
-  color: #6c757d;
+  background: var(--cc-color-surface);
+  color: var(--cc-color-muted);
   line-height: 1;
 }
 
@@ -197,8 +196,8 @@ function addSelected(item) {
 }
 
 .selected-items :deep(.jskos-vue-itemSelected-actionBtn:hover:not(:disabled)) {
-  background: #6c757d;
-  color: #fff;
+  background: var(--cc-color-muted);
+  color: var(--cc-color-on-primary);
 }
 
 .selected-items :deep(.jskos-vue-itemSelected-actionBtn:disabled) {
@@ -207,7 +206,7 @@ function addSelected(item) {
 }
 
 .selected-items :deep(.jskos-vue-itemName-notation) {
-  font-weight: 600;
+  font-weight: var(--cc-font-weight-regular);
 }
 
 /* Center the arrow inside the button */

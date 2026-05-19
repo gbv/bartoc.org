@@ -2,9 +2,9 @@
 title:
 ---
 
-<h1 style="font-weight: bold;">Contact at the Head Office (VZG)</h1>
+<h1 class="contact-title">Contact at the Head Office (VZG)</h1>
   <p>If you have any questins or suggestions about BARTOC, please contact the BARTOC team</p>
-  <div style="padding-top: 24px;" class="contact-grid">
+  <div class="contact-grid section-offset">
     <div class="contact-entry">
       <div class="contact-header">
         <a class="contact-name">
@@ -75,7 +75,7 @@ title:
     </div>
   </div>
 
-<h1 style="font-weight: bold; padding-top: 48px;">International Editors</h1>
+<h1 class="contact-title section-offset-large">International Editors</h1>
 <p>Bartoc content is curated by an international group of editors. You can contact any editor of your choice, or write to the <a style="text-decoration: none;" href="mailto:bartoc-editors-bounces@lists.gbv.de">BARTOC editors mailing list</a>.
 
 <div class="contact-grid">
