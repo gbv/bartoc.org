@@ -165,7 +165,7 @@ div.multiselect {
   --ms-max-height: 300px;
 }
 div.multiselect-input, div.multiselect-options {
-  border: 1px solid #ced4da;
+  border: 1px solid var(--cc-border-color-control);
 }
 div.multiselect-options {
   overflow-x: hidden;

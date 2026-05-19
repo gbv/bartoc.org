@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <div style="padding-top: 24px;" class="col-12">
+    <div class="col-12 section-offset">
       <div class="card">
         <div class="card-body">
           <h4 class="card-title">More Statistics</h4>
@@ -48,15 +48,15 @@
     </div>
 
     <% if (reports.length) { %>
-      <div class="col-12 pt-4">
+      <div class="col-12 section-offset">
         <div class="card">
           <div class="card-body">
             <h4 class="card-title">Daily Data Quality Reports</h4>
-            <div class="d-flex flex-wrap">
+            <div class="action-group">
               <% for (file of reports) { %>
                 <a
                   href="/data/reports/<%= file %>"
-                  class="btn btn-outline-secondary btn-sm mr-3 mt-3">
+                  class="cc-button cc-button-action">
                   <%= file %>
                 </a>
               <% } %>
@@ -69,4 +69,3 @@
 </div>
 
 <%- include('footer') %>
-

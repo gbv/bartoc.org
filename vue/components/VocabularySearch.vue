@@ -33,7 +33,7 @@
           <div class="col">
             <button
               type="submit"
-              class="btn btn-primary">
+              class="cc-button cc-button-primary">
               Search
             </button>
           </div>

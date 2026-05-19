@@ -30,7 +30,7 @@
           <button
             v-if="endpoints.length > 1"
             type="button"
-            class="btn btn-outline-secondary button-remove"
+            class="cc-button cc-button-secondary cc-button-icon button-remove"
             @click="remove(i)">
             &times;
           </button>

@@ -3,8 +3,7 @@
   (<item-name :item="apiType" />)
   <a
     v-if="cocoda"
-    class="btn btn-sm btn-primary"
-    style="margin-left: 1em"
+    class="cc-button cc-button-primary cc-button-sm service-link-cocoda"
     :href="cocoda">Cocoda Mapping Tool</a>
 </template>
 
@@ -43,3 +42,9 @@ async function reload() {
 
 watch(() => props.endpoint, reload, { deep: true, immediate: true })
 </script>
+
+<style scoped>
+.service-link-cocoda {
+  margin-left: var(--cc-space-md);
+}
+</style>

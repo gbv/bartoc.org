@@ -52,7 +52,7 @@ const prefLabelToShow = computed(() => {
 
 <style>
 .jskos-notation {
-  font-weight: bold;
-  padding-right: 0.5em;
+  font-weight: var(--cc-font-weight-bold);
+  padding-right: var(--cc-space-sm);
 }
 </style>
