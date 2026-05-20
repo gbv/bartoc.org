@@ -15,6 +15,7 @@ import {
   registriesApiUrl,
   jskosDataUrl,
 } from "./src/registries.js"
+import { getConceptsInBatches } from "./src/backend.js"
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
 
@@ -136,18 +137,39 @@ app.get("/edit", async (req, res, next) => {
 // vocabulary search should be delivered by bartoc-search instead
 app.get("/vocabularies", (req, res) => render(req, res, "vocabularies", { title: "Missing bartoc-search" }))
 
+function mergeSubjectMetadata(subject, resolved) {
+  const cleaned = jskos.clean({
+    ...resolved,
+    ...subject,
+    prefLabel: resolved.prefLabel || subject.prefLabel,
+    notation: resolved.notation || subject.notation,
+    type: resolved.type || subject.type,
+  })
+
+  return {
+    ...cleaned,
+    ...subject,
+    prefLabel: cleaned.prefLabel || subject.prefLabel,
+    notation: cleaned.notation || subject.notation,
+    type: cleaned.type || subject.type,
+  }
+}
+
 async function enrichItem (item) {
   const subjects = item && item.subject || []
   if (subjects.length) {
-    const found = await backend.getConcepts({ concepts: item.subject })
-    item.subject = found.map(jskos.clean)
-    // add non-found subjects
-    const uris = found.map(s => s.uri)
-    for (const subj of subjects) {
-      if (!uris.find(uri => uri === subj.uri)) {
-        item.subject.push(subj)
-      }
+    let found = []
+    try {
+      found = (await getConceptsInBatches(backend, subjects)).filter(Boolean)
+    } catch (error) {
+      config.warn("Could not resolve subject metadata from backend. Keeping unresolved subject references.", error)
     }
+
+    const foundByUri = new Map(found.map(concept => [concept.uri, concept]))
+    item.subject = subjects.map(subject => {
+      const resolved = foundByUri.get(subject.uri)
+      return resolved ? mergeSubjectMetadata(subject, resolved) : subject
+    })
   }
 
   const versionOf = item?.versionOf || []
