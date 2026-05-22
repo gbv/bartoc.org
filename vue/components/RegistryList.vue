@@ -1,5 +1,15 @@
 <template>
   <div>
+    <!-- TODO: set registryCount and repositoryCount via Vue -->
+    <p>
+      BARTOC knows about <a href="/registries"><!--%= registryCount %--> terminology registries</a>,
+      including itself.
+      <!--%= repositoryCount %--> some registries
+      also provide access to full terminologies
+      either via an API (terminology <b>service</b>) or by other means
+      (terminology <b>repository</b>).<sup><a href="#poster">*</a></sup>
+    </p>
+
     <p>
       Registries can be filtered by function.
     </p>
@@ -90,11 +100,21 @@
       class="text-muted">
       No registries found.
     </p>
+
+    <hr>
+    <p>
+      <a
+        href="/registries?format=jskos"
+        class="cc-button cc-button-action">
+        Download full list of registries
+      </a>
+      in JSKOS format.
+    </p>
   </div>
 </template>
 
 <script setup>
-import { computed, reactive } from "vue"
+import { computed, reactive, ref } from "vue"
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
@@ -118,12 +138,33 @@ const apiTypeLabels = {
   xtree: "xTree API",
 }
 
-const props = defineProps({
-  registries: {
-    type: Array,
-    default: () => [],
-  },
+const registries = ref([])
+
+fetch("/api/registries?limit=1000").then(res => res.json()).then(async res => {
+  registries.value = res
+
+  /* TODO
+  // Load counts in small batches so we do not flood the backend.
+  let batchSize = 5
+  for (let i=0; i<res.length; i+=batchSize) {
+    const batch = res.slice(i, i+batchSize)
+
+    await Promise.all(batch.map(async registry => {
+      try {
+        const count = await fetch(`/api/voc?partOf=${registry.uri}&limit=0`)
+          .then(res => response.headers?.get('X-Total-Count'))
+        if (Number.isInteger(count)) {
+          registries.value[i].COUNT = count
+        }
+
+      } catch (error) {
+        //config.warn(`Could not load schemes count for registry ${registry.uri}`, error)
+      }
+    }))
+  }
+  */
 })
+
 
 // Small data helpers.
 // Return API links for a registry.
@@ -151,8 +192,8 @@ function terminologiesUrl(registry) {
 
 // Show the count when it is loaded.
 function terminologiesLabel(registry) {
-  return Number.isInteger(registry.terminologiesCount)
-    ? registry.terminologiesCount.toLocaleString()
+  return Number.isInteger(registry.COUNT)
+    ? registry.COUNT.toLocaleString()
     : "show"
 }
 
@@ -232,7 +273,7 @@ const functionFilters = computed(() => [
   },
 ].map(filter => ({
   ...filter,
-  items: sortByLabel(props.registries.filter(registry =>
+  items: sortByLabel(registries.value.filter(registry =>
     registryFunction(registry) === filter.id,
   )),
 })))
@@ -254,7 +295,7 @@ function toggleFilter(id) {
 }
 
 const filteredRegistries = computed(() =>
-  sortByLabel(props.registries.filter(registry =>
+  sortByLabel(registries.value.filter(registry =>
     activeFilters[registryFunction(registry)],
   )),
 )

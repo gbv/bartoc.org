@@ -1,28 +1,6 @@
 <%- include('header') %>
 
-<% const registryCount = Object.keys(registries).length %>
-<% const repositoryCount = Object.keys(repositories).length %>
-<p>
-  BARTOC knows about <a href="/registries"><%= registryCount %> terminology registries</a>,
-  including itself.
-  <%= repositoryCount %> registries
-  also provide access to full terminologies
-  either via an API (terminology <b>service</b>) or by other means
-  (terminology <b>repository</b>).<sup><a href="#poster">*</a></sup>
-</p>
-<registry-list
-  :registries='<%- JSON.stringify(Object.values(registries)).replace(/'/g, "&apos;") %>'>
-</registry-list>
-
-<hr>
-<p>
-  <a
-    href="<%= registriesApiUrl() %>"
-    class="cc-button cc-button-action">
-    Download full list of registries
-  </a>
-  in JSKOS format.
-</p>
+<registry-list></registry-list>
 
 <p id="poster">
   <sup>*</sup> See also our poster

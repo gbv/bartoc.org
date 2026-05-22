@@ -62,18 +62,15 @@ npm run import -- concepts $BARTOC/data/bartoc-api-types.concepts.ndjson
 npm run import -- schemes $BARTOC/data/eurovoc.scheme.ndjson -n
 npm run import -- schemes $BARTOC/data/ilc.scheme.ndjson -n
 
+# Import/replace registries from file (current source of truth)
+yes | npm run reset -- -t registry
+npm run import -- registry $BARTOC/data/registries.ndjson
+
 # Import latest dump
 ask "Do you want to import the latest BARTOC dump? (y/N) "
 if [ $? -eq 1 ]; then
   npm run import -- schemes https://bartoc.org/api/voc?limit=10000
   echo
 fi
-
-ask "Do you want to import the initial registries from file? (y/N) "
-if [ $? -eq 1 ]; then
-  npm run import -- registry $BARTOC/data/registries.ndjson -n
-  echo
-fi
-
 
 cd $BARTOC

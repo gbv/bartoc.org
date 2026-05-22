@@ -7,14 +7,6 @@ import querystring from "querystring"
 import { rdfContentType, rdfSerialize } from "./src/rdf.js"
 import child_process from "child_process"
 import portfinder from "portfinder"
-import {
-  enrichRegistriesWithTerminologiesCounts,
-  loadRegistriesFromFile,
-  getRepositories,
-  refreshRegistries,
-  registriesApiUrl,
-  jskosDataUrl,
-} from "./src/registries.js"
 import { getConceptsInBatches } from "./src/backend.js"
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
@@ -43,27 +35,10 @@ const backend = config.registry
 
 config.log(`Running in ${config.env} mode.`)
 
+// TODO: this should come from database as well
 const nkostypes = utils.indexByUri((utils.readNdjson(__dirname,"./data/nkostype.concepts.ndjson")))
 const accesstypes = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-access.concepts.ndjson"))
 const formats = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-formats.concepts.ndjson"))
-
-
-// Initial data: use the local file so the app has data immediately.
-// This is replaced by backend data during startup if loading succeeds.
-let registries = loadRegistriesFromFile()
-let repositories = getRepositories(registries)
-
-config.log(`Read ${Object.keys(registries).length} registries, ${Object.keys(repositories).length} also being repositories or services.`)
-
-async function refreshRegistriesInBackground() {
-  const refreshed = await refreshRegistries()
-  registries = refreshed.registries
-  repositories = refreshed.repositories
-
-  if (refreshed.source === "backend") {
-    await enrichRegistriesWithTerminologiesCounts(registries)
-  }
-}
 
 // Initialize express with settings
 import express from "express"
@@ -101,13 +76,9 @@ function render (req, res, view, locals) {
     path,
     utils,
     querystring,
-    registries,
-    repositories,
     nkostypes,
     accesstypes,
     formats,
-    registriesApiUrl,
-    jskosDataUrl,
     page: path.replace(/^\/|\/$/g, ""),
   }
   return res.render(view, { ...vars, ...locals })
@@ -225,8 +196,6 @@ app.get("/stats", async (req, res, next) => {
         title: "Statistics",
         reports,
         schemesCount,
-        registriesCount: Object.keys(registries).length,
-        repositoriesCount: Object.keys(repositories).length,
       })
     })
     .catch(e => {
@@ -239,7 +208,7 @@ function conceptPageHandler(prefix) {
   return async (req, res, next) => {
     const uri = prefix + req.params.id
     backend.getConcepts({ concepts: [{ uri }] })
-      .then(concepts => concepts.length ? sendItem(req, res, concepts[0]) : next())
+      .then(concepts => concepts.length && concepts[0] ? sendItem(req, res, concepts[0]) : next())
       .catch(next)
   }
 }
@@ -250,7 +219,7 @@ app.get("/ILC/1/:id([a-z0-9-]+)", conceptPageHandler("https://bartoc.org/ILC/1/"
 // list of terminology registries
 app.get("/registries", (req, res) => {
   if (req.query.format === "jskos") {
-    return res.send(registries)
+    return res.redirect("/api/registries?limit=1000")
   }
   render(req, res, "registries", { title: "Terminology Registries" })
 })
@@ -258,11 +227,21 @@ app.get("/registries", (req, res) => {
 // BARTOC ID => registry or vocabulary (if found)
 app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   const uri = `http://bartoc.org/en/node/${req.params.id}`
+
+  // TODO: better use /data endpoint of backend for both registries and scheme
   let path = "/vocabularies"
-  let item = registries[uri]
+  let item
+
+  try {
+    const api = `${config.backend.api}registries?uri=${uri}`
+    item = await fetch(api).then(res => res.json()).then(res => res[0])
+  } catch {
+    //
+  }
 
   if (item) {
     path = "/registries"
+    item.type = ["http://www.w3.org/ns/dcat#Catalog"] // required for view
   } else {
     try {
       const result = await backend.getSchemes({ properties: "*", params: { uri } })
@@ -353,13 +332,7 @@ async function start() {
     port = await portfinder.getPortPromise()
   }
 
-  app.listen(port, () => {
-    config.log(`Now listening on port ${port}`)
-
-    refreshRegistriesInBackground().catch(error => {
-      config.warn("Could not refresh registries in background.", error)
-    })
-  })
+  app.listen(port, () => config.log(`Now listening on port ${port}`))
 }
 
 start()
