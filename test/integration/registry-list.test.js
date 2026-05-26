@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect } from "vitest"
-import { mount } from "@vue/test-utils"
+import { afterEach, describe, it, expect, vi } from "vitest"
+import { flushPromises, mount } from "@vue/test-utils"
 import RegistryList from "../../vue/components/RegistryList.vue"
 
 const catalogType = "http://www.w3.org/ns/dcat#Catalog"
@@ -30,7 +30,7 @@ const terminologyService = {
       url: "https://service.example/api",
     },
   ],
-  terminologiesCount: 12,
+  COUNT: 12,
 }
 
 const terminologyRepository = {
@@ -43,22 +43,29 @@ const terminologyRepository = {
   url: "https://repository.example",
 }
 
-function mountList(registries = [
+async function mountList(registries = [
   metadataRegistry,
   terminologyService,
   terminologyRepository,
 ]) {
-  return mount(RegistryList, {
-    props: { registries },
-  })
+  vi.stubGlobal("fetch", vi.fn(async () => ({
+    json: async () => registries,
+  })))
+
+  const wrapper = mount(RegistryList)
+  await flushPromises()
+  return wrapper
 }
 
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
-// TODO: enable test again after loading and display of registries has been decoupled.
-describe.skip("RegistryList", () => {
-  it("shows toggle buttons for registry functions", () => {
-    const wrapper = mountList()
+describe("RegistryList", () => {
+  it("shows toggle buttons for registry functions", async () => {
+    const wrapper = await mountList()
 
+    expect(fetch).toHaveBeenCalledWith("/api/registries?limit=1000")
     expect(wrapper.findAll("button").map(button => button.text())).toEqual([
       "Metadata Registries 1",
       "Terminology Services 1",
@@ -70,8 +77,8 @@ describe.skip("RegistryList", () => {
     )
   })
 
-  it("renders the compact registry table", () => {
-    const wrapper = mountList()
+  it("renders the compact registry table", async () => {
+    const wrapper = await mountList()
 
     expect(wrapper.find("thead").findAll("th").map(th => th.text())).toEqual([
       "Name",
@@ -106,7 +113,7 @@ describe.skip("RegistryList", () => {
   })
 
   it("filters registries by function", async () => {
-    const wrapper = mountList()
+    const wrapper = await mountList()
 
     await wrapper.findAll("button")[1].trigger("click")
 
@@ -117,8 +124,8 @@ describe.skip("RegistryList", () => {
     expect(rows.some(row => row.includes("Terminology Repository"))).toBe(true)
   })
 
-  it("shows an empty state", () => {
-    const wrapper = mountList([])
+  it("shows an empty state", async () => {
+    const wrapper = await mountList([])
 
     expect(wrapper.text()).toContain("No registries found.")
   })
