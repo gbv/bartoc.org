@@ -60,7 +60,7 @@
       <%- include('row-list', { label: 'Address', list: address }) %>
       <%- include('row', { label: 'Contact', content: item.CONTACT }) %>
       <%- include('row-list', { label: 'Part of', list: item.partOf,
-        view: s => include('item', { item: registries[s.uri] || { uri: s.uri } })  }) %>
+        view: s => include('item', { item: s })  }) %>
       <%- include('row-list', { label: 'Services (API)', list: item.API,
         view: s => `<service-link :scheme='{"uri":"${item.uri}"}' :endpoint='${JSON.stringify(s)}'></service-link>` }) %>
    </table>
