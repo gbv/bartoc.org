@@ -228,37 +228,42 @@ app.get("/registries", (req, res) => {
 app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   const uri = `http://bartoc.org/en/node/${req.params.id}`
 
-  // TODO: better use /data endpoint of backend for both registries and scheme
   let path = "/vocabularies"
   let item
 
   try {
-    const api = `${config.backend.api}registries?uri=${uri}`
-    item = await fetch(api).then(res => res.json()).then(res => res[0])
-  } catch {
-    //
+    item = await backendDataByUri(uri)
+  } catch (error) {
+    config.warn(`Could not load item ${uri} from backend data endpoint.`, error)
   }
 
-  if (item) {
-    path = "/registries"
-    item.type = ["http://www.w3.org/ns/dcat#Catalog"] // required for view
-  } else {
+  if (!item) {
     try {
       const result = await backend.getSchemes({ properties: "*", params: { uri } })
       if (result.length === 1) {
-        item = await enrichItem(result[0])
+        item = result[0]
       }
     } catch (error) {
-      next(error)
+      return next(error)
     }
   }
 
   if (item) {
+    item = await enrichItem(item)
+    path = item.type?.[0] === "http://www.w3.org/ns/dcat#Catalog"
+      ? "/registries"
+      : "/vocabularies"
     sendItem(req, res, item, { path })
   } else {
     next()
   }
 })
+
+async function backendDataByUri(uri) {
+  const api = `${config.backend.api}data?${querystring.stringify({ uri })}`
+  const items = await fetch(api).then(res => res.json())
+  return items.find(item => item.uri === uri)
+}
 
 const viewsByType = {
   "http://www.w3.org/2004/02/skos/core#Concept": "concept",
