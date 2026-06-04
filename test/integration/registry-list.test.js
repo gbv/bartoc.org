@@ -71,6 +71,16 @@ describe("RegistryList", () => {
       "Terminology Services 1",
       "Terminology Repositories 1",
     ])
+    expect(wrapper.findAll("button").map(button => button.attributes("title"))).toEqual([
+      "List and describe terminologies.",
+      "Provide access to terminologies via an API.",
+      "Contain full terminologies.",
+    ])
+    expect(wrapper.findAll("button").map(button => button.attributes("aria-label"))).toEqual([
+      "Metadata Registries: List and describe terminologies.",
+      "Terminology Services: Provide access to terminologies via an API.",
+      "Terminology Repositories: Contain full terminologies.",
+    ])
 
     expect(wrapper.text()).toContain(
       "Registries can be filtered by function.",

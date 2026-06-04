@@ -24,6 +24,8 @@
         type="button"
         class="cc-button mr-2 mb-2"
         :class="activeFilters[filter.id] ? 'cc-button-selected' : 'cc-button-ghost'"
+        :title="filter.description"
+        :aria-label="`${filter.title}: ${filter.description}`"
         :aria-pressed="activeFilters[filter.id] ? 'true' : 'false'"
         @click="toggleFilter(filter.id)">
         {{ filter.title }}
@@ -260,16 +262,19 @@ const functionFilters = computed(() => [
     id: "metadata-registries",
     title: "Metadata Registries",
     label: "metadata registry",
+    description: "List and describe terminologies.",
   },
   {
     id: "terminology-services",
     title: "Terminology Services",
     label: "terminology service",
+    description: "Provide access to terminologies via an API.",
   },
   {
     id: "terminology-repositories",
     title: "Terminology Repositories",
     label: "terminology repository",
+    description: "Contain full terminologies.",
   },
 ].map(filter => ({
   ...filter,
