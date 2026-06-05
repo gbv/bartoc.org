@@ -74,7 +74,18 @@
           </td>
 
           <td class="align-middle registry-terminologies-count">
+            <span
+              v-if="isTerminologyCountLoading(registry)"
+              class="registry-count-loading"
+              role="status"
+              :aria-label="`Loading terminology count for ${registryLabel(registry)}`">
+              <loading-indicator
+                class="registry-count-loading-indicator"
+                size="lg"
+                aria-hidden="true" />
+            </span>
             <a
+              v-else
               :href="terminologiesUrl(registry)"
               :aria-label="`Show terminologies listed by ${registryLabel(registry)}`">
               {{ terminologiesLabel(registry) }}
@@ -120,6 +131,7 @@ import { computed, reactive, ref } from "vue"
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
+import { LoadingIndicator } from "jskos-vue"
 
 library.add(faArrowUpRightFromSquare)
 
@@ -141,31 +153,56 @@ const apiTypeLabels = {
 }
 
 const registries = ref([])
+const pendingTerminologyCountUris = reactive(new Set())
+const terminologyCountBatchSize = 5
 
 fetch("/api/registries?limit=1000").then(res => res.json()).then(async res => {
   registries.value = res
-
-  /* TODO
-  // Load counts in small batches so we do not flood the backend.
-  let batchSize = 5
-  for (let i=0; i<res.length; i+=batchSize) {
-    const batch = res.slice(i, i+batchSize)
-
-    await Promise.all(batch.map(async registry => {
-      try {
-        const count = await fetch(`/api/voc?partOf=${registry.uri}&limit=0`)
-          .then(res => response.headers?.get('X-Total-Count'))
-        if (Number.isInteger(count)) {
-          registries.value[i].COUNT = count
-        }
-
-      } catch (error) {
-        //config.warn(`Could not load schemes count for registry ${registry.uri}`, error)
-      }
-    }))
-  }
-  */
+  await loadTerminologyCounts()
 })
+
+// Show the registry list first. Then load terminology counts in small batches.
+async function loadTerminologyCounts() {
+  const pendingRegistries = registries.value.filter(registry =>
+    !Number.isInteger(registry.COUNT),
+  )
+
+  pendingRegistries.forEach(registry => {
+    pendingTerminologyCountUris.add(registry.uri)
+  })
+
+  for (let offset = 0; offset < pendingRegistries.length; offset += terminologyCountBatchSize) {
+    const batch = pendingRegistries.slice(offset, offset + terminologyCountBatchSize)
+    await Promise.all(batch.map(loadTerminologyCount))
+  }
+}
+
+// Load the terminology count for one registry.
+async function loadTerminologyCount(registry) {
+  try {
+    const params = new URLSearchParams({
+      partOf: registry.uri,
+      limit: "0",
+    })
+
+    // Request no rows: jskos-server still returns the total in X-Total-Count.
+    const response = await fetch(`/api/voc?${params.toString()}`)
+    const countHeader = response.headers?.get("X-Total-Count")
+
+    if (countHeader === null || countHeader === undefined) {
+      return
+    }
+
+    const count = Number(countHeader)
+    if (Number.isInteger(count) && count >= 0) {
+      registry.COUNT = count
+    }
+  } catch {
+    // Keep the table usable if a single count request fails.
+  } finally {
+    pendingTerminologyCountUris.delete(registry.uri)
+  }
+}
 
 
 // Small data helpers.
@@ -197,6 +234,11 @@ function terminologiesLabel(registry) {
   return Number.isInteger(registry.COUNT)
     ? registry.COUNT.toLocaleString()
     : "show"
+}
+
+// Check whether a registry count request is still pending.
+function isTerminologyCountLoading(registry) {
+  return pendingTerminologyCountUris.has(registry.uri)
 }
 
 // Build a stable key for API links.
@@ -325,4 +367,10 @@ const filteredRegistries = computed(() =>
 .registry-terminologies-count {
   text-align: center;
 }
+
+.registry-count-loading-indicator {
+  --jskos-vue-loadingIndicator-primary-color: var(--cc-color-on-primary);
+  --jskos-vue-loadingIndicator-secondary-color: var(--cc-color-primary);
+}
+
 </style>
