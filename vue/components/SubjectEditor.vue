@@ -2,15 +2,14 @@
   <div class="subject-editor">
     <!-- Show all selected subjects, independent from the active scheme -->
     <table
-      v-if="subjects.length"
+      v-if="editableSubjects.length"
       class="table table-sm table-borderless selected-subjects">
       <tbody>
         <tr
-          v-for="(subject, i) in subjects"
+          v-for="({ subject }, i) in editableSubjects"
           :key="subjectKey(subject, i)">
           <!-- Scheme label, e.g. DDC / EUROVOC / ILC -->
           <td
-            v-if="excludeDerived(subject)"
             class="scheme-col">
             <item-name
               :item="findScheme(subject.inScheme?.[0]?.uri)"
@@ -20,7 +19,6 @@
 
           <!-- Selected concept -->
           <td
-            v-if="excludeDerived(subject)"
             class="subject-col">
             <div class="subject-box">
               <item-name
@@ -31,27 +29,26 @@
 
           <!-- Reorder / remove buttons -->
           <td
-            v-if="excludeDerived(subject)"
             class="actions-col">
             <div class="cc-button-group">
               <button
                 :disabled="!i"
                 type="button"
                 class="cc-button cc-button-secondary cc-button-icon"
-                @click="up(i)">
+                @click="moveEditableSubject(i, -1)">
                 &#9650;
               </button>
               <button
-                :disabled="i >= subjects.length - 1"
+                :disabled="i >= editableSubjects.length - 1"
                 type="button"
                 class="cc-button cc-button-secondary cc-button-icon"
-                @click="down(i)">
+                @click="moveEditableSubject(i, 1)">
                 &#9660;
               </button>
               <button
                 type="button"
                 class="cc-button cc-button-secondary cc-button-icon"
-                @click="remove(i)">
+                @click="removeEditableSubject(i)">
                 &times;
               </button>
             </div>
@@ -113,13 +110,22 @@ function subjectInScheme(subject, schemeUri) {
   )
 }
 
-// Replace only the subjects of the active scheme, keep the others unchanged.
+function isDerivedSubject(subject) {
+  return Object.prototype.hasOwnProperty.call(subject || {}, "MAPPING")
+}
+
+// Replace only manually editable subjects of the active scheme.
+// Derived subjects are hidden from the editor, but must pass through unchanged
+// so the parent can still save the complete subject list.
 function mergeSubjectsByScheme(current, schemeUri, nextSubjects) {
   const result = []
   let inserted = false
 
   for (const subject of current || []) {
-    if (subjectInScheme(subject, schemeUri)) {
+    if (
+      subjectInScheme(subject, schemeUri) &&
+      !isDerivedSubject(subject)
+    ) {
       if (!inserted) {
         result.push(...nextSubjects)
         inserted = true
@@ -143,16 +149,18 @@ const activeSchemeUri = ref(indexingSchemes[0].uri)
 // All valid subjects from the parent value.
 const subjects = computed(() =>
   // Filter out invalid subjects (without URI),
-  // but keep derived subjects (with MAPPING relation) for now, as they are needed to show the correct labels in the list.
+  // but keep derived subjects so they can pass through to the parent unchanged.
   (props.modelValue || []).filter(subject => subject?.uri),
 )
 
-// Check whether one subject is a derived subject with MAPPING relation,
-// which should not be shown in the list, but only used to show the correct
-// labels for the original subject.
-function excludeDerived(subject) {
-  return !subject?.MAPPING
-}
+// UI projection of the complete subject list: only manually editable subjects
+// are rendered, while their original indexes keep mutations anchored to the
+// complete modelValue array.
+const editableSubjects = computed(() =>
+  subjects.value
+    .map((subject, index) => ({ subject, index }))
+    .filter(({ subject }) => !isDerivedSubject(subject)),
+)
 
 // Find one scheme object by URI.
 function findScheme(uri) {
@@ -177,6 +185,7 @@ const activeProvider = computed(() =>
 const activeSubjects = computed({
   get() {
     return subjects.value.filter(subject =>
+      !isDerivedSubject(subject) &&
       subjectInScheme(subject, activeSchemeUri.value),
     )
   },
@@ -195,30 +204,31 @@ function subjectKey(subject, i) {
   return `${subject.inScheme?.[0]?.uri || "scheme"}-${subject.uri || "empty"}-${i}`
 }
 
-// Remove one subject from the full list.
-function remove(i) {
+// Remove one visible subject from the full list by its original index.
+function removeEditableSubject(i) {
+  const subjectIndex = editableSubjects.value[i]?.index
+  if (subjectIndex === undefined) {
+    return
+  }
+
   const next = [...subjects.value]
-  next.splice(i, 1)
+  next.splice(subjectIndex, 1)
   emit("update:modelValue", next)
 }
 
-// Move one subject one row up.
-function up(i) {
-  if (!i) {
+// Move visible subjects within their editable slots; derived subjects keep their
+// original positions in the complete list.
+function moveEditableSubject(i, direction) {
+  const target = i + direction
+  if (target < 0 || target >= editableSubjects.value.length) {
     return
   }
-  const next = [...subjects.value]
-  ;[next[i - 1], next[i]] = [next[i], next[i - 1]]
-  emit("update:modelValue", next)
-}
 
-// Move one subject one row down.
-function down(i) {
-  if (i >= subjects.value.length - 1) {
-    return
-  }
   const next = [...subjects.value]
-  ;[next[i], next[i + 1]] = [next[i + 1], next[i]]
+  const fromIndex = editableSubjects.value[i].index
+  const toIndex = editableSubjects.value[target].index
+
+  ;[next[fromIndex], next[toIndex]] = [next[toIndex], next[fromIndex]]
   emit("update:modelValue", next)
 }
 </script>
