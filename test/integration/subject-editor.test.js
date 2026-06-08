@@ -224,4 +224,46 @@ describe("SubjectEditor", () => {
       },
     ])
   })
+
+  it("does not render derived subjects in the list", async () => {
+    const wrapper = mountEditor([
+      {
+        uri: "http://dewey.info/class/20/",
+        notation: ["20"],
+        prefLabel: { en: "Religion" },
+        inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+      },
+      {
+        uri: "http://example.org/derived-subject",
+        notation: ["200"],
+        prefLabel: { en: "Derived Subject" },
+        inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+        MAPPING: [{ uri: "mapping:1" }],
+      },
+    ])
+
+    const rows = wrapper.findAll("tbody tr")
+    expect(rows).toHaveLength(1)
+    expect(wrapper.get("[data-testid='picker-count']").text()).toBe("1")
+
+    await wrapper.get("[data-testid='emit-picker-update']").trigger("click")
+
+    const lastValue = wrapper.emitted("update:modelValue").at(-1)[0]
+    expect(lastValue).toEqual([
+      {
+        uri: "http://example.org/new-ddc",
+        notation: ["999"],
+        prefLabel: { en: "New DDC concept" },
+        inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+      },
+      {
+        uri: "http://example.org/derived-subject",
+        notation: ["200"],
+        prefLabel: { en: "Derived Subject" },
+        inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+        MAPPING: [{ uri: "mapping:1" }],
+      },
+    ])
+  })
+
 })
