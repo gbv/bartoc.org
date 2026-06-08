@@ -28,8 +28,16 @@
       <%- include('row-list', { label: 'KOS Type', list: item.type.slice(1), style: 'inline',
         view: item => include('item', { item: nkostypes[item], base: '/vocabularies?type=' }) }) %>
       <%- include('row-list', { label: 'Links', list: item.subjectOf, view: s => include('link', s) }) %>
-      <%- include('row-list', { label: 'Subject', list: item.subject, style: 'inline',
-        view: s => include('item', { item: s, base: '/vocabularies?subject=', withNotation: true }) }) %>
+      <%
+        // Split manually assigned and derived subjects.
+        const subjects = item.subject || []
+        const hasMapping = subject => subject && Object.prototype.hasOwnProperty.call(subject, 'MAPPING')
+        const manualSubjects = subjects.filter(subject => !hasMapping(subject))
+        const derivedSubjects = subjects.filter(hasMapping)
+        const subjectView = subject => include('item', { item: subject, base: '/vocabularies?subject=', withNotation: true })
+      %>
+      <%- include('row-list', { label: 'Subject', list: manualSubjects, style: 'inline', view: subjectView }) %>
+      <%- include('row-list', { label: 'Derived Subjects', list: derivedSubjects, style: 'inline', view: subjectView }) %>
       <%- include('row-list', { label: 'Version of', list: item.versionOfResolved, view: s => include('item', { item: s }) }) %>
       <%- include('row-list', { label: 'Based on', list: item.basedOnResolved, view: s => include('item', { item: s }) }) %>
       <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
