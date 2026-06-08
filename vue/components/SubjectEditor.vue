@@ -9,7 +9,9 @@
           v-for="(subject, i) in subjects"
           :key="subjectKey(subject, i)">
           <!-- Scheme label, e.g. DDC / EUROVOC / ILC -->
-          <td class="scheme-col">
+          <td
+            v-if="excludeDerived(subject)"
+            class="scheme-col">
             <item-name
               :item="findScheme(subject.inScheme?.[0]?.uri)"
               :notation="true"
@@ -17,7 +19,9 @@
           </td>
 
           <!-- Selected concept -->
-          <td class="subject-col">
+          <td
+            v-if="excludeDerived(subject)"
+            class="subject-col">
             <div class="subject-box">
               <item-name
                 :item="subject"
@@ -26,7 +30,9 @@
           </td>
 
           <!-- Reorder / remove buttons -->
-          <td class="actions-col">
+          <td
+            v-if="excludeDerived(subject)"
+            class="actions-col">
             <div class="cc-button-group">
               <button
                 :disabled="!i"
@@ -136,11 +142,17 @@ const activeSchemeUri = ref(indexingSchemes[0].uri)
 
 // All valid subjects from the parent value.
 const subjects = computed(() =>
-  // Filter out invalid subjects (without URI or with MAPPING relation, i.e., subjects known as derived subjects).
-  (props.modelValue || []).filter(subject => subject?.uri && !subject?.MAPPING),
+  // Filter out invalid subjects (without URI),
+  // but keep derived subjects (with MAPPING relation) for now, as they are needed to show the correct labels in the list.
+  (props.modelValue || []).filter(subject => subject?.uri),
 )
 
-console.log("SubjectEditor subjects", subjects.value)
+// Check whether one subject is a derived subject with MAPPING relation,
+// which should not be shown in the list, but only used to show the correct
+// labels for the original subject.
+function excludeDerived(subject) {
+  return !subject?.MAPPING
+}
 
 // Find one scheme object by URI.
 function findScheme(uri) {
