@@ -136,8 +136,11 @@ const activeSchemeUri = ref(indexingSchemes[0].uri)
 
 // All valid subjects from the parent value.
 const subjects = computed(() =>
-  (props.modelValue || []).filter(subject => subject?.uri),
+  // Filter out invalid subjects (without URI or with MAPPING relation, i.e., subjects known as derived subjects).
+  (props.modelValue || []).filter(subject => subject?.uri && !subject?.MAPPING),
 )
+
+console.log("SubjectEditor subjects", subjects.value)
 
 // Find one scheme object by URI.
 function findScheme(uri) {
