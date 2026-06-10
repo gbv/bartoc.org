@@ -69,12 +69,32 @@ export function itemError(item) {
     return { message: "Please provide at least one English abstract." }
   }
 
+  if (hasSelfReference(item, "versionOf")) {
+    return { message: "A vocabulary cannot be a version of itself." }
+  }
+  if (hasSelfReference(item, "basedOn")) {
+    return { message: "A vocabulary cannot be based on itself." }
+  }
+
   if (item.publisher?.length) {
     const publisherError = validatePublisher(item.publisher[0])
     if (publisherError) {
       return publisherError
     }
   }
+}
+
+function normalizedUri(value) {
+  return typeof value === "string" ? value.trim() : value
+}
+
+function hasSelfReference(item, field) {
+  const uri = normalizedUri(item?.uri)
+  return Boolean(
+    uri &&
+    Array.isArray(item?.[field]) &&
+    item[field].some(reference => normalizedUri(reference?.uri) === uri),
+  )
 }
 
 export function cleanupItem(item) {

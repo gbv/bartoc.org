@@ -173,6 +173,46 @@ describe("ItemEditor abstracts", () => {
     expect(w.vm.showVersionOfEditor).toBe(true)
   })
 
+  it("blocks saving versionOf self-references", async () => {
+    vi.stubGlobal("fetch", vi.fn())
+
+    const uri = "http://bartoc.org/en/node/18410"
+    const w = mountEditor({
+      uri,
+      prefLabel: { en: ["Title"] },
+      definition: { en: ["English abstract"] },
+      type: [conceptSchemeType],
+      versionOf: [{ uri }],
+    })
+
+    await w.vm.saveItem()
+
+    expect(fetch).not.toHaveBeenCalled()
+    expect(w.vm.error).toEqual({
+      message: "A vocabulary cannot be a version of itself.",
+    })
+  })
+
+  it("blocks saving basedOn self-references", async () => {
+    vi.stubGlobal("fetch", vi.fn())
+
+    const uri = "http://bartoc.org/en/node/18410"
+    const w = mountEditor({
+      uri,
+      prefLabel: { en: ["Title"] },
+      definition: { en: ["English abstract"] },
+      type: [conceptSchemeType],
+      basedOn: [{ uri }],
+    })
+
+    await w.vm.saveItem()
+
+    expect(fetch).not.toHaveBeenCalled()
+    expect(w.vm.error).toEqual({
+      message: "A vocabulary cannot be based on itself.",
+    })
+  })
+
   it("loads supporting concept lists on mount", async () => {
     mountEditor({
       prefLabel: { en: ["x"] },

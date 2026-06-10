@@ -72,6 +72,32 @@ describe("ItemEditor business logic", () => {
     })).toBeUndefined()
   })
 
+  it("blocks self-references in terminology relations", () => {
+    const uri = "http://bartoc.org/en/node/18410"
+    const validItem = {
+      uri,
+      prefLabel: { en: ["Title"] },
+      definition: { en: ["English abstract"] },
+      publisher: [],
+    }
+
+    expect(itemError({
+      ...validItem,
+      versionOf: [{ uri }],
+    })).toEqual({ message: "A vocabulary cannot be a version of itself." })
+
+    expect(itemError({
+      ...validItem,
+      basedOn: [{ uri: ` ${uri} ` }],
+    })).toEqual({ message: "A vocabulary cannot be based on itself." })
+
+    expect(itemError({
+      ...validItem,
+      versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      basedOn: [{ uri: "http://bartoc.org/en/node/17963" }],
+    })).toBeUndefined()
+  })
+
   it("cleans empty fields and normalizes relation-like values", () => {
     const cleaned = cleanupItem({
       type: [],
