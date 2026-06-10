@@ -115,4 +115,24 @@ describe("vocabulary view", () => {
     expect(rows).not.toHaveProperty("Version of")
   })
 
+  it("shows incoming basedOn relations in a separate row", async () => {
+    const html = await renderVocabulary({
+      uri: "http://bartoc.org/en/node/18410",
+      prefLabel: { en: "Base Terminology" },
+      type: ["http://www.w3.org/2004/02/skos/core#ConceptScheme"],
+      incomingBasedOnResolved: [
+        {
+          uri: "http://bartoc.org/en/node/18307",
+          prefLabel: { en: "Derived Terminology" },
+        },
+      ],
+    })
+
+    // Incoming basedOn relations are computed for display only.
+    const rows = tableRowsByLabel(html)
+
+    expect(rows["Terminologies based on this terminology"]).toContain("Derived Terminology")
+    expect(rows).not.toHaveProperty("Based on")
+  })
+
 })

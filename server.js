@@ -212,6 +212,13 @@ async function enrichItem (item) {
     item.incomingVersionOfResolved = incomingVersions
   }
 
+  // Incoming basedOn relations are also display-only. The direct "Based on"
+  // relation remains stored on the referencing vocabulary.
+  const incomingBasedOn = await resolveIncomingSchemeReferences(item, "basedOn")
+  if (incomingBasedOn.length) {
+    item.incomingBasedOnResolved = incomingBasedOn
+  }
+
   return item
 }
 
@@ -308,7 +315,8 @@ async function sendItem (req, res, item, vars = {}) {
     Object.keys(item)
       .filter(key =>
         key[0] === "_" ||
-        key === "incomingVersionOfResolved",
+        key === "incomingVersionOfResolved" ||
+        key === "incomingBasedOnResolved",
       )
       .forEach(key => delete item[key])
     res.send([item])
