@@ -38,7 +38,8 @@
       %>
       <%- include('row-list', { label: 'Subject', list: manualSubjects, style: 'inline', view: subjectView }) %>
       <%- include('row-list', { label: 'Derived Subjects', list: derivedSubjects, style: 'inline', view: subjectView }) %>
-      <%- include('row-list', { label: 'Version of', list: item.versionOfResolved, view: s => include('item', { item: s }) }) %>
+      <%- include('row-list', { label: 'Version of', list: item.versionOfResolved, view: s => include('terminology-version-link', { item: s })}) %>
+      <%- include('row-list', { label: 'Versions of this terminology', list: item.incomingVersionOfResolved, view: s => include('terminology-version-link', { item: s })}) %>
       <%- include('row-list', { label: 'Based on', list: item.basedOnResolved, view: s => include('item', { item: s }) }) %>
       <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
       <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>

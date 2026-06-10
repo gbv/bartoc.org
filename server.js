@@ -39,6 +39,7 @@ config.log(`Running in ${config.env} mode.`)
 const nkostypes = utils.indexByUri((utils.readNdjson(__dirname,"./data/nkostype.concepts.ndjson")))
 const accesstypes = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-access.concepts.ndjson"))
 const formats = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-formats.concepts.ndjson"))
+const conceptSchemeType = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
 
 // Initialize express with settings
 import express from "express"
@@ -88,6 +89,7 @@ function render (req, res, view, locals) {
 app.get("/edit", async (req, res, next) => {
   const { uri } = req.query
   let item, title = "Add vocabulary"
+  let hasIncomingVersions = false
 
   if (uri) {
     item = await backend.getSchemes({ params: { uri } }).then(result => result[0])
@@ -96,13 +98,14 @@ app.get("/edit", async (req, res, next) => {
       utils.cleanupItem(item)
       delete item.concepts
       delete item.topConcepts
+      hasIncomingVersions = (await resolveIncomingSchemeReferences(item, "versionOf")).length > 0
     } else {
       next()
       return
     }
   }
 
-  render(req, res, "edit", { item, title, edit: true })
+  render(req, res, "edit", { item, title, edit: true, hasIncomingVersions })
 })
 
 // vocabulary search should be delivered by bartoc-search instead
@@ -126,6 +129,56 @@ function mergeSubjectMetadata(subject, resolved) {
   }
 }
 
+async function resolveSchemeReferences(references) {
+  const refs = (references || []).filter(ref => ref?.uri)
+  if (!refs.length) {
+    return []
+  }
+
+  const found = await Promise.all(
+    refs.map(({ uri }) =>
+      backend.getSchemes({ params: { uri } })
+        .then(result => result[0] || null)
+        .catch(() => null),
+    ),
+  )
+
+  // Direct relation fields store only URI references. The view needs labels, so
+  // resolve them to full schemes when possible.
+  const resolved = found.filter(Boolean).map(jskos.clean)
+  const resolvedUris = new Set(resolved.map(item => item.uri))
+
+  // Keep unresolved references visible instead of silently dropping them.
+  return [
+    ...resolved,
+    ...refs.filter(ref => !resolvedUris.has(ref.uri)),
+  ]
+}
+
+async function resolveIncomingSchemeReferences(item, relation) {
+  if (!item?.uri || !item.type?.includes(conceptSchemeType)) {
+    return []
+  }
+
+  try {
+    // Reverse relations are not stored on this item. They are found by asking
+    // the backend for all schemes that point to the current URI.
+    const result = await backend.getSchemes({
+      params: {
+        [relation]: item.uri,
+        limit: 1000,
+      },
+    })
+
+    return (result || [])
+      .filter(scheme => scheme?.uri && scheme.uri !== item.uri)
+      .map(jskos.clean)
+  } catch (error) {
+    config.warn(`Could not resolve incoming ${relation} relations for ${item.uri}.`, error)
+    return []
+  }
+}
+
 async function enrichItem (item) {
   const subjects = item && item.subject || []
   if (subjects.length) {
@@ -143,43 +196,20 @@ async function enrichItem (item) {
     })
   }
 
-  const versionOf = item?.versionOf || []
-  if (versionOf.length) {
-    const found = await Promise.all(
-      versionOf.map(({ uri }) =>
-        backend.getSchemes({ params: { uri } })
-          .then(result => result[0] || null)
-          .catch(() => null),
-      ),
-    )
-    item.versionOfResolved = found.map(jskos.clean)
-
-    const uris = found.map(s => s.uri)
-    for (const rel of versionOf) {
-      if (!uris.find(uri => uri === rel.uri)) {
-        item.versionOfResolved.push(rel)
-      }
-    }
+  // Direct relations are stored on this item and can be edited there.
+  if (item?.versionOf?.length) {
+    item.versionOfResolved = await resolveSchemeReferences(item.versionOf)
   }
 
-  const basedOn = item?.basedOn || []
-  if (basedOn.length) {
-    const found = await Promise.all(
-      basedOn.map(({ uri }) =>
-        backend.getSchemes({ params: { uri } })
-          .then(result => result[0] || null)
-          .catch(() => null),
-      ),
-    )
+  if (item?.basedOn?.length) {
+    item.basedOnResolved = await resolveSchemeReferences(item.basedOn)
+  }
 
-    item.basedOnResolved = found.map(jskos.clean)
-
-    const uris = found.map(s => s.uri)
-    for (const rel of basedOn) {
-      if (!uris.find(uri => uri === rel.uri)) {
-        item.basedOnResolved.push(rel)
-      }
-    }
+  // Incoming versions are display-only: they help the vocabulary page show
+  // "Versions of this terminology" without making the list editable or saved.
+  const incomingVersions = await resolveIncomingSchemeReferences(item, "versionOf")
+  if (incomingVersions.length) {
+    item.incomingVersionOfResolved = incomingVersions
   }
 
   return item
@@ -267,7 +297,7 @@ async function backendDataByUri(uri) {
 
 const viewsByType = {
   "http://www.w3.org/2004/02/skos/core#Concept": "concept",
-  "http://www.w3.org/2004/02/skos/core#ConceptScheme": "vocabulary",
+  [conceptSchemeType]: "vocabulary",
   "http://www.w3.org/ns/dcat#Catalog": "registry",
 }
 
@@ -275,7 +305,12 @@ async function sendItem (req, res, item, vars = {}) {
   const { format } = req.query
   if (format === "json" || format === "jsonld") {
     item["@context"] = "https://gbv.github.io/jskos/context.json"
-    Object.keys(item).filter(key => key[0] === "_").forEach(key => delete item[key])
+    Object.keys(item)
+      .filter(key =>
+        key[0] === "_" ||
+        key === "incomingVersionOfResolved",
+      )
+      .forEach(key => delete item[key])
     res.send([item])
   } else {
     const type = rdfContentType[format]

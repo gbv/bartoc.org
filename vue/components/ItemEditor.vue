@@ -57,7 +57,9 @@
   <form-row :label="'Subjects'">
     <subject-editor v-model="item.subject" />
   </form-row>
-  <form-row :label="'Version of'">
+  <form-row
+    v-if="showVersionOfEditor"
+    :label="'Version of'">
     <terminology-relation-editor
       v-model="item.versionOf"
       :multiple="false"
@@ -281,6 +283,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  hasIncomingVersions: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const item = reactive(normalizeEditableItem(props.current))
@@ -324,6 +330,9 @@ const registryProvider = createRegistryProvider(() => registriesLoaded, {
 })
 
 const type = computed(() => item.type.map((uri) => ({ uri })))
+const showVersionOfEditor = computed(() =>
+  !props.hasIncomingVersions || item.versionOf.length > 0,
+)
 
 const jskosPreview = computed(() => {
   // Clone to avoid mutating the live form state.
@@ -394,6 +403,7 @@ defineExpose({
   licenseProvider,
   registryProvider,
   type,
+  showVersionOfEditor,
   jskosPreview,
   itemError,
   saveItem,

@@ -95,6 +95,7 @@ function mountEditor(current = {}, props = {}) {
         SetSelect: true,
         AddressEditor: true,
         EndpointsEditor: true,
+        TerminologyRelationEditor: true,
         ItemSelect: true,
         ItemSelected: true,
       },
@@ -129,6 +130,47 @@ describe("ItemEditor abstracts", () => {
     expect(w.vm.item.subjectOf).toEqual([])
     expect(w.vm.item.versionOf).toEqual([])
     expect(w.vm.examples).toBe("A, B")
+  })
+
+  it("shows the Version of editor by default", () => {
+    const w = mountEditor({
+      prefLabel: { en: ["x"] },
+      definition: { en: ["English abstract"] },
+      type: [conceptSchemeType],
+    })
+
+    expect(w.text()).toContain("Version of")
+    expect(w.vm.showVersionOfEditor).toBe(true)
+  })
+
+  it("hides the Version of editor for base vocabularies with incoming versions", () => {
+    const w = mountEditor(
+      {
+        prefLabel: { en: ["x"] },
+        definition: { en: ["English abstract"] },
+        type: [conceptSchemeType],
+      },
+      { hasIncomingVersions: true },
+    )
+
+    expect(w.text()).not.toContain("Version of")
+    expect(w.text()).toContain("Based on")
+    expect(w.vm.showVersionOfEditor).toBe(false)
+  })
+
+  it("keeps the Version of editor visible when a direct relation already exists", () => {
+    const w = mountEditor(
+      {
+        prefLabel: { en: ["x"] },
+        definition: { en: ["English abstract"] },
+        type: [conceptSchemeType],
+        versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      },
+      { hasIncomingVersions: true },
+    )
+
+    expect(w.text()).toContain("Version of")
+    expect(w.vm.showVersionOfEditor).toBe(true)
   })
 
   it("loads supporting concept lists on mount", async () => {

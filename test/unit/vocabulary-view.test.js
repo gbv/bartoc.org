@@ -89,4 +89,30 @@ describe("vocabulary view", () => {
     expect(rows["Derived Subjects"]).toContain("Derived Subject (200)")
     expect(rows["Derived Subjects"]).not.toContain("Manual Subject (100)")
   })
+
+  it("shows incoming versions in a separate row", async () => {
+    const html = await renderVocabulary({
+      uri: "http://bartoc.org/en/node/21133",
+      prefLabel: { en: "Base Terminology" },
+      type: ["http://www.w3.org/2004/02/skos/core#ConceptScheme"],
+      incomingVersionOfResolved: [
+        {
+          uri: "http://bartoc.org/en/node/294",
+          prefLabel: { en: "Previous Version" },
+        },
+        {
+          uri: "http://bartoc.org/en/node/20827",
+          prefLabel: { en: "Current Version" },
+        },
+      ],
+    })
+
+    // Incoming versionOf relations are computed for display only.
+    const rows = tableRowsByLabel(html)
+
+    expect(rows["Versions of this terminology"]).toContain("Previous Version")
+    expect(rows["Versions of this terminology"]).toContain("Current Version")
+    expect(rows).not.toHaveProperty("Version of")
+  })
+
 })
