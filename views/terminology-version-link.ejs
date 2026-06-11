@@ -1,11 +1,10 @@
 <% const id = item.uri?.split("/").pop() %>
-<% const label = utils.label(item.prefLabel).value || item.uri %>
 
 <a href="<%= utils.isBartocUri(item.uri) ? `/en/node/${id}` : item.uri %>">
-  <%= label %>
+  <%= utils.label(item.prefLabel).value || item.uri %>
 </a>
 <small class="text-muted">
-  <% if (id) { %> BARTOC <%= id %><% } %>
+  <% if (id) { %> (<%= id %>)<% } %>
   <% if (item.startDate) { %> · since <%= item.startDate %><% } %>
   <% if (item.extent) { %> · <%= item.extent %><% } %>
 </small>

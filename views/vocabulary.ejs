@@ -22,6 +22,7 @@
   <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="home-tab">
     <%- include('abstract', { abstract: item.definition }) %>
     <table class="table table-borderless">
+      <%- include('row-list', { label: 'Version of', list: item.versionOf, view: s => include('terminology-version-link', { item: s })}) %>
       <%  var titles = Object.values(item.prefLabel || {}).concat(...Object.values(item.altLabel || {})) %>
       <%- include('row-list', { label: 'Titles', list: titles }) %>
       <%- include('row-list', { label: 'Abbreviation', list: item.notation }) %>
@@ -38,15 +39,14 @@
       %>
       <%- include('row-list', { label: 'Subject', list: manualSubjects, style: 'inline', view: subjectView }) %>
       <%- include('row-list', { label: 'Derived Subjects', list: derivedSubjects, style: 'inline', view: subjectView }) %>
-      <%- include('row-list', { label: 'Version of', list: item.versionOfResolved, view: s => include('terminology-version-link', { item: s })}) %>
-      <%- include('row-list', { label: 'Versions of this terminology', list: item.incomingVersionOfResolved, view: s => include('terminology-version-link', { item: s })}) %>
-      <%- include('row-list', { label: 'Based on', list: item.basedOnResolved, view: s => include('item', { item: s }) }) %>
-      <%- include('row-list', { label: 'Terminologies based on this terminology', list: item.incomingBasedOnResolved, view: s => include('item', { item: s }) }) %>
       <%- include('row-list', { icon: 'language', label: 'Languages', list: item.languages, style: 'inline' }) %>
       <%- include('row', { icon: 'calendar', label: 'Created', content: item.startDate }) %>
       <%- include('row', { icon: 'calendar', label: 'Dissolved', content: item.endDate }) %>
       <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
       <%- include('row', { icon: 'home', label: 'Homepage', content: include('link', { url: item.url })}) %>
+      <%- include('row-list', { label: 'Versions', list: item._versionOfBacklink, view: s => include('terminology-version-link', { item: s })}) %>
+      <%- include('row-list', { label: 'Based on', list: item.basedOn, view: s => include('item', { item: s }) }) %>
+      <%- include('row-list', { label: 'Derived terminologies', list: item._basedOnBacklink, view: s => include('item', { item: s }) }) %>
       <!-- TODO: rating -->
     </table>
   </div>

@@ -198,25 +198,19 @@ async function enrichItem (item) {
 
   // Direct relations are stored on this item and can be edited there.
   if (item?.versionOf?.length) {
-    item.versionOfResolved = await resolveSchemeReferences(item.versionOf)
+    item.versionOf = await resolveSchemeReferences(item.versionOf)
   }
 
   if (item?.basedOn?.length) {
-    item.basedOnResolved = await resolveSchemeReferences(item.basedOn)
+    item.basedOn = await resolveSchemeReferences(item.basedOn)
   }
 
-  // Incoming versions are display-only: they help the vocabulary page show
-  // "Versions of this terminology" without making the list editable or saved.
-  const incomingVersions = await resolveIncomingSchemeReferences(item, "versionOf")
-  if (incomingVersions.length) {
-    item.incomingVersionOfResolved = incomingVersions
-  }
-
-  // Incoming basedOn relations are also display-only. The direct "Based on"
-  // relation remains stored on the referencing vocabulary.
-  const incomingBasedOn = await resolveIncomingSchemeReferences(item, "basedOn")
-  if (incomingBasedOn.length) {
-    item.incomingBasedOnResolved = incomingBasedOn
+  // Add backlinks for selected fields
+  for (let key of ["versionOf", "basedOn"]) {
+    const backlinks = await resolveIncomingSchemeReferences(item, key)
+    if (backlinks.length) {
+      item[`_${key}Backlink`] = backlinks
+    }
   }
 
   return item
@@ -313,11 +307,7 @@ async function sendItem (req, res, item, vars = {}) {
   if (format === "json" || format === "jsonld") {
     item["@context"] = "https://gbv.github.io/jskos/context.json"
     Object.keys(item)
-      .filter(key =>
-        key[0] === "_" ||
-        key === "incomingVersionOfResolved" ||
-        key === "incomingBasedOnResolved",
-      )
+      .filter(key => key[0] === "_")
       .forEach(key => delete item[key])
     res.send([item])
   } else {

@@ -95,7 +95,7 @@ describe("vocabulary view", () => {
       uri: "http://bartoc.org/en/node/21133",
       prefLabel: { en: "Base Terminology" },
       type: ["http://www.w3.org/2004/02/skos/core#ConceptScheme"],
-      incomingVersionOfResolved: [
+      _versionOfBacklink: [
         {
           uri: "http://bartoc.org/en/node/294",
           prefLabel: { en: "Previous Version" },
@@ -110,8 +110,8 @@ describe("vocabulary view", () => {
     // Incoming versionOf relations are computed for display only.
     const rows = tableRowsByLabel(html)
 
-    expect(rows["Versions of this terminology"]).toContain("Previous Version")
-    expect(rows["Versions of this terminology"]).toContain("Current Version")
+    expect(rows["Versions"]).toContain("Previous Version")
+    expect(rows["Versions"]).toContain("Current Version")
     expect(rows).not.toHaveProperty("Version of")
   })
 
@@ -120,7 +120,7 @@ describe("vocabulary view", () => {
       uri: "http://bartoc.org/en/node/18410",
       prefLabel: { en: "Base Terminology" },
       type: ["http://www.w3.org/2004/02/skos/core#ConceptScheme"],
-      incomingBasedOnResolved: [
+      _basedOnBacklink: [
         {
           uri: "http://bartoc.org/en/node/18307",
           prefLabel: { en: "Derived Terminology" },
@@ -131,7 +131,7 @@ describe("vocabulary view", () => {
     // Incoming basedOn relations are computed for display only.
     const rows = tableRowsByLabel(html)
 
-    expect(rows["Terminologies based on this terminology"]).toContain("Derived Terminology")
+    expect(rows["Derived terminologies"]).toContain("Derived Terminology")
     expect(rows).not.toHaveProperty("Based on")
   })
 
