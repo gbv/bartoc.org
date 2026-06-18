@@ -11,14 +11,6 @@
 
     <template v-else-if="status === 'ready'">
       <template v-if="vocabularyCount">
-        <p>
-          <a :href="searchUrl">
-            {{ vocabularyCount.toLocaleString("en") }}
-            {{ vocabularyCount === 1 ? "terminology" : "terminologies" }}
-            in BARTOC
-          </a>
-        </p>
-
         <ul
           v-if="vocabularies.length"
           class="list-unstyled">
