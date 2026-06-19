@@ -25,8 +25,9 @@
 
         <a
           v-if="vocabularyCount > vocabularies.length"
-          :href="searchUrl">
-          show all in BARTOC
+          :href="searchUrl"
+          class="cc-button cc-button-action">
+          show all ({{ vocabularyCount }})
         </a>
       </template>
 
@@ -55,7 +56,7 @@ const props = defineProps({
   },
 })
 
-const previewLimit = 20
+const previewLimit = 10
 const status = ref("loading")
 const vocabularies = ref([])
 const vocabularyCount = ref(0)

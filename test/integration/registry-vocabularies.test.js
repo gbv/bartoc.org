@@ -4,7 +4,7 @@ import { flushPromises, mount } from "@vue/test-utils"
 import RegistryVocabularies from "../../vue/components/RegistryVocabularies.vue"
 
 const registryUri = "http://bartoc.org/en/node/18605"
-const vocabulariesUrl = "/api/voc?partOf=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18605&limit=20"
+const vocabulariesUrl = "/api/voc?partOf=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18605&limit=10"
 const searchUrl = "/vocabularies?partOf=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F18605"
 
 const LoadingIndicatorStub = {
@@ -65,6 +65,19 @@ describe("RegistryVocabularies", () => {
     expect(wrapper.get("a[href='/en/node/18606']").text()).toBe(
       "Chinese Agricultural Thesaurus",
     )
+  })
+
+  it("links to all vocabularies with the total count", async () => {
+    const wrapper = await mountRegistryVocabularies(async () =>
+      response([vocabulary()], 25),
+    )
+
+    const link = wrapper.get(`a[href='${searchUrl}']`)
+    expect(link.text()).toBe("show all (25)")
+    expect(link.classes()).toEqual(expect.arrayContaining([
+      "cc-button",
+      "cc-button-action",
+    ]))
   })
 
   it("shows an empty state when no vocabularies are listed", async () => {
