@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest"
 import {
+  findDuplicateIdentifiers,
   buildSaveError,
   prepareItemForSave,
   saveVocabularyItem,
@@ -73,6 +74,89 @@ describe("ItemEditor save service", () => {
     expect(error.message).toBe("Save failed")
     expect(error.html).toContain("https://github.com/gbv/bartoc.org/issues/new")
     expect(error.html).toContain("open a GitHub issue")
+  })
+
+  it("finds identifiers used by another item", async () => {
+    const fetchImpl = vi.fn(async () => ({
+      ok: true,
+      json: async () => [
+        {
+          uri: "http://bartoc.org/en/node/456",
+          identifier: ["https://www.wikidata.org/entity/Q123"],
+        },
+      ],
+    }))
+
+    const duplicates = await findDuplicateIdentifiers({
+      item: makeItem({
+        identifier: ["https://www.wikidata.org/entity/Q123"],
+      }),
+      fetchImpl,
+    })
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "/api/voc?uri=https%3A%2F%2Fwww.wikidata.org%2Fentity%2FQ123&limit=1000",
+    )
+    expect(duplicates).toEqual([{
+      identifier: "https://www.wikidata.org/entity/Q123",
+      uri: "http://bartoc.org/en/node/456",
+    }])
+  })
+
+  it("ignores identifiers on the item being edited", async () => {
+    const item = makeItem({
+      identifier: ["https://www.wikidata.org/entity/Q123"],
+    })
+    const fetchImpl = vi.fn(async () => ({
+      ok: true,
+      json: async () => [item],
+    }))
+
+    await expect(findDuplicateIdentifiers({ item, fetchImpl })).resolves.toEqual([])
+  })
+
+  it("does not save when an identifier is already in use", async () => {
+    const fetchImpl = vi.fn(async () => ({
+      ok: true,
+      json: async () => [{
+        uri: "http://bartoc.org/en/node/456",
+        identifier: ["https://www.wikidata.org/entity/Q123"],
+      }],
+    }))
+
+    const result = await saveVocabularyItem({
+      item: makeItem({
+        identifier: [" https://www.wikidata.org/entity/Q123 "],
+      }),
+      fetchImpl,
+    })
+
+    expect(result.ok).toBe(false)
+    expect(result.error).toEqual({
+      status: "duplicate identifier",
+      message: "Identifiers must be unique. \"https://www.wikidata.org/entity/Q123\" is already used by http://bartoc.org/en/node/456.",
+    })
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+
+  it("does not save when identifier uniqueness cannot be checked", async () => {
+    const fetchImpl = vi.fn(async () => ({
+      ok: false,
+      status: 503,
+    }))
+
+    const result = await saveVocabularyItem({
+      item: makeItem({ identifier: ["https://example.org/vocabulary"] }),
+      fetchImpl,
+      trimItemIdentifiers: vi.fn(),
+    })
+
+    expect(result.ok).toBe(false)
+    expect(result.error).toEqual({
+      status: "checking identifiers",
+      message: "Could not verify that identifiers are unique.",
+    })
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
   })
 
   it("saves existing items with auth headers", async () => {

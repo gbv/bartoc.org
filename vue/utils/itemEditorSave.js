@@ -1,16 +1,12 @@
 import { trimItemIdentifiers as defaultTrimItemIdentifiers } from "../utils.js"
 import { cleanupItem as defaultCleanupItem, githubIssueUrl } from "./itemEditor.js"
+import { IdentifierCheckError, NewItemUriError } from "./itemEditorSaveErrors.js"
 
 const API_URL = "/api/voc"
 const NEW_ITEM_URI_URL = "/api/voc?sort=counter&order=desc&limit=1"
 const BARTOC_URI_BASE = "http://bartoc.org/en/node/"
-
-export class NewItemUriError extends Error {
-  constructor() {
-    super("Could not determine URI for new record.")
-    this.status = "determining new URI"
-  }
-}
+// Keep the preflight in one request while allowing us to report all collisions.
+const IDENTIFIER_CHECK_LIMIT = 1000
 
 async function nextItemUri(fetchImpl) {
   const latestRecord = (
@@ -47,6 +43,75 @@ export async function prepareItemForSave({
   }
 }
 
+export async function findDuplicateIdentifiers({ item, fetchImpl = fetch }) {
+  // Duplicate values within one item do not indicate a collision with another
+  // record and only need to be queried once.
+  const identifiers = [...new Set(item.identifier || [])]
+  if (!identifiers.length) {
+    return []
+  }
+
+  // jskos-server's `uri` filter matches both a record's primary `uri` and its
+  // alternative `identifier` values. The exact identifier match is checked
+  // below because a primary URI match alone is not a duplicate identifier.
+  const params = new URLSearchParams({
+    uri: identifiers.join("|"),
+    limit: IDENTIFIER_CHECK_LIMIT.toString(),
+  })
+
+  let response
+  let records
+  try {
+    response = await fetchImpl(`${API_URL}?${params.toString()}`)
+    if (!response.ok) {
+      throw new IdentifierCheckError()
+    }
+    records = await response.json()
+  } catch {
+    throw new IdentifierCheckError()
+  }
+
+  if (!Array.isArray(records)) {
+    throw new IdentifierCheckError()
+  }
+
+  const duplicates = []
+  for (const record of records) {
+    // A record being edited can keep its own identifiers.
+    if (record.uri === item.uri) {
+      continue
+    }
+
+    // The API also matches primary URIs, so check the identifier array itself.
+    for (const identifier of identifiers) {
+      if (record.identifier?.includes(identifier)) {
+        duplicates.push({ identifier, uri: record.uri })
+      }
+    }
+  }
+
+  return duplicates
+}
+
+export function buildDuplicateIdentifierError(duplicates) {
+  const details = duplicates
+    .map(({ identifier, uri }) => `"${identifier}" is already used by ${uri}`)
+    .join("; ")
+
+  return {
+    status: "duplicate identifier",
+    message: `Identifiers must be unique. ${details}.`,
+  }
+}
+
+async function readResponseError(response) {
+  try {
+    return await response.json()
+  } catch {
+    return {}
+  }
+}
+
 export function buildSaveError({
   error,
   response,
@@ -78,6 +143,8 @@ export async function saveVocabularyItem({
   cleanupItem = defaultCleanupItem,
   trimItemIdentifiers = defaultTrimItemIdentifiers,
 }) {
+
+  // Prepartion and validation steps before the actual save request
   let prepared
 
   try {
@@ -103,9 +170,43 @@ export async function saveVocabularyItem({
     }
   }
 
-  const headers = { "Content-Type": "application/json" }
-  if (auth) {
-    headers.Authorization = `Bearer ${auth.token}`
+  // Check that jskos identifiers (item.identifier) are unique before saving
+  let duplicates
+  try {
+    // Check the serialized payload
+    duplicates = await findDuplicateIdentifiers({
+      item: JSON.parse(prepared.body),
+      fetchImpl,
+    })
+  } catch (error) {
+    if (!(error instanceof IdentifierCheckError)) {
+      throw error
+    }
+
+    // The uniqueness check failed, do not save an unchecked record.
+    return {
+      ok: false,
+      ...prepared,
+      error: {
+        status: error.status,
+        message: error.message,
+      },
+    }
+  }
+
+  // The uniqueness check succeeded and found identifiers used by another record.
+  if (duplicates.length) {
+    return {
+      ok: false,
+      ...prepared,
+      error: buildDuplicateIdentifierError(duplicates),
+    }
+  }
+
+  // All checks passed, proceed with the save request
+  const headers = {
+    "Content-Type": "application/json",
+    ...(auth ? { Authorization: `Bearer ${auth.token}` } : {}),
   }
 
   const response = await fetchImpl(API_URL, {
@@ -113,26 +214,20 @@ export async function saveVocabularyItem({
     body: prepared.body,
     headers,
   })
+  const result = { ...prepared, response }
 
   if (response.ok) {
     return {
       ok: true,
-      ...prepared,
-      response,
+      ...result,
     }
   }
 
-  let responseError = {}
-  try {
-    responseError = await response.json()
-  } catch {
-    responseError = {}
-  }
+  const responseError = await readResponseError(response)
 
   return {
     ok: false,
-    ...prepared,
-    response,
+    ...result,
     error: buildSaveError({
       error: responseError,
       response,
