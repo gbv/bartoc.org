@@ -43,7 +43,7 @@ async function pageRoute(req, res) {
 
       content = content.replace(
         /<vocabulary-search\b[^>]*><\/vocabulary-search>/,
-        `<vocabulary-search schemes-count="${schemesCount}"></vocabulary-search>`,
+        `<vocabulary-search :schemes-count="${schemesCount}"></vocabulary-search>`,
       )
     }
 
