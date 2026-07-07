@@ -4,4 +4,8 @@
 
 <item-editor :user="user" :auth="auth" :has-incoming-versions="<%= hasIncomingVersions ? 'true' : 'false' %>" <% if(item) { %>:current='<%- JSON.stringify(item).replace(/'/g,"&apos;") %>'<% } %>/>
 
-<%- include('footer') %>
+    </div>
+    <the-footer></the-footer>
+  </div>
+</body>
+</html>

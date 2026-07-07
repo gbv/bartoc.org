@@ -6,9 +6,12 @@ import ServiceLink from "./components/ServiceLink.vue"
 import ConceptBrowser from "./components/ConceptBrowser.vue"
 import RegistryList from "./components/RegistryList.vue"
 import RegistryVocabularies from "./components/RegistryVocabularies.vue"
+import TheFooter from "./components/TheFooter.vue"
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { faLanguage } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
+import { parseJson } from "./utils.js"
+
 // Add icons to the library, in this case language
 library.add(faLanguage)
 
@@ -18,8 +21,18 @@ import configDefault from "../config/config.default.json"
 import configUser from "../config/config.json"
 const login = Object.assign({}, configDefault.login, configUser.login || {})
 
+// Footer context comes from EJS-rendered data attributes on the app root.
+const rootElement = document.getElementById("app")
+const footer = {
+  siteName: rootElement?.dataset.siteName || "BARTOC.org",
+  itemUri: rootElement?.dataset.itemUri || "",
+  api: rootElement?.dataset.api || "",
+  query: parseJson(rootElement?.dataset.query),
+}
+
 import { render } from "../node_modules/timeago.js/"
 import "jskos-vue/dist/style.css"
+import "@gbv/bartoc-components/style.css"
 
 const app = createApp({
   components: {
@@ -30,6 +43,11 @@ const app = createApp({
     ConceptBrowser,
     RegistryList,
     RegistryVocabularies,
+    TheFooter,
+  },
+  provide() {
+    // Make footer data available without repeating props in every EJS view.
+    return { footer }
   },
   data() {
     return {

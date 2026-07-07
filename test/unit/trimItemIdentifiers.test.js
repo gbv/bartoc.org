@@ -1,5 +1,18 @@
 import { describe, it, expect } from "vitest"
-import { trimItemIdentifiers } from "../../vue/utils"
+import { parseJson, trimItemIdentifiers } from "../../vue/utils"
+
+describe("parseJson", () => {
+  it("parses valid JSON", () => {
+    expect(parseJson("{\"search\":\"dfg\"}")).toEqual({ search: "dfg" })
+  })
+
+  it("returns fallback for empty or invalid JSON", () => {
+    const fallback = { ok: false }
+
+    expect(parseJson("", fallback)).toBe(fallback)
+    expect(parseJson("{", fallback)).toBe(fallback)
+  })
+})
 
 describe("trimItemIdentifiers", () => {
   it("trims strings and removes empty entries", () => {

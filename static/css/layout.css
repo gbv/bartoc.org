@@ -397,22 +397,6 @@ a, a:hover {
   padding-bottom: var(--cc-space-sm);
 }
 
-/* Footer */
-footer {
-  padding: var(--cc-space-xl) 0;
-}
-footer a {
-  color: var(--cc-color-on-primary);
-  font-weight: var(--cc-font-weight-bold);
-}
-footer ul.list-inline > li.list-inline-item:not(:last-child)::after {
-  color: var(--cc-color-muted);
-}
-footer .container {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-}
 .navbar {
   color: #A1A8B0;
 }

@@ -18,6 +18,18 @@ export async function cdkLoadConcepts(scheme, uri) {
   return result
 }
 
+export function parseJson(value, fallback = {}) {
+  if (!value) {
+    return fallback
+  }
+
+  try {
+    return JSON.parse(value)
+  } catch {
+    return fallback
+  }
+}
+
 export const indexingSchemes = [
   {
     uri: "http://bartoc.org/en/node/241",
