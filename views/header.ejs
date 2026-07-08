@@ -1,10 +1,3 @@
-<%
-  const jsonAttribute = value => JSON.stringify(value)
-    .replace(/&/g, "&amp;")
-    .replace(/'/g, "&#39;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-%>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -46,7 +39,7 @@
       data-site-name="<%= config.name %>"
       data-item-uri="<%= locals.item?.uri || '' %>"
       data-api="<%= locals.api || '' %>"
-      data-query='<%- jsonAttribute(locals.query || {}) %>'>
+      data-query="<%= JSON.stringify(locals.query || {}) %>">
       <header class="navbar navbar-dark bg-primary navbar-expand-lg">
         <div class="container">
           <a class="navbar-brand" href="./">
