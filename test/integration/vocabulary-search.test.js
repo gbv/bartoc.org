@@ -3,18 +3,9 @@ import { describe, it, expect, beforeEach } from "vitest"
 import { mount } from "@vue/test-utils"
 import VocabularySearch from "../../vue/components/VocabularySearch.vue"
 
-const FormRowStub = {
-  template: "<div><slot /></div>",
-}
-
 function mountSearch(props = {}) {
   return mount(VocabularySearch, {
     props,
-    global: {
-      stubs: {
-        FormRow: FormRowStub,
-      },
-    },
   })
 }
 
@@ -65,14 +56,14 @@ describe("VocabularySearch Component", () => {
     expect(select.element.value).toBe("title_search")
   })
 
-  it("uses allfields as default field", () => {
+  it("uses an empty all-fields default field", () => {
     const wrapper = mountSearch({
       query: {
         search: "dfg",
       },
     })
 
-    expect(wrapper.get("select").element.value).toBe("allfields")
+    expect(wrapper.get("select").element.value).toBe("")
   })
 
   it("redirects to vocabularies search on submit with Title field", async () => {
@@ -127,7 +118,7 @@ describe("VocabularySearch Component", () => {
 
     expect(options).toEqual(expect.arrayContaining([
       { label: "Subject notation", value: "subject_notation" },
-      { label: "Subject Uri", value: "subject_uri" },
+      { label: "Subject URI", value: "subject_uri" },
     ]))
   })
 

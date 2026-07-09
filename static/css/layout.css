@@ -340,18 +340,27 @@ a, a:hover {
   padding: var(--cc-space-xl);
   background: var(--cc-color-surface-muted);
   border-radius: var(--cc-radius-lg);
-  width: 80%;
+  width: 70%;
+  max-width: 100%;
+  --bartoc-search-bar-input-width: 20rem;
+  --bartoc-search-bar-input-min-width: min(15rem, 100%);
+  --bartoc-search-bar-field-width: 11rem;
+  --bartoc-search-bar-field-min-width: min(10rem, 100%);
 }
-.vocabulary-search .row {
-  gap: var(--cc-space-md);
-  margin: 0;
+.vocabulary-search .bartoc-search-bar {
+  width: 100%;
 }
-.vocabulary-search .row > div {
-  padding: 0;
+.vocabulary-search .bartoc-search-bar__controls {
+  width: 100%;
 }
-.metadata-count-text {
-  font-weight: var(--cc-font-weight-bold);
+.vocabulary-search .bartoc-search-bar__input {
+  flex-grow: 0;
+}
+.vocabulary-search .bartoc-search-bar__summary {
   padding-bottom: var(--cc-space-sm);
+}
+.vocabulary-search__summary-text {
+  font-weight: var(--cc-font-weight-bold);
 }
 
 .navbar {

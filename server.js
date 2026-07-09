@@ -326,7 +326,12 @@ async function sendItem (req, res, item, vars = {}) {
 }
 
 // Some vocabularies use the BARTOC namespace; we should cover these with a redirect
-const schemesWithBartocNamespacePromise = backend.getSchemes({}).then(schemes => schemes.filter(s => s.namespace?.startsWith("http://bartoc.org")))
+const schemesWithBartocNamespacePromise = backend.getSchemes({})
+  .then(schemes => schemes.filter(s => s.namespace?.startsWith("http://bartoc.org")))
+  .catch(error => {
+    config.warn("Could not load BARTOC namespace redirect metadata from backend.", error)
+    return []
+  })
 
 // BARTOC namespace redirect + error handling
 app.use(async (req, res) => {
