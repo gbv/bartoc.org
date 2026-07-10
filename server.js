@@ -367,7 +367,11 @@ app.use(async (req, res) => {
   } else if (req.query.format === "nt") {
     res.type("txt").send(title)
   } else {
-    render(req, res, "404", { title })
+    render(req, res, "vue-page", {
+      title: title,
+      vuePage: "notFound",
+    })
+
   }
 })
 
