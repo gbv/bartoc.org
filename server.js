@@ -263,7 +263,10 @@ app.get("/registries", (req, res) => {
   if (req.query.format === "jskos") {
     return res.redirect("/api/registries?limit=1000")
   }
-  render(req, res, "registries", { title: "Terminology Registries" })
+  render(req, res, "vue-page", {
+    title: "Terminology Registries",
+    vuePage: "registries",
+  })
 })
 
 // BARTOC ID => registry or vocabulary (if found)
