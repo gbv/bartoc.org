@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import { mount } from "@vue/test-utils"
+import { markRaw } from "vue"
 import { describe, expect, it } from "vitest"
 import App from "../../vue/App.vue"
 
-const PageComponent = {
+const PageComponent = markRaw({
   template: "<p class=\"page-content\">Server-rendered page</p>",
-}
+})
 
 describe("App", () => {
   it("keeps page content local and teleports the header and footer", () => {
