@@ -1,0 +1,11 @@
+<template>
+  <h1>Missing bartoc-search</h1>
+  <em>
+    BARTOC.org seems not fully configured yet. Please contact administrator to enable
+    <a href="https://github.com/gbv/bartoc-search/">bartoc-search</a> component!
+  </em>
+</template>
+
+<script setup>
+defineOptions({ name: "MissingSearchPage" })
+</script>

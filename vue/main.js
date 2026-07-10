@@ -7,6 +7,7 @@ import ServiceLink from "./components/ServiceLink.vue"
 import ConceptBrowser from "./components/ConceptBrowser.vue"
 import RegistryList from "./components/RegistryList.vue"
 import RegistryVocabularies from "./components/RegistryVocabularies.vue"
+import { pages } from "./pages/index.js"
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { faLanguage } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
@@ -55,7 +56,7 @@ watch(token, async currentToken => {
 
 // EJS still renders the route-specific page markup. App.vue owns the shell
 // and renders this component where bartoc-search would render RouterView.
-const PageContent = markRaw({
+const EjsPageContent = markRaw({
   name: "PageContent",
   components: {
     ItemEditor,
@@ -71,7 +72,8 @@ const PageContent = markRaw({
   template: rootElement?.innerHTML || "",
 })
 
-const app = createApp(App, { pageComponent: PageContent })
+const pageComponent = markRaw(pages[rootElement?.dataset.page] || EjsPageContent)
+const app = createApp(App, { pageComponent })
 app.provide("footer", footer)
 app.provide("header", {
   activePath: rootElement?.dataset.pagePath || "",

@@ -117,7 +117,10 @@ app.get("/edit", async (req, res, next) => {
 })
 
 // vocabulary search should be delivered by bartoc-search instead
-app.get("/vocabularies", (req, res) => render(req, res, "vocabularies", { title: "Missing bartoc-search" }))
+app.get("/vocabularies", (req, res) => render(req, res, "vue-page", {
+  title: "Missing bartoc-search",
+  vuePage: "missingSearch",
+}))
 
 function mergeSubjectMetadata(subject, resolved) {
   const cleaned = jskos.clean({
