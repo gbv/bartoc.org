@@ -21,7 +21,6 @@ import { computed, inject, unref } from "vue"
 import { BartocHeader } from "@gbv/bartoc-components"
 import { UserStatus } from "gbv-login-client-vue"
 import configDefault from "../../config/config.default.json"
-import configUser from "../../config/config.json"
 
 defineOptions({ name: "TheHeader" })
 
@@ -37,8 +36,9 @@ const props = defineProps({
   },
 })
 
-const configuredMenu = configUser.menu || configDefault.menu || []
-const siteName = configUser.name || configDefault.name || "BARTOC.org"
+const configuredMenu = configDefault.menu || []
+const siteName = configDefault.name || "BARTOC.org"
+
 const navLinks = configuredMenu.map(item => ({
   href: item.url,
   label: item.prefLabel.en,
