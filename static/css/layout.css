@@ -162,62 +162,6 @@ a, a:hover {
   gap: var(--cc-space-sm);
 }
 
-.cc-button,
-.inline-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(1.5em + 0.75rem + 2px);
-  padding: 0.375rem 0.75rem;
-  border: 1px solid var(--cc-border-color-strong);
-  border-radius: var(--cc-radius-md);
-  background: var(--cc-color-surface);
-  color: var(--cc-color-link);
-  font-size: var(--cc-font-size-base);
-  font-weight: var(--cc-font-weight-light);
-  line-height: 1.5;
-  text-decoration: none;
-  cursor: pointer;
-  user-select: none;
-  vertical-align: middle;
-  white-space: nowrap;
-  transition:
-    color 0.15s ease-in-out,
-    background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out,
-    box-shadow 0.15s ease-in-out;
-}
-
-.cc-button:hover,
-.cc-button:focus,
-.inline-action:hover,
-.inline-action:focus {
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-  text-decoration: none;
-}
-
-.cc-button:disabled,
-.cc-button[aria-disabled="true"],
-.inline-action:disabled,
-.inline-action[aria-disabled="true"] {
-  opacity: 0.55;
-  pointer-events: none;
-}
-
-.cc-button-primary {
-  border-color: var(--cc-color-primary);
-  background: var(--cc-color-primary);
-  color: var(--cc-color-on-primary);
-}
-
-.cc-button-primary:hover,
-.cc-button-primary:focus {
-  border-color: var(--cc-color-primary-hover);
-  background: var(--cc-color-primary-hover);
-  color: var(--cc-color-on-primary);
-}
-
 .cc-button-secondary {
   border-color: var(--cc-border-color-strong);
   background: var(--cc-color-surface);
@@ -226,25 +170,6 @@ a, a:hover {
 
 .cc-button-secondary:hover,
 .cc-button-secondary:focus {
-  border-color: var(--cc-color-primary);
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-action {
-  border-color: var(--cc-color-primary);
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-action:hover,
-.cc-button-action:focus {
-  border-color: var(--cc-color-primary-hover);
-  background: var(--cc-color-primary);
-  color: var(--cc-color-on-primary);
-}
-
-.cc-button-selected {
   border-color: var(--cc-color-primary);
   background: var(--cc-color-accent);
   color: var(--cc-color-primary);

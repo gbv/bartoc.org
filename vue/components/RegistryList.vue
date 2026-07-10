@@ -22,8 +22,8 @@
         v-for="filter in functionFilters"
         :key="filter.id"
         type="button"
-        class="cc-button mr-2 mb-2"
-        :class="activeFilters[filter.id] ? 'cc-button-selected' : 'cc-button-ghost'"
+        class="cc-button cc-button-primary mr-2 mb-2"
+        :class="activeFilters[filter.id] ? 'cc-button-primary' : 'cc-button-ghost'"
         :title="filter.description"
         :aria-label="`${filter.title}: ${filter.description}`"
         :aria-pressed="activeFilters[filter.id] ? 'true' : 'false'"
@@ -371,6 +371,10 @@ const filteredRegistries = computed(() =>
 .registry-count-loading-indicator {
   --jskos-vue-loadingIndicator-primary-color: var(--cc-color-on-primary);
   --jskos-vue-loadingIndicator-secondary-color: var(--cc-color-primary);
+}
+
+.badge {
+  margin-left: 0.4rem;
 }
 
 </style>
