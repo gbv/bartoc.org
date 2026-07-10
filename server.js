@@ -55,6 +55,14 @@ app.use(express.static("static"))
 app.use("/data/dumps/", express.static("data/dumps"))
 app.use("/data/reports/", express.static("data/reports"))
 app.use("/dist/", express.static("dist"))
+app.use(
+  "/vendor/gbv-login-client-vue/",
+  express.static("node_modules/gbv-login-client-vue/dist"),
+)
+app.use(
+  "/vendor/bartoc-components/",
+  express.static("node_modules/@gbv/bartoc-components/dist"),
+)
 
 
 import redirectsRoute from "./routes/redirects.js"

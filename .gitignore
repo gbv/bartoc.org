@@ -32,3 +32,5 @@ ecosystem.config.json
 
 docker/data
 !docker/ecosystem.config.json
+
+notes/

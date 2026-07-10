@@ -1,21 +1,21 @@
-import { createApp } from "vue"
+import { computed, createApp, markRaw, ref, toRefs, watch } from "vue"
 
+import App from "./App.vue"
 import ItemEditor from "./components/ItemEditor.vue"
 import VocabularySearch from "./components/VocabularySearch.vue"
 import ServiceLink from "./components/ServiceLink.vue"
 import ConceptBrowser from "./components/ConceptBrowser.vue"
 import RegistryList from "./components/RegistryList.vue"
 import RegistryVocabularies from "./components/RegistryVocabularies.vue"
-import TheFooter from "./components/TheFooter.vue"
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { faLanguage } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
 import { parseJson } from "./utils.js"
+import { Login } from "gbv-login-client-vue"
 
 // Add icons to the library, in this case language
 library.add(faLanguage)
 
-import UserStatus from "./components/UserStatus.vue"
 // Note: Using the JSON files directly because Lodash is used in config/index.js
 import configDefault from "../config/config.default.json"
 import configUser from "../config/config.json"
@@ -32,62 +32,60 @@ const footer = {
 
 import { render } from "../node_modules/timeago.js/"
 import "jskos-vue/dist/style.css"
-import "@gbv/bartoc-components/style.css"
 
-const app = createApp({
+const { token, user } = toRefs(Login)
+const auth = computed(() => token.value ? { token: token.value } : null)
+const userCanAdd = ref(false)
+
+watch(token, async currentToken => {
+  if (!currentToken) {
+    userCanAdd.value = false
+    return
+  }
+
+  const url = "/api/checkAuth?type=schemes&action=create"
+  const headers = { Authorization: `Bearer ${currentToken}` }
+  try {
+    const response = await fetch(url, { headers })
+    userCanAdd.value = response.ok
+  } catch {
+    userCanAdd.value = false
+  }
+}, { immediate: true })
+
+// EJS still renders the route-specific page markup. App.vue owns the shell
+// and renders this component where bartoc-search would render RouterView.
+const PageContent = markRaw({
+  name: "PageContent",
   components: {
-    UserStatus,
     ItemEditor,
     VocabularySearch,
     ServiceLink,
     ConceptBrowser,
     RegistryList,
     RegistryVocabularies,
-    TheFooter,
   },
-  provide() {
-    // Make footer data available without repeating props in every EJS view.
-    return { footer }
+  setup() {
+    return { auth, user, userCanAdd }
   },
-  data() {
-    return {
-      login,
-      user: null,
-      userCanAdd: false,
-      auth: null,
-    }
-  },
-  mounted() {
-    // no need to use a Vue component, plain old JavaScript
-    // See https://github.com/hustcc/timeago.js/issues/230
-    const nodes = document.querySelectorAll(".timeago")
-    if (nodes.length) {
-      render(nodes)
-    }
-  },
-  methods: {
-    updateUser(user) {
-      this.user = user
-      this.checkAuth()
-    },
-    updateAuth(auth) {
-      this.auth = auth
-      return this.checkAuth()
-    },
-    checkAuth() {
-      if (this.auth) {
-        const url = "/api/checkAuth?type=schemes&action=create"
-        const headers = { Authorization: `Bearer ${this.auth.token}` }
-        fetch(url, { headers }).then(res => {
-          this.userCanAdd = res.ok
-        })
-      } else {
-        this.userCanAdd = false
-      }
-    },
-  },
+  template: rootElement?.innerHTML || "",
 })
 
+const app = createApp(App, { pageComponent: PageContent })
+app.provide("footer", footer)
+app.provide("header", {
+  activePath: rootElement?.dataset.pagePath || "",
+  userCanAdd,
+})
+app.use(Login)
+Login.connect(login.api, { ssl: login.ssl })
 app.component("FontAwesomeIcon", FontAwesomeIcon)
 
 app.mount("#app")
+
+// Plain JavaScript is sufficient for relative timestamps.
+// See https://github.com/hustcc/timeago.js/issues/230
+const timeagoNodes = document.querySelectorAll(".timeago")
+if (timeagoNodes.length) {
+  render(timeagoNodes)
+}

@@ -1,26 +1,42 @@
 body {
   background: var(--cc-color-page);
-}
-#app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
-#app > header,
-#app > footer {
+
+#header-app,
+#footer-app {
   flex-shrink: 0;
 }
-#app > .container,
-#app > main {
+
+#header-app {
+  display: flow-root;
+}
+
+#header-app:empty {
+  min-height: calc(
+    var(--cc-header-logo-height) +
+    var(--cc-space-sm) +
+    var(--cc-space-sm) +
+    var(--cc-space-lg)
+  );
+  background: linear-gradient(
+    to bottom,
+    var(--cc-header-background) 0,
+    var(--cc-header-background) calc(
+      var(--cc-header-logo-height) + var(--cc-space-sm) + var(--cc-space-sm)
+    ),
+    transparent calc(
+      var(--cc-header-logo-height) + var(--cc-space-sm) + var(--cc-space-sm)
+    )
+  );
+}
+
+#app {
   flex: 1 0 auto;
 }
 
-header {
-  margin-bottom: var(--cc-space-lg);
-}
-.bg-primary {
-  background-color: var(--cc-color-primary)!important;
-}
 small.label-help {
   margin-top: calc(-1 * var(--cc-space-sm));
   margin-bottom: var(--cc-space-xs);
@@ -363,34 +379,17 @@ a, a:hover {
   font-weight: var(--cc-font-weight-bold);
 }
 
-.navbar {
-  color: #A1A8B0;
-}
-.navbar-nav {
-  align-items: center;
-}
-.nav-link-spaced {
-  padding-right: var(--cc-space-lg);
-}
-.nav-item.active {
-  font-weight: var(--cc-font-weight-bold);
-}
-.navbar-brand .bartoc-logo__image {
-  height: 48px;
-  max-height: none;
-  width: auto;
-}
-.navbar-dark .navbar-nav .nav-link {
-  color: #E3E7EC;
-  opacity: 0.95;
-  text-decoration: none;
-}
-.navbar-dark .navbar-nav .nav-link:hover {
-  color: #E3E7EC;
-  opacity: 0.95;
-  text-decoration: underline;
+/* Temporary compatibility shim for gbv-login-client-vue. */
+.bartoc-header__user-status > .user-status > a {
+  color: inherit;
+  font-size: var(--cc-font-size-base);
+  font-weight: var(--cc-font-weight-light);
 }
 
+.bartoc-header__user-status .user-status-dropdown {
+  color: var(--cc-color-text);
+  z-index: 1000;
+}
 
 /* About page */
 .about__wrapper {

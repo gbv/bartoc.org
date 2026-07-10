@@ -1,4 +1,4 @@
-<%- include('header') %>
+<%- include('layout-start') %>
 <%- include('abstract', { abstract: item.definition }) %>
 <%- include('abstract', { abstract: item.scopeNote }) %>
 
@@ -53,8 +53,6 @@
 
 <%- include('item-dates') %>
 
-    </div>
-    <the-footer></the-footer>
-  </div>
+<%- include('layout-end') %>
 </body>
 </html>

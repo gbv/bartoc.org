@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/vendor/gbv-login-client-vue/style.css">
+    <link rel="stylesheet" href="/vendor/bartoc-components/style.css">
     <title><%= config.name %><%= title ? ": " + title : "" %></title>
     <% if (config.env === "development") { %>
       <script type="module" src="<%= config.vue.assetPrefix %>@vite/client"></script>
@@ -34,44 +36,21 @@
     <% } %>
   </head>
   <body>
-    <div
+    <div id="header-app"></div>
+    <main
       id="app"
+      class="container"
       data-site-name="<%= config.name %>"
       data-item-uri="<%= locals.item?.uri || '' %>"
       data-api="<%= locals.api || '' %>"
-      data-query="<%= JSON.stringify(locals.query || {}) %>">
-      <header class="navbar navbar-dark bg-primary navbar-expand-lg">
-        <div class="container">
-          <a class="navbar-brand" href="./">
-             <img src="/img/bartoc-logo-new.png" alt="BARTOC" class="bartoc-logo__image">
-          </a>
-          <ul class="navbar-nav mr-auto">
-            <% config.menu.forEach( item => { %>
-            <li class="nav-item <%= item.url == path ? 'active' : '' %>">
-              <a class="nav-link" href="<%= item.url %>"><%= item.prefLabel.en %></a>
-            </li>
-            <% }) %>
-          </ul>
+      data-query="<%= JSON.stringify(locals.query || {}) %>"
+      data-page-path="<%= path %>">
+      <noscript>
+        <div class="alert alert-danger" role="alert">
+          JavaScript needs to be enabled for this site to work properly.
         </div>
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item <%= path == '/contact' ? 'active' : '' %>">
-            <a class="nav-link nav-link-spaced" href="/contact">Contact & Editors</a>
-          </li>
-          <li v-cloak>
-            <user-status :login="login" @update:user="updateUser" @update:auth="updateAuth"/>
-          </li>
-          <li v-cloak v-if="userCanAdd" class="nav-item">
-            <a class="cc-button cc-button-on-primary cc-button-sm" href="/edit">add</a>
-          </li>
-        </ul>
-      </header>
-      <div class="container">
-        <noscript>
-          <div class="alert alert-danger" role="alert">
-            JavaScript needs to be enabled for this site to work properly.
-          </div>
-        </noscript>
-        <% if (locals.button) { %><%- locals.button %><% } %>
-        <% if(title) { %>
-        <h1><%= title %></h1>
-        <% } %>
+      </noscript>
+      <% if (locals.button) { %><%- locals.button %><% } %>
+      <% if(title) { %>
+      <h1><%= title %></h1>
+      <% } %>

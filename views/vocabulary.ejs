@@ -1,4 +1,4 @@
-<%- include('header', {
+<%- include('layout-start', {
   button: `<a v-cloak v-if="userCanAdd" class="cc-button cc-button-primary float-right" href="/edit?uri=${item.uri}">edit</a>`
 }) %>
 
@@ -122,9 +122,7 @@
 
 <%- include('item-dates') %>
 
-    </div>
-    <the-footer></the-footer>
-  </div>
+<%- include('layout-end') %>
 
 <script type="application/javascript">
   // Logic to change Bootstrap tabs
