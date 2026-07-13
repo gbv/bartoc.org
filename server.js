@@ -237,10 +237,13 @@ app.get("/stats", async (req, res, next) => {
       const schemesCount = schemes._totalCount
       const reportsDir = `${__dirname}data/reports`
       const reports = fs.existsSync(reportsDir) ? fs.readdirSync(reportsDir) : []
-      render(req, res, "stats", {
+      render(req, res, "vue-page", {
         title: "Statistics",
-        reports,
-        schemesCount,
+        vuePage: "stats",
+        vuePageProps: {
+          reports,
+          schemesCount,
+        },
       })
     })
     .catch(e => {
