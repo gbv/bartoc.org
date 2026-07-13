@@ -2,7 +2,9 @@
   <Teleport to="#header-app">
     <TheHeader />
   </Teleport>
-  <component :is="pageComponent" />
+  <component
+    :is="pageComponent"
+    v-bind="pageProps" />
   <Teleport to="#footer-app">
     <TheFooter />
   </Teleport>
@@ -18,6 +20,10 @@ defineProps({
   pageComponent: {
     type: Object,
     required: true,
+  },
+  pageProps: {
+    type: Object,
+    default: () => ({}),
   },
 })
 </script>

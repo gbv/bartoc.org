@@ -24,6 +24,7 @@ const login = Object.assign({}, configDefault.login, configUser.login || {})
 
 // Footer context comes from EJS-rendered data attributes on the app root.
 const rootElement = document.getElementById("app")
+const pageProps = parseJson(document.getElementById("page-props")?.textContent)
 const footer = {
   siteName: rootElement?.dataset.siteName || "BARTOC.org",
   itemUri: rootElement?.dataset.itemUri || "",
@@ -73,7 +74,7 @@ const EjsPageContent = markRaw({
 })
 
 const pageComponent = markRaw(pages[rootElement?.dataset.page] || EjsPageContent)
-const app = createApp(App, { pageComponent })
+const app = createApp(App, { pageComponent, pageProps })
 app.provide("footer", footer)
 app.provide("header", {
   activePath: rootElement?.dataset.pagePath || "",

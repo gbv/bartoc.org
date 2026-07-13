@@ -78,6 +78,9 @@ app.use(pageRoute)
 // render HTML page with EJS
 function render (req, res, view, locals) {
   const { query, path } = req
+  const vuePagePropsJson = locals.vuePageProps === undefined
+    ? ""
+    : utils.serializeJsonForHtml(locals.vuePageProps)
   // pass environment
   const vars = {
     config,
@@ -90,7 +93,7 @@ function render (req, res, view, locals) {
     formats,
     page: path.replace(/^\/|\/$/g, ""),
   }
-  return res.render(view, { ...vars, ...locals })
+  return res.render(view, { ...vars, ...locals, vuePagePropsJson })
 }
 
 // edit form
@@ -380,8 +383,16 @@ app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err)
   }
+  const title = err.message || "Technical problems"
   res.status(500)
-  render(req, res, "500", { title: err.message, message: err + "" })
+  render(req, res, "vue-page", {
+    title,
+    vuePage: "error",
+    vuePageProps: {
+      title,
+      message: String(err),
+    },
+  })
 })
 
 // Start service

@@ -37,6 +37,9 @@
   </head>
   <body>
     <div id="header-app"></div>
+    <% if (locals.vuePagePropsJson) { %>
+    <script id="page-props" type="application/json"><%- vuePagePropsJson %></script>
+    <% } %>
     <main
       id="app"
       class="container"

@@ -5,7 +5,13 @@ import { describe, expect, it } from "vitest"
 import App from "../../vue/App.vue"
 
 const PageComponent = markRaw({
-  template: "<p class=\"page-content\">Server-rendered page</p>",
+  props: {
+    message: {
+      type: String,
+      default: "Server-rendered page",
+    },
+  },
+  template: "<p class=\"page-content\">{{ message }}</p>",
 })
 
 describe("App", () => {
@@ -35,5 +41,25 @@ describe("App", () => {
     wrapper.unmount()
     headerTarget.remove()
     footerTarget.remove()
+  })
+
+  it("passes initial page props to the selected component", () => {
+    const wrapper = mount(App, {
+      props: {
+        pageComponent: PageComponent,
+        pageProps: {
+          message: "Error from the server",
+        },
+      },
+      global: {
+        stubs: {
+          Teleport: true,
+          TheHeader: true,
+          TheFooter: true,
+        },
+      },
+    })
+
+    expect(wrapper.get(".page-content").text()).toBe("Error from the server")
   })
 })

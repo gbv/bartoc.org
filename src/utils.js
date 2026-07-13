@@ -10,6 +10,21 @@ const readLines = (baseDir, file) => readFileSync(join(baseDir, file), "utf8")
   .split(/\r?\n/)
   .filter(Boolean)
 
+const htmlUnsafeCharacters = {
+  "<": "\\u003c",
+  ">": "\\u003e",
+  "&": "\\u0026",
+  "\u2028": "\\u2028",
+  "\u2029": "\\u2029",
+}
+
+export function serializeJsonForHtml(value) {
+  return JSON.stringify(value).replace(
+    /[<>&\u2028\u2029]/g,
+    character => htmlUnsafeCharacters[character],
+  )
+}
+
 export default {
   cleanupItem: item => {
     for (const key in item) {
@@ -25,6 +40,8 @@ export default {
 
   readNdjson: (baseDir, file) =>
     readLines(baseDir, file).map(line => JSON.parse(line)),
+
+  serializeJsonForHtml,
 
   escapeXML: s => String(s).replace(/[<>&"']/g, c => "&#" + c.charCodeAt(0) + ";"),
 
@@ -63,4 +80,3 @@ export default {
   },
 
 }
-
