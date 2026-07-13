@@ -326,9 +326,12 @@ async function backendDataByUri(uri) {
 }
 
 const viewsByType = {
-  "http://www.w3.org/2004/02/skos/core#Concept": "concept",
   [conceptSchemeType]: "vocabulary",
   "http://www.w3.org/ns/dcat#Catalog": "registry",
+}
+
+const vuePagesByType = {
+  "http://www.w3.org/2004/02/skos/core#Concept": "concept",
 }
 
 async function sendItem (req, res, item, vars = {}) {
@@ -345,9 +348,19 @@ async function sendItem (req, res, item, vars = {}) {
       res.setHeader("Content-Type", type)
       res.send(await rdfSerialize(item, format))
     } else {
-      const view = viewsByType[item.type[0]]
+      const itemType = item.type[0]
+      const vuePage = vuePagesByType[itemType]
+      const view = vuePage ? "vue-page" : viewsByType[itemType]
       const title = utils.label(item.prefLabel).value
-      render(req, res, view, { ...vars, item, title })
+      render(req, res, view, {
+        ...vars,
+        item,
+        title,
+        ...(vuePage && {
+          vuePage,
+          vuePageProps: { item, title },
+        }),
+      })
     }
   }
 
