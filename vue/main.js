@@ -1,7 +1,6 @@
 import { computed, createApp, markRaw, ref, toRefs, watch } from "vue"
 
 import App from "./App.vue"
-import ItemEditor from "./components/ItemEditor.vue"
 import VocabularySearch from "./components/VocabularySearch.vue"
 import ServiceLink from "./components/ServiceLink.vue"
 import ConceptBrowser from "./components/ConceptBrowser.vue"
@@ -60,7 +59,6 @@ watch(token, async currentToken => {
 const EjsPageContent = markRaw({
   name: "PageContent",
   components: {
-    ItemEditor,
     VocabularySearch,
     ServiceLink,
     ConceptBrowser,

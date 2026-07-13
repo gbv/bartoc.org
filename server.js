@@ -116,7 +116,16 @@ app.get("/edit", async (req, res, next) => {
     }
   }
 
-  render(req, res, "edit", { item, title, edit: true, hasIncomingVersions })
+  render(req, res, "vue-page", {
+    title,
+    vuePage: "edit",
+    vuePageProps: {
+      title,
+      item: item || null,
+      cancelUrl: `/vocabularies?${querystring.stringify({ uri: item?.uri || "" })}`,
+      hasIncomingVersions,
+    },
+  })
 })
 
 // vocabulary search should be delivered by bartoc-search instead

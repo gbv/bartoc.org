@@ -1,9 +1,0 @@
-<%- include('layout-start', {
-  button: `<a class="cc-button cc-button-secondary float-right" href="/vocabularies?uri=${item ? item.uri : ''}">cancel</a>`
-}) %>
-
-<item-editor :user="user" :auth="auth" :has-incoming-versions="<%= hasIncomingVersions ? 'true' : 'false' %>" <% if(item) { %>:current='<%- JSON.stringify(item).replace(/'/g,"&apos;") %>'<% } %>/>
-
-<%- include('layout-end') %>
-</body>
-</html>
