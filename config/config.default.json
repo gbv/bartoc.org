@@ -10,6 +10,7 @@
   },
   "name": "BARTOC.org",
   "fullname": "Basic Register of Thesauri, Ontologies & Classifications",
+  "sparql": null,
   "menu": [
      {
       "url": "/about",
