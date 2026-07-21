@@ -5,6 +5,7 @@ import MissingSearchPage from "./MissingSearchPage.vue"
 import RegistriesPage from "./RegistriesPage.vue"
 import StatsPage from "./StatsPage.vue"
 import notFoundPage from "./NotFoundPage.vue"
+import SparqlPage from "./SparqlPage.vue"
 
 export const pages = {
   concept: ConceptPage,
@@ -14,4 +15,5 @@ export const pages = {
   registries: RegistriesPage,
   stats: StatsPage,
   notFound: notFoundPage,
+  sparql: SparqlPage,
 }
