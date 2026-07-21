@@ -47,6 +47,8 @@
     "@gbv/bartoc-components": "github:gbv/bartoc-components",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vueform/multiselect": "^2.6.10",
+    "@zazuko/yasqe": "^4.6.1",
+    "@zazuko/yasr": "^4.6.1",
     "axios": "^1.7.7",
     "cocoda-sdk": "^3.6.3",
     "dotenv": "^16.4.5",
@@ -75,8 +77,7 @@
   "overrides": {
     "dockerode": "5.0.0",
     "esbuild": "0.28.1",
-    "minimatch": "^9.0.6",
-    "shell-quote": "1.8.4"
+    "minimatch": "^9.0.6"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.18",
