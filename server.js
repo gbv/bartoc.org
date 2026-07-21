@@ -73,6 +73,20 @@ import pageRoute from "./routes/page.js"
 app.use(redirectsRoute)
 app.use("/api", apiRoute)
 app.use(uriRoute)
+
+// sparql query page
+if (config.sparql) {
+  app.get("/sparql", (req, res) => {
+    render(req, res, "vue-page", {
+      title: "SPARQL Query",
+      vuePage: "sparql",
+      vuePageProps: {
+        endpoint: config.sparql,
+      },
+    })
+  })
+}
+
 app.use(pageRoute)
 
 // render HTML page with EJS
