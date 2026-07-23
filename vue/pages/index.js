@@ -3,9 +3,9 @@ import EditPage from "./EditPage.vue"
 import ErrorPage from "./ErrorPage.vue"
 import MissingSearchPage from "./MissingSearchPage.vue"
 import RegistriesPage from "./RegistriesPage.vue"
+import SparqlPage from "./SparqlPage.vue"
 import StatsPage from "./StatsPage.vue"
 import notFoundPage from "./NotFoundPage.vue"
-import SparqlPage from "./SparqlPage.vue"
 
 export const pages = {
   concept: ConceptPage,
