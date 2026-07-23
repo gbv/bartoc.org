@@ -202,8 +202,6 @@ onMounted(async () => {
     const [{ default: Yasqe }, { default: Yasr }] = await Promise.all([
       import("@zazuko/yasqe"),
       import("@zazuko/yasr"),
-      import("@zazuko/yasqe/build/yasqe.min.css"),
-      import("@zazuko/yasr/build/yasr.min.css"),
     ])
 
     if (isUnmounted) {
@@ -238,7 +236,8 @@ onMounted(async () => {
     // layout after v-show has made it visible so the gutter does not cover the query.
     await nextTick()
     yasqe?.refresh()
-  } catch {
+  } catch (error) {
+    console.error("Could not load the SPARQL query editor.", error)
     yasqe?.destroy()
     yasr?.destroy()
     yasqe = undefined

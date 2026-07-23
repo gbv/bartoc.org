@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="/css/fontawesome.min.css">
     <link rel="stylesheet" href="/vendor/gbv-login-client-vue/style.css">
     <link rel="stylesheet" href="/vendor/bartoc-components/style.css">
+    <% for (const stylesheet of locals.stylesheets || []) { %>
+      <link rel="stylesheet" href="<%= stylesheet %>">
+    <% } %>
     <title><%= config.name %><%= title ? ": " + title : "" %></title>
     <% if (config.env === "development") { %>
       <script type="module" src="<%= config.vue.assetPrefix %>@vite/client"></script>

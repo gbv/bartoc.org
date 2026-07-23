@@ -63,6 +63,14 @@ app.use(
   "/vendor/bartoc-components/",
   express.static("node_modules/@gbv/bartoc-components/dist"),
 )
+app.use(
+  "/vendor/yasqe/",
+  express.static("node_modules/@zazuko/yasqe/build"),
+)
+app.use(
+  "/vendor/yasr/",
+  express.static("node_modules/@zazuko/yasr/build"),
+)
 
 
 import redirectsRoute from "./routes/redirects.js"
@@ -83,6 +91,10 @@ if (config.sparql) {
       vuePageProps: {
         endpoint: config.sparql,
       },
+      stylesheets: [
+        "/vendor/yasqe/yasqe.min.css",
+        "/vendor/yasr/yasr.min.css",
+      ],
     })
   })
 }
