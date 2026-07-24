@@ -77,28 +77,17 @@ import redirectsRoute from "./routes/redirects.js"
 import apiRoute from "./routes/api.js"
 import uriRoute from "./routes/uri.js"
 import pageRoute from "./routes/page.js"
+import createSparqlRoute from "./routes/sparql.js"
 
 app.use(redirectsRoute)
 app.use("/api", apiRoute)
 app.use(uriRoute)
 
-// sparql query page
-if (config.sparql) {
-  app.get("/sparql", (req, res) => {
-    render(req, res, "vue-page", {
-      title: "SPARQL Query",
-      vuePage: "sparql",
-      vuePageProps: {
-        endpoint: config.sparql,
-        examples: config.sparqlExamples,
-      },
-      stylesheets: [
-        "/vendor/yasqe/yasqe.min.css",
-        "/vendor/yasr/yasr.min.css",
-      ],
-    })
-  })
-}
+app.use("/sparql", createSparqlRoute({
+  endpoint: config.sparql,
+  examples: config.sparqlExamples,
+  render,
+}))
 
 app.use(pageRoute)
 
