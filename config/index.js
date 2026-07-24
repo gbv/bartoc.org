@@ -1,5 +1,9 @@
 import _ from "lodash"
 import { cdk } from "cocoda-sdk"
+import {
+  normalizeSparqlExamples,
+  validateSparqlEndpoint,
+} from "./utils.js"
 
 // to load local JSON files
 import { createRequire } from "module"
@@ -31,31 +35,13 @@ try {
 
 const config = _.defaultsDeep({ env }, configEnv, configUser, configDefault)
 
-// Validate the optional SPARQL endpoint URL
-if (config.sparql !== null) {
-  if (typeof config.sparql !== "string" || !config.sparql.trim()) {
-    throw new TypeError(
-      "Invalid \"sparql\" configuration: expected an absolute HTTP(S) URL or null",
-    )
-  }
+config.sparqlExamples = normalizeSparqlExamples(
+  configEnv.sparqlExamples ??
+  configUser.sparqlExamples ??
+  configDefault.sparqlExamples,
+)
 
-  let url
-  try {
-    url = new URL(config.sparql.trim())
-  } catch {
-    throw new TypeError(
-      "Invalid \"sparql\" configuration: expected an absolute HTTP(S) URL or null",
-    )
-  }
-
-  if (!["http:", "https:"].includes(url.protocol)) {
-    throw new TypeError(
-      "Invalid \"sparql\" configuration: expected an absolute HTTP(S) URL or null",
-    )
-  }
-
-  config.sparql = url.href
-}
+config.sparql = validateSparqlEndpoint(config.sparql)
 
 // Logging functions
 config.log = (...args) => {

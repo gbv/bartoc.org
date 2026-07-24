@@ -5,7 +5,9 @@
     Queries are sent to <code>{{ endpoint }}</code>.
   </p>
 
-  <div class="example-query">
+  <div
+    v-if="examples.length"
+    class="example-query">
     <label for="sparql-example">Example query</label>
     <div class="example-query-controls">
       <select
@@ -18,9 +20,9 @@
           Select an example
         </option>
         <option
-          v-for="example in exampleQueries"
-          :key="example.id"
-          :value="example.id">
+          v-for="(example, index) in examples"
+          :key="index"
+          :value="String(index)">
           {{ example.label }}
         </option>
       </select>
@@ -98,6 +100,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  examples: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 // YASQE and YASR manage their own DOM, so Vue only provides their
@@ -108,40 +114,12 @@ const selectedExample = ref("")
 const editorState = ref("loading")
 const queryState = ref("idle")
 
-const exampleQueries = [
-  {
-    id: "triples-by-graph",
-    label: "Count triples by graph",
-    query: `SELECT ?g (COUNT(*) AS ?triples)
-WHERE {
-  GRAPH ?g {
-    ?s ?p ?o
-  }
-}
-GROUP BY ?g
-ORDER BY DESC(?triples)`,
-  },
-  {
-    id: "sample-triples",
-    label: "Construct sample triples",
-    query: `CONSTRUCT {
-  ?s ?p ?o
-}
-WHERE {
-  GRAPH ?g {
-    ?s ?p ?o
-  }
-}
-LIMIT 10`,
-  },
-]
-
 let yasqe
 let yasr
 let isUnmounted = false
 
 function loadExample() {
-  const example = exampleQueries.find(({ id }) => id === selectedExample.value)
+  const example = props.examples[Number(selectedExample.value)]
   if (example) {
     // setValue only updates the editor; examples are never executed automatically.
     yasqe?.setValue(example.query)

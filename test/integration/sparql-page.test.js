@@ -33,6 +33,32 @@ vi.mock("@zazuko/yasr", () => ({
 
 import SparqlPage from "../../vue/pages/SparqlPage.vue"
 
+const configuredExamples = [
+  {
+    label: "Count triples by graph",
+    query: `SELECT ?g (COUNT(*) AS ?triples)
+WHERE {
+  GRAPH ?g {
+    ?s ?p ?o
+  }
+}
+GROUP BY ?g
+ORDER BY DESC(?triples)`,
+  },
+  {
+    label: "Construct sample triples",
+    query: `CONSTRUCT {
+  ?s ?p ?o
+}
+WHERE {
+  GRAPH ?g {
+    ?s ?p ?o
+  }
+}
+LIMIT 10`,
+  },
+]
+
 function sparqlJsonResponse(data) {
   return {
     content: JSON.stringify(data),
@@ -48,10 +74,11 @@ describe("SparqlPage", () => {
     rendererInstances.length = 0
   })
 
-  it("loads two named-graph examples without executing them", async () => {
+  it("loads configured examples without executing them", async () => {
     const wrapper = mount(SparqlPage, {
       props: {
         endpoint: "https://example.org/sparql",
+        examples: configuredExamples,
       },
     })
 
@@ -71,8 +98,13 @@ describe("SparqlPage", () => {
       expect(editor.refresh).toHaveBeenCalledOnce()
     })
 
+    expect(editor.options.requestConfig).toEqual({
+      endpoint: "https://example.org/sparql",
+      method: "POST",
+    })
+
     const exampleIds = select.findAll("option").slice(1).map(option => option.element.value)
-    expect(exampleIds).toEqual(["triples-by-graph", "sample-triples"])
+    expect(exampleIds).toEqual(["0", "1"])
 
     for (const exampleId of exampleIds) {
       await select.setValue(exampleId)
@@ -80,10 +112,22 @@ describe("SparqlPage", () => {
     }
 
     expect(editor.setValue).toHaveBeenCalledTimes(2)
-    for (const [query] of editor.setValue.mock.calls) {
-      expect(query).toContain("GRAPH ?g")
-    }
+    expect(editor.setValue.mock.calls.map(([query]) => query)).toEqual(
+      configuredExamples.map(({ query }) => query),
+    )
     expect(editor.query).not.toHaveBeenCalled()
+
+    wrapper.unmount()
+  })
+
+  it("hides the example controls when no examples are configured", () => {
+    const wrapper = mount(SparqlPage, {
+      props: {
+        endpoint: "https://example.org/sparql",
+      },
+    })
+
+    expect(wrapper.find(".example-query").exists()).toBe(false)
 
     wrapper.unmount()
   })

@@ -90,6 +90,7 @@ if (config.sparql) {
       vuePage: "sparql",
       vuePageProps: {
         endpoint: config.sparql,
+        examples: config.sparqlExamples,
       },
       stylesheets: [
         "/vendor/yasqe/yasqe.min.css",

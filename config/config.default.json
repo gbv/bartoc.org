@@ -11,6 +11,16 @@
   "name": "BARTOC.org",
   "fullname": "Basic Register of Thesauri, Ontologies & Classifications",
   "sparql": null,
+  "sparqlExamples": [
+    {
+      "label": "Count triples by graph",
+      "query": "SELECT ?g (COUNT(*) AS ?triples)\nWHERE {\n  GRAPH ?g {\n    ?s ?p ?o\n  }\n}\nGROUP BY ?g\nORDER BY DESC(?triples)"
+    },
+    {
+      "label": "Construct sample triples",
+      "query": "CONSTRUCT {\n  ?s ?p ?o\n}\nWHERE {\n  GRAPH ?g {\n    ?s ?p ?o\n  }\n}\nLIMIT 10"
+    }
+  ],
   "menu": [
      {
       "url": "/about",

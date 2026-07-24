@@ -65,6 +65,28 @@ To be able to log in, add, and edit vocabularies, you need to setup and configur
 }
 ```
 
+The optional SPARQL query page is enabled by setting `sparql` to an absolute
+HTTP(S) endpoint URL. Its example selector can be customized with
+`sparqlExamples`:
+
+```json
+{
+  "sparql": "https://example.org/sparql",
+  "sparqlExamples": [
+    {
+      "label": "Check whether the dataset contains triples",
+      "query": "ASK { ?s ?p ?o }"
+    }
+  ]
+}
+```
+
+Each example requires a non-empty `label` and `query`. A configured array
+replaces the default examples completely; use an empty array to hide the
+example selector. Leave `sparql` set to `null` to keep the `/sparql` route
+disabled. Queries are sent directly by the browser, so the endpoint must be
+publicly reachable and allow requests from the BARTOC origin.
+
 ### jskos-server Configuration
 To be able to use the full functionality of BARTOC, your jskos-server installation must allow concept schemes to be written via the API, e.g.:
 
