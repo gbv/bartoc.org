@@ -1,8 +1,8 @@
 <template>
-  <h1>SPARQL Query</h1>
-
+  <h1>Knowledge Graph</h1>
   <p>
-    Queries are sent to <code>{{ endpoint }}</code>.
+    Terminology metadata is merged into a knowledge graph with
+    SPARQL API at <code>{{ endpoint }}</code>.
   </p>
 
   <div
