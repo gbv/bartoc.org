@@ -8,27 +8,25 @@
   <div
     v-if="examples.length"
     class="example-query">
-    <label for="sparql-example">Example query</label>
-    <div class="example-query-controls">
-      <select
-        id="sparql-example"
-        v-model="selectedExample"
-        class="cc-form-control"
-        :disabled="editorState !== 'ready' || queryState === 'running'"
-        @change="loadExample">
-        <option
-          value=""
-          disabled>
-          Select an example
-        </option>
-        <option
-          v-for="(example, index) in examples"
-          :key="index"
-          :value="String(index)">
-          {{ example.label }}
-        </option>
-      </select>
-    </div>
+    <label for="sparql-example">Example queries</label>
+    <select
+      id="sparql-example"
+      v-model="selectedExample"
+      class="cc-form-control"
+      :disabled="editorState !== 'ready' || queryState === 'running'"
+      @change="loadExample">
+      <option
+        value=""
+        disabled>
+        Select an example
+      </option>
+      <option
+        v-for="(example, index) in examples"
+        :key="index"
+        :value="String(index)">
+        {{ example.label }}
+      </option>
+    </select>
   </div>
 
   <div
@@ -236,18 +234,20 @@ onBeforeUnmount(() => {
 </script>
 <style scoped>
 .example-query {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--cc-space-sm);
   margin-bottom: var(--cc-space-md);
 }
 
-.example-query-controls {
-  display: flex;
-  align-items: stretch;
-  gap: var(--cc-space-sm);
-  max-width: 36rem;
+.example-query select {
+  flex: 0 1 20rem;
+  min-width: 0;
 }
 
-.example-query-controls select {
-  flex: 1;
+.example-query label {
+  margin: 0;
 }
 
 .sparql-editor-loading {

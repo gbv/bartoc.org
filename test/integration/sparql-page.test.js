@@ -93,6 +93,8 @@ describe("SparqlPage", () => {
     const editor = editorInstances[0]
     const select = wrapper.get("#sparql-example")
 
+    expect(wrapper.get("label[for='sparql-example']").text()).toBe("Example queries")
+
     await vi.waitFor(() => {
       expect(editor.refresh).toHaveBeenCalledOnce()
     })
