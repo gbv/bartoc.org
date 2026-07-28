@@ -92,7 +92,6 @@ describe("SparqlPage", () => {
 
     const editor = editorInstances[0]
     const select = wrapper.get("#sparql-example")
-    const loadButton = wrapper.get("button")
 
     await vi.waitFor(() => {
       expect(editor.refresh).toHaveBeenCalledOnce()
@@ -108,7 +107,6 @@ describe("SparqlPage", () => {
 
     for (const exampleId of exampleIds) {
       await select.setValue(exampleId)
-      await loadButton.trigger("click")
     }
 
     expect(editor.setValue).toHaveBeenCalledTimes(2)

@@ -13,7 +13,9 @@
       <select
         id="sparql-example"
         v-model="selectedExample"
-        class="cc-form-control">
+        class="cc-form-control"
+        :disabled="editorState !== 'ready' || queryState === 'running'"
+        @change="loadExample">
         <option
           value=""
           disabled>
@@ -26,13 +28,6 @@
           {{ example.label }}
         </option>
       </select>
-      <button
-        type="button"
-        class="cc-button cc-button-secondary"
-        :disabled="!selectedExample || editorState !== 'ready' || queryState === 'running'"
-        @click="loadExample">
-        Load
-      </button>
     </div>
   </div>
 
