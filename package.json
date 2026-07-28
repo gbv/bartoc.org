@@ -9,7 +9,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
-    "lint": "eslint; ejslint views/*.ejs",
+    "lint": "eslint && ejslint views/*.ejs",
     "fix": "eslint --fix",
     "lint-staged": "lint-staged",
     "data": "npm run data:nkostype; make -C data",
