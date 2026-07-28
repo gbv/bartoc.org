@@ -34,8 +34,11 @@ describe("SPARQL example configuration", () => {
   it("provides normalized default examples", () => {
     const examples = normalizeSparqlExamples(configDefault.sparqlExamples)
 
-    expect(examples).toHaveLength(2)
+    expect(examples).toHaveLength(7)
     expect(examples[0].query).toContain("GRAPH ?g")
+    expect(examples.map(({ label }) => label)).toContain(
+      "Terminologies by decade of creation",
+    )
   })
 
   it("normalizes labels and queries", () => {

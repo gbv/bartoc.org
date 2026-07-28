@@ -19,6 +19,26 @@
     {
       "label": "Construct sample triples",
       "query": "CONSTRUCT {\n  ?s ?p ?o\n}\nWHERE {\n  GRAPH ?g {\n    ?s ?p ?o\n  }\n}\nLIMIT 10"
+    },
+    {
+      "label": "Classes by number of instances",
+      "query": "SELECT ?class (COUNT(?instance) AS ?count)\nWHERE {\n  ?instance a ?class\n}\nGROUP BY ?class\nORDER BY DESC(?count)"
+    },
+    {
+      "label": "Properties by number of triples",
+      "query": "SELECT ?property (COUNT(*) AS ?count)\nWHERE {\n  ?subject ?property ?object\n}\nGROUP BY ?property\nORDER BY DESC(?count)"
+    },
+    {
+      "label": "Publishers",
+      "query": "PREFIX dct: <http://purl.org/dc/terms/>\n\nSELECT ?publisher (COUNT(*) AS ?count)\nWHERE {\n  ?x dct:publisher ?publisher\n}\nGROUP BY ?publisher\nORDER BY DESC(?count)"
+    },
+    {
+      "label": "Publishers with DDC main subjects",
+      "query": "PREFIX dct: <http://purl.org/dc/terms/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX bartoc: <http://bartoc.org/en/node/>\n\nSELECT ?publisher ?class ?label (COUNT(?terminology) AS ?count)\nWHERE {\n  ?terminology dct:publisher ?publisher .\n  ?terminology dct:subject ?ddc .\n  ?ddc skos:inScheme bartoc:241 .\n  ?ddc skos:notation ?class .\n  ?ddc skos:prefLabel ?label .\n  FILTER (STRLEN(?class) = 1)\n}\nGROUP BY ?publisher ?class ?label\nORDER BY DESC(?count)"
+    },
+    {
+      "label": "Terminologies by decade of creation",
+      "query": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\n\nSELECT ?decade (COUNT(?terminology) AS ?count)\nWHERE {\n  ?terminology a skos:ConceptScheme .\n  ?terminology schema:startDate ?date .\n  BIND(CONCAT(SUBSTR(STR(?date), 1, 3), \"0\") AS ?decade)\n}\nGROUP BY ?decade\nORDER BY ?decade"
     }
   ],
   "menu": [
