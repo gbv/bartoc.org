@@ -21,7 +21,7 @@ The application is currently being reconstructed funded by DFG.
 
 ### Requirements
 
-Requires at least Node.js 18 and an instance of [jskos-server](https://github.com/gbv/jskos-server) to connect to. Additional dependencies are listed in `package.json`.
+Requires Node.js 22.19 or newer and an instance of [jskos-server](https://github.com/gbv/jskos-server) to connect to. Additional dependencies are listed in `package.json`.
 
 ### Install from sources
 

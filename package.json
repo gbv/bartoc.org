@@ -38,7 +38,7 @@
     "url": "https://github.com/gbv/bartoc.org.git"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.19.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
