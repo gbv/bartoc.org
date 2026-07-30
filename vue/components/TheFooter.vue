@@ -1,9 +1,8 @@
 <template>
   <BartocFooter
     :site-name="siteName"
-    api-url="/api/"
-    download-url="/download"
     :external-links="externalLinks"
+    :internal-links="internalLinks"
     :resource-format-links="resourceFormatLinks" />
 </template>
 
@@ -42,9 +41,17 @@ const api = computed(() => props.api || providedFooter.api || "")
 const queryParams = computed(() => props.query || providedFooter.query || {})
 
 const externalLinks = [
+  { label: "Legal Notice", href: "https://www.gbv.de/impressum" },
+  { label: "Privacy Policy", href: "https://www.gbv.de/datenschutz" },
   { label: "Mastodon", href: "https://code4lib.social/@bartoc", rel: "me" },
   { label: "sources", href: "https://github.com/gbv/bartoc.org" },
   { label: "issues", href: "https://github.com/gbv/bartoc.org/issues" },
+]
+
+const internalLinks = [
+  { href: "/api/", label: "API" },
+  { href: "/download", label: "download" },
+  { href: "/sparql", label: "SPARQL" },
 ]
 
 const resourceFormatLinks = computed(() => {
