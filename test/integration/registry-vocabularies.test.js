@@ -67,7 +67,7 @@ describe("RegistryVocabularies", () => {
     )
   })
 
-  it("links to all vocabularies with the total count", async () => {
+  it("links to all terminologies with the total count", async () => {
     const wrapper = await mountRegistryVocabularies(async () =>
       response([vocabulary()], 25),
     )
@@ -85,7 +85,7 @@ describe("RegistryVocabularies", () => {
       response([], 0),
     )
 
-    expect(wrapper.text()).toContain("No vocabularies listed in BARTOC yet.")
+    expect(wrapper.text()).toContain("No terminologies listed in BARTOC yet.")
     expect(wrapper.get(`a[href='${searchUrl}']`).text()).toBe("search in BARTOC")
   })
 

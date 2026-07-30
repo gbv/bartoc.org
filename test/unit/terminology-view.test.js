@@ -6,7 +6,7 @@ import { JSDOM } from "jsdom"
 import { fileURLToPath } from "url"
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
-const template = path.join(rootDir, "views/vocabulary.ejs")
+const template = path.join(rootDir, "views/terminology.ejs")
 
 // Minimal locals required by vocabulary.ejs and its included partials.
 const viewLocals = {

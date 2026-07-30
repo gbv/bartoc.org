@@ -39,7 +39,6 @@ config.log(`Running in ${config.env} mode.`)
 const nkostypes = utils.indexByUri((utils.readNdjson(__dirname,"./data/nkostype.concepts.ndjson")))
 const accesstypes = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-access.concepts.ndjson"))
 const formats = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-formats.concepts.ndjson"))
-const conceptSchemeType = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
 
 // Initialize express with settings
 import express from "express"
@@ -195,7 +194,7 @@ async function resolveSchemeReferences(references) {
 }
 
 async function resolveIncomingSchemeReferences(item, relation) {
-  if (!item?.uri || !item.type?.includes(conceptSchemeType)) {
+  if (!item?.uri || !item.type?.includes("http://www.w3.org/2004/02/skos/core#ConceptScheme")) {
     return []
   }
 
@@ -342,7 +341,7 @@ async function backendDataByUri(uri) {
 }
 
 const viewsByType = {
-  [conceptSchemeType]: "vocabulary",
+  "http://www.w3.org/2004/02/skos/core#ConceptScheme": "terminology",
   "http://www.w3.org/ns/dcat#Catalog": "registry",
 }
 
