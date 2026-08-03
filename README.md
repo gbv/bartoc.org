@@ -87,6 +87,12 @@ example selector. Leave `sparql` set to `null` to keep the `/sparql` route
 disabled. Queries are sent directly by the browser, so the endpoint must be
 publicly reachable and allow requests from the BARTOC origin.
 
+The page also displays the latest knowledge graph update when the endpoint
+provides `<https://bartoc.org/graph/> dct:modified ?updated` in the named graph
+`<https://bartoc.org/graph/metadata/>`. This metadata is optional: if it is
+missing or cannot be retrieved, the query editor remains available without the
+timestamp.
+
 ### jskos-server Configuration
 To be able to use the full functionality of BARTOC, your jskos-server installation must allow concept schemes to be written via the API, e.g.:
 

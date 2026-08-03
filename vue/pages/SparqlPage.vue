@@ -4,6 +4,12 @@
     Terminology metadata is merged into a knowledge graph with
     SPARQL API at <code>{{ endpoint }}</code>.
   </p>
+  <p
+    v-if="updatedAt"
+    class="sparql-last-updated text-muted">
+    Knowledge graph last updated:
+    <time :datetime="updatedAt">{{ formattedUpdatedAt }}</time>.
+  </p>
 
   <div
     v-if="examples.length"
@@ -79,7 +85,7 @@
     class="sparql-results" />
 </template>
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, ref } from "vue"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue"
 import { LoadingIndicator } from "jskos-vue"
 
 // YASQE provides the SPARQL editor and request handling; YASR renders
@@ -106,10 +112,52 @@ const yasrElement = ref(null)
 const selectedExample = ref("")
 const editorState = ref("loading")
 const queryState = ref("idle")
+const updatedAt = ref("")
+
+const formattedUpdatedAt = computed(() => updatedAt.value
+  ? new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(updatedAt.value))
+  : "")
 
 let yasqe
 let yasr
 let isUnmounted = false
+
+// The graph metadata contains the timestamp of the latest completed import.
+const updatedAtQuery = `PREFIX dct: <http://purl.org/dc/terms/>
+
+SELECT ?updated {
+  GRAPH <https://bartoc.org/graph/metadata/> {
+    <https://bartoc.org/graph/> dct:modified ?updated
+  }
+}
+ORDER BY DESC(?updated)
+LIMIT 1`
+
+async function loadUpdatedAt() {
+  try {
+    // The query is short enough for GET, which keeps the request simple.
+    const url = new URL(props.endpoint)
+    url.searchParams.set("query", updatedAtQuery)
+
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/sparql-results+json",
+      },
+    })
+
+    if (!response.ok) {
+      return
+    }
+
+    const data = await response.json()
+    updatedAt.value = data.results?.bindings?.[0]?.updated?.value || ""
+  } catch (error) {
+    console.warn("Could not load the knowledge graph update time.", error)
+  }
+}
 
 function loadExample() {
   const example = props.examples[Number(selectedExample.value)]
@@ -169,6 +217,8 @@ async function showResponse(_instance, response, duration) {
 }
 
 onMounted(async () => {
+  loadUpdatedAt()
+
   try {
     const [{ default: Yasqe }, { default: Yasr }] = await Promise.all([
       import("@zazuko/yasqe"),

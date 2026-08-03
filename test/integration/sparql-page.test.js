@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const editorInstances = vi.hoisted(() => [])
 const rendererInstances = vi.hoisted(() => [])
+const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@zazuko/yasqe", () => ({
   default: class YasqeMock {
@@ -72,6 +73,46 @@ describe("SparqlPage", () => {
   beforeEach(() => {
     editorInstances.length = 0
     rendererInstances.length = 0
+    fetchMock.mockReset()
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        head: { vars: ["updated"] },
+        results: { bindings: [] },
+      }),
+    })
+    vi.stubGlobal("fetch", fetchMock)
+  })
+
+  it("shows the latest knowledge graph update reported by the endpoint", async () => {
+    const timestamp = "2026-07-30T10:55:14Z"
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        results: {
+          bindings: [{ updated: { value: timestamp } }],
+        },
+      }),
+    })
+
+    const wrapper = mount(SparqlPage, {
+      props: {
+        endpoint: "https://example.org/sparql",
+      },
+    })
+
+    await vi.waitFor(() => {
+      expect(wrapper.find(".sparql-last-updated").exists()).toBe(true)
+    })
+
+    const time = wrapper.get(".sparql-last-updated time")
+    expect(time.attributes("datetime")).toBe(timestamp)
+    expect(time.text()).not.toBe("")
+
+    const [url] = fetchMock.mock.calls[0]
+    expect(url.searchParams.get("query")).toContain("dct:modified")
+
+    wrapper.unmount()
   })
 
   it("loads configured examples without executing them", async () => {
