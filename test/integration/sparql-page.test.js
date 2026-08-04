@@ -85,7 +85,8 @@ describe("SparqlPage", () => {
   })
 
   it("shows the latest knowledge graph update reported by the endpoint", async () => {
-    const timestamp = "2026-07-30T10:55:14Z"
+    // The endpoint currently reports UTC without the trailing Z.
+    const timestamp = "2026-08-04T09:42:14"
     fetchMock.mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -106,8 +107,11 @@ describe("SparqlPage", () => {
     })
 
     const time = wrapper.get(".sparql-last-updated time")
-    expect(time.attributes("datetime")).toBe(timestamp)
-    expect(time.text()).not.toBe("")
+    expect(time.attributes("datetime")).toBe(`${timestamp}Z`)
+    expect(time.text()).toBe(new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(`${timestamp}Z`)))
 
     const [url] = fetchMock.mock.calls[0]
     expect(url.searchParams.get("query")).toContain("dct:modified")

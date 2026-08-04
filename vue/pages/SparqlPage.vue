@@ -126,15 +126,17 @@ let yasr
 let isUnmounted = false
 
 // The graph metadata contains the timestamp of the latest completed import.
-const updatedAtQuery = `PREFIX dct: <http://purl.org/dc/terms/>
+const updatedAtQuery = `
+PREFIX dct: <http://purl.org/dc/terms/>
 
 SELECT ?updated {
-  GRAPH <https://bartoc.org/graph/metadata/> {
-    <https://bartoc.org/graph/> dct:modified ?updated
+  GRAPH <https://bartoc.org/graph/terminology/> {
+    <https://bartoc.org/graph/terminology/> dct:modified ?updated
   }
 }
 ORDER BY DESC(?updated)
-LIMIT 1`
+LIMIT 1
+`
 
 async function loadUpdatedAt() {
   try {
@@ -153,7 +155,9 @@ async function loadUpdatedAt() {
     }
 
     const data = await response.json()
-    updatedAt.value = data.results?.bindings?.[0]?.updated?.value || ""
+    const timestamp = data.results?.bindings?.[0]?.updated?.value || ""
+    const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(timestamp)
+    updatedAt.value = timestamp && !hasTimezone ? `${timestamp}Z` : timestamp
   } catch (error) {
     console.warn("Could not load the knowledge graph update time.", error)
   }
