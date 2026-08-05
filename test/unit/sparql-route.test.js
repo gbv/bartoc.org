@@ -43,6 +43,11 @@ describe("SPARQL route", () => {
           endpoint: "https://example.org/sparql",
           examples,
         },
+        stylesheets: [
+          "/vendor/yasgui/yasgui.min.css",
+          "/vendor/fontawesome/css/all.min.css",
+        ],
+        scripts: ["/vendor/yasgui/yasgui.min.js"],
       },
     })
     expect(render).toHaveBeenCalledOnce()

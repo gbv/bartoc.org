@@ -63,12 +63,12 @@ app.use(
   express.static("node_modules/@gbv/bartoc-components/dist"),
 )
 app.use(
-  "/vendor/yasqe/",
-  express.static("node_modules/@zazuko/yasqe/build"),
+  "/vendor/yasgui/",
+  express.static("node_modules/@matdata/yasgui/build"),
 )
 app.use(
-  "/vendor/yasr/",
-  express.static("node_modules/@zazuko/yasr/build"),
+  "/vendor/fontawesome/",
+  express.static("node_modules/@fortawesome/fontawesome-free"),
 )
 
 

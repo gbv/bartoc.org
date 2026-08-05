@@ -1,2 +1,5 @@
     </main>
     <div id="footer-app"></div>
+    <% for (const script of locals.scripts || []) { %>
+      <script src="<%= script %>"></script>
+    <% } %>

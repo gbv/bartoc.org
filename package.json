@@ -41,14 +41,14 @@
     "node": ">=22.19.0"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@gbv/bartoc-components": "github:gbv/bartoc-components#v0.2.0",
+    "@matdata/yasgui": "^5.20.3",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vueform/multiselect": "^2.6.10",
-    "@zazuko/yasqe": "^4.6.1",
-    "@zazuko/yasr": "^4.6.1",
     "axios": "^1.7.7",
     "cocoda-sdk": "^3.6.3",
     "dotenv": "^16.4.5",

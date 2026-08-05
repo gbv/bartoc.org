@@ -47,18 +47,20 @@ describe("layout view", () => {
     expect(app.querySelector("the-footer")).toBeNull()
   })
 
-  it("includes page-specific stylesheets", async () => {
+  it("includes page-specific assets", async () => {
     document.documentElement.innerHTML = await renderLayout("/sparql", {
       stylesheets: [
-        "/vendor/yasqe/yasqe.min.css",
-        "/vendor/yasr/yasr.min.css",
+        "/vendor/yasgui/yasgui.min.css",
+        "/vendor/fontawesome/css/all.min.css",
       ],
+      scripts: ["/vendor/yasgui/yasgui.min.js"],
     })
 
     const stylesheetUrls = Array.from(document.querySelectorAll("link[rel='stylesheet']"))
       .map(link => link.getAttribute("href"))
 
-    expect(stylesheetUrls).toContain("/vendor/yasqe/yasqe.min.css")
-    expect(stylesheetUrls).toContain("/vendor/yasr/yasr.min.css")
+    expect(stylesheetUrls).toContain("/vendor/yasgui/yasgui.min.css")
+    expect(stylesheetUrls).toContain("/vendor/fontawesome/css/all.min.css")
+    expect(document.querySelector("script[src='/vendor/yasgui/yasgui.min.js']")).not.toBeNull()
   })
 })
