@@ -34,11 +34,16 @@ describe("SPARQL example configuration", () => {
   it("provides normalized default examples", () => {
     const examples = normalizeSparqlExamples(configDefault.sparqlExamples)
 
-    expect(examples).toHaveLength(7)
+    expect(examples).toHaveLength(11)
     expect(examples[0].query).toContain("GRAPH ?g")
-    expect(examples.map(({ label }) => label)).toContain(
+    expect(examples.map(({ label }) => label)).toEqual(expect.arrayContaining([
+      "Describe a BK concept (Graph)",
+      "Basic Classification metadata (Graph)",
+      "Terminologies about historical geography (Graph)",
+      "Terminology contact locations (Geo)",
+      "Terminologies by contact country (Geo)",
       "Terminologies by decade of creation",
-    )
+    ]))
   })
 
   it("normalizes labels and queries", () => {
