@@ -215,6 +215,10 @@ onBeforeUnmount(() => {
   border-bottom-color: var(--cc-color-primary);
 }
 
+.sparql-yasgui :deep(.tabPanel:not(.orientation-horizontal) > .yasrWrapperEl) {
+  margin-top: var(--cc-space-md);
+}
+
 /* The endpoint is public page configuration, not a user-editable field. */
 .sparql-yasgui :deep(.autocompleteWrapper),
 .sparql-yasgui :deep(.endpointButtonsContainer) {
