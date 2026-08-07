@@ -173,7 +173,42 @@ onBeforeUnmount(() => {
 }
 
 .sparql-yasgui {
+  --yasgui-accent-color: var(--cc-color-primary);
+  --yasgui-link-color: var(--cc-color-link);
+  --yasgui-link-hover: var(--cc-color-primary-hover);
+  --yasgui-button-hover: var(--cc-color-primary);
+  --yasgui-input-focus: var(--cc-color-primary);
+  --yasgui-button-text: var(--cc-color-text);
+  --yasgui-input-border: var(--cc-border-color-control);
+  --yasgui-border-color: var(--cc-border-color);
+  --yasgui-bg-primary: var(--cc-color-surface);
+  --yasgui-bg-secondary: var(--cc-color-surface-muted);
+
   min-height: 800px;
+}
+
+.sparql-yasgui :deep(.yasqe_queryButton) {
+  --yasgui-button-text: var(--cc-color-on-primary);
+
+  border: 1px solid var(--cc-color-primary);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-color-primary);
+  color: var(--cc-color-on-primary);
+}
+
+.sparql-yasgui :deep(.yasqe_queryButton:hover),
+.sparql-yasgui :deep(.yasqe_queryButton:focus-visible) {
+  border-color: var(--cc-color-primary-hover);
+  background: var(--cc-color-primary-hover);
+}
+
+.sparql-yasgui :deep(.yasqe_queryButton:focus-visible) {
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--cc-color-primary) 20%, transparent);
+}
+
+.sparql-yasgui :deep(.tabsList .tab.active > a) {
+  border-bottom-color: var(--cc-color-primary);
 }
 
 /* The endpoint is public page configuration, not a user-editable field. */
