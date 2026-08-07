@@ -24,6 +24,7 @@ describe("TheFooter Component", () => {
 
     expect(links.API).toBe("/api/")
     expect(links.download).toBe("/download")
+    expect(links.SPARQL).toBe("/graph/")
     expect(links.Mastodon).toBe("https://code4lib.social/@bartoc")
     expect(links.sources).toBe("https://github.com/gbv/bartoc.org")
     expect(links.issues).toBe("https://github.com/gbv/bartoc.org/issues")

@@ -16,7 +16,7 @@ function createApp(endpoint) {
     res.json({ view, locals })
   })
 
-  app.use("/sparql", createSparqlRoute({
+  app.use(createSparqlRoute({
     endpoint,
     examples,
     render,
@@ -32,7 +32,7 @@ describe("SPARQL route", () => {
   it("renders the query page when an endpoint is configured", async () => {
     const { app, render } = createApp("https://example.org/sparql")
     const response = await request(app)
-      .get("/sparql")
+      .get("/graph/")
       .expect(200)
 
     expect(response.body).toMatchObject({
@@ -53,11 +53,34 @@ describe("SPARQL route", () => {
     expect(render).toHaveBeenCalledOnce()
   })
 
+  it.each(["/graph", "/sparql", "/sparql/"])(
+    "redirects %s permanently to the canonical URL",
+    async (path) => {
+      const { app, render } = createApp("https://example.org/sparql")
+
+      await request(app)
+        .get(path)
+        .expect(301)
+        .expect("Location", "/graph/")
+
+      expect(render).not.toHaveBeenCalled()
+    },
+  )
+
+  it("preserves the query string when redirecting", async () => {
+    const { app } = createApp("https://example.org/sparql")
+
+    await request(app)
+      .get("/sparql?query=ASK%20%7B%7D")
+      .expect(301)
+      .expect("Location", "/graph/?query=ASK%20%7B%7D")
+  })
+
   it("does not register the query page when the endpoint is disabled", async () => {
     const { app, render } = createApp(null)
 
     await request(app)
-      .get("/sparql")
+      .get("/graph/")
       .expect(404)
 
     expect(render).not.toHaveBeenCalled()

@@ -83,9 +83,8 @@ HTTP(S) endpoint URL. Its example selector can be customized with
 
 Each example requires a non-empty `label` and `query`. A configured array
 replaces the default examples completely; use an empty array to hide the
-example selector. Leave `sparql` set to `null` to keep the `/sparql` route
-disabled. Queries are sent directly by the browser, so the endpoint must be
-publicly reachable and allow requests from the BARTOC origin.
+example selector. The query page is available at `/graph/` when `sparql` is
+configured.
 
 The page also displays the latest knowledge graph update when the endpoint
 provides `<https://bartoc.org/graph/> dct:modified ?updated` in the named graph

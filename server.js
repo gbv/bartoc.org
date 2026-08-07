@@ -82,7 +82,7 @@ app.use(redirectsRoute)
 app.use("/api", apiRoute)
 app.use(uriRoute)
 
-app.use("/sparql", createSparqlRoute({
+app.use(createSparqlRoute({
   endpoint: config.sparql,
   examples: config.sparqlExamples,
   render,

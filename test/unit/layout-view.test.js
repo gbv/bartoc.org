@@ -48,7 +48,7 @@ describe("layout view", () => {
   })
 
   it("includes page-specific assets", async () => {
-    document.documentElement.innerHTML = await renderLayout("/sparql", {
+    document.documentElement.innerHTML = await renderLayout("/graph/", {
       stylesheets: [
         "/vendor/yasgui/yasgui.min.css",
         "/vendor/fontawesome/css/all.min.css",

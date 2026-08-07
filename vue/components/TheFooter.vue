@@ -51,7 +51,7 @@ const externalLinks = [
 const internalLinks = [
   { href: "/api/", label: "API" },
   { href: "/download", label: "download" },
-  { href: "/sparql", label: "SPARQL" },
+  { href: "/graph/", label: "SPARQL" },
 ]
 
 const resourceFormatLinks = computed(() => {
