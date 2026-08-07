@@ -117,10 +117,18 @@ function loadExample(event) {
   }
 }
 
+function disableGeoPlugin() {
+  if (window.Yasr?.defaults?.plugins) {
+    window.Yasr.defaults.plugins.Geo = false
+  }
+}
+
 onMounted(() => {
   loadUpdatedAt()
 
   try {
+    disableGeoPlugin()
+
     yasgui = new window.Yasgui(yasguiElement.value, {
       autofocus: false,
       persistenceId: null,

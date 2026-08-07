@@ -22,6 +22,12 @@ class YasguiMock {
   }
 }
 
+const yasrDefaults = {
+  plugins: {
+    Geo: { enabled: true },
+  },
+}
+
 describe("SparqlPage", () => {
   beforeEach(() => {
     fetchMock.mockReset().mockResolvedValue({
@@ -30,6 +36,7 @@ describe("SparqlPage", () => {
     })
     vi.stubGlobal("fetch", fetchMock)
     vi.stubGlobal("Yasgui", YasguiMock)
+    vi.stubGlobal("Yasr", { defaults: yasrDefaults })
   })
 
   afterEach(() => {
@@ -50,6 +57,7 @@ describe("SparqlPage", () => {
       requestConfig: { endpoint, method: "POST" },
       yasqe: { value: "ASK {}" },
     })
+    expect(window.Yasr.defaults.plugins.Geo).toBe(false)
     expect(yasgui.options.endpointCatalogueOptions.getData()).toEqual([{ endpoint }])
 
     await wrapper.get("#sparql-example").setValue("0")
