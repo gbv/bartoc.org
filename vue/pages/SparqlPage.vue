@@ -183,8 +183,12 @@ onBeforeUnmount(() => {
   --yasgui-border-color: var(--cc-border-color);
   --yasgui-bg-primary: var(--cc-color-surface);
   --yasgui-bg-secondary: var(--cc-color-surface-muted);
+  --yasgui-graph-button-bg: var(--cc-color-primary);
+  --yasgui-graph-button-hover: var(--cc-color-primary-hover);
+  --yasgui-graph-button-text: var(--cc-color-on-primary);
 
   min-height: 800px;
+  margin-bottom: var(--cc-space-xl);
 }
 
 .sparql-yasgui :deep(.yasqe_queryButton) {
