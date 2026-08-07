@@ -2,14 +2,14 @@
   <h1>Knowledge Graph</h1>
   <p>
     Terminology metadata is merged into a knowledge graph with
-    SPARQL API at <code>{{ endpoint }}</code>.
+    SPARQL API at <code>{{ endpoint }}</code>
+    <span
+      v-if="updatedAt">
+      updated at
+      <time :datetime="updatedAt">{{ formattedUpdatedAt() }}</time>.
+    </span>
   </p>
-  <p
-    v-if="updatedAt"
-    class="sparql-last-updated text-muted">
-    Knowledge graph last updated:
-    <time :datetime="updatedAt">{{ formattedUpdatedAt() }}</time>.
-  </p>
+
 
   <div
     v-if="examples.length"
