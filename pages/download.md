@@ -2,19 +2,16 @@
 title: Download
 ---
 
-The content of BARTOC is available in several formats under the [Public Domain Dedication and License](http://www.opendatacommons.org/licenses/pddl/1.0/) (Public Domain).
+The content of BARTOC is available in several formats under the [Public Domain Dedication and License](http://www.opendatacommons.org/licenses/pddl/1.0/) (Public Domain). Content of individual terminologies listed in and available *via* BARTOC has individual licenses.
 
-## Linked Open Data
+## Linked Open Data (RDF)
 
-Each entry is identifier by an URI of the form `http://bartoc.org/en/node/{ID}` where `{ID}` is a number.
-For instance the International Classification of Diseases (ICD) has URI [http://bartoc.org/en/node/447](/en/node/447) (mind it starts with `http://`, not `https://`).
-Each BARTOC entry can be accessed in RDF N-Triples format by appending
-`?format=nt` to its URI. The footer contains a corresponding "RDF" link.
+Each record is identifier by an URI of the form `http://bartoc.org/en/node/{ID}` where `{ID}` is a number.
+For instance the International Classification of Diseases (ICD) has URI [http://bartoc.org/en/node/447](/en/node/447) (mind it starts with `http://`, not `https://`). Record data can be accessed in RDF by appending `?format=nt` or `?format=rdfxml` to its URI. The footer contains a corresponding links **RDF** and **XML**. RDF data of all records is aggregated daily in a triple store with SPARQL query interface at <http://bartoc.org/graph/>.
 
 ## JSKOS format
 
-Each BARTOC entry can be accessed in [JSKOS format](https://gbv.github.io/jskos/) by appending
-`?format=json` to its URI. The footer contains a corresponding "JSON" link.
+Each BARTOC entry can be accessed in [JSKOS format](https://gbv.github.io/jskos/) by appending `?format=json` to its URI. The footer contains a corresponding **JSON** link.
 
 ## API
 
