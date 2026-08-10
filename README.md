@@ -87,10 +87,10 @@ example selector. The query page is available at `/graph/` when `sparql` is
 configured.
 
 The page also displays the latest knowledge graph update when the endpoint
-provides `<https://bartoc.org/graph/> dct:modified ?updated` in the named graph
-`<https://bartoc.org/graph/metadata/>`. This metadata is optional: if it is
-missing or cannot be retrieved, the query editor remains available without the
-timestamp.
+provides `<https://bartoc.org/graph/terminology/> dct:modified ?updated` in the
+named graph `<https://bartoc.org/graph/terminology/>`. This metadata is
+optional: if it is missing or cannot be retrieved, the query editor remains
+available without the timestamp.
 
 ### jskos-server Configuration
 To be able to use the full functionality of BARTOC, your jskos-server installation must allow concept schemes to be written via the API, e.g.:
