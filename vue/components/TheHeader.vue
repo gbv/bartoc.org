@@ -1,7 +1,7 @@
 <template>
   <BartocHeader
     :site-name="siteName"
-    home-url="./"
+    home-url="/"
     logo-url="/img/bartoc-logo-new.png"
     logo-alt="BARTOC"
     :nav-links="navLinks"

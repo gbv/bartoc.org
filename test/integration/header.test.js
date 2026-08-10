@@ -35,6 +35,7 @@ describe("shared header integration", () => {
 
     expect(wrapper.find(".bartoc-header__user-status > .user-status > a").exists()).toBe(true)
     expect(wrapper.find(".bartoc-header__user-status .user-status-dropdown").exists()).toBe(true)
+    expect(wrapper.get(".bartoc-header__logo-link").attributes("href")).toBe("/")
     expect(wrapper.get("a[href='/stats']").attributes("aria-current")).toBe("page")
     expect(wrapper.get("a[href='/contact']").text()).toBe("Contact & Editors")
     expect(wrapper.get("a[href='/edit']").text()).toBe("add")
