@@ -3,11 +3,11 @@
     :show="items.length > 0"
     :label="label"
     :icon="icon">
-    <ul :class="['metadata-list', `list-${style}`]">
+    <ul :class="['metadata-list', `list-${listStyle}`]">
       <li
         v-for="(item, index) in items"
         :key="itemKey(item, index)"
-        :class="style === 'inline' ? 'list-inline-item' : undefined">
+        :class="listStyle === 'inline' ? 'list-inline-item' : undefined">
         <slot
           name="item"
           :item="item">
@@ -36,7 +36,7 @@ defineProps({
     type: Array,
     default: () => [],
   },
-  style: {
+  listStyle: {
     type: String,
     default: "unstyled",
     validator: value => ["inline", "unstyled"].includes(value),

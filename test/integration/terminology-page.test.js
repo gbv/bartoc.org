@@ -126,6 +126,7 @@ describe("TerminologyPage", () => {
     ])
     expect(rowByLabel(wrapper, "Subject").text()).toContain("Manual Subject (100)")
     expect(rowByLabel(wrapper, "Subject").text()).not.toContain("Derived Subject")
+    expect(rowByLabel(wrapper, "Subject").get("ul").classes()).toContain("list-inline")
     expect(rowByLabel(wrapper, "Derived Subjects").text()).toContain("Derived Subject (200)")
     expect(rowByLabel(wrapper, "Version of").text()).toContain("Earlier Version (122) · since 2020 · 100 concepts")
     expect(rowByLabel(wrapper, "Versions").text()).toContain("Later Version")

@@ -33,7 +33,7 @@
         <MetadataListRow
           label="KOS Type"
           :items="kosTypeUris"
-          style="inline">
+          list-style="inline">
           <template #item="{ item: uri }">
             <ItemLink
               :item="nkosTypes[uri] || { uri }"
@@ -54,7 +54,7 @@
         <MetadataListRow
           label="Subject"
           :items="manualSubjects"
-          style="inline">
+          list-style="inline">
           <template #item="{ item: subject }">
             <ItemLink
               :item="subject"
@@ -66,7 +66,7 @@
         <MetadataListRow
           label="Derived Subjects"
           :items="derivedSubjects"
-          style="inline">
+          list-style="inline">
           <template #item="{ item: subject }">
             <ItemLink
               :item="subject"
@@ -79,7 +79,7 @@
           icon="language"
           label="Languages"
           :items="item.languages"
-          style="inline" />
+          list-style="inline" />
 
         <MetadataRow
           :show="Boolean(item.startDate)"
@@ -140,7 +140,7 @@
         <MetadataListRow
           label="Access"
           :items="item.ACCESS"
-          style="inline">
+          list-style="inline">
           <template #item="{ item: access }">
             <ItemLink :item="accessTypes[access.uri] || access" />
           </template>
@@ -149,7 +149,7 @@
         <MetadataListRow
           label="License"
           :items="item.license"
-          style="inline">
+          list-style="inline">
           <template #item="{ item: license }">
             <ItemLink
               :item="license"
@@ -160,7 +160,7 @@
         <MetadataListRow
           label="Format"
           :items="item.FORMAT"
-          style="inline">
+          list-style="inline">
           <template #item="{ item: format }">
             <ItemLink :item="formats[format.uri] || format" />
           </template>
@@ -215,7 +215,7 @@
         <MetadataListRow
           label="Languages"
           :items="item.languages"
-          style="inline" />
+          list-style="inline" />
       </table>
 
       <template v-if="item.API">
