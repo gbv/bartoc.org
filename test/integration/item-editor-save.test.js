@@ -45,6 +45,33 @@ describe("ItemEditor save service", () => {
     })
   })
 
+  it("prepares a version without an abstract", async () => {
+    const result = await prepareItemForSave({
+      item: makeItem({
+        definition: { en: [""] },
+        API: [],
+        versionOf: [{
+          uri: "http://bartoc.org/en/node/21133",
+          prefLabel: { en: ["Base terminology"] },
+        }],
+      }),
+      trimItemIdentifiers: vi.fn(),
+    })
+
+    expect({
+      method: result.method,
+      body: JSON.parse(result.body),
+    }).toEqual({
+      method: "PUT",
+      body: {
+        uri: "http://bartoc.org/en/node/123",
+        prefLabel: { en: ["Title"] },
+        type: [CONCEPT_SCHEME_TYPE],
+        versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      },
+    })
+  })
+
   it("prepares new items as POST requests with the next BARTOC URI", async () => {
     const fetchImpl = vi.fn(async () => ({
       json: async () => [{ uri: "http://bartoc.org/en/node/123" }],
