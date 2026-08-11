@@ -31,7 +31,12 @@
   <form-row :label="'Abstracts'">
     <abstracts-editor
       v-model="item.definition"
-      require-english />
+      :require-english="requireEnglish" />
+    <div
+      v-if="!requireEnglish"
+      class="form-text text-muted">
+      An English abstract is optional because this terminology is a version of another BARTOC terminology.
+    </div>
   </form-row>
   <form-row :label="'Languages'">
     <language-select
@@ -254,6 +259,7 @@ import {
   itemError as validateItem,
   normalizeEditableItem,
   parseNotationExamples,
+  hasValidVersionOf,
 } from "../utils/itemEditor.js"
 import { saveVocabularyItem } from "../utils/itemEditorSave.js"
 
@@ -333,6 +339,8 @@ const type = computed(() => item.type.map((uri) => ({ uri })))
 const showVersionOfEditor = computed(() =>
   !props.hasIncomingVersions || item.versionOf.length > 0,
 )
+
+const requireEnglish = computed(() => !hasValidVersionOf(item))
 
 const jskosPreview = computed(() => {
   // Clone to avoid mutating the live form state.

@@ -123,6 +123,27 @@ describe("AbstractsEditor", () => {
     )
   })
 
+  it("reacts when the English abstract requirement changes", async () => {
+    const w = mountAbstracts({
+      modelValue: {},
+      requireEnglish: false,
+    })
+
+    await w.setProps({ requireEnglish: true })
+
+    expect(w.findAll("textarea")).toHaveLength(1)
+    expect(w.text()).toContain(
+      "Every terminology should have an English abstract at least.",
+    )
+
+    await w.setProps({ requireEnglish: false })
+
+    expect(w.findAll("textarea")).toHaveLength(1)
+    expect(w.text()).not.toContain(
+      "Every terminology should have an English abstract at least.",
+    )
+  })
+
   it("adds another abstract row", async () => {
     const w = mountAbstracts({
       modelValue: {

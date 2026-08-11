@@ -75,6 +75,8 @@ const AbstractsEditorStub = {
 }
 
 const conceptSchemeType = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+const optionalEnglishMessage =
+  "An English abstract is optional because this terminology is a version of another BARTOC terminology."
 
 function mountEditor(current = {}, props = {}) {
   return mount(ItemEditor, {
@@ -349,6 +351,31 @@ describe("ItemEditor abstracts", () => {
     })
 
     expect(w.get("[data-testid='require-english']").text()).toBe("true")
+  })
+
+  it("updates the English requirement when versionOf changes", async () => {
+    const definition = {
+      en: ["English abstract"],
+      de: ["Deutsche Zusammenfassung"],
+    }
+    const w = mountEditor({
+      uri: "http://bartoc.org/en/node/294",
+      definition,
+      prefLabel: { en: ["Previous version"] },
+      type: [conceptSchemeType],
+    })
+
+    w.vm.item.versionOf = [{ uri: "http://bartoc.org/en/node/21133" }]
+    await nextTick()
+
+    expect(w.get("[data-testid='require-english']").text()).toBe("false")
+    expect(w.text()).toContain(optionalEnglishMessage)
+
+    w.vm.item.versionOf = []
+    await nextTick()
+
+    expect(w.get("[data-testid='require-english']").text()).toBe("true")
+    expect(w.vm.item.definition).toEqual(definition)
   })
 
   it("updates item.definition when AbstractsEditor emits a new value", async () => {
