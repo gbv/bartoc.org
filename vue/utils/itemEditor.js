@@ -20,6 +20,13 @@ const arrayFields = [
   "basedOn",
 ]
 
+function isBartocUri(uri) {
+  return (
+    typeof uri === "string" &&
+    /^http:\/\/bartoc\.org\/en\/node\/[1-9][0-9]+$/.test(uri)
+  )
+}
+
 export function normalizeEditableItem(current = {}) {
   const item = current || {}
 
@@ -65,15 +72,19 @@ export function itemError(item) {
   if (!Object.keys(item.prefLabel).length) {
     return { message: "item must have at least a title!" }
   }
-  if (!item.definition?.en?.some(text => text?.trim() || "")) {
-    return { message: "Please provide at least one English abstract." }
-  }
 
   if (hasSelfReference(item, "versionOf")) {
     return { message: "A vocabulary cannot be a version of itself." }
   }
+
   if (hasSelfReference(item, "basedOn")) {
     return { message: "A vocabulary cannot be based on itself." }
+  }
+
+  const hasEnglishAbstract = item.definition?.en?.some(text => text?.trim())
+
+  if (!hasEnglishAbstract && !hasValidVersionOf(item)) {
+    return { message: "Please provide at least one English abstract." }
   }
 
   if (item.publisher?.length) {
@@ -165,4 +176,16 @@ function filtered(value, parentKey = null) {
   } else {
     return value
   }
+}
+
+// Check if the item has a valid versionOf reference.
+export function hasValidVersionOf(item) {
+  const references = item?.versionOf
+
+  return (
+    Array.isArray(references) &&
+    references.length === 1 &&
+    isBartocUri(normalizedUri(references[0]?.uri)) &&
+    !hasSelfReference(item, "versionOf")
+  )
 }

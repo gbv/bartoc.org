@@ -7,6 +7,7 @@ import {
   itemError,
   normalizeEditableItem,
   parseNotationExamples,
+  hasValidVersionOf,
 } from "../../vue/utils/itemEditor.js"
 
 describe("ItemEditor business logic", () => {
@@ -98,6 +99,44 @@ describe("ItemEditor business logic", () => {
     })).toBeUndefined()
   })
 
+  it("allows a version record without an English abstract", () => {
+    expect(itemError({
+      prefLabel: { en: ["Version title"] },
+      definition: {},
+      versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      publisher: [],
+    })).toBeUndefined()
+  })
+
+  it.each([
+    ["an empty relation", []],
+    ["an empty URI", [{ uri: "" }]],
+    ["a non-BARTOC URI", [{ uri: "https://example.org/terminology/base" }]],
+    ["multiple references", [
+      { uri: "http://bartoc.org/en/node/21133" },
+      { uri: "http://bartoc.org/en/node/20827" },
+    ]],
+  ])("does not let %s bypass the English abstract requirement", (_, versionOf) => {
+    expect(itemError({
+      prefLabel: { en: ["Version title"] },
+      definition: {},
+      versionOf,
+      publisher: [],
+    })).toEqual({ message: "Please provide at least one English abstract." })
+  })
+
+  it("reports a versionOf self-reference before a missing abstract", () => {
+    const uri = "http://bartoc.org/en/node/18410"
+
+    expect(itemError({
+      uri,
+      prefLabel: { en: ["Version title"] },
+      definition: {},
+      versionOf: [{ uri }],
+      publisher: [],
+    })).toEqual({ message: "A vocabulary cannot be a version of itself." })
+  })
+
   it("cleans empty fields and normalizes relation-like values", () => {
     const cleaned = cleanupItem({
       type: [],
@@ -159,5 +198,54 @@ describe("ItemEditor business logic", () => {
     expect(url.origin + url.pathname).toBe("https://github.com/gbv/bartoc.org/issues/new")
     expect(url.searchParams.get("title")).toBe("Error 500 when saving")
     expect(url.searchParams.get("body")).toBe("body with spaces")
+  })
+})
+
+describe("hasValidVersionOf", () => {
+  const itemUri = "http://bartoc.org/en/node/18410"
+  const baseUri = "http://bartoc.org/en/node/21133"
+
+  it("accepts exactly one BARTOC reference", () => {
+    expect(hasValidVersionOf({
+      uri: itemUri,
+      versionOf: [{ uri: baseUri }],
+    })).toBe(true)
+
+    expect(hasValidVersionOf({
+      uri: itemUri,
+      versionOf: [{ uri: ` ${baseUri} ` }],
+    })).toBe(true)
+  })
+
+  it("rejects a missing or empty reference", () => {
+    expect(hasValidVersionOf({})).toBe(false)
+    expect(hasValidVersionOf({ versionOf: null })).toBe(false)
+    expect(hasValidVersionOf({ versionOf: [] })).toBe(false)
+    expect(hasValidVersionOf({ versionOf: [{}] })).toBe(false)
+    expect(hasValidVersionOf({ versionOf: [{ uri: "   " }] })).toBe(false)
+  })
+
+  it("rejects a non-BARTOC reference", () => {
+    expect(hasValidVersionOf({
+      uri: itemUri,
+      versionOf: [{ uri: "https://example.org/terminology/base" }],
+    })).toBe(false)
+  })
+
+  it("rejects multiple references", () => {
+    expect(hasValidVersionOf({
+      uri: itemUri,
+      versionOf: [
+        { uri: baseUri },
+        { uri: "http://bartoc.org/en/node/20827" },
+      ],
+    })).toBe(false)
+  })
+
+  it("rejects a self-reference", () => {
+    expect(hasValidVersionOf({
+      uri: ` ${itemUri} `,
+      versionOf: [{ uri: itemUri }],
+    })).toBe(false)
   })
 })
