@@ -82,6 +82,13 @@ const topConcepts = ref([])
 const selected = ref({})
 const display = computed(() => props.scheme.DISPLAY || {})
 
+// Let the parent page reset the selected concept when leaving the Content tab.
+function selectConcept(concept) {
+  selected.value = concept
+}
+
+defineExpose({ selectConcept })
+
 watch(selected, concept => {
   // Update URL with new selected concept
   const hash = window.location.hash
@@ -102,11 +109,6 @@ watch(selected, concept => {
 })
 
 onMounted(async () => {
-  // Define global method to select concept, even from EJS template
-  window.selectConcept = (concept) => {
-    selected.value = concept
-  }
-
   const { scheme } = props
 
   // Get URI for selected concept from URL

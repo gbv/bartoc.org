@@ -3,7 +3,6 @@ import { computed, createApp, markRaw, ref, toRefs, watch } from "vue"
 import App from "./App.vue"
 import VocabularySearch from "./components/VocabularySearch.vue"
 import ServiceLink from "./components/ServiceLink.vue"
-import ConceptBrowser from "./components/ConceptBrowser.vue"
 import RegistryList from "./components/RegistryList.vue"
 import RegistryVocabularies from "./components/RegistryVocabularies.vue"
 import { pages } from "./pages/index.js"
@@ -61,7 +60,6 @@ const EjsPageContent = markRaw({
   components: {
     VocabularySearch,
     ServiceLink,
-    ConceptBrowser,
     RegistryList,
     RegistryVocabularies,
   },

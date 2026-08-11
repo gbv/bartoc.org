@@ -341,12 +341,12 @@ async function backendDataByUri(uri) {
 }
 
 const viewsByType = {
-  "http://www.w3.org/2004/02/skos/core#ConceptScheme": "terminology",
   "http://www.w3.org/ns/dcat#Catalog": "registry",
 }
 
 const vuePagesByType = {
   "http://www.w3.org/2004/02/skos/core#Concept": "concept",
+  "http://www.w3.org/2004/02/skos/core#ConceptScheme": "terminology",
 }
 
 async function sendItem (req, res, item, vars = {}) {
@@ -373,7 +373,15 @@ async function sendItem (req, res, item, vars = {}) {
         title,
         ...(vuePage && {
           vuePage,
-          vuePageProps: { item, title },
+          vuePageProps: {
+            item,
+            title,
+            ...(vuePage === "terminology" && {
+              nkosTypes: nkostypes,
+              accessTypes: accesstypes,
+              formats,
+            }),
+          },
         }),
       })
     }

@@ -120,7 +120,6 @@ describe("ConceptBrowser", () => {
   afterEach(() => {
     utilsMocks.registryForScheme.mockReset()
     utilsMocks.sortConcepts.mockReset()
-    delete window.selectConcept
     vi.restoreAllMocks()
   })
 
@@ -171,7 +170,7 @@ describe("ConceptBrowser", () => {
     expect(new URL(window.location.href).searchParams.has("uri")).toBe(false)
   })
 
-  it("opens a concept from the URL and exposes window.selectConcept", async () => {
+  it("opens a concept from the URL and exposes concept selection", async () => {
     window.history.replaceState({}, "", "/vocabulary?uri=concept:from-url#browse")
     const registry = makeRegistry()
     utilsMocks.registryForScheme.mockReturnValue(registry)
@@ -183,11 +182,11 @@ describe("ConceptBrowser", () => {
     expect(wrapper.get("[data-testid='details-scheme']").text()).toBe("voc-id")
     expect(window.location.hash).toBe("#browse")
 
-    window.selectConcept({ uri: "concept:from-window" })
+    wrapper.vm.selectConcept({ uri: "concept:from-page" })
     await flushPromises()
 
-    expect(wrapper.get("[data-testid='details-uri']").text()).toBe("concept:from-window")
-    expect(new URL(window.location.href).searchParams.get("uri")).toBe("concept:from-window")
+    expect(wrapper.get("[data-testid='details-uri']").text()).toBe("concept:from-page")
+    expect(new URL(window.location.href).searchParams.get("uri")).toBe("concept:from-page")
     expect(window.location.hash).toBe("#browse")
   })
 })

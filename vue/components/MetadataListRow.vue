@@ -3,7 +3,7 @@
     :show="items.length > 0"
     :label="label"
     :icon="icon">
-    <ul :class="`list-${style}`">
+    <ul :class="['metadata-list', `list-${style}`]">
       <li
         v-for="(item, index) in items"
         :key="itemKey(item, index)"
@@ -49,3 +49,10 @@ function itemKey(item, index) {
     : `${item}-${index}`
 }
 </script>
+
+<style scoped>
+.metadata-list {
+  padding-left: 0;
+  list-style: none;
+}
+</style>
