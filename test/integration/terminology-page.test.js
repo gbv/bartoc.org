@@ -72,11 +72,11 @@ const item = {
   notationPattern: "[A-Z]+",
 }
 
-function mountPage() {
+function mountPage(itemOverrides = {}) {
   return mount(TerminologyPage, {
     props: {
       title: "Test Vocabulary",
-      item,
+      item: { ...item, ...itemOverrides },
       nkosTypes: {
         [typeUri]: { uri: typeUri, prefLabel: { en: "Thesaurus" } },
       },
@@ -124,6 +124,7 @@ describe("TerminologyPage", () => {
       "First paragraph",
       "Second paragraph",
     ])
+    expect(wrapper.find(".virtual-abstract").exists()).toBe(false)
     expect(rowByLabel(wrapper, "Subject").text()).toContain("Manual Subject (100)")
     expect(rowByLabel(wrapper, "Subject").text()).not.toContain("Derived Subject")
     expect(rowByLabel(wrapper, "Subject").get("ul").classes()).toContain("list-inline")
@@ -132,6 +133,35 @@ describe("TerminologyPage", () => {
     expect(rowByLabel(wrapper, "Versions").text()).toContain("Later Version")
     expect(rowByLabel(wrapper, "Based on").text()).toContain("Base Terminology")
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")
+  })
+
+  it.each([
+    [
+      "the preferred title",
+      {
+        uri: "http://bartoc.org/en/node/122",
+        prefLabel: { en: "Earlier Version" },
+        startDate: "2020",
+        extent: "100 concepts",
+      },
+      "Earlier Version",
+    ],
+    [
+      "the URI fallback",
+      { uri: "http://bartoc.org/en/node/122" },
+      "http://bartoc.org/en/node/122",
+    ],
+  ])("shows a virtual abstract using %s", (_, version, expectedLabel) => {
+    const wrapper = mountPage({
+      definition: { de: ["Deutsche Zusammenfassung"] },
+      versionOf: [version],
+    })
+
+    const virtualAbstract = wrapper.get(".virtual-abstract")
+    expect(virtualAbstract.text()).toBe(`Version of ${expectedLabel}.`)
+    expect(virtualAbstract.get("a").attributes("href")).toBe("/en/node/122")
+    expect(wrapper.text()).toContain("Deutsche Zusammenfassung")
+    expect(rowByLabel(wrapper, "Version of").text()).toContain(expectedLabel)
   })
 
   it("selects tabs from the hash and updates it on tab changes", async () => {

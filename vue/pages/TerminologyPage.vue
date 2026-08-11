@@ -12,6 +12,12 @@
     active-color="var(--cc-color-primary)"
     @change="changeTab">
     <Tab title="About">
+      <p
+        v-if="virtualAbstractTarget"
+        lang="en"
+        class="language-tag virtual-abstract">
+        Version of <ItemLink :item="virtualAbstractTarget" />.
+      </p>
       <LocalizedAbstract :abstract="item.definition" />
       <table class="table table-borderless">
         <MetadataListRow
@@ -307,6 +313,7 @@ import MetadataListRow from "../components/MetadataListRow.vue"
 import MetadataRow from "../components/MetadataRow.vue"
 import ServiceLink from "../components/ServiceLink.vue"
 import TerminologyVersionLink from "../components/TerminologyVersionLink.vue"
+import { hasValidVersionOf } from "../utils/itemEditor.js"
 
 defineOptions({ name: "TerminologyPage" })
 
@@ -344,6 +351,14 @@ const titles = computed(() => [
   ...Object.values(props.item.prefLabel || {}),
   ...Object.values(props.item.altLabel || {}).flat(),
 ])
+const hasEnglishAbstract = computed(() => (
+  props.item.definition?.en?.some(text => text?.trim()) || false
+))
+const virtualAbstractTarget = computed(() => (
+  !hasEnglishAbstract.value && hasValidVersionOf(props.item)
+    ? props.item.versionOf[0]
+    : null
+))
 const kosTypeUris = computed(() => (props.item.type || []).slice(1))
 const subjects = computed(() => props.item.subject || [])
 // Mapped subjects are derived by enrichment; subjects without MAPPING were assigned manually.
