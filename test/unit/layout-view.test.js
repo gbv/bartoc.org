@@ -39,7 +39,7 @@ describe("layout view", () => {
     expect(document.querySelector("#header-app")).not.toBeNull()
     expect(document.querySelector("#footer-app")).not.toBeNull()
     expect(app.tagName).toBe("MAIN")
-    expect(app.classList.contains("container")).toBe(true)
+    expect(app.classList.contains("app-container")).toBe(true)
     expect(app.dataset.pagePath).toBe("/stats")
     expect(app.querySelector("#page-content").textContent).toBe("Page")
     expect(app.querySelector("bartoc-header")).toBeNull()
