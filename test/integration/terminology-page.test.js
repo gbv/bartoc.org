@@ -124,7 +124,7 @@ describe("TerminologyPage", () => {
       "First paragraph",
       "Second paragraph",
     ])
-    expect(wrapper.find(".virtual-abstract").exists()).toBe(false)
+    expect(wrapper.find("[data-testid='virtual-abstract']").exists()).toBe(false)
     expect(rowByLabel(wrapper, "Subject").text()).toContain("Manual Subject (100)")
     expect(rowByLabel(wrapper, "Subject").text()).not.toContain("Derived Subject")
     expect(rowByLabel(wrapper, "Subject").get("ul").classes()).toContain("list-inline")
@@ -162,6 +162,12 @@ describe("TerminologyPage", () => {
     expect(virtualAbstract.get("a").attributes("href")).toBe("/en/node/122")
     expect(wrapper.text()).toContain("Deutsche Zusammenfassung")
     expect(rowByLabel(wrapper, "Version of").text()).toContain(expectedLabel)
+  })
+
+  it("shows a virtual abstract when the definition is empty", () => {
+    const wrapper = mountPage({ definition: {} })
+
+    expect(wrapper.get("[data-testid='virtual-abstract']").text()).toContain("Earlier Version")
   })
 
   it("selects tabs from the hash and updates it on tab changes", async () => {
