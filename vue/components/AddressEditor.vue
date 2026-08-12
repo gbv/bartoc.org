@@ -1,5 +1,5 @@
 <template>
-  <table class="table-sm">
+  <table class="cc-table cc-table--compact">
     <tbody>
       <tr>
         <td>Street address</td>

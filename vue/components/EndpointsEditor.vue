@@ -1,5 +1,5 @@
 <template>
-  <table class="table table-sm table-borderless">
+  <table class="cc-table cc-table--compact">
     <thead>
       <tr class="d-flex">
         <th class="col-8">

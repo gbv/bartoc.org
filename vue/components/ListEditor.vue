@@ -1,5 +1,5 @@
 <template>
-  <table class="table table-sm table-borderless">
+  <table class="cc-table cc-table--compact">
     <tbody>
       <tr
         v-for="(entry,i) in set"

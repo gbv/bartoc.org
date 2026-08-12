@@ -3,7 +3,7 @@
     <!-- Show all selected subjects, independent from the active scheme -->
     <table
       v-if="editableSubjects.length"
-      class="table table-sm table-borderless selected-subjects">
+      class="cc-table cc-table--compact selected-subjects">
       <tbody>
         <tr
           v-for="({ subject }, i) in editableSubjects"

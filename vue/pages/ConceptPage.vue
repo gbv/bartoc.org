@@ -1,7 +1,7 @@
 <template>
   <h1>{{ title }}</h1>
 
-  <table class="table">
+  <table class="cc-table cc-table--divided">
     <MetadataRow
       v-if="scheme"
       label="Vocabulary">

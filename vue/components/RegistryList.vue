@@ -35,7 +35,7 @@
 
     <table
       v-if="filteredRegistries.length"
-      class="table table-borderless table-hover registry-list-table">
+      class="cc-table cc-table--hover registry-list-table">
       <thead>
         <tr>
           <th>Name</th>

@@ -1,6 +1,6 @@
 <template>
   <tr v-if="show">
-    <td>
+    <td class="metadata-row-label">
       <i
         v-if="icon"
         :class="`fas fa-${icon}`" />
@@ -30,3 +30,9 @@ defineProps({
   },
 })
 </script>
+
+<style scoped>
+.metadata-row-label {
+  white-space: nowrap;
+}
+</style>

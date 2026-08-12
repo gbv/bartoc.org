@@ -14,12 +14,13 @@
     <Tab title="About">
       <p
         v-if="virtualAbstractTarget"
+        data-testid="virtual-abstract"
         lang="en"
-        class="language-tag virtual-abstract">
+        class="language-tag">
         Version of <ItemLink :item="virtualAbstractTarget" />.
       </p>
       <LocalizedAbstract :abstract="item.definition" />
-      <table class="table table-borderless">
+      <table class="cc-table">
         <MetadataListRow
           label="Version of"
           :items="item.versionOf">
@@ -142,7 +143,7 @@
     </Tab>
 
     <Tab title="Access">
-      <table class="table table-borderless">
+      <table class="cc-table">
         <MetadataListRow
           label="Access"
           :items="item.ACCESS"
@@ -211,7 +212,7 @@
     </Tab>
 
     <Tab title="Content">
-      <table class="table table-borderless">
+      <table class="cc-table">
         <MetadataRow
           :show="Boolean(item.extent)"
           label="Size">
@@ -233,7 +234,7 @@
     </Tab>
 
     <Tab title="Identifiers">
-      <table class="table table-borderless">
+      <table class="cc-table">
         <MetadataRow
           :show="Boolean(item.uri)"
           icon="link"

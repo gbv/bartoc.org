@@ -157,7 +157,7 @@ describe("TerminologyPage", () => {
       versionOf: [version],
     })
 
-    const virtualAbstract = wrapper.get(".virtual-abstract")
+    const virtualAbstract = wrapper.get("[data-testid='virtual-abstract']")
     expect(virtualAbstract.text()).toBe(`Version of ${expectedLabel}.`)
     expect(virtualAbstract.get("a").attributes("href")).toBe("/en/node/122")
     expect(wrapper.text()).toContain("Deutsche Zusammenfassung")
