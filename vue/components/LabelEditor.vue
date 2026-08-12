@@ -3,19 +3,20 @@
     <tbody>
       <tr
         v-for="(label,i) in labels"
-        :key="i"
-        class="d-flex">
-        <td class="col-8">
+        :key="i">
+        <td class="label-text-column">
           <input
             v-model="label.label"
             type="text"
             class="form-control">
-        </td><td class="col-3">
+        </td>
+        <td class="label-language-column">
           <language-select
             v-model="label.language"
             class="form-control"
             :guess-from="label.label" />
-        </td><td class="col-1">
+        </td>
+        <td class="label-actions-column">
           <button
             v-if="labels.length > 1"
             type="button"
@@ -95,3 +96,17 @@ watch(labels, (value) => {
 }, { deep: true })
 
 </script>
+
+<style scoped>
+.label-text-column {
+  width: 66.667%;
+}
+
+.label-language-column {
+  width: 25%;
+}
+
+.label-actions-column {
+  width: 8.333%;
+}
+</style>

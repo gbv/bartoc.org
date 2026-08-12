@@ -51,7 +51,7 @@
         <tr
           v-for="registry in filteredRegistries"
           :key="registry.uri">
-          <td class="align-middle">
+          <td>
             <a :href="registryUrl(registry)">
               {{ registryLabel(registry) }}
             </a>
@@ -65,15 +65,15 @@
             </a>
           </td>
 
-          <td class="align-middle">
+          <td>
             {{ functionTitle(registry) }}
           </td>
 
-          <td class="align-middle text-muted registry-description">
+          <td class="text-muted registry-description">
             {{ registryDescription(registry) }}
           </td>
 
-          <td class="align-middle registry-terminologies-count">
+          <td class="registry-terminologies-count">
             <span
               v-if="isTerminologyCountLoading(registry)"
               class="registry-count-loading"
@@ -92,7 +92,7 @@
             </a>
           </td>
 
-          <td class="align-middle">
+          <td>
             <template v-if="registryApis(registry).length">
               <span
                 v-for="(api, index) in registryApis(registry)"

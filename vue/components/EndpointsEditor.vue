@@ -1,11 +1,11 @@
 <template>
   <table class="cc-table cc-table--compact">
     <thead>
-      <tr class="d-flex">
-        <th class="col-8">
+      <tr>
+        <th class="endpoint-url-column">
           URL
         </th>
-        <th class="col-3">
+        <th class="endpoint-type-column">
           API type
         </th>
       </tr>
@@ -13,20 +13,21 @@
     <tbody>
       <tr
         v-for="(api,i) in endpoints"
-        :key="i"
-        class="d-flex">
-        <td class="col-8">
+        :key="i">
+        <td class="endpoint-url-column">
           <input
             v-model="api.url"
             type="text"
             class="form-control">
-        </td><td class="col-3">
+        </td>
+        <td class="endpoint-type-column">
           <item-select
             v-model="api.type"
             :scheme="apiTypesScheme"
             :depth="2"
             :extract-label="jskos.prefLabel" />
-        </td><td class="col-1">
+        </td>
+        <td class="endpoint-actions-column">
           <button
             v-if="endpoints.length > 1"
             type="button"
@@ -74,3 +75,17 @@ function remove(i) {
   endpoints.value.splice(i, 1)
 }
 </script>
+
+<style scoped>
+.endpoint-url-column {
+  width: 66.667%;
+}
+
+.endpoint-type-column {
+  width: 25%;
+}
+
+.endpoint-actions-column {
+  width: 8.333%;
+}
+</style>
