@@ -16,6 +16,8 @@ describe("StatsPage", () => {
     expect(wrapper.get("a[href='/vocabularies']").text()).toBe("2345 vocabularies")
     expect(wrapper.get("a[href='/data/reports/growth.csv']").exists()).toBe(true)
     expect(wrapper.get("a[href='/data/reports/stats.json']").exists()).toBe(true)
+    expect(wrapper.findAll(".stats-panel")).toHaveLength(4)
+    expect(wrapper.findAll(".stats-panel--summary")).toHaveLength(2)
 
     const reportLinks = wrapper.findAll(".action-group a")
     expect(reportLinks.map(link => link.text())).toEqual([
@@ -37,5 +39,6 @@ describe("StatsPage", () => {
 
     expect(wrapper.text()).not.toContain("Daily Data Quality Reports")
     expect(wrapper.find(".action-group").exists()).toBe(false)
+    expect(wrapper.findAll(".stats-panel")).toHaveLength(3)
   })
 })
