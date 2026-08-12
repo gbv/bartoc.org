@@ -159,7 +159,7 @@ defineExpose({ focus })
 
 <style src="@vueform/multiselect/themes/default.css"></style>
 <style>
-/* Adjust for Bootstrap CSS */
+/* Align Multiselect with the shared form controls. */
 div.multiselect {
   padding: 0;
   --ms-max-height: 300px;
@@ -169,8 +169,5 @@ div.multiselect-input, div.multiselect-options {
 }
 div.multiselect-options {
   overflow-x: hidden;
-}
-div.multiselect.form-control {
-  height: inherit;
 }
 </style>

@@ -8,7 +8,7 @@
           <input
             v-model="set[i]"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td><td>
           <div
             v-if="set.length > 1"

@@ -20,7 +20,7 @@
     <input
       v-model="item.notation[0]"
       type="text"
-      class="form-control">
+      class="cc-form-control">
     Common, unique abbreviation, acronym, or notation the vocabulary is known
     under.
   </form-row>
@@ -41,14 +41,14 @@
   <form-row :label="'Languages'">
     <language-select
       v-model="item.languages"
-      class="form-control"
+      class="cc-form-control"
       :repeatable="true" />
   </form-row>
   <form-row :label="'Size'">
     <input
       v-model="item.extent"
       type="text"
-      class="form-control">
+      class="cc-form-control">
     Number of classes, subclasses, taxa, terms, concepts etc. Please add date in
     parenthesis (YYYY-MM).
   </form-row>
@@ -82,7 +82,7 @@
     <input
       v-model="item.startDate"
       type="text"
-      class="form-control"
+      class="cc-form-control"
       maxlength="4">
     The year when the KOS was first created (YYYY).
   </form-row>
@@ -96,7 +96,7 @@
     <input
       v-model="item.url"
       type="text"
-      class="form-control">
+      class="cc-form-control">
   </form-row>
   <form-row :label="'Additional links'">
     <list-editor
@@ -127,7 +127,7 @@
     <input
       v-model="item.CONTACT"
       type="text"
-      class="form-control">
+      class="cc-form-control">
     email address of anyone in charge of the vocabulary
   </form-row>
   <form-row label="Listed In">
@@ -172,25 +172,25 @@
     <input
       v-model="item.namespace"
       type="text"
-      class="form-control">
+      class="cc-form-control">
   </form-row>
   <form-row :label="'notation pattern'">
     <input
       v-model="item.notationPattern"
       type="text"
-      class="form-control">
+      class="cc-form-control">
   </form-row>
   <form-row :label="'URI pattern'">
     <input
       v-model="item.uriPattern"
       type="text"
-      class="form-control">
+      class="cc-form-control">
   </form-row>
   <form-row :label="'example notations'">
     <input
       v-model="examples"
       type="text"
-      class="form-control">
+      class="cc-form-control">
     Please use comma to separate multiple notations.
   </form-row>
   <hr>

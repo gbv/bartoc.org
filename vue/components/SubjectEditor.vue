@@ -62,7 +62,7 @@
       <div class="picker-scheme">
         <select
           v-model="activeSchemeUri"
-          class="form-control">
+          class="cc-form-control">
           <option
             v-for="s in indexingSchemes"
             :key="s.uri"

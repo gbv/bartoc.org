@@ -6,7 +6,7 @@
           <input
             v-model.trim="name"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td>
         <td>Name</td>
       </tr>
@@ -15,7 +15,7 @@
           <input
             v-model.trim="uri"
             type="text"
-            class="form-control"
+            class="cc-form-control"
             :class="{ 'is-invalid': uriInvalid }">
           <div
             v-if="uriInvalid"
@@ -92,3 +92,13 @@ function emitValue() {
   emit("update:modelValue", [publisher])
 }
 </script>
+
+<style scoped>
+.cc-form-control.is-invalid {
+  border-color: var(--cc-color-danger);
+}
+
+.cc-form-control.is-invalid:focus {
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--cc-color-danger) 25%, transparent);
+}
+</style>

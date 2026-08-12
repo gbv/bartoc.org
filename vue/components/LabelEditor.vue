@@ -8,12 +8,12 @@
           <input
             v-model="label.label"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td>
         <td class="label-language-column">
           <language-select
             v-model="label.language"
-            class="form-control"
+            class="cc-form-control"
             :guess-from="label.label" />
         </td>
         <td class="label-actions-column">

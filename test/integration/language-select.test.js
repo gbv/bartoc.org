@@ -60,10 +60,10 @@ describe("LanguageSelect", () => {
   })
 
   it("passes fallthrough attributes to ItemSelect only", () => {
-    const w = mountLang({ modelValue: "", class: "form-control" })
+    const w = mountLang({ modelValue: "", class: "cc-form-control" })
 
-    expect(w.get(".language-select").classes()).not.toContain("form-control")
-    expect(w.get("[data-testid='item-select']").classes()).toContain("form-control")
+    expect(w.get(".language-select").classes()).not.toContain("cc-form-control")
+    expect(w.get("[data-testid='item-select']").classes()).toContain("cc-form-control")
   })
 
   it("non-repeatable: emits a string and ignores arrays", async () => {

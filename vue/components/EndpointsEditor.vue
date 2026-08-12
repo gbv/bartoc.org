@@ -18,7 +18,7 @@
           <input
             v-model="api.url"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td>
         <td class="endpoint-type-column">
           <item-select

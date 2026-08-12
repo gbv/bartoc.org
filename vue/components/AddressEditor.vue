@@ -7,7 +7,7 @@
           <input
             v-model="street"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td>
       </tr><tr>
         <td />
@@ -15,7 +15,7 @@
           <input
             v-model="ext"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td>
       </tr><tr>
         <td>City</td>
@@ -23,7 +23,7 @@
           <input
             v-model="locality"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td>
       </tr><tr>
         <td>Region/State</td>
@@ -31,7 +31,7 @@
           <input
             v-model="region"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td>
       </tr><tr>
         <td>Postal code</td>
@@ -39,7 +39,7 @@
           <input
             v-model="code"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td>
       </tr><tr>
         <td>Country</td>
@@ -47,7 +47,7 @@
           <input
             v-model="country"
             type="text"
-            class="form-control">
+            class="cc-form-control">
         </td>
       </tr>
     </tbody>

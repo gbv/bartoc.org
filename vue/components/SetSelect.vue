@@ -4,7 +4,7 @@
     v-model="value"
     multiple
     :size="options.length"
-    class="form-control">
+    class="cc-form-control">
     <option
       v-for="opt in options"
       :key="opt.uri"
@@ -15,7 +15,7 @@
   <select
     v-else
     v-model="value"
-    class="form-control">
+    class="cc-form-control">
     <option
       v-for="opt in options"
       :key="opt.uri"

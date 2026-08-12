@@ -9,7 +9,7 @@
         class="abstract-main">
         <textarea
           v-model="row.text"
-          class="form-control"
+          class="cc-form-control"
           rows="6"
           @input="emitValue"
           @blur="pruneEmptyRow(row.id)" />
@@ -21,7 +21,7 @@
         class="abstract-side">
         <language-select
           v-model="row.lang"
-          class="form-control"
+          class="cc-form-control"
           :repeatable="false"
           :guess-from="row.text"
           @update:modelValue="emitValue" />
