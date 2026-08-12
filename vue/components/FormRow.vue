@@ -1,11 +1,9 @@
 <template>
-  <div class="form-group row">
+  <div class="editor-form-row">
     <label
       v-if="hasLabel"
-      class="col-form-label col-sm-2">{{ label }}</label>
-    <div
-      :class="contentClass"
-      class="font-weight-light">
+      class="editor-form-label">{{ label }}</label>
+    <div class="editor-form-content font-weight-light">
       <slot />
     </div>
   </div>
@@ -19,5 +17,33 @@ const props = defineProps({
 })
 
 const hasLabel = computed(() => props.label.trim().length > 0)
-const contentClass = computed(() => hasLabel.value ? "col-sm-10" : "col-sm-12")
 </script>
+
+<style scoped>
+.editor-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: var(--cc-space-md);
+}
+
+.editor-form-label {
+  flex: 0 0 100%;
+  padding-block: var(--cc-space-sm);
+  margin-bottom: 0;
+}
+
+.editor-form-content {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+@media (min-width: 36rem) {
+  .editor-form-label {
+    flex: 1 1 0;
+  }
+
+  .editor-form-content {
+    flex: 5 1 0;
+  }
+}
+</style>

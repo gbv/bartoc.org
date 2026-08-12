@@ -34,7 +34,7 @@
       :require-english="requireEnglish" />
     <div
       v-if="!requireEnglish"
-      class="form-text text-muted">
+      class="editor-help-text text-muted">
       An English abstract is optional because this terminology is a version of another BARTOC terminology.
     </div>
   </form-row>
@@ -142,28 +142,26 @@
     <endpoints-editor v-model="item.API" />
   </form-row>
   <form-row label="Display options">
-    <div class="form-check">
+    <div class="editor-display-option">
       <input
         id="hideNotation"
         v-model="item.DISPLAY.hideNotation"
-        type="checkbox"
-        class="form-check-input">
-      <label
-        for="hideNotation"
-        class="form-check-label">hide notation</label>
-      it is only used as internal identifier
+        type="checkbox">
+      <div>
+        <label for="hideNotation">hide notation</label>
+        it is only used as internal identifier
+      </div>
     </div>
-    <div class="form-check">
+    <div class="editor-display-option">
       <input
         id="numericalNotation"
         v-model="item.DISPLAY.numericalNotation"
-        type="checkbox"
-        class="form-check-input">
-      <label
-        for="numericalNotation"
-        class="form-check-label">numerical notation</label>
-      concepts of this vocabulary will be sorted numerically when displayed as a
-      list
+        type="checkbox">
+      <div>
+        <label for="numericalNotation">numerical notation</label>
+        concepts of this vocabulary will be sorted numerically when displayed as
+        a list
+      </div>
     </div>
   </form-row>
   <hr>
@@ -199,9 +197,8 @@
     metadata is editable by the community of
     <a href="/contact">the BARTOC.org editors</a>.
   </p>
-  <div class="form-group row">
-    <div class="col-sm-2" />
-    <div class="col-sm-4">
+  <div class="editor-actions-row">
+    <div class="action-group">
       <button
         v-if="auth"
         class="cc-button cc-button-primary"
@@ -214,32 +211,28 @@
         @click="saveItem">
         authentification required!
       </button>
-      &nbsp;
       <button
         class="cc-button cc-button-secondary"
         onclick="location.reload()">
         reset
       </button>
     </div>
-    <div class="col-sm-4">
+    <div class="action-group">
       <input
         id="showJSKOS"
         v-model="showJSKOS"
-        type="checkbox">&nbsp;<label
+        type="checkbox"><label
           for="showJSKOS">show JSKOS record</label>
     </div>
   </div>
   <div
     v-if="error"
-    class="form-group row">
-    <div class="col-sm-2" />
-    <div class="col-sm-8">
-      <div class="alert alert-warning">
-        <p>error {{ error.status }}: {{ error.message }}</p>
-        <p
-          v-if="error.html"
-          v-html="error.html" />
-      </div>
+    class="editor-error-row">
+    <div class="alert alert-warning">
+      <p>error {{ error.status }}: {{ error.message }}</p>
+      <p
+        v-if="error.html"
+        v-html="error.html" />
     </div>
   </div>
   <pre v-show="showJSKOS">{{ jskosPreview }}</pre>
@@ -418,3 +411,43 @@ defineExpose({
   cleanupItem,
 })
 </script>
+
+<style scoped>
+.editor-help-text {
+  display: block;
+  margin-top: var(--cc-space-xs);
+}
+
+.editor-display-option {
+  display: flex;
+  align-items: baseline;
+  gap: var(--cc-space-xs);
+}
+
+.editor-actions-row {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: var(--cc-space-sm);
+  margin-bottom: var(--cc-space-md);
+}
+
+.editor-error-row {
+  margin-bottom: var(--cc-space-md);
+}
+
+@media (min-width: 36rem) {
+  .editor-actions-row {
+    flex-direction: row;
+  }
+
+  .editor-actions-row > * {
+    flex: 1 1 0;
+  }
+
+  .editor-actions-row,
+  .editor-error-row {
+    margin-inline: calc(100% / 6);
+  }
+}
+</style>

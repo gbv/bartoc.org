@@ -16,10 +16,11 @@
             v-model.trim="uri"
             type="text"
             class="cc-form-control"
-            :class="{ 'is-invalid': uriInvalid }">
+            :class="{ 'publisher-uri-input--invalid': uriInvalid }"
+            :aria-invalid="uriInvalid">
           <div
             v-if="uriInvalid"
-            class="invalid-feedback d-block">
+            class="publisher-uri-feedback">
             Please enter a valid HTTP(S) URI
           </div>
         </td>
@@ -94,11 +95,18 @@ function emitValue() {
 </script>
 
 <style scoped>
-.cc-form-control.is-invalid {
+.publisher-uri-input--invalid {
   border-color: var(--cc-color-danger);
 }
 
-.cc-form-control.is-invalid:focus {
-  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--cc-color-danger) 25%, transparent);
+.publisher-uri-input--invalid:focus {
+  box-shadow: 0 0 0 var(--cc-space-xs) var(--cc-color-danger-surface);
+}
+
+.publisher-uri-feedback {
+  display: block;
+  margin-top: var(--cc-space-xs);
+  color: var(--cc-color-danger);
+  font-size: var(--cc-font-size-sm);
 }
 </style>

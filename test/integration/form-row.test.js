@@ -13,12 +13,12 @@ function mountFormRow(props = {}) {
 }
 
 describe("FormRow", () => {
-  it("renders a label and narrow content column when label is set", () => {
+  it("renders labelled editor content when a label is set", () => {
     const wrapper = mountFormRow({ label: "Title" })
 
     expect(wrapper.get("label").text()).toBe("Title")
     expect(wrapper.get("[data-testid='field']").exists()).toBe(true)
-    expect(wrapper.get(".font-weight-light").classes()).toContain("col-sm-10")
+    expect(wrapper.get(".editor-form-content").exists()).toBe(true)
   })
 
   it("renders full-width content without a label", () => {
@@ -26,13 +26,13 @@ describe("FormRow", () => {
 
     expect(wrapper.find("label").exists()).toBe(false)
     expect(wrapper.get("[data-testid='field']").exists()).toBe(true)
-    expect(wrapper.get(".font-weight-light").classes()).toContain("col-sm-12")
+    expect(wrapper.get(".editor-form-content").exists()).toBe(true)
   })
 
   it("treats whitespace-only labels as missing", () => {
     const wrapper = mountFormRow({ label: "   " })
 
     expect(wrapper.find("label").exists()).toBe(false)
-    expect(wrapper.get(".font-weight-light").classes()).toContain("col-sm-12")
+    expect(wrapper.get(".editor-form-content").exists()).toBe(true)
   })
 })
