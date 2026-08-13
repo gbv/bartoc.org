@@ -35,8 +35,7 @@ describe("layout view", () => {
     const stylesheetUrls = Array.from(document.querySelectorAll("link[rel='stylesheet']"))
       .map(link => link.getAttribute("href"))
 
-    expect(stylesheetUrls.slice(0, 3)).toEqual([
-      "/css/bootstrap.min.css",
+    expect(stylesheetUrls.slice(0, 2)).toEqual([
       "/css/base.css",
       "/css/layout.css",
     ])
