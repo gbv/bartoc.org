@@ -96,6 +96,6 @@ describe("ConceptPage", () => {
     const rows = rowsByLabel(wrapper)
     expect(Object.keys(rows)).toEqual(["Vocabulary", "URI"])
     expect(wrapper.text()).not.toContain("vocabularies in this language")
-    expect(wrapper.find(".text-right").exists()).toBe(false)
+    expect(wrapper.find(".item-dates").exists()).toBe(false)
   })
 })

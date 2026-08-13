@@ -140,20 +140,16 @@ a, a:hover {
   margin-bottom: var(--cc-space-md);
 }
 
+.page-action {
+  float: right;
+}
+
+.item-dates {
+  text-align: right;
+}
+
 .compact-table {
   font-size: var(--cc-font-size-sm);
-}
-
-.font-weight-light {
-  font-weight: var(--cc-font-weight-light) !important;
-}
-
-.font-weight-regular {
-  font-weight: var(--cc-font-weight-regular) !important;
-}
-
-.font-weight-bold {
-  font-weight: var(--cc-font-weight-bold) !important;
 }
 
 .compact-table th,

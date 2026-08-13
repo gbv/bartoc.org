@@ -1,6 +1,6 @@
 <template>
   <ItemLink :item="item" />
-  <small class="text-muted">
+  <small class="terminology-version-details">
     <template v-if="id"> ({{ id }})</template>
     <template v-if="item.startDate"> · since {{ item.startDate }}</template>
     <template v-if="item.extent"> · {{ item.extent }}</template>
@@ -22,3 +22,9 @@ const props = defineProps({
 
 const id = computed(() => props.item.uri?.split("/").pop() || "")
 </script>
+
+<style scoped>
+.terminology-version-details {
+  color: var(--cc-color-muted);
+}
+</style>

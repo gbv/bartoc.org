@@ -119,7 +119,11 @@ describe("TerminologyPage", () => {
     const wrapper = mountPage()
 
     expect(wrapper.get("h1").text()).toBe("Test Vocabulary")
-    expect(wrapper.get("a[href='/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123']").text()).toBe("edit")
+    const editAction = wrapper.get(
+      "a[href='/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123']",
+    )
+    expect(editAction.text()).toBe("edit")
+    expect(editAction.classes()).toContain("page-action")
     expect(wrapper.findAll("p").map(paragraph => paragraph.text())).toEqual([
       "First paragraph",
       "Second paragraph",
@@ -131,6 +135,7 @@ describe("TerminologyPage", () => {
     expect(rowByLabel(wrapper, "Identifiers").get("ul").classes()).toEqual(["metadata-list"])
     expect(rowByLabel(wrapper, "Derived Subjects").text()).toContain("Derived Subject (200)")
     expect(rowByLabel(wrapper, "Version of").text()).toContain("Earlier Version (122) · since 2020 · 100 concepts")
+    expect(rowByLabel(wrapper, "Version of").get(".terminology-version-details").exists()).toBe(true)
     expect(rowByLabel(wrapper, "Versions").text()).toContain("Later Version")
     expect(rowByLabel(wrapper, "Based on").text()).toContain("Base Terminology")
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")

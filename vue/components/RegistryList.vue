@@ -15,21 +15,21 @@
     </p>
 
     <div
-      class="registry-list-filters mb-3"
+      class="registry-list-filters"
       role="group"
       aria-label="Filter registries by function">
       <button
         v-for="filter in functionFilters"
         :key="filter.id"
         type="button"
-        class="cc-button cc-button-primary mr-2 mb-2"
+        class="cc-button registry-filter-button"
         :class="activeFilters[filter.id] ? 'cc-button-primary' : 'cc-button-ghost'"
         :title="filter.description"
         :aria-label="`${filter.title}: ${filter.description}`"
         :aria-pressed="activeFilters[filter.id] ? 'true' : 'false'"
         @click="toggleFilter(filter.id)">
         {{ filter.title }}
-        <span class="badge badge-light">{{ filter.items.length }}</span>
+        <span class="registry-filter-count">{{ filter.items.length }}</span>
       </button>
     </div>
 
@@ -69,7 +69,7 @@
             {{ functionTitle(registry) }}
           </td>
 
-          <td class="text-muted registry-description">
+          <td class="registry-description">
             {{ registryDescription(registry) }}
           </td>
 
@@ -110,7 +110,7 @@
 
     <p
       v-if="!filteredRegistries.length"
-      class="text-muted">
+      class="registry-list-empty">
       No registries found.
     </p>
 
@@ -349,6 +349,13 @@ const filteredRegistries = computed(() =>
 </script>
 
 <style scoped>
+.registry-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-sm);
+  margin-bottom: var(--cc-space-lg);
+}
+
 .registry-list-table th,
 .registry-list-table td {
   vertical-align: middle;
@@ -362,6 +369,7 @@ const filteredRegistries = computed(() =>
 
 .registry-description {
   max-width: 30rem;
+  color: var(--cc-color-muted);
 }
 
 .registry-terminologies-count {
@@ -373,8 +381,23 @@ const filteredRegistries = computed(() =>
   --jskos-vue-loadingIndicator-secondary-color: var(--cc-color-primary);
 }
 
-.badge {
+.registry-filter-count {
+  display: inline-block;
+  padding: 0.25em 0.4em;
   margin-left: 0.4rem;
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-color-surface-muted);
+  color: var(--cc-color-text);
+  font-size: 75%;
+  font-weight: var(--cc-font-weight-bold);
+  line-height: 1;
+  text-align: center;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+.registry-list-empty {
+  color: var(--cc-color-muted);
 }
 
 </style>

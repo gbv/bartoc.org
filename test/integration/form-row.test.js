@@ -18,7 +18,7 @@ describe("FormRow", () => {
 
     expect(wrapper.get("label").text()).toBe("Title")
     expect(wrapper.get("[data-testid='field']").exists()).toBe(true)
-    expect(wrapper.get(".editor-form-content").exists()).toBe(true)
+    expect(wrapper.get(".editor-form-content").classes()).toEqual(["editor-form-content"])
   })
 
   it("renders full-width content without a label", () => {

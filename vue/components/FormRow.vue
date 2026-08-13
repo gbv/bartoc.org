@@ -3,7 +3,7 @@
     <label
       v-if="hasLabel"
       class="editor-form-label">{{ label }}</label>
-    <div class="editor-form-content font-weight-light">
+    <div class="editor-form-content">
       <slot />
     </div>
   </div>
@@ -35,6 +35,7 @@ const hasLabel = computed(() => props.label.trim().length > 0)
 .editor-form-content {
   flex: 0 0 100%;
   min-width: 0;
+  font-weight: var(--cc-font-weight-light);
 }
 
 @media (min-width: 36rem) {

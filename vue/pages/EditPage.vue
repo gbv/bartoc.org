@@ -1,6 +1,6 @@
 <template>
   <a
-    class="cc-button cc-button-secondary float-right"
+    class="cc-button cc-button-secondary page-action"
     :href="cancelUrl">
     cancel
   </a>

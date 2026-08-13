@@ -122,6 +122,12 @@ describe("RegistryList", () => {
       "Terminology Services: Provide access to terminologies via an API.",
       "Terminology Repositories: Contain full terminologies.",
     ])
+    expect(wrapper.findAll(".registry-filter-button")).toHaveLength(3)
+    expect(wrapper.findAll(".registry-filter-count").map(count => count.text())).toEqual([
+      "1",
+      "1",
+      "1",
+    ])
 
     expect(wrapper.text()).toContain(
       "Registries can be filtered by function.",
@@ -161,6 +167,7 @@ describe("RegistryList", () => {
     expect(wrapper.text()).toContain(
       "A terminology service provides API access to terminologies.",
     )
+    expect(wrapper.findAll(".registry-description")).toHaveLength(3)
   })
 
   it("loads terminology counts for registries", async () => {
@@ -224,5 +231,6 @@ describe("RegistryList", () => {
     const wrapper = await mountList([])
 
     expect(wrapper.text()).toContain("No registries found.")
+    expect(wrapper.get(".registry-list-empty").exists()).toBe(true)
   })
 })

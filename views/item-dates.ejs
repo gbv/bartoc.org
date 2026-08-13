@@ -1,7 +1,7 @@
 <%
   const { created, issued, modified } = item
   if (created || issued || modified) { %>
-  <ul class="item-dates separated-list text-right">
+  <ul class="item-dates separated-list">
    <% if (created) { %>
     <li><small>created <time><%= created %></time></small></li>
    <% } %>

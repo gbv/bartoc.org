@@ -34,7 +34,7 @@
       :require-english="requireEnglish" />
     <div
       v-if="!requireEnglish"
-      class="editor-help-text text-muted">
+      class="editor-help-text">
       An English abstract is optional because this terminology is a version of another BARTOC terminology.
     </div>
   </form-row>
@@ -418,6 +418,7 @@ defineExpose({
 .editor-help-text {
   display: block;
   margin-top: var(--cc-space-xs);
+  color: var(--cc-color-muted);
 }
 
 .editor-display-option {

@@ -1,7 +1,7 @@
 <template>
   <ul
     v-if="created || issued || showModified"
-    class="item-dates separated-list text-right">
+    class="item-dates separated-list">
     <li
       v-if="created">
       <small>created <time>{{ created }}</time></small>

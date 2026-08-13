@@ -1,7 +1,7 @@
 <template>
   <a
     v-if="userCanAdd"
-    class="cc-button cc-button-primary float-right"
+    class="cc-button cc-button-primary page-action"
     :href="`/edit?uri=${encodeURIComponent(item.uri)}`">
     edit
   </a>

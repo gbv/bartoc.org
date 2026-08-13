@@ -41,9 +41,11 @@ describe("EditPage", () => {
     }, { token, user })
 
     expect(wrapper.get("h1").text()).toBe("Edit vocabulary")
-    expect(wrapper.get("a").attributes("href")).toBe(
+    const cancelAction = wrapper.get("a")
+    expect(cancelAction.attributes("href")).toBe(
       "/vocabularies?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123",
     )
+    expect(cancelAction.classes()).toContain("page-action")
 
     const editor = wrapper.getComponent(ItemEditorStub)
     expect(editor.props("current")).toEqual(item)

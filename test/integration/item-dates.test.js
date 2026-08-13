@@ -15,10 +15,10 @@ describe("ItemDates", () => {
       },
     })
 
-    expect(wrapper.get("ul").classes()).toEqual(expect.arrayContaining([
+    expect(wrapper.get("ul").classes()).toEqual([
       "item-dates",
       "separated-list",
-    ]))
+    ])
     expect(wrapper.findAll("li").map(item => item.text())).toEqual([
       "created 2022-01-01",
       "issued 2023-01-01",
