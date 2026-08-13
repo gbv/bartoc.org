@@ -36,7 +36,7 @@
 
   <p
     v-if="editorFailed"
-    class="alert alert-danger"
+    class="cc-message cc-message--danger"
     role="alert">
     The SPARQL query editor could not be loaded. Reload the page to try again.
   </p>

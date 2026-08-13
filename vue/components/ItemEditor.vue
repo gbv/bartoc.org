@@ -228,7 +228,9 @@
   <div
     v-if="error"
     class="editor-error-row">
-    <div class="alert alert-warning">
+    <div
+      class="cc-message cc-message--warning"
+      role="alert">
       <p>error {{ error.status }}: {{ error.message }}</p>
       <p
         v-if="error.html"

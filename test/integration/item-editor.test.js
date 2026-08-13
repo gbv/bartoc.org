@@ -548,5 +548,9 @@ describe("ItemEditor abstracts", () => {
       status: 500,
       message: "Save failed",
     })
+
+    const errorMessage = w.get(".editor-error-row .cc-message")
+    expect(errorMessage.classes()).toContain("cc-message--warning")
+    expect(errorMessage.attributes("role")).toBe("alert")
   })
 })

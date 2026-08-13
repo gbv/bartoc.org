@@ -38,7 +38,7 @@
     <div class="abstract-actions">
       <span
         v-if="showEnglishAbstractHint"
-        class="abstract-hint alert alert-warning">
+        class="abstract-hint cc-message cc-message--warning">
         Every terminology should have an English abstract at least.
       </span>
       <button

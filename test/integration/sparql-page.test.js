@@ -91,4 +91,26 @@ describe("SparqlPage", () => {
 
     wrapper.unmount()
   })
+
+  it("shows a danger message when YASGUI cannot be initialized", async () => {
+    const initializationError = new Error("YASGUI failed")
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.stubGlobal("Yasgui", class {
+      constructor() {
+        throw initializationError
+      }
+    })
+    const wrapper = mount(SparqlPage, { props: { endpoint } })
+    await wrapper.vm.$nextTick()
+
+    const errorMessage = wrapper.get(".cc-message")
+    expect(errorMessage.classes()).toContain("cc-message--danger")
+    expect(errorMessage.attributes("role")).toBe("alert")
+    expect(consoleError).toHaveBeenCalledWith(
+      "Could not load the SPARQL query editor.",
+      initializationError,
+    )
+
+    consoleError.mockRestore()
+  })
 })

@@ -28,7 +28,8 @@ async function renderLayout(pathname = "/stats", locals = {}) {
 
 describe("layout view", () => {
   it("leaves the Vue application shell to App.vue", async () => {
-    document.documentElement.innerHTML = await renderLayout()
+    const html = await renderLayout()
+    document.documentElement.innerHTML = html
 
     const app = document.querySelector("#app")
     const stylesheetUrls = Array.from(document.querySelectorAll("link[rel='stylesheet']"))
@@ -42,6 +43,7 @@ describe("layout view", () => {
     expect(app.classList.contains("app-container")).toBe(true)
     expect(app.dataset.pagePath).toBe("/stats")
     expect(app.querySelector("#page-content").textContent).toBe("Page")
+    expect(html).toContain("class=\"cc-message cc-message--danger\"")
     expect(app.querySelector("bartoc-header")).toBeNull()
     expect(app.querySelector("the-header")).toBeNull()
     expect(app.querySelector("the-footer")).toBeNull()

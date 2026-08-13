@@ -14,6 +14,7 @@ describe("ErrorPage", () => {
 
     expect(wrapper.get("h1").text()).toBe("Backend unavailable")
     expect(wrapper.text()).toContain("Please contact the administrator")
-    expect(wrapper.get(".jumbotron").text()).toBe("Error: Backend unavailable")
+    expect(wrapper.get(".cc-message--prominent").classes()).toContain("cc-message--danger")
+    expect(wrapper.get(".cc-message--prominent").text()).toBe("Error: Backend unavailable")
   })
 })

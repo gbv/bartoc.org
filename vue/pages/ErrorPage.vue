@@ -5,7 +5,9 @@
     Sorry, we have some technical problems! Please contact the administrator and include the error message below.
   </p>
 
-  <div class="jumbotron">
+  <div
+    class="cc-message cc-message--danger cc-message--prominent"
+    role="alert">
     {{ message }}
   </div>
 </template>

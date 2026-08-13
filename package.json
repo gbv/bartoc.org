@@ -45,7 +45,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
-    "@gbv/bartoc-components": "github:gbv/bartoc-components#v0.3.0",
+    "@gbv/bartoc-components": "github:gbv/bartoc-components#v0.4.0",
     "@matdata/yasgui": "^5.20.3",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vueform/multiselect": "^2.6.10",

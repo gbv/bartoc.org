@@ -73,6 +73,10 @@ describe("AbstractsEditor", () => {
     expect(w.text()).toContain(
       "Every terminology should have an English abstract at least.",
     )
+    expect(w.get(".abstract-hint").classes()).toEqual(expect.arrayContaining([
+      "cc-message",
+      "cc-message--warning",
+    ]))
   })
 
   it("shows an empty English abstract row when required and missing", () => {
