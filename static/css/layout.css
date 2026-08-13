@@ -1,5 +1,4 @@
 body {
-  background: var(--cc-color-page);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -37,10 +36,6 @@ body {
   flex: 1 0 auto;
 }
 
-small.label-help {
-  margin-top: calc(-1 * var(--cc-space-sm));
-  margin-bottom: var(--cc-space-xs);
-}
 .separated-list {
   padding-left: 0;
   list-style: none;
@@ -61,9 +56,6 @@ small.label-help {
 }
 td > ul {
   margin-bottom: 0;
-}
-li.current-page {
-  font-weight: var(--cc-font-weight-bold);
 }
 label {
   font-weight: var(--cc-font-weight-bold);
@@ -96,10 +88,6 @@ a[href*="orcid.org"]:before {
   white-space: nowrap;
 }
 
-a, a:hover {
-  color: var(--cc-color-link);
-}
-
 .homepage {
   display: flex;
   align-items: center;
@@ -107,22 +95,6 @@ a, a:hover {
 }
 .homepage > * {
   margin: var(--cc-space-xl);
-}
-
-/* Shared UI patterns */
-.page-intro {
-  color: var(--cc-color-text);
-  font-size: var(--cc-font-size-lg);
-  line-height: 1.6;
-  margin-bottom: var(--cc-space-xl);
-}
-
-.section-group {
-  margin-bottom: var(--cc-space-xl);
-}
-
-.section-group > :last-child {
-  margin-bottom: 0;
 }
 
 .section-offset {
@@ -133,13 +105,6 @@ a, a:hover {
   padding-top: var(--cc-space-xxl);
 }
 
-.section-description {
-  color: var(--cc-color-muted);
-  font-size: var(--cc-font-size-base);
-  line-height: 1.5;
-  margin-bottom: var(--cc-space-md);
-}
-
 .page-action {
   float: right;
 }
@@ -148,95 +113,11 @@ a, a:hover {
   text-align: right;
 }
 
-.compact-table {
-  font-size: var(--cc-font-size-sm);
-}
-
-.compact-table th,
-.compact-table td {
-  padding: var(--cc-row-padding-y) var(--cc-row-padding-x);
-  vertical-align: middle;
-}
-
-.compact-table tbody tr + tr {
-  border-top: 1px solid var(--cc-border-color);
-}
-
 .action-group {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--cc-space-sm);
-}
-
-.cc-button-secondary {
-  border-color: var(--cc-border-color-strong);
-  background: var(--cc-color-surface);
-  color: var(--cc-color-text);
-}
-
-.cc-button-secondary:hover,
-.cc-button-secondary:focus {
-  border-color: var(--cc-color-primary);
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-danger {
-  border-color: var(--cc-color-danger);
-  background: var(--cc-color-danger);
-  color: var(--cc-color-on-primary);
-}
-
-.cc-button-danger:hover,
-.cc-button-danger:focus {
-  border-color: var(--cc-color-danger-hover);
-  background: var(--cc-color-danger-hover);
-  color: var(--cc-color-on-primary);
-}
-
-.cc-button-on-primary {
-  border-color: var(--cc-color-on-primary);
-  background: var(--cc-color-on-primary);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-on-primary:hover,
-.cc-button-on-primary:focus {
-  border-color: var(--cc-color-accent);
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-ghost {
-  border-color: var(--cc-border-color-strong);
-  background: transparent;
-  color: var(--cc-color-muted);
-}
-
-.cc-button-ghost:hover,
-.cc-button-ghost:focus {
-  background: transparent;
-  color: var(--cc-color-muted);
-}
-
-.cc-button-sm {
-  min-height: calc(1.5em + 0.5rem + 2px);
-  padding: 0.25rem 0.5rem;
-  font-size: var(--cc-font-size-sm);
-  line-height: 1.5;
-}
-
-.cc-button-icon {
-  width: calc(1.5em + 0.75rem + 2px);
-  min-width: calc(1.5em + 0.75rem + 2px);
-  padding-right: 0;
-  padding-left: 0;
-}
-
-.cc-button-sm.cc-button-icon {
-  width: calc(1.5em + 0.5rem + 2px);
-  min-width: calc(1.5em + 0.5rem + 2px);
 }
 
 .cc-button-group {
@@ -262,27 +143,6 @@ a, a:hover {
   margin-left: -1px;
 }
 
-.list-row,
-.selected-row {
-  display: flex;
-  align-items: center;
-  gap: var(--cc-row-gap);
-  padding: var(--cc-row-padding-y) var(--cc-row-padding-x);
-  border: 1px solid var(--cc-border-color-strong);
-  border-radius: var(--cc-radius-md);
-  background: var(--cc-color-surface);
-}
-
-.selected-row {
-  border-color: var(--cc-color-primary);
-  background: var(--cc-color-accent);
-}
-
-.list-row + .list-row,
-.selected-row + .selected-row {
-  margin-top: var(--cc-row-gap);
-}
-
 /* Vocabulary Search Bar */
 .vocabulary-search {
   padding: var(--cc-space-xl);
@@ -300,9 +160,6 @@ a, a:hover {
 }
 .vocabulary-search .bartoc-search-bar__controls {
   width: 100%;
-}
-.vocabulary-search .bartoc-search-bar__input {
-  flex-grow: 0;
 }
 .vocabulary-search .bartoc-search-bar__summary {
   padding-bottom: var(--cc-space-sm);

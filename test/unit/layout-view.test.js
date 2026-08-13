@@ -35,6 +35,11 @@ describe("layout view", () => {
     const stylesheetUrls = Array.from(document.querySelectorAll("link[rel='stylesheet']"))
       .map(link => link.getAttribute("href"))
 
+    expect(stylesheetUrls.slice(0, 3)).toEqual([
+      "/css/bootstrap.min.css",
+      "/css/base.css",
+      "/css/layout.css",
+    ])
     expect(stylesheetUrls).toContain("/vendor/gbv-login-client-vue/style.css")
     expect(stylesheetUrls).toContain("/vendor/bartoc-components/style.css")
     expect(document.querySelector("#header-app")).not.toBeNull()

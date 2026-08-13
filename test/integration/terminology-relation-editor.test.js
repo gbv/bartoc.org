@@ -58,8 +58,7 @@ const ItemSelectedStub = {
     <div data-testid="item-selected">
       <div
         v-for="item in modelValue"
-        :key="item.uri"
-        class="selected-row">
+        :key="item.uri">
         <span class="selected-notation">{{ item.notation?.[0] || '' }}</span>
         <span class="selected-label">{{ item.prefLabel?.en || '' }}</span>
       </div>
