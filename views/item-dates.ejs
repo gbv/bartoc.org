@@ -1,15 +1,15 @@
 <%
   const { created, issued, modified } = item
   if (created || issued || modified) { %>
-  <ul class="list-inline text-right">
+  <ul class="item-dates separated-list text-right">
    <% if (created) { %>
-    <li class="list-inline-item"><small>created <time><%= created %></time></small></li>
+    <li><small>created <time><%= created %></time></small></li>
    <% } %>
    <% if (issued) { %>
-    <li class="list-inline-item"><small>issued <time><%= issued %></time></small></li>
+    <li><small>issued <time><%= issued %></time></small></li>
    <% } %>
    <% if (modified && modified !== created && modified !== issued) { %>
-    <li class="list-inline-item"><small>modified <time><%= modified %></time></small></li>
+    <li><small>modified <time><%= modified %></time></small></li>
    <% } %>
   </ul>
 <% } %>

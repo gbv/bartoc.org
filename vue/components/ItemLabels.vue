@@ -1,7 +1,7 @@
 <template>
   <ul
     v-if="item.prefLabel"
-    class="list-inline">
+    class="item-label-list">
     <li
       v-for="(label, lang) in item.prefLabel"
       :key="lang">
@@ -12,7 +12,7 @@
   </ul>
   <ul
     v-if="item.altLabel"
-    class="list-inline">
+    class="item-label-list">
     <template
       v-for="(labels, lang) in item.altLabel"
       :key="lang">
@@ -27,7 +27,7 @@
   </ul>
   <ul
     v-if="item.hiddenLabel"
-    class="list-inline">
+    class="item-label-list">
     <template
       v-for="(labels, lang) in item.hiddenLabel"
       :key="lang">
@@ -53,3 +53,10 @@ const props = defineProps({
 const item = props.item
 
 </script>
+
+<style scoped>
+.item-label-list {
+  padding-left: 0;
+  list-style: none;
+}
+</style>

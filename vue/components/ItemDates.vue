@@ -1,20 +1,17 @@
 <template>
   <ul
     v-if="created || issued || showModified"
-    class="list-inline text-right">
+    class="item-dates separated-list text-right">
     <li
-      v-if="created"
-      class="list-inline-item">
+      v-if="created">
       <small>created <time>{{ created }}</time></small>
     </li>
     <li
-      v-if="issued"
-      class="list-inline-item">
+      v-if="issued">
       <small>issued <time>{{ issued }}</time></small>
     </li>
     <li
-      v-if="showModified"
-      class="list-inline-item">
+      v-if="showModified">
       <small>modified <time>{{ modified }}</time></small>
     </li>
   </ul>

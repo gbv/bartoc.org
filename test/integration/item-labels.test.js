@@ -31,5 +31,6 @@ describe("ItemLabels", () => {
       "de",
       "fr",
     ])
+    expect(wrapper.findAll(".item-label-list")).toHaveLength(3)
   })
 })

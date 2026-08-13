@@ -65,6 +65,7 @@ describe("RegistryVocabularies", () => {
     expect(wrapper.get("a[href='/en/node/18606']").text()).toBe(
       "Chinese Agricultural Thesaurus",
     )
+    expect(wrapper.get("ul").classes()).toContain("registry-vocabulary-list")
   })
 
   it("links to all terminologies with the total count", async () => {

@@ -13,7 +13,7 @@
       <template v-if="terminologyCount">
         <ul
           v-if="terminologies.length"
-          class="list-unstyled">
+          class="registry-vocabulary-list">
           <li
             v-for="terminology in terminologies"
             :key="terminology.uri">
@@ -108,3 +108,10 @@ async function loadTerminologies() {
 
 onMounted(loadTerminologies)
 </script>
+
+<style scoped>
+.registry-vocabulary-list {
+  padding-left: 0;
+  list-style: none;
+}
+</style>

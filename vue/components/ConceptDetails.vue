@@ -26,27 +26,24 @@
       </div>
       <div v-if="selected.uri || (selected.identifier||[]).length">
         <ul
-          class="list-inline concept-details-identifiers">
+          class="concept-details-identifiers separated-list">
           <li
-            v-if="selected.uri"
-            class="list-inline-item">
+            v-if="selected.uri">
             <icon name="link" />
             <a :href="selected.uri">{{ selected.uri }}</a>
           </li>
           <li
             v-for="id in (selected.identifier||[])"
-            :key="id"
-            class="list-inline-item">
+            :key="id">
             {{ id }}
           </li>
         </ul>
       </div>
       <item-labels :item="selected" />
       <item-notes :item="selected" />
-      <ul class="list-inline">
+      <ul class="concept-details-dates separated-list">
         <li
           v-if="selected.created"
-          class="list-inline-item"
           title="created">
           <icon
             name="created"
@@ -55,7 +52,6 @@
         </li>
         <li
           v-if="selected.issued"
-          class="list-inline-item"
           title="issued">
           <icon
             name="modified"
@@ -64,7 +60,6 @@
         </li>
         <li
           v-if="selected.modified"
-          class="list-inline-item"
           title="modified">
           <icon
             name="modified"

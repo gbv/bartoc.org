@@ -141,6 +141,8 @@ describe("ConceptDetails", () => {
     expect(wrapper.get("a[href='concept:selected']").text()).toBe("concept:selected")
     expect(wrapper.text()).toContain("ID-1")
     expect(wrapper.text()).toContain("2024-01-02")
+    expect(wrapper.get(".concept-details-identifiers").classes()).toContain("separated-list")
+    expect(wrapper.get(".concept-details-dates").classes()).toContain("separated-list")
   })
 
   it("emits selected ancestors and narrower concepts", async () => {

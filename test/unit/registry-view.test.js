@@ -52,11 +52,17 @@ describe("registry view", () => {
         "http://www.w3.org/ns/dcat#Catalog",
         "http://bartoc.org/full-repository",
       ],
+      identifier: ["https://example.org/registry"],
+      created: "2024-01-02",
     })
 
     const document = new JSDOM(html).window.document
     const component = document.querySelector("registry-vocabularies")
+    const identifierList = document.querySelector(".registry-metadata-list")
+    const dateList = document.querySelector(".item-dates")
 
     expect(component.getAttribute("registry-uri")).toBe("http://bartoc.org/en/node/18605")
+    expect(identifierList.textContent).toContain("https://example.org/registry")
+    expect(dateList.classList.contains("separated-list")).toBe(true)
   })
 })

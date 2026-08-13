@@ -41,12 +41,23 @@ small.label-help {
   margin-top: calc(-1 * var(--cc-space-sm));
   margin-bottom: var(--cc-space-xs);
 }
-ul.list-inline > li.list-inline-item:not(:last-child)::after {
+.separated-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.separated-list > li {
+  display: inline-block;
+}
+
+.separated-list > li:not(:last-child)::after {
   content: "\A0|\A0";
   color: var(--cc-border-color);
 }
-ul.list-inline > li.list-inline-item:not(:last-child) {
-  margin-right: 0;
+
+.registry-metadata-list {
+  padding-left: 0;
+  list-style: none;
 }
 td > ul {
   margin-bottom: 0;

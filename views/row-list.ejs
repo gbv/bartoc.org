@@ -1,6 +1,6 @@
 <%
 if (list && list.length) {
-  let style = locals.style || "unstyled"
+  const inline = locals.style === "inline"
   let view = locals.view || utils.escapeXML
   let link = s => s
   if (locals.link) {
@@ -16,10 +16,11 @@ if (list && list.length) {
       return html
     }
   }
-  let items = style === "inline"
-    ? list.map(view).map(link).map(item => `<li class="list-inline-item">${item}</li>`)
-    : list.map(view).map(link).map(item => `<li>${item}</li>`)
-  let content = `<ul class="list-${style}">${items.join("\n")}</ul>`
+  const items = list.map(view).map(link).map(item => `<li>${item}</li>`)
+  const listClass = inline
+    ? "registry-metadata-list separated-list"
+    : "registry-metadata-list"
+  const content = `<ul class="${listClass}">${items.join("\n")}</ul>`
 %>
   <%- include('row', { content }) %>
 <% } %>

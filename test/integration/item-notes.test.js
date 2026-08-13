@@ -34,5 +34,6 @@ describe("ItemNotes", () => {
       "definition",
       "definition",
     ])
+    expect(wrapper.findAll(".item-note-list")).toHaveLength(2)
   })
 })

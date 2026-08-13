@@ -2,7 +2,7 @@
   <ul
     v-for="type in noteTypes"
     :key="type"
-    class="list-inline">
+    class="item-note-list">
     <li
       v-for="note in notes(type)"
       :key="`${note.lang}:${note.note}`"
@@ -50,3 +50,10 @@ function notes(type) {
 }
 
 </script>
+
+<style scoped>
+.item-note-list {
+  padding-left: 0;
+  list-style: none;
+}
+</style>

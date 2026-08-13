@@ -3,11 +3,10 @@
     :show="items.length > 0"
     :label="label"
     :icon="icon">
-    <ul :class="['metadata-list', `list-${listStyle}`]">
+    <ul :class="['metadata-list', { 'separated-list': listStyle === 'inline' }]">
       <li
         v-for="(item, index) in items"
-        :key="itemKey(item, index)"
-        :class="listStyle === 'inline' ? 'list-inline-item' : undefined">
+        :key="itemKey(item, index)">
         <slot
           name="item"
           :item="item">
