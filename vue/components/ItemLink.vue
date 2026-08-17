@@ -14,6 +14,7 @@
 
 <script setup>
 import { computed } from "vue"
+import { isBartocUri } from "../../src/uri.js"
 
 defineOptions({ name: "ItemLink" })
 
@@ -36,8 +37,6 @@ const props = defineProps({
   },
 })
 
-const bartocUri = /^http:\/\/bartoc\.org\/en\/node\/[1-9][0-9]+$/
-
 const languageCode = computed(() => {
   const labels = props.item?.prefLabel || {}
   return props.language in labels
@@ -52,7 +51,7 @@ const href = computed(() => {
   }
 
   if (item.uri) {
-    if (bartocUri.test(item.uri)) {
+    if (isBartocUri(item.uri)) {
       return `/en/node/${item.uri.split("/").pop()}`
     }
     if (props.base) {

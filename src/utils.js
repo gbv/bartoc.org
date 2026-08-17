@@ -1,10 +1,8 @@
 import { readFileSync } from "fs"
 import config from "../config/index.js"
 import { join } from "path"
+import { isBartocUri } from "./uri.js"
 
-
-const bartocUri = new RegExp("^http://bartoc.org/en/node/[1-9][0-9]+$")
-const isBartocUri = id => id.match(bartocUri)
 
 const readLines = (baseDir, file) => readFileSync(join(baseDir, file), "utf8")
   .split(/\r?\n/)
