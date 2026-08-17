@@ -46,6 +46,7 @@ describe("layout view", () => {
     expect(app.tagName).toBe("MAIN")
     expect(app.classList.contains("app-container")).toBe(true)
     expect(app.dataset.pagePath).toBe("/stats")
+    expect(app.dataset.resourcePath).toBe("/stats")
     expect(app.querySelector("#page-content").textContent).toBe("Page")
     expect(html).toContain("class=\"cc-message cc-message--danger\"")
     expect(app.querySelector("bartoc-header")).toBeNull()
@@ -68,5 +69,17 @@ describe("layout view", () => {
     expect(stylesheetUrls).toContain("/vendor/yasgui/yasgui.min.css")
     expect(stylesheetUrls).toContain("/vendor/fontawesome/css/all.min.css")
     expect(document.querySelector("script[src='/vendor/yasgui/yasgui.min.js']")).not.toBeNull()
+  })
+
+  it("keeps the resource URL separate from the active navigation path", async () => {
+    document.documentElement.innerHTML = await renderLayout("/en/node/123", {
+      path: "/vocabularies",
+      resourcePath: "/en/node/123",
+      item: { uri: "http://bartoc.org/en/node/123" },
+    })
+
+    const app = document.querySelector("#app")
+    expect(app.dataset.pagePath).toBe("/vocabularies")
+    expect(app.dataset.resourcePath).toBe("/en/node/123")
   })
 })

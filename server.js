@@ -4,7 +4,12 @@ import path from "path"
 import jskos from "jskos-tools"
 import fs from "fs"
 import querystring from "querystring"
-import { rdfContentType, rdfSerialize } from "./src/rdf.js"
+import {
+  rdfContentType,
+  rdfResponseContentType,
+  rdfSerialize,
+} from "./src/rdf.js"
+import { canonicalItemCopy } from "./src/itemSerialization.js"
 import child_process from "child_process"
 import portfinder from "portfinder"
 import { getConceptsInBatches } from "./src/backend.js"
@@ -101,6 +106,8 @@ function render (req, res, view, locals) {
     config,
     query,
     path,
+    // Keep the requested resource path separate from the active navigation path.
+    resourcePath: path,
     utils,
     querystring,
     nkostypes,
@@ -217,7 +224,9 @@ async function resolveIncomingSchemeReferences(item, relation) {
   }
 }
 
-async function enrichItem (item) {
+async function enrichItem (storedItem) {
+  // Presentation enrichment must never consume the only canonical copy.
+  const item = structuredClone(storedItem)
   const subjects = item && item.subject || []
   if (subjects.length) {
     let found = []
@@ -324,11 +333,19 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   }
 
   if (item) {
-    item = await enrichItem(item)
-    path = item.type?.[0] === "http://www.w3.org/ns/dcat#Catalog"
+    const storedItem = item
+    const { format } = req.query
+    const isCanonicalFormat = format === "json" ||
+      format === "jsonld" ||
+      Boolean(rdfContentType[format])
+    // Machine-readable formats do not need labels or computed backlinks.
+    const presentationItem = isCanonicalFormat
+      ? storedItem
+      : await enrichItem(storedItem)
+    path = storedItem.type?.[0] === "http://www.w3.org/ns/dcat#Catalog"
       ? "/registries"
       : "/vocabularies"
-    sendItem(req, res, item, { path })
+    sendItem(req, res, storedItem, { path, presentationItem })
   } else {
     next()
   }
@@ -349,20 +366,29 @@ const vuePagesByType = {
   "http://www.w3.org/2004/02/skos/core#ConceptScheme": "terminology",
 }
 
-async function sendItem (req, res, item, vars = {}) {
+async function sendItem (
+  req,
+  res,
+  storedItem,
+  { presentationItem = storedItem, ...vars } = {},
+) {
   const { format } = req.query
   if (format === "json" || format === "jsonld") {
-    item["@context"] = "https://gbv.github.io/jskos/context.json"
-    Object.keys(item)
-      .filter(key => key[0] === "_")
-      .forEach(key => delete item[key])
+    const item = canonicalItemCopy(
+      storedItem,
+      "https://gbv.github.io/jskos/context.json",
+    )
     res.send([item])
   } else {
     const type = rdfContentType[format]
     if (type) {
-      res.setHeader("Content-Type", type)
-      res.send(await rdfSerialize(item, format))
+      res.setHeader(
+        "Content-Type",
+        rdfResponseContentType(format, req.query.inline === "1"),
+      )
+      res.send(await rdfSerialize(storedItem, format))
     } else {
+      const item = presentationItem
       const itemType = item.type[0]
       const vuePage = vuePagesByType[itemType]
       const view = vuePage ? "vue-page" : viewsByType[itemType]

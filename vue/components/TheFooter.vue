@@ -25,6 +25,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  resourcePath: {
+    type: String,
+    default: "",
+  },
   api: {
     type: String,
     default: "",
@@ -37,6 +41,7 @@ const props = defineProps({
 
 const siteName = computed(() => props.siteName || providedFooter.siteName || "BARTOC.org")
 const itemUri = computed(() => props.itemUri || providedFooter.itemUri || "")
+const resourcePath = computed(() => props.resourcePath || providedFooter.resourcePath || "")
 const api = computed(() => props.api || providedFooter.api || "")
 const queryParams = computed(() => props.query || providedFooter.query || {})
 
@@ -59,8 +64,8 @@ const resourceFormatLinks = computed(() => {
   if (itemUri.value) {
     return [
       { label: "JSON", href: withQuery("/api/data", { uri: itemUri.value }) },
-      { label: "RDF", href: withQuery("/vocabularies", { uri: itemUri.value, format: "nt" }) },
-      { label: "XML", href: withQuery("/vocabularies", { uri: itemUri.value, format: "rdfxml" }) },
+      { label: "RDF", href: withQuery(resourcePath.value, { format: "nt", inline: 1 }) },
+      { label: "XML", href: withQuery(resourcePath.value, { format: "rdfxml" }) },
     ]
   }
 

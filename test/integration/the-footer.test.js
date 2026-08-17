@@ -34,14 +34,15 @@ describe("TheFooter Component", () => {
     const wrapper = mount(TheFooter, {
       props: {
         itemUri: "http://bartoc.org/en/node/123",
+        resourcePath: "/en/node/123",
       },
     })
 
     const links = linksByLabel(wrapper)
 
     expect(links.JSON).toBe("/api/data?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123")
-    expect(links.RDF).toBe("/vocabularies?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123&format=nt")
-    expect(links.XML).toBe("/vocabularies?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123&format=rdfxml")
+    expect(links.RDF).toBe("/en/node/123?format=nt&inline=1")
+    expect(links.XML).toBe("/en/node/123?format=rdfxml")
   })
 
   it("uses provided footer data", () => {
@@ -51,6 +52,7 @@ describe("TheFooter Component", () => {
           footer: {
             siteName: "BARTOC",
             itemUri: "http://bartoc.org/en/node/123",
+            resourcePath: "/en/node/123",
             api: "",
             query: {},
           },
@@ -59,7 +61,10 @@ describe("TheFooter Component", () => {
     })
 
     expect(wrapper.text()).toContain("BARTOC vocabulary metadata")
-    expect(linksByLabel(wrapper).JSON).toBe("/api/data?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123")
+    const links = linksByLabel(wrapper)
+    expect(links.JSON).toBe("/api/data?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123")
+    expect(links.RDF).toBe("/en/node/123?format=nt&inline=1")
+    expect(links.XML).toBe("/en/node/123?format=rdfxml")
   })
 
   it("shows API result links", () => {
