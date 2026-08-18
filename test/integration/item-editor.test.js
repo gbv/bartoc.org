@@ -134,6 +134,23 @@ describe("ItemEditor abstracts", () => {
     expect(w.vm.examples).toBe("A, B")
   })
 
+  it("edits a deep clone without normalizing or mutating the input record", () => {
+    const current = {
+      prefLabel: { en: ["Original title"] },
+      definition: { en: ["Original abstract"] },
+      type: [conceptSchemeType],
+    }
+    const original = structuredClone(current)
+    const w = mountEditor(current)
+
+    expect(current).toEqual(original)
+
+    w.vm.item.prefLabel.en[0] = "Changed title"
+    w.vm.item.definition.en[0] = "Changed abstract"
+
+    expect(current).toEqual(original)
+  })
+
   it("shows the Version of editor by default", () => {
     const w = mountEditor({
       prefLabel: { en: ["x"] },

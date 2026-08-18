@@ -124,6 +124,7 @@ app.get("/edit", async (req, res, next) => {
   const { uri } = req.query
   let item, title = "Add vocabulary"
   let hasIncomingVersions = false
+  let versionMain = null
 
   if (uri) {
     item = await backend.getSchemes({ params: { uri } }).then(result => result[0])
@@ -132,7 +133,12 @@ app.get("/edit", async (req, res, next) => {
       utils.cleanupItem(item)
       delete item.concepts
       delete item.topConcepts
-      hasIncomingVersions = (await resolveIncomingSchemeReferences(item, "versionOf")).length > 0
+      const [incomingVersions, resolvedVersionMain] = await Promise.all([
+        resolveIncomingSchemeReferences(item, "versionOf"),
+        resolveDirectVersionMain(item),
+      ])
+      hasIncomingVersions = incomingVersions.length > 0
+      versionMain = resolvedVersionMain
     } else {
       next()
       return
@@ -145,6 +151,7 @@ app.get("/edit", async (req, res, next) => {
     vuePageProps: {
       title,
       item: item || null,
+      versionMain,
       cancelUrl: `/vocabularies?${querystring.stringify({ uri: item?.uri || "" })}`,
       hasIncomingVersions,
     },
@@ -201,6 +208,33 @@ async function resolveSchemeReferences(references) {
   ]
 }
 
+/**
+ * Load the main record referenced by versionOf for the editor.
+ * Keep it separate from the editable item so inherited values are not saved.
+ * Return null if the reference is invalid or the main record cannot be loaded.
+ */
+async function resolveDirectVersionMain(item) {
+  if (!hasValidVersionOf(item)) {
+    return null
+  }
+
+  const uri = item.versionOf[0].uri.trim()
+
+  try {
+    const result = await backend.getSchemes({ params: { uri } })
+    const main = result?.find(candidate => candidate?.uri === uri)
+    return main ? jskos.clean(main) : null
+  } catch (error) {
+    config.warn(`Could not load version main record ${uri}.`, error)
+    return null
+  }
+}
+
+/**
+ * Find schemes that point to this item through the given relation.
+ * These backlinks are computed for display and are never saved.
+ * Return an empty list if the lookup fails.
+ */
 async function resolveIncomingSchemeReferences(item, relation) {
   if (!item?.uri || !item.type?.includes("http://www.w3.org/2004/02/skos/core#ConceptScheme")) {
     return []

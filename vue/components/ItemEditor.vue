@@ -241,7 +241,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from "vue"
+import { computed, reactive, ref, toRaw, watch } from "vue"
 import {
   loadConcepts,
   trimItemIdentifiers,
@@ -284,13 +284,18 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  versionMain: {
+    type: Object,
+    default: null,
+  },
   hasIncomingVersions: {
     type: Boolean,
     default: false,
   },
 })
 
-const item = reactive(normalizeEditableItem(props.current))
+// Edit a deep copy so normalization and form changes do not mutate props.current.
+const item = reactive(normalizeEditableItem(structuredClone(toRaw(props.current))))
 const examples = ref((item.notationExamples || []).join(", "))
 const kostypes = ref([])
 const licenses = ref([])
