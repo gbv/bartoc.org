@@ -17,10 +17,10 @@
     it could be also "undetermined" if you do not know the language.
   </form-row>
   <form-row :label="'Abbreviation'">
-    <input
-      v-model="item.notation[0]"
-      type="text"
-      class="cc-form-control">
+    <AbbreviationEditor
+      ref="abbreviationEditor"
+      v-model="item.notation"
+      :source="versionMainSource" />
     Common, unique abbreviation, acronym, or notation the vocabulary is known
     under.
   </form-row>
@@ -270,6 +270,7 @@ import EndpointsEditor from "./EndpointsEditor.vue"
 import JskosItemPicker from "./JskosItemPicker.vue"
 import PublisherEditor from "./PublisherEditor.vue"
 import TerminologyRelationEditor from "./TerminologyRelationEditor.vue"
+import AbbreviationEditor from "./AbbreviationEditor.vue"
 
 const props = defineProps({
   user: {
@@ -304,6 +305,7 @@ const access = ref([])
 const registries = ref([])
 const error = ref(null)
 const showJSKOS = ref(false)
+const abbreviationEditor = ref(null)
 const formatScheme = {
   uri: "http://bartoc.org/en/node/20000",
 }
@@ -342,6 +344,17 @@ const showVersionOfEditor = computed(() =>
 
 const requireEnglish = computed(() => !hasValidVersionOf(item))
 
+// Use the loaded main record only if it matches the current versionOf.
+// This prevents showing values from an old main record after a change.
+const versionMainSource = computed(() => {
+  if (!hasValidVersionOf(item) || !props.versionMain?.uri) {
+    return null
+  }
+
+  const targetUri = item.versionOf[0].uri.trim()
+  return targetUri === props.versionMain.uri ? props.versionMain : null
+})
+
 const jskosPreview = computed(() => {
   // Clone to avoid mutating the live form state.
   const clone = JSON.parse(JSON.stringify(item))
@@ -374,7 +387,12 @@ loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001").then((set) => {
 })
 
 function itemError() {
-  return validateItem(item)
+  const validationError = validateItem(item)
+  if (validationError) {
+    return validationError
+  }
+
+  return abbreviationEditor.value?.validationError()
 }
 
 async function saveItem() {

@@ -134,6 +134,43 @@ describe("ItemEditor abstracts", () => {
     expect(w.vm.examples).toBe("A, B")
   })
 
+  it("does not save an inherited abbreviation without an override", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 500,
+        json: async () => ({ message: "Save failed" }),
+      })),
+    )
+
+    const w = mountEditor(
+      {
+        uri: "http://bartoc.org/en/node/294",
+        prefLabel: { en: ["Version"] },
+        versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      },
+      {
+        versionMain: {
+          uri: "http://bartoc.org/en/node/21133",
+          prefLabel: { en: "Main terminology" },
+          notation: ["TheSoz"],
+        },
+      },
+    )
+
+    await w.vm.saveItem()
+
+    const [, options] = fetch.mock.calls.at(-1)
+    expect(JSON.parse(options.body).notation).toBeUndefined()
+
+    await w.get("[data-testid='start-override']").trigger("click")
+    await w.get("[data-testid='notation-editor']").setValue("")
+    expect(w.vm.itemError()).toEqual({
+      message: "Enter an abbreviation or use the value from the main record.",
+    })
+  })
+
   it("edits a deep clone without normalizing or mutating the input record", () => {
     const current = {
       prefLabel: { en: ["Original title"] },

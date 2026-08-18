@@ -1,8 +1,8 @@
 import { validatePublisher } from "../utils.js"
 import { normalizeUri } from "../../src/uri.js"
-import { hasValidVersionOf } from "../../src/versioning.js"
+import { hasMeaningfulValue, hasValidVersionOf } from "../../src/versioning.js"
 
-export { hasValidVersionOf }
+export { hasMeaningfulValue, hasValidVersionOf }
 
 export const CONCEPT_SCHEME_TYPE = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
 
