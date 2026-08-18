@@ -20,6 +20,7 @@
         Version of <ItemLink :item="virtualAbstractTarget" />.
       </p>
       <LocalizedAbstract :abstract="item.definition" />
+      <InheritedFieldNotice :source="inheritedSource('definition')" />
       <table class="cc-table">
         <MetadataListRow
           label="Version of"
@@ -35,7 +36,11 @@
 
         <MetadataListRow
           label="Abbreviation"
-          :items="item.notation" />
+          :items="item.notation">
+          <template #note>
+            <InheritedFieldNotice :source="inheritedSource('notation')" />
+          </template>
+        </MetadataListRow>
 
         <MetadataListRow
           label="KOS Type"
@@ -68,6 +73,9 @@
               base="/vocabularies?subject="
               with-notation />
           </template>
+          <template #note>
+            <InheritedFieldNotice :source="inheritedSource('subject')" />
+          </template>
         </MetadataListRow>
 
         <MetadataListRow
@@ -79,6 +87,11 @@
               :item="subject"
               base="/vocabularies?subject="
               with-notation />
+          </template>
+          <template #note>
+            <InheritedFieldNotice
+              v-if="!manualSubjects.length"
+              :source="inheritedSource('subject')" />
           </template>
         </MetadataListRow>
 
@@ -225,7 +238,8 @@
           list-style="inline" />
       </table>
 
-      <template v-if="item.API">
+      <!-- Avoid initializing the browser on inactive tabs or without an API. -->
+      <template v-if="activeTab === 2 && item.API?.length">
         <hr>
         <ConceptBrowser
           ref="conceptBrowser"
@@ -307,6 +321,7 @@ import { Tab, Tabs } from "jskos-vue-tabs"
 import "jskos-vue-tabs/dist/style.css"
 import ConceptBrowser from "../components/ConceptBrowser.vue"
 import ExternalLink from "../components/ExternalLink.vue"
+import InheritedFieldNotice from "../components/InheritedFieldNotice.vue"
 import ItemDates from "../components/ItemDates.vue"
 import ItemLink from "../components/ItemLink.vue"
 import LocalizedAbstract from "../components/LocalizedAbstract.vue"
@@ -326,6 +341,11 @@ const props = defineProps({
   item: {
     type: Object,
     required: true,
+  },
+  // Field provenance is supplied by the server and rendered in slice 5b.
+  derivedFields: {
+    type: Object,
+    default: () => ({}),
   },
   nkosTypes: {
     type: Object,
@@ -360,6 +380,17 @@ const virtualAbstractTarget = computed(() => (
     ? props.item.versionOf[0]
     : null
 ))
+
+// Match provenance URIs to the already resolved direct relation. An unresolved
+// target still produces a usable URI link without another backend request.
+function inheritedSource(field) {
+  const uri = props.derivedFields[field]?.from
+  if (!uri) {
+    return null
+  }
+  return props.item.versionOf?.find(item => item?.uri === uri) || { uri }
+}
+
 const kosTypeUris = computed(() => (props.item.type || []).slice(1))
 const subjects = computed(() => props.item.subject || [])
 // Mapped subjects are derived by enrichment; subjects without MAPPING were assigned manually.

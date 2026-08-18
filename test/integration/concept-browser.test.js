@@ -136,6 +136,20 @@ describe("ConceptBrowser", () => {
     }))
   })
 
+  it("falls back to API links when the registry rejects every scheme URI", async () => {
+    const registry = makeRegistry()
+    registry.getTop.mockRejectedValue(new Error("Unsupported scheme"))
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser()
+    await flushPromises()
+
+    expect(registry.getTop).toHaveBeenCalledTimes(2)
+    expect(wrapper.text()).toContain("Access to this repository is possible via APIs")
+    expect(wrapper.find("[data-testid='item-select']").exists()).toBe(false)
+    expect(console.error).not.toHaveBeenCalled()
+  })
+
   it("loads top concepts and updates the URL when a concept is selected", async () => {
     const registry = makeRegistry()
     utilsMocks.registryForScheme.mockReturnValue(registry)

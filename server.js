@@ -10,6 +10,7 @@ import {
   rdfSerialize,
 } from "./src/rdf.js"
 import { canonicalItemCopy } from "./src/itemSerialization.js"
+import { deriveVersionRecord, hasValidVersionOf } from "./src/versioning.js"
 import child_process from "child_process"
 import portfinder from "portfinder"
 import { getConceptsInBatches } from "./src/backend.js"
@@ -224,7 +225,7 @@ async function resolveIncomingSchemeReferences(item, relation) {
   }
 }
 
-async function enrichItem (storedItem) {
+async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
   // Presentation enrichment must never consume the only canonical copy.
   const item = structuredClone(storedItem)
   const subjects = item && item.subject || []
@@ -244,7 +245,10 @@ async function enrichItem (storedItem) {
   }
 
   // Direct relations are stored on this item and can be edited there.
-  if (item?.versionOf?.length) {
+  if (resolvedVersionOf !== undefined) {
+    // Reuse the main record loaded for derivation instead of fetching it twice.
+    item.versionOf = structuredClone(resolvedVersionOf)
+  } else if (item?.versionOf?.length) {
     item.versionOf = await resolveSchemeReferences(item.versionOf)
   }
 
@@ -261,6 +265,26 @@ async function enrichItem (storedItem) {
   }
 
   return item
+}
+
+async function buildPresentationView(storedItem) {
+  let effectiveItem = storedItem
+  let derivedFields = {}
+  let resolvedVersionOf
+
+  if (hasValidVersionOf(storedItem)) {
+    // Resolve exactly the direct main relation. The pure kernel decides
+    // whether the loaded record is a usable inheritance source.
+    resolvedVersionOf = await resolveSchemeReferences(storedItem.versionOf)
+    const mainItem = resolvedVersionOf[0]
+    const derivation = deriveVersionRecord(storedItem, mainItem)
+    effectiveItem = derivation.effectiveItem
+    derivedFields = derivation.derivedFields
+  }
+
+  // Enrichment runs after derivation so inherited subjects receive labels too.
+  const presentationItem = await enrichItem(effectiveItem, { resolvedVersionOf })
+  return { presentationItem, derivedFields }
 }
 
 // Statistics
@@ -339,15 +363,15 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
       format === "jsonld" ||
       Boolean(rdfContentType[format])
     // Machine-readable formats do not need labels or computed backlinks.
-    const presentationItem = isCanonicalFormat
-      ? storedItem
-      : await enrichItem(storedItem)
+    const presentationView = isCanonicalFormat
+      ? { presentationItem: storedItem, derivedFields: {} }
+      : await buildPresentationView(storedItem)
     path = storedItem.type?.[0] === "http://www.w3.org/ns/dcat#Catalog"
       ? "/registries"
       : "/vocabularies"
-    sendItem(req, res, storedItem, { path, presentationItem })
+    return sendItem(req, res, storedItem, { path, ...presentationView })
   } else {
-    next()
+    return next()
   }
 })
 
@@ -370,7 +394,7 @@ async function sendItem (
   req,
   res,
   storedItem,
-  { presentationItem = storedItem, ...vars } = {},
+  { presentationItem = storedItem, derivedFields = {}, ...vars } = {},
 ) {
   const { format } = req.query
   if (format === "json" || format === "jsonld") {
@@ -406,6 +430,7 @@ async function sendItem (
               nkosTypes: nkostypes,
               accessTypes: accesstypes,
               formats,
+              derivedFields,
             }),
           },
         }),

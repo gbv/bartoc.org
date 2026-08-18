@@ -123,18 +123,21 @@ onMounted(async () => {
     // TODO: allow to manually switch API endpoints
     const registryCandidate = registryForScheme(schemeWithUri)
     if (registryCandidate) {
-      registry.value = registryCandidate
-
       schemeWithUri.VOCID = registryCandidate._jskos.schemes && registryCandidate._jskos.schemes.length ? registryCandidate._jskos.schemes[0].VOCID : undefined // TODO: this is a hack
-      accessScheme.value = schemeWithUri
 
       let results = []
       try {
-        results = await registry.value.getTop({ scheme: accessScheme.value })
-      } catch (e) {
-        // TODO: catch CDKError
-        console.error(e)
+        results = await registryCandidate.getTop({ scheme: schemeWithUri })
+      } catch {
+        // A matching API provider may still reject this particular scheme URI.
+        // Try the remaining identifiers and fall back to API links if none work.
+        continue
       }
+
+      // Do not mount ItemSelect until the provider has accepted the scheme.
+      registry.value = registryCandidate
+      accessScheme.value = schemeWithUri
+
       if (results.length) {
         sortConcepts(results, props.scheme)
         topConcepts.value = [...results] // no clue why this is necessary (WTF?)
@@ -146,10 +149,10 @@ onMounted(async () => {
             inScheme: [schemeWithUri],
           }
         }
-        break
       } else {
         console.info(`Vocabulary ${uri} has no top concepts!`)
       }
+      break
     } else {
       console.debug("Failed to get registry for scheme: ", accessScheme.value)
     }

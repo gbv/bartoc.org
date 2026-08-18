@@ -43,6 +43,9 @@ describe("Vue page view", () => {
     const pageProps = {
       title: "Broken </script><script>alert('xss')</script>",
       message: "Error: broken",
+      derivedFields: {
+        definition: { from: "http://bartoc.org/en/node/21133" },
+      },
     }
     const html = await ejs.renderFile(template, {
       config: {
