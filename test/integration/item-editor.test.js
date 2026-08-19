@@ -156,6 +156,10 @@ describe("ItemEditor abstracts", () => {
           prefLabel: { en: "Main terminology" },
           notation: ["TheSoz"],
           definition: { en: ["Main definition"] },
+          subject: [{
+            uri: "http://dewey.info/class/300/",
+            inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+          }],
         },
       },
     )
@@ -166,11 +170,39 @@ describe("ItemEditor abstracts", () => {
     const savedItem = JSON.parse(options.body)
     expect(savedItem.notation).toBeUndefined()
     expect(savedItem.definition).toBeUndefined()
+    expect(savedItem.subject).toBeUndefined()
 
     await w.get("[data-testid='start-override']").trigger("click")
     await w.get("[data-testid='notation-editor']").setValue("")
     expect(w.vm.itemError()).toEqual({
       message: "Enter an abbreviation or use the value from the main record.",
+    })
+  })
+
+  it("blocks saving an empty subject override", async () => {
+    const w = mountEditor(
+      {
+        uri: "http://bartoc.org/en/node/294",
+        prefLabel: { en: ["Version"] },
+        versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      },
+      {
+        versionMain: {
+          uri: "http://bartoc.org/en/node/21133",
+          subject: [{
+            uri: "http://dewey.info/class/300/",
+            inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+          }],
+        },
+      },
+    )
+
+    await w.get("[data-testid='start-override']").trigger("click")
+    w.vm.item.subject.splice(0)
+    await nextTick()
+
+    expect(w.vm.itemError()).toEqual({
+      message: "Select a subject or use the value from the main record.",
     })
   })
 

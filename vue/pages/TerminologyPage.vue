@@ -79,8 +79,8 @@
         </MetadataListRow>
 
         <MetadataListRow
-          label="Derived Subjects"
-          :items="derivedSubjects"
+          label="Mapped Subjects"
+          :items="mappedSubjects"
           list-style="inline">
           <template #item="{ item: subject }">
             <ItemLink
@@ -393,12 +393,13 @@ function inheritedSource(field) {
 
 const kosTypeUris = computed(() => (props.item.type || []).slice(1))
 const subjects = computed(() => props.item.subject || [])
-// Mapped subjects are derived by enrichment; subjects without MAPPING were assigned manually.
-const derivedSubjects = computed(() => subjects.value.filter(subject => (
+// Mapped subjects carry enrichment provenance in MAPPING. Other subjects were
+// assigned manually.
+const mappedSubjects = computed(() => subjects.value.filter(subject => (
   subject && Object.prototype.hasOwnProperty.call(subject, "MAPPING")
 )))
 const manualSubjects = computed(() => subjects.value.filter(
-  subject => !derivedSubjects.value.includes(subject),
+  subject => !mappedSubjects.value.includes(subject),
 ))
 const address = computed(() => [
   "street",

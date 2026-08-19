@@ -62,7 +62,10 @@
     Use Shift key to deselect or select multiple types.
   </form-row>
   <form-row :label="'Subjects'">
-    <subject-editor v-model="item.subject" />
+    <InheritableSubjectsEditor
+      ref="inheritableSubjectsEditor"
+      v-model="item.subject"
+      :source="versionMainSource" />
   </form-row>
   <form-row
     v-if="showVersionOfEditor"
@@ -264,8 +267,8 @@ import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
 import LanguageSelect from "./LanguageSelect.vue"
 import InheritableAbstractsEditor from "./InheritableAbstractsEditor.vue"
+import InheritableSubjectsEditor from "./InheritableSubjectsEditor.vue"
 import LabelEditor from "./LabelEditor.vue"
-import SubjectEditor from "./SubjectEditor.vue"
 import ListEditor from "./ListEditor.vue"
 import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
@@ -309,6 +312,7 @@ const error = ref(null)
 const showJSKOS = ref(false)
 const abbreviationEditor = ref(null)
 const inheritableAbstractsEditor = ref(null)
+const inheritableSubjectsEditor = ref(null)
 const formatScheme = {
   uri: "http://bartoc.org/en/node/20000",
 }
@@ -397,6 +401,7 @@ function itemError() {
 
   return abbreviationEditor.value?.validationError()
     || inheritableAbstractsEditor.value?.validationError()
+    || inheritableSubjectsEditor.value?.validationError()
 }
 
 async function saveItem() {

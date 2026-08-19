@@ -34,7 +34,7 @@ const item = {
     },
     {
       uri: "http://bartoc.org/en/node/200",
-      prefLabel: { en: "Derived Subject" },
+      prefLabel: { en: "Mapped Subject" },
       notation: ["200"],
       MAPPING: [{ uri: "mapping:1" }],
     },
@@ -132,10 +132,10 @@ describe("TerminologyPage", () => {
     expect(wrapper.find("[data-testid='virtual-abstract']").exists()).toBe(false)
     expect(wrapper.find("[data-testid='inherited-field-notice']").exists()).toBe(false)
     expect(rowByLabel(wrapper, "Subject").text()).toContain("Manual Subject (100)")
-    expect(rowByLabel(wrapper, "Subject").text()).not.toContain("Derived Subject")
+    expect(rowByLabel(wrapper, "Subject").text()).not.toContain("Mapped Subject")
     expect(rowByLabel(wrapper, "Subject").get("ul").classes()).toContain("separated-list")
     expect(rowByLabel(wrapper, "Identifiers").get("ul").classes()).toEqual(["metadata-list"])
-    expect(rowByLabel(wrapper, "Derived Subjects").text()).toContain("Derived Subject (200)")
+    expect(rowByLabel(wrapper, "Mapped Subjects").text()).toContain("Mapped Subject (200)")
     expect(rowByLabel(wrapper, "Version of").text()).toContain("Earlier Version (122) · since 2020 · 100 concepts")
     expect(rowByLabel(wrapper, "Version of").get(".terminology-version-details").exists()).toBe(true)
     expect(rowByLabel(wrapper, "Versions").text()).toContain("Later Version")
