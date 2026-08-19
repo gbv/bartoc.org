@@ -134,7 +134,7 @@ describe("ItemEditor abstracts", () => {
     expect(w.vm.examples).toBe("A, B")
   })
 
-  it("does not save an inherited abbreviation without an override", async () => {
+  it("does not save inherited fields without an override", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({
@@ -155,6 +155,7 @@ describe("ItemEditor abstracts", () => {
           uri: "http://bartoc.org/en/node/21133",
           prefLabel: { en: "Main terminology" },
           notation: ["TheSoz"],
+          definition: { en: ["Main definition"] },
         },
       },
     )
@@ -162,7 +163,9 @@ describe("ItemEditor abstracts", () => {
     await w.vm.saveItem()
 
     const [, options] = fetch.mock.calls.at(-1)
-    expect(JSON.parse(options.body).notation).toBeUndefined()
+    const savedItem = JSON.parse(options.body)
+    expect(savedItem.notation).toBeUndefined()
+    expect(savedItem.definition).toBeUndefined()
 
     await w.get("[data-testid='start-override']").trigger("click")
     await w.get("[data-testid='notation-editor']").setValue("")

@@ -29,8 +29,10 @@
     Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
   <form-row :label="'Abstracts'">
-    <abstracts-editor
+    <InheritableAbstractsEditor
+      ref="inheritableAbstractsEditor"
       v-model="item.definition"
+      :source="versionMainSource"
       :require-english="requireEnglish" />
     <div
       v-if="!requireEnglish"
@@ -261,7 +263,7 @@ import { saveVocabularyItem } from "../utils/itemEditorSave.js"
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
 import LanguageSelect from "./LanguageSelect.vue"
-import AbstractsEditor from "./AbstractsEditor.vue"
+import InheritableAbstractsEditor from "./InheritableAbstractsEditor.vue"
 import LabelEditor from "./LabelEditor.vue"
 import SubjectEditor from "./SubjectEditor.vue"
 import ListEditor from "./ListEditor.vue"
@@ -306,6 +308,7 @@ const registries = ref([])
 const error = ref(null)
 const showJSKOS = ref(false)
 const abbreviationEditor = ref(null)
+const inheritableAbstractsEditor = ref(null)
 const formatScheme = {
   uri: "http://bartoc.org/en/node/20000",
 }
@@ -393,6 +396,7 @@ function itemError() {
   }
 
   return abbreviationEditor.value?.validationError()
+    || inheritableAbstractsEditor.value?.validationError()
 }
 
 async function saveItem() {
