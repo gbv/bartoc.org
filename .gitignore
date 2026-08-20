@@ -34,3 +34,8 @@ docker/data
 !docker/ecosystem.config.json
 
 notes/
+
+/bin/audit-versions.js
+/src/versionAudit.js
+/test/fixtures/version-audit-current.json
+/test/unit/version-audit.test.js

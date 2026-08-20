@@ -101,6 +101,30 @@ describe("SubjectEditor", () => {
     expect(wrapper.text()).toContain("1004")
   })
 
+  it("renders a read-only subject list without editing controls", () => {
+    const wrapper = mount(SubjectEditor, {
+      props: {
+        modelValue: [{
+          uri: "http://dewey.info/class/300/",
+          notation: ["300"],
+          prefLabel: { en: "Social sciences" },
+          inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+        }],
+        readOnly: true,
+      },
+      global: {
+        stubs: {
+          ItemName: ItemNameStub,
+          JskosItemPicker: JskosItemPickerStub,
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain("300")
+    expect(wrapper.find(".subject-picker").exists()).toBe(false)
+    expect(wrapper.find(".actions-col").exists()).toBe(false)
+  })
+
   it("passes only subjects of the active scheme to the picker", () => {
     const wrapper = mountEditor([
       {
@@ -225,7 +249,46 @@ describe("SubjectEditor", () => {
     ])
   })
 
-  it("does not render derived subjects in the list", async () => {
+  it("reorders editable subjects without moving a mapped subject", async () => {
+    const firstSubject = {
+      uri: "http://dewey.info/class/20/",
+      notation: ["20"],
+      prefLabel: { en: "Religion" },
+      inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+    }
+    const mappedSubject = {
+      uri: "http://example.org/mapped-subject",
+      notation: ["200"],
+      prefLabel: { en: "Mapped Subject" },
+      inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+      MAPPING: [{ uri: "mapping:1" }],
+    }
+    const lastSubject = {
+      uri: "http://dewey.info/class/300/",
+      notation: ["300"],
+      prefLabel: { en: "Social sciences" },
+      inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+    }
+    const wrapper = mountEditor([
+      firstSubject,
+      mappedSubject,
+      lastSubject,
+    ])
+
+    const moveDownButtons = wrapper.findAll("button").filter(
+      button => button.text() === "▼",
+    )
+    await moveDownButtons[0].trigger("click")
+
+    const lastValue = wrapper.emitted("update:modelValue").at(-1)[0]
+    expect(lastValue).toEqual([
+      lastSubject,
+      mappedSubject,
+      firstSubject,
+    ])
+  })
+
+  it("does not render mapped subjects in the editable list", async () => {
     const wrapper = mountEditor([
       {
         uri: "http://dewey.info/class/20/",
@@ -236,7 +299,7 @@ describe("SubjectEditor", () => {
       {
         uri: "http://example.org/derived-subject",
         notation: ["200"],
-        prefLabel: { en: "Derived Subject" },
+        prefLabel: { en: "Mapped Subject" },
         inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
         MAPPING: [{ uri: "mapping:1" }],
       },
@@ -259,7 +322,7 @@ describe("SubjectEditor", () => {
       {
         uri: "http://example.org/derived-subject",
         notation: ["200"],
-        prefLabel: { en: "Derived Subject" },
+        prefLabel: { en: "Mapped Subject" },
         inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
         MAPPING: [{ uri: "mapping:1" }],
       },

@@ -10,6 +10,7 @@
     :user="user"
     :auth="auth"
     :current="currentItem"
+    :version-main="versionMain"
     :has-incoming-versions="hasIncomingVersions" />
 </template>
 
@@ -25,6 +26,10 @@ const props = defineProps({
     required: true,
   },
   item: {
+    type: Object,
+    default: null,
+  },
+  versionMain: {
     type: Object,
     default: null,
   },

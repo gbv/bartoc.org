@@ -10,6 +10,7 @@ const ItemEditorStub = {
     user: Object,
     auth: Object,
     current: Object,
+    versionMain: Object,
     hasIncomingVersions: Boolean,
   },
   template: "<div data-test=\"item-editor\" />",
@@ -33,9 +34,14 @@ describe("EditPage", () => {
     }
     const token = ref("token-123")
     const user = ref({ login: "editor" })
+    const versionMain = {
+      uri: "http://bartoc.org/en/node/122",
+      prefLabel: { en: "Main vocabulary" },
+    }
     const wrapper = mountPage({
       title: "Edit vocabulary",
       item,
+      versionMain,
       cancelUrl: "/vocabularies?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123",
       hasIncomingVersions: true,
     }, { token, user })
@@ -49,6 +55,7 @@ describe("EditPage", () => {
 
     const editor = wrapper.getComponent(ItemEditorStub)
     expect(editor.props("current")).toEqual(item)
+    expect(editor.props("versionMain")).toEqual(versionMain)
     expect(editor.props("hasIncomingVersions")).toBe(true)
     expect(editor.props("auth")).toEqual({ token: "token-123" })
     expect(editor.props("user")).toEqual({ login: "editor" })
@@ -68,5 +75,6 @@ describe("EditPage", () => {
 
     expect(wrapper.get("h1").text()).toBe("Add vocabulary")
     expect(wrapper.getComponent(ItemEditorStub).props("current")).toEqual({})
+    expect(wrapper.getComponent(ItemEditorStub).props("versionMain")).toBeNull()
   })
 })

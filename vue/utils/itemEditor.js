@@ -1,4 +1,8 @@
 import { validatePublisher } from "../utils.js"
+import { normalizeUri } from "../../src/uri.js"
+import { hasMeaningfulValue, hasValidVersionOf } from "../../src/versioning.js"
+
+export { hasMeaningfulValue, hasValidVersionOf }
 
 export const CONCEPT_SCHEME_TYPE = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
 
@@ -19,13 +23,6 @@ const arrayFields = [
   "versionOf",
   "basedOn",
 ]
-
-function isBartocUri(uri) {
-  return (
-    typeof uri === "string" &&
-    /^http:\/\/bartoc\.org\/en\/node\/[1-9][0-9]+$/.test(uri)
-  )
-}
 
 export function normalizeEditableItem(current = {}) {
   const item = current || {}
@@ -95,16 +92,12 @@ export function itemError(item) {
   }
 }
 
-function normalizedUri(value) {
-  return typeof value === "string" ? value.trim() : value
-}
-
 function hasSelfReference(item, field) {
-  const uri = normalizedUri(item?.uri)
+  const uri = normalizeUri(item?.uri)
   return Boolean(
     uri &&
     Array.isArray(item?.[field]) &&
-    item[field].some(reference => normalizedUri(reference?.uri) === uri),
+    item[field].some(reference => normalizeUri(reference?.uri) === uri),
   )
 }
 
@@ -176,16 +169,4 @@ function filtered(value, parentKey = null) {
   } else {
     return value
   }
-}
-
-// Check if the item has a valid versionOf reference.
-export function hasValidVersionOf(item) {
-  const references = item?.versionOf
-
-  return (
-    Array.isArray(references) &&
-    references.length === 1 &&
-    isBartocUri(normalizedUri(references[0]?.uri)) &&
-    !hasSelfReference(item, "versionOf")
-  )
 }

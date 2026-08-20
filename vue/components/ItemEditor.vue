@@ -17,10 +17,10 @@
     it could be also "undetermined" if you do not know the language.
   </form-row>
   <form-row :label="'Abbreviation'">
-    <input
-      v-model="item.notation[0]"
-      type="text"
-      class="cc-form-control">
+    <AbbreviationEditor
+      ref="abbreviationEditor"
+      v-model="item.notation"
+      :source="versionMainSource" />
     Common, unique abbreviation, acronym, or notation the vocabulary is known
     under.
   </form-row>
@@ -29,8 +29,10 @@
     Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
   <form-row :label="'Abstracts'">
-    <abstracts-editor
+    <InheritableAbstractsEditor
+      ref="inheritableAbstractsEditor"
       v-model="item.definition"
+      :source="versionMainSource"
       :require-english="requireEnglish" />
     <div
       v-if="!requireEnglish"
@@ -60,7 +62,10 @@
     Use Shift key to deselect or select multiple types.
   </form-row>
   <form-row :label="'Subjects'">
-    <subject-editor v-model="item.subject" />
+    <InheritableSubjectsEditor
+      ref="inheritableSubjectsEditor"
+      v-model="item.subject"
+      :source="versionMainSource" />
   </form-row>
   <form-row
     v-if="showVersionOfEditor"
@@ -241,7 +246,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from "vue"
+import { computed, reactive, ref, toRaw, watch } from "vue"
 import {
   loadConcepts,
   trimItemIdentifiers,
@@ -261,15 +266,16 @@ import { saveVocabularyItem } from "../utils/itemEditorSave.js"
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
 import LanguageSelect from "./LanguageSelect.vue"
-import AbstractsEditor from "./AbstractsEditor.vue"
+import InheritableAbstractsEditor from "./InheritableAbstractsEditor.vue"
+import InheritableSubjectsEditor from "./InheritableSubjectsEditor.vue"
 import LabelEditor from "./LabelEditor.vue"
-import SubjectEditor from "./SubjectEditor.vue"
 import ListEditor from "./ListEditor.vue"
 import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
 import JskosItemPicker from "./JskosItemPicker.vue"
 import PublisherEditor from "./PublisherEditor.vue"
 import TerminologyRelationEditor from "./TerminologyRelationEditor.vue"
+import AbbreviationEditor from "./AbbreviationEditor.vue"
 
 const props = defineProps({
   user: {
@@ -284,13 +290,18 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  versionMain: {
+    type: Object,
+    default: null,
+  },
   hasIncomingVersions: {
     type: Boolean,
     default: false,
   },
 })
 
-const item = reactive(normalizeEditableItem(props.current))
+// Edit a deep copy so normalization and form changes do not mutate props.current.
+const item = reactive(normalizeEditableItem(structuredClone(toRaw(props.current))))
 const examples = ref((item.notationExamples || []).join(", "))
 const kostypes = ref([])
 const licenses = ref([])
@@ -299,6 +310,9 @@ const access = ref([])
 const registries = ref([])
 const error = ref(null)
 const showJSKOS = ref(false)
+const abbreviationEditor = ref(null)
+const inheritableAbstractsEditor = ref(null)
+const inheritableSubjectsEditor = ref(null)
 const formatScheme = {
   uri: "http://bartoc.org/en/node/20000",
 }
@@ -337,6 +351,17 @@ const showVersionOfEditor = computed(() =>
 
 const requireEnglish = computed(() => !hasValidVersionOf(item))
 
+// Use the loaded main record only if it matches the current versionOf.
+// This prevents showing values from an old main record after a change.
+const versionMainSource = computed(() => {
+  if (!hasValidVersionOf(item) || !props.versionMain?.uri) {
+    return null
+  }
+
+  const targetUri = item.versionOf[0].uri.trim()
+  return targetUri === props.versionMain.uri ? props.versionMain : null
+})
+
 const jskosPreview = computed(() => {
   // Clone to avoid mutating the live form state.
   const clone = JSON.parse(JSON.stringify(item))
@@ -369,7 +394,14 @@ loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20001").then((set) => {
 })
 
 function itemError() {
-  return validateItem(item)
+  const validationError = validateItem(item)
+  if (validationError) {
+    return validationError
+  }
+
+  return abbreviationEditor.value?.validationError()
+    || inheritableAbstractsEditor.value?.validationError()
+    || inheritableSubjectsEditor.value?.validationError()
 }
 
 async function saveItem() {

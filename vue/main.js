@@ -26,6 +26,7 @@ const pageProps = parseJson(document.getElementById("page-props")?.textContent)
 const footer = {
   siteName: rootElement?.dataset.siteName || "BARTOC.org",
   itemUri: rootElement?.dataset.itemUri || "",
+  resourcePath: rootElement?.dataset.resourcePath || "",
   api: rootElement?.dataset.api || "",
   query: parseJson(rootElement?.dataset.query),
 }

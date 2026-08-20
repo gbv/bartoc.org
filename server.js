@@ -4,7 +4,13 @@ import path from "path"
 import jskos from "jskos-tools"
 import fs from "fs"
 import querystring from "querystring"
-import { rdfContentType, rdfSerialize } from "./src/rdf.js"
+import {
+  rdfContentType,
+  rdfResponseContentType,
+  rdfSerialize,
+} from "./src/rdf.js"
+import { canonicalItemCopy } from "./src/itemSerialization.js"
+import { deriveVersionRecord, hasValidVersionOf } from "./src/versioning.js"
 import child_process from "child_process"
 import portfinder from "portfinder"
 import { getConceptsInBatches } from "./src/backend.js"
@@ -101,6 +107,8 @@ function render (req, res, view, locals) {
     config,
     query,
     path,
+    // Keep the requested resource path separate from the active navigation path.
+    resourcePath: path,
     utils,
     querystring,
     nkostypes,
@@ -116,6 +124,7 @@ app.get("/edit", async (req, res, next) => {
   const { uri } = req.query
   let item, title = "Add vocabulary"
   let hasIncomingVersions = false
+  let versionMain = null
 
   if (uri) {
     item = await backend.getSchemes({ params: { uri } }).then(result => result[0])
@@ -124,7 +133,12 @@ app.get("/edit", async (req, res, next) => {
       utils.cleanupItem(item)
       delete item.concepts
       delete item.topConcepts
-      hasIncomingVersions = (await resolveIncomingSchemeReferences(item, "versionOf")).length > 0
+      const [incomingVersions, resolvedVersionMain] = await Promise.all([
+        resolveIncomingSchemeReferences(item, "versionOf"),
+        resolveDirectVersionMain(item),
+      ])
+      hasIncomingVersions = incomingVersions.length > 0
+      versionMain = resolvedVersionMain
     } else {
       next()
       return
@@ -137,6 +151,7 @@ app.get("/edit", async (req, res, next) => {
     vuePageProps: {
       title,
       item: item || null,
+      versionMain,
       cancelUrl: `/vocabularies?${querystring.stringify({ uri: item?.uri || "" })}`,
       hasIncomingVersions,
     },
@@ -193,6 +208,33 @@ async function resolveSchemeReferences(references) {
   ]
 }
 
+/**
+ * Load the main record referenced by versionOf for the editor.
+ * Keep it separate from the editable item so inherited values are not saved.
+ * Return null if the reference is invalid or the main record cannot be loaded.
+ */
+async function resolveDirectVersionMain(item) {
+  if (!hasValidVersionOf(item)) {
+    return null
+  }
+
+  const uri = item.versionOf[0].uri.trim()
+
+  try {
+    const result = await backend.getSchemes({ params: { uri } })
+    const main = result?.find(candidate => candidate?.uri === uri)
+    return main ? jskos.clean(main) : null
+  } catch (error) {
+    config.warn(`Could not load version main record ${uri}.`, error)
+    return null
+  }
+}
+
+/**
+ * Find schemes that point to this item through the given relation.
+ * These backlinks are computed for display and are never saved.
+ * Return an empty list if the lookup fails.
+ */
 async function resolveIncomingSchemeReferences(item, relation) {
   if (!item?.uri || !item.type?.includes("http://www.w3.org/2004/02/skos/core#ConceptScheme")) {
     return []
@@ -217,7 +259,9 @@ async function resolveIncomingSchemeReferences(item, relation) {
   }
 }
 
-async function enrichItem (item) {
+async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
+  // Presentation enrichment must never consume the only canonical copy.
+  const item = structuredClone(storedItem)
   const subjects = item && item.subject || []
   if (subjects.length) {
     let found = []
@@ -235,7 +279,10 @@ async function enrichItem (item) {
   }
 
   // Direct relations are stored on this item and can be edited there.
-  if (item?.versionOf?.length) {
+  if (resolvedVersionOf !== undefined) {
+    // Reuse the main record loaded for derivation instead of fetching it twice.
+    item.versionOf = structuredClone(resolvedVersionOf)
+  } else if (item?.versionOf?.length) {
     item.versionOf = await resolveSchemeReferences(item.versionOf)
   }
 
@@ -252,6 +299,26 @@ async function enrichItem (item) {
   }
 
   return item
+}
+
+async function buildPresentationView(storedItem) {
+  let effectiveItem = storedItem
+  let derivedFields = {}
+  let resolvedVersionOf
+
+  if (hasValidVersionOf(storedItem)) {
+    // Resolve exactly the direct main relation. The pure kernel decides
+    // whether the loaded record is a usable inheritance source.
+    resolvedVersionOf = await resolveSchemeReferences(storedItem.versionOf)
+    const mainItem = resolvedVersionOf[0]
+    const derivation = deriveVersionRecord(storedItem, mainItem)
+    effectiveItem = derivation.effectiveItem
+    derivedFields = derivation.derivedFields
+  }
+
+  // Enrichment runs after derivation so inherited subjects receive labels too.
+  const presentationItem = await enrichItem(effectiveItem, { resolvedVersionOf })
+  return { presentationItem, derivedFields }
 }
 
 // Statistics
@@ -324,13 +391,21 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
   }
 
   if (item) {
-    item = await enrichItem(item)
-    path = item.type?.[0] === "http://www.w3.org/ns/dcat#Catalog"
+    const storedItem = item
+    const { format } = req.query
+    const isCanonicalFormat = format === "json" ||
+      format === "jsonld" ||
+      Boolean(rdfContentType[format])
+    // Machine-readable formats do not need labels or computed backlinks.
+    const presentationView = isCanonicalFormat
+      ? { presentationItem: storedItem, derivedFields: {} }
+      : await buildPresentationView(storedItem)
+    path = storedItem.type?.[0] === "http://www.w3.org/ns/dcat#Catalog"
       ? "/registries"
       : "/vocabularies"
-    sendItem(req, res, item, { path })
+    return sendItem(req, res, storedItem, { path, ...presentationView })
   } else {
-    next()
+    return next()
   }
 })
 
@@ -349,20 +424,29 @@ const vuePagesByType = {
   "http://www.w3.org/2004/02/skos/core#ConceptScheme": "terminology",
 }
 
-async function sendItem (req, res, item, vars = {}) {
+async function sendItem (
+  req,
+  res,
+  storedItem,
+  { presentationItem = storedItem, derivedFields = {}, ...vars } = {},
+) {
   const { format } = req.query
   if (format === "json" || format === "jsonld") {
-    item["@context"] = "https://gbv.github.io/jskos/context.json"
-    Object.keys(item)
-      .filter(key => key[0] === "_")
-      .forEach(key => delete item[key])
+    const item = canonicalItemCopy(
+      storedItem,
+      "https://gbv.github.io/jskos/context.json",
+    )
     res.send([item])
   } else {
     const type = rdfContentType[format]
     if (type) {
-      res.setHeader("Content-Type", type)
-      res.send(await rdfSerialize(item, format))
+      res.setHeader(
+        "Content-Type",
+        rdfResponseContentType(format, req.query.inline === "1"),
+      )
+      res.send(await rdfSerialize(storedItem, format))
     } else {
+      const item = presentationItem
       const itemType = item.type[0]
       const vuePage = vuePagesByType[itemType]
       const view = vuePage ? "vue-page" : viewsByType[itemType]
@@ -380,6 +464,7 @@ async function sendItem (req, res, item, vars = {}) {
               nkosTypes: nkostypes,
               accessTypes: accesstypes,
               formats,
+              derivedFields,
             }),
           },
         }),

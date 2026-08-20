@@ -134,6 +134,95 @@ describe("ItemEditor abstracts", () => {
     expect(w.vm.examples).toBe("A, B")
   })
 
+  it("does not save inherited fields without an override", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 500,
+        json: async () => ({ message: "Save failed" }),
+      })),
+    )
+
+    const w = mountEditor(
+      {
+        uri: "http://bartoc.org/en/node/294",
+        prefLabel: { en: ["Version"] },
+        versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      },
+      {
+        versionMain: {
+          uri: "http://bartoc.org/en/node/21133",
+          prefLabel: { en: "Main terminology" },
+          notation: ["TheSoz"],
+          definition: { en: ["Main definition"] },
+          subject: [{
+            uri: "http://dewey.info/class/300/",
+            inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+          }],
+        },
+      },
+    )
+
+    await w.vm.saveItem()
+
+    const [, options] = fetch.mock.calls.at(-1)
+    const savedItem = JSON.parse(options.body)
+    expect(savedItem.notation).toBeUndefined()
+    expect(savedItem.definition).toBeUndefined()
+    expect(savedItem.subject).toBeUndefined()
+
+    await w.get("[data-testid='start-override']").trigger("click")
+    await w.get("[data-testid='notation-editor']").setValue("")
+    expect(w.vm.itemError()).toEqual({
+      message: "Enter an abbreviation or use the value from the main record.",
+    })
+  })
+
+  it("blocks saving an empty subject override", async () => {
+    const w = mountEditor(
+      {
+        uri: "http://bartoc.org/en/node/294",
+        prefLabel: { en: ["Version"] },
+        versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      },
+      {
+        versionMain: {
+          uri: "http://bartoc.org/en/node/21133",
+          subject: [{
+            uri: "http://dewey.info/class/300/",
+            inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
+          }],
+        },
+      },
+    )
+
+    await w.get("[data-testid='start-override']").trigger("click")
+    w.vm.item.subject.splice(0)
+    await nextTick()
+
+    expect(w.vm.itemError()).toEqual({
+      message: "Select a subject or use the value from the main record.",
+    })
+  })
+
+  it("edits a deep clone without normalizing or mutating the input record", () => {
+    const current = {
+      prefLabel: { en: ["Original title"] },
+      definition: { en: ["Original abstract"] },
+      type: [conceptSchemeType],
+    }
+    const original = structuredClone(current)
+    const w = mountEditor(current)
+
+    expect(current).toEqual(original)
+
+    w.vm.item.prefLabel.en[0] = "Changed title"
+    w.vm.item.definition.en[0] = "Changed abstract"
+
+    expect(current).toEqual(original)
+  })
+
   it("shows the Version of editor by default", () => {
     const w = mountEditor({
       prefLabel: { en: ["x"] },

@@ -34,7 +34,7 @@ const item = {
     },
     {
       uri: "http://bartoc.org/en/node/200",
-      prefLabel: { en: "Derived Subject" },
+      prefLabel: { en: "Mapped Subject" },
       notation: ["200"],
       MAPPING: [{ uri: "mapping:1" }],
     },
@@ -72,11 +72,12 @@ const item = {
   notationPattern: "[A-Z]+",
 }
 
-function mountPage(itemOverrides = {}) {
+function mountPage(itemOverrides = {}, derivedFields = {}) {
   return mount(TerminologyPage, {
     props: {
       title: "Test Vocabulary",
       item: { ...item, ...itemOverrides },
+      derivedFields,
       nkosTypes: {
         [typeUri]: { uri: typeUri, prefLabel: { en: "Thesaurus" } },
       },
@@ -129,16 +130,60 @@ describe("TerminologyPage", () => {
       "Second paragraph",
     ])
     expect(wrapper.find("[data-testid='virtual-abstract']").exists()).toBe(false)
+    expect(wrapper.find("[data-testid='inherited-field-notice']").exists()).toBe(false)
     expect(rowByLabel(wrapper, "Subject").text()).toContain("Manual Subject (100)")
-    expect(rowByLabel(wrapper, "Subject").text()).not.toContain("Derived Subject")
+    expect(rowByLabel(wrapper, "Subject").text()).not.toContain("Mapped Subject")
     expect(rowByLabel(wrapper, "Subject").get("ul").classes()).toContain("separated-list")
     expect(rowByLabel(wrapper, "Identifiers").get("ul").classes()).toEqual(["metadata-list"])
-    expect(rowByLabel(wrapper, "Derived Subjects").text()).toContain("Derived Subject (200)")
+    expect(rowByLabel(wrapper, "Mapped Subjects").text()).toContain("Mapped Subject (200)")
     expect(rowByLabel(wrapper, "Version of").text()).toContain("Earlier Version (122) · since 2020 · 100 concepts")
     expect(rowByLabel(wrapper, "Version of").get(".terminology-version-details").exists()).toBe(true)
     expect(rowByLabel(wrapper, "Versions").text()).toContain("Later Version")
     expect(rowByLabel(wrapper, "Based on").text()).toContain("Base Terminology")
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")
+  })
+
+  it("uses an effective English definition instead of the #310 fallback", () => {
+    const wrapper = mountPage(
+      {
+        definition: { en: ["Inherited abstract"] },
+      },
+      {
+        definition: {
+          from: "http://bartoc.org/en/node/122",
+        },
+      },
+    )
+
+    expect(wrapper.props("derivedFields")).toEqual({
+      definition: { from: "http://bartoc.org/en/node/122" },
+    })
+    expect(wrapper.find("[data-testid='virtual-abstract']").exists()).toBe(false)
+    expect(wrapper.text()).toContain("Inherited abstract")
+    expect(wrapper.get("[data-testid='inherited-field-notice']").text()).toBe(
+      "Inherited from Earlier Version.",
+    )
+  })
+
+  it("labels each inherited field with its resolved source", () => {
+    const wrapper = mountPage(
+      {},
+      Object.fromEntries(
+        ["definition", "notation", "subject"].map(field => [
+          field,
+          { from: "http://bartoc.org/en/node/122" },
+        ]),
+      ),
+    )
+
+    const notices = wrapper.findAll("[data-testid='inherited-field-notice']")
+    expect(notices).toHaveLength(3)
+    expect(notices.every(notice => (
+      notice.text() === "Inherited from Earlier Version."
+    ))).toBe(true)
+    expect(notices.every(notice => (
+      notice.get("a").attributes("href") === "/en/node/122"
+    ))).toBe(true)
   })
 
   it.each([
@@ -183,14 +228,27 @@ describe("TerminologyPage", () => {
 
     const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
     expect(headers[3].classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
 
     await headers[1].trigger("click")
     expect(window.location.hash).toBe("#access")
     expect(rowByLabel(wrapper, "Access").text()).toContain("freely available")
-    expect(selectConcept).toHaveBeenCalledWith(null)
+    expect(selectConcept).not.toHaveBeenCalled()
 
     await headers[2].trigger("click")
     expect(window.location.hash).toBe("#content")
     expect(wrapper.get("[data-testid='concept-browser']").exists()).toBe(true)
+
+    await headers[0].trigger("click")
+    expect(selectConcept).toHaveBeenCalledWith(null)
+    expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
+  })
+
+  it("does not mount the concept browser for an empty API list", async () => {
+    window.history.replaceState({}, "", "/en/node/123#content")
+    const wrapper = mountPage({ API: [] })
+    await nextTick()
+
+    expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
   })
 })

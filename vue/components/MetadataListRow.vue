@@ -14,6 +14,8 @@
         </slot>
       </li>
     </ul>
+    <!-- Optional context such as field provenance belongs beside the values. -->
+    <slot name="note" />
   </MetadataRow>
 </template>
 
