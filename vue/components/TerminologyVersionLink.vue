@@ -1,9 +1,9 @@
 <template>
   <ItemLink :item="item" />
-  <small class="terminology-version-details">
-    <template v-if="id"> ({{ id }})</template>
-    <template v-if="item.startDate"> · since {{ item.startDate }}</template>
-    <template v-if="item.extent"> · {{ item.extent }}</template>
+  <small
+    v-if="details.length"
+    class="terminology-version-details">
+    {{ ` ${details.join(" · ")}` }}
   </small>
 </template>
 
@@ -21,6 +21,11 @@ const props = defineProps({
 })
 
 const id = computed(() => props.item.uri?.split("/").pop() || "")
+const details = computed(() => [
+  props.item.startDate ? `since ${props.item.startDate}` : "",
+  props.item.extent,
+  id.value ? `BARTOC ID ${id.value}` : "",
+].filter(Boolean))
 </script>
 
 <style scoped>

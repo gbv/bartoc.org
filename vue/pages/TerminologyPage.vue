@@ -130,14 +130,6 @@
         </MetadataRow>
 
         <MetadataListRow
-          label="Versions"
-          :items="item._versionOfBacklink">
-          <template #item="{ item: version }">
-            <TerminologyVersionLink :item="version" />
-          </template>
-        </MetadataListRow>
-
-        <MetadataListRow
           label="Based on"
           :items="item.basedOn">
           <template #item="{ item: terminology }">
@@ -239,7 +231,7 @@
       </table>
 
       <!-- Avoid initializing the browser on inactive tabs or without an API. -->
-      <template v-if="activeTab === 2 && item.API?.length">
+      <template v-if="activeTabName === 'content' && item.API?.length">
         <hr>
         <ConceptBrowser
           ref="conceptBrowser"
@@ -310,6 +302,18 @@
         </MetadataRow>
       </table>
     </Tab>
+
+    <Tab
+      v-if="hasVersions"
+      title="Versions">
+      <ul class="terminology-versions">
+        <li
+          v-for="version in item._versionOfBacklink"
+          :key="version.uri">
+          <TerminologyVersionLink :item="version" />
+        </li>
+      </ul>
+    </Tab>
   </Tabs>
 
   <ItemDates :item="item" />
@@ -361,8 +365,16 @@ const props = defineProps({
   },
 })
 
-const tabs = ["about", "access", "content", "identifiers"]
+const hasVersions = computed(() => Boolean(props.item._versionOfBacklink?.length))
+const tabs = computed(() => [
+  "about",
+  "access",
+  "content",
+  "identifiers",
+  ...(hasVersions.value ? ["versions"] : []),
+])
 const activeTab = ref(0)
+const activeTabName = computed(() => tabs.value[activeTab.value])
 const conceptBrowser = ref(null)
 const ready = ref(false)
 const header = inject("header", {})
@@ -419,7 +431,7 @@ const conceptScheme = computed(() => ({
 }))
 
 function tabIndexFromHash() {
-  const index = tabs.indexOf(window.location.hash.slice(1))
+  const index = tabs.value.indexOf(window.location.hash.slice(1))
   return index === -1 ? 0 : index
 }
 
@@ -433,11 +445,11 @@ function changeTab({ index }) {
     return
   }
 
-  if (index !== 2) {
+  if (tabs.value[index] !== "content") {
     conceptBrowser.value?.selectConcept(null)
   }
 
-  const hash = `#${tabs[index]}`
+  const hash = `#${tabs.value[index]}`
   if (window.location.hash !== hash) {
     window.history.replaceState({}, "", `${window.location.pathname}${window.location.search}${hash}`)
   }
@@ -457,3 +469,14 @@ onBeforeUnmount(() => {
   window.removeEventListener("hashchange", syncTabFromHash)
 })
 </script>
+
+<style scoped>
+.terminology-versions {
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.terminology-versions > li + li {
+  margin-block-start: var(--cc-row-gap);
+}
+</style>

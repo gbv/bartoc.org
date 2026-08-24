@@ -136,9 +136,14 @@ describe("TerminologyPage", () => {
     expect(rowByLabel(wrapper, "Subject").get("ul").classes()).toContain("separated-list")
     expect(rowByLabel(wrapper, "Identifiers").get("ul").classes()).toEqual(["metadata-list"])
     expect(rowByLabel(wrapper, "Mapped Subjects").text()).toContain("Mapped Subject (200)")
-    expect(rowByLabel(wrapper, "Version of").text()).toContain("Earlier Version (122) · since 2020 · 100 concepts")
-    expect(rowByLabel(wrapper, "Version of").get(".terminology-version-details").exists()).toBe(true)
-    expect(rowByLabel(wrapper, "Versions").text()).toContain("Later Version")
+    const versionOfRow = rowByLabel(wrapper, "Version of")
+    expect(versionOfRow.text()).toContain(
+      "Earlier Version since 2020 · 100 concepts · BARTOC ID 122",
+    )
+    expect(rowByLabel(wrapper, "Versions")).toBeUndefined()
+    expect(wrapper.get(".terminology-versions").text()).toContain(
+      "Later Version BARTOC ID 124",
+    )
     expect(rowByLabel(wrapper, "Based on").text()).toContain("Base Terminology")
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")
   })
@@ -239,9 +244,35 @@ describe("TerminologyPage", () => {
     expect(window.location.hash).toBe("#content")
     expect(wrapper.get("[data-testid='concept-browser']").exists()).toBe(true)
 
+    await headers[4].trigger("click")
+    expect(window.location.hash).toBe("#versions")
+
     await headers[0].trigger("click")
     expect(selectConcept).toHaveBeenCalledWith(null)
     expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
+  })
+
+  it("opens the conditional Versions tab from the URL hash", async () => {
+    window.history.replaceState({}, "", "/en/node/123#versions")
+    const wrapper = mountPage()
+    await nextTick()
+
+    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
+    expect(headers).toHaveLength(5)
+    expect(headers[4].text()).toBe("Versions")
+    expect(headers[4].classes()).toContain("jskos-vue-tabs-header-item-active")
+  })
+
+  it("omits the Versions tab when there are no incoming versions", async () => {
+    window.history.replaceState({}, "", "/en/node/123#versions")
+    const wrapper = mountPage({ _versionOfBacklink: [] })
+    await nextTick()
+
+    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
+    expect(headers).toHaveLength(4)
+    expect(headers.some(header => header.text() === "Versions")).toBe(false)
+    expect(headers[0].classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(wrapper.find(".terminology-versions").exists()).toBe(false)
   })
 
   it("does not mount the concept browser for an empty API list", async () => {
