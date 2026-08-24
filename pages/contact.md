@@ -29,7 +29,7 @@ title:
         </a>
         <a
           class="contact-orcid-icon"
-          href="https://orcid.org/0000-0002-6076-9853"
+          href="https://orcid.org/0000-0002-7613-4123"
           aria-label="ORCID profile"
           title="ORCID">
         </a>
@@ -46,7 +46,7 @@ title:
         </a>
         <a
           class="contact-orcid-icon"
-          href="https://orcid.org/0000-0002-6076-9853"
+          href="https://orcid.org/0009-0006-6578-8443"
           aria-label="ORCID profile"
           title="ORCID">
         </a>
@@ -63,7 +63,7 @@ title:
         </a>
         <a
           class="contact-orcid-icon"
-          href="https://orcid.org/0000-0002-6076-9853"
+          href="https://orcid.org/0000-0003-1763-3026"
           aria-label="ORCID profile"
           title="ORCID">
         </a>
