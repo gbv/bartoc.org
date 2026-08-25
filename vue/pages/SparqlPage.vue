@@ -6,7 +6,7 @@
     <span
       v-if="updatedAt">
       updated at
-      <time :datetime="updatedAt">{{ formattedUpdatedAt() }}</time>.
+      <time :datetime="updatedAt">{{ formatTimestamp(updatedAt) }}</time>.
     </span>
   </p>
 
@@ -48,6 +48,7 @@
 </template>
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from "vue"
+import { formatTimestamp } from "../utils.js"
 
 const props = defineProps({
   endpoint: {
@@ -64,13 +65,6 @@ const yasguiElement = ref(null)
 const editorFailed = ref(false)
 const updatedAt = ref("")
 let yasgui
-
-function formattedUpdatedAt() {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(updatedAt.value))
-}
 
 // The graph metadata contains the timestamp of the latest completed import.
 const updatedAtQuery = `

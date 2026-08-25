@@ -2,7 +2,8 @@
   <MetadataRow
     :show="items.length > 0"
     :label="label"
-    :icon="icon">
+    :icon="icon"
+    :source-field="sourceField">
     <ul :class="['metadata-list', { 'separated-list': listStyle === 'inline' }]">
       <li
         v-for="(item, index) in items"
@@ -41,6 +42,11 @@ defineProps({
     type: String,
     default: "unstyled",
     validator: value => ["inline", "unstyled"].includes(value),
+  },
+  sourceField: {
+    // Forward the JSKOS source identity to MetadataRow for provenance lookup.
+    type: [String, Array],
+    default: "",
   },
 })
 

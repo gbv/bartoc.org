@@ -126,20 +126,20 @@ describe("TerminologyPage", () => {
     expect(editAction.text()).toBe("edit")
     expect(editAction.classes()).toContain("page-action")
     expect(wrapper.findAll("p").map(paragraph => paragraph.text())).toEqual([
+      "This is a version of Earlier Version.",
       "First paragraph",
       "Second paragraph",
     ])
-    expect(wrapper.find("[data-testid='virtual-abstract']").exists()).toBe(false)
-    expect(wrapper.find("[data-testid='inherited-field-notice']").exists()).toBe(false)
+    expect(wrapper.find("[data-testid='version-inheritance-legend']").exists()).toBe(false)
+    expect(wrapper.get("[data-testid='version-context'] a").attributes("href")).toBe(
+      "/en/node/122",
+    )
     expect(rowByLabel(wrapper, "Subject").text()).toContain("Manual Subject (100)")
     expect(rowByLabel(wrapper, "Subject").text()).not.toContain("Mapped Subject")
     expect(rowByLabel(wrapper, "Subject").get("ul").classes()).toContain("separated-list")
     expect(rowByLabel(wrapper, "Identifiers").get("ul").classes()).toEqual(["metadata-list"])
     expect(rowByLabel(wrapper, "Mapped Subjects").text()).toContain("Mapped Subject (200)")
-    const versionOfRow = rowByLabel(wrapper, "Version of")
-    expect(versionOfRow.text()).toContain(
-      "Earlier Version since 2020 · 100 concepts · BARTOC ID 122",
-    )
+    expect(rowByLabel(wrapper, "Version of")).toBeUndefined()
     expect(rowByLabel(wrapper, "Versions")).toBeUndefined()
     expect(wrapper.get(".terminology-versions").text()).toContain(
       "Later Version BARTOC ID 124",
@@ -148,82 +148,27 @@ describe("TerminologyPage", () => {
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")
   })
 
-  it("uses an effective English definition instead of the #310 fallback", () => {
-    const wrapper = mountPage(
-      {
-        definition: { en: ["Inherited abstract"] },
-      },
-      {
-        definition: {
-          from: "http://bartoc.org/en/node/122",
-        },
-      },
-    )
-
-    expect(wrapper.props("derivedFields")).toEqual({
-      definition: { from: "http://bartoc.org/en/node/122" },
-    })
-    expect(wrapper.find("[data-testid='virtual-abstract']").exists()).toBe(false)
-    expect(wrapper.text()).toContain("Inherited abstract")
-    expect(wrapper.get("[data-testid='inherited-field-notice']").text()).toBe(
-      "Inherited from Earlier Version.",
-    )
-  })
-
-  it("labels each inherited field with its resolved source", () => {
-    const wrapper = mountPage(
-      {},
-      Object.fromEntries(
-        ["definition", "notation", "subject"].map(field => [
-          field,
-          { from: "http://bartoc.org/en/node/122" },
-        ]),
-      ),
-    )
-
-    const notices = wrapper.findAll("[data-testid='inherited-field-notice']")
-    expect(notices).toHaveLength(3)
-    expect(notices.every(notice => (
-      notice.text() === "Inherited from Earlier Version."
-    ))).toBe(true)
-    expect(notices.every(notice => (
-      notice.get("a").attributes("href") === "/en/node/122"
-    ))).toBe(true)
-  })
-
-  it.each([
-    [
-      "the preferred title",
-      {
-        uri: "http://bartoc.org/en/node/122",
-        prefLabel: { en: "Earlier Version" },
-        startDate: "2020",
-        extent: "100 concepts",
-      },
-      "Earlier Version",
-    ],
-    [
-      "the URI fallback",
-      { uri: "http://bartoc.org/en/node/122" },
-      "http://bartoc.org/en/node/122",
-    ],
-  ])("shows a virtual abstract using %s", (_, version, expectedLabel) => {
-    const wrapper = mountPage({
-      definition: { de: ["Deutsche Zusammenfassung"] },
-      versionOf: [version],
+  it("marks inherited fields and explains them once", () => {
+    const source = { from: "http://bartoc.org/en/node/122" }
+    const wrapper = mountPage({}, {
+      definition: source,
+      type: source,
     })
 
-    const virtualAbstract = wrapper.get("[data-testid='virtual-abstract']")
-    expect(virtualAbstract.text()).toBe(`Version of ${expectedLabel}.`)
-    expect(virtualAbstract.get("a").attributes("href")).toBe("/en/node/122")
-    expect(wrapper.text()).toContain("Deutsche Zusammenfassung")
-    expect(rowByLabel(wrapper, "Version of").text()).toContain(expectedLabel)
+    expect(wrapper.get("[data-testid='version-inheritance-legend']").text()).toBe(
+      "Values marked with a dotted line come from the main record.",
+    )
+    expect(wrapper.findAll("a[href='/en/node/122']")).toHaveLength(1)
+    expect(wrapper.findAll("[aria-describedby='version-inheritance-legend']")).toHaveLength(2)
+    expect(rowByLabel(wrapper, "KOS Type").classes()).toContain("metadata-row--inherited")
+    expect(rowByLabel(wrapper, "Abbreviation").classes()).not.toContain(
+      "metadata-row--inherited",
+    )
   })
 
-  it("shows a virtual abstract when the definition is empty", () => {
-    const wrapper = mountPage({ definition: {} })
-
-    expect(wrapper.get("[data-testid='virtual-abstract']").text()).toContain("Earlier Version")
+  it("shows version context independently of the abstract", () => {
+    expect(mountPage({ definition: {} }).find("[data-testid='version-context']").exists()).toBe(true)
+    expect(mountPage({ versionOf: [] }).find("[data-testid='version-context']").exists()).toBe(false)
   })
 
   it("selects tabs from the hash and updates it on tab changes", async () => {

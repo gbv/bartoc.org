@@ -6,6 +6,9 @@
     edit
   </a>
   <h1>{{ title }}</h1>
+  <ItemDates
+    class="terminology-dates"
+    :item="item" />
 
   <Tabs
     v-model="activeTab"
@@ -13,36 +16,31 @@
     @change="changeTab">
     <Tab title="About">
       <p
-        v-if="virtualAbstractTarget"
-        data-testid="virtual-abstract"
-        lang="en"
-        class="language-tag">
-        Version of <ItemLink :item="virtualAbstractTarget" />.
+        v-if="versionMain"
+        data-testid="version-context">
+        <i
+          class="fas fa-code-branch"
+          aria-hidden="true" />
+        This is a version of <ItemLink :item="versionMain" />.
       </p>
-      <LocalizedAbstract :abstract="item.definition" />
-      <InheritedFieldNotice :source="inheritedSource('definition')" />
+      <div
+        :class="{ 'inherited-field-block': definitionInherited }"
+        :aria-describedby="definitionInherited ? INHERITANCE_LEGEND_ID : undefined">
+        <LocalizedAbstract :abstract="item.definition" />
+      </div>
       <table class="cc-table">
         <MetadataListRow
-          label="Version of"
-          :items="item.versionOf">
-          <template #item="{ item: version }">
-            <TerminologyVersionLink :item="version" />
-          </template>
-        </MetadataListRow>
-
-        <MetadataListRow
+          :source-field="['prefLabel', 'altLabel']"
           label="Titles"
           :items="titles" />
 
         <MetadataListRow
+          source-field="notation"
           label="Abbreviation"
-          :items="item.notation">
-          <template #note>
-            <InheritedFieldNotice :source="inheritedSource('notation')" />
-          </template>
-        </MetadataListRow>
+          :items="item.notation" />
 
         <MetadataListRow
+          source-field="type"
           label="KOS Type"
           :items="kosTypeUris"
           list-style="inline">
@@ -54,6 +52,7 @@
         </MetadataListRow>
 
         <MetadataListRow
+          source-field="subjectOf"
           label="Links"
           :items="item.subjectOf">
           <template #item="{ item: link }">
@@ -64,6 +63,7 @@
         </MetadataListRow>
 
         <MetadataListRow
+          source-field="subject"
           label="Subject"
           :items="manualSubjects"
           list-style="inline">
@@ -73,12 +73,10 @@
               base="/vocabularies?subject="
               with-notation />
           </template>
-          <template #note>
-            <InheritedFieldNotice :source="inheritedSource('subject')" />
-          </template>
         </MetadataListRow>
 
         <MetadataListRow
+          source-field="subject"
           label="Mapped Subjects"
           :items="mappedSubjects"
           list-style="inline">
@@ -88,20 +86,17 @@
               base="/vocabularies?subject="
               with-notation />
           </template>
-          <template #note>
-            <InheritedFieldNotice
-              v-if="!manualSubjects.length"
-              :source="inheritedSource('subject')" />
-          </template>
         </MetadataListRow>
 
         <MetadataListRow
+          source-field="languages"
           icon="language"
           label="Languages"
           :items="item.languages"
           list-style="inline" />
 
         <MetadataRow
+          source-field="startDate"
           :show="Boolean(item.startDate)"
           icon="calendar"
           label="Created">
@@ -109,6 +104,7 @@
         </MetadataRow>
 
         <MetadataRow
+          source-field="endDate"
           :show="Boolean(item.endDate)"
           icon="calendar"
           label="Dissolved">
@@ -116,6 +112,7 @@
         </MetadataRow>
 
         <MetadataRow
+          source-field="uri"
           :show="Boolean(item.uri)"
           icon="link"
           label="URI">
@@ -123,6 +120,7 @@
         </MetadataRow>
 
         <MetadataRow
+          source-field="url"
           :show="Boolean(item.url)"
           icon="home"
           label="Homepage">
@@ -130,6 +128,7 @@
         </MetadataRow>
 
         <MetadataListRow
+          source-field="basedOn"
           label="Based on"
           :items="item.basedOn">
           <template #item="{ item: terminology }">
@@ -138,6 +137,7 @@
         </MetadataListRow>
 
         <MetadataListRow
+          source-field="_basedOnBacklink"
           label="Derived terminologies"
           :items="item._basedOnBacklink">
           <template #item="{ item: terminology }">
@@ -145,6 +145,16 @@
           </template>
         </MetadataListRow>
       </table>
+      <p
+        v-if="hasInheritedFields"
+        :id="INHERITANCE_LEGEND_ID"
+        class="version-inheritance-legend"
+        data-testid="version-inheritance-legend">
+        <span
+          class="version-inheritance-marker"
+          aria-hidden="true" />
+        Values marked with a dotted line come from the main record.
+      </p>
     </Tab>
 
     <Tab title="Access">
@@ -315,17 +325,15 @@
       </ul>
     </Tab>
   </Tabs>
-
-  <ItemDates :item="item" />
 </template>
 
 <script setup>
-import { computed, inject, onBeforeUnmount, onMounted, ref, unref } from "vue"
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, unref } from "vue"
 import { Tab, Tabs } from "jskos-vue-tabs"
 import "jskos-vue-tabs/dist/style.css"
+import { hasValidVersionOf } from "../../src/versioning.js"
 import ConceptBrowser from "../components/ConceptBrowser.vue"
 import ExternalLink from "../components/ExternalLink.vue"
-import InheritedFieldNotice from "../components/InheritedFieldNotice.vue"
 import ItemDates from "../components/ItemDates.vue"
 import ItemLink from "../components/ItemLink.vue"
 import LocalizedAbstract from "../components/LocalizedAbstract.vue"
@@ -333,9 +341,10 @@ import MetadataListRow from "../components/MetadataListRow.vue"
 import MetadataRow from "../components/MetadataRow.vue"
 import ServiceLink from "../components/ServiceLink.vue"
 import TerminologyVersionLink from "../components/TerminologyVersionLink.vue"
-import { hasValidVersionOf } from "../utils/itemEditor.js"
 
 defineOptions({ name: "TerminologyPage" })
+
+const INHERITANCE_LEGEND_ID = "version-inheritance-legend"
 
 const props = defineProps({
   title: {
@@ -365,6 +374,21 @@ const props = defineProps({
   },
 })
 
+function isFieldInherited(field) {
+  return Boolean(field && props.derivedFields?.[field]?.from)
+}
+
+// MetadataRow may be nested inside MetadataListRow. Providing this once avoids
+// passing the provenance map and legend ID through every metadata component.
+provide("field-inheritance", {
+  isInherited: isFieldInherited,
+  descriptionId: INHERITANCE_LEGEND_ID,
+})
+
+// The abstract is introductory text rather than a metadata-table row, so its
+// inheritance marker is computed separately.
+const definitionInherited = computed(() => isFieldInherited("definition"))
+
 const hasVersions = computed(() => Boolean(props.item._versionOfBacklink?.length))
 const tabs = computed(() => [
   "about",
@@ -384,24 +408,12 @@ const titles = computed(() => [
   ...Object.values(props.item.prefLabel || {}),
   ...Object.values(props.item.altLabel || {}).flat(),
 ])
-const hasEnglishAbstract = computed(() => (
-  props.item.definition?.en?.some(text => text?.trim()) || false
+const versionMain = computed(() => (
+  hasValidVersionOf(props.item) ? props.item.versionOf[0] : null
 ))
-const virtualAbstractTarget = computed(() => (
-  !hasEnglishAbstract.value && hasValidVersionOf(props.item)
-    ? props.item.versionOf[0]
-    : null
+const hasInheritedFields = computed(() => (
+  Object.keys(props.derivedFields || {}).some(isFieldInherited)
 ))
-
-// Match provenance URIs to the already resolved direct relation. An unresolved
-// target still produces a usable URI link without another backend request.
-function inheritedSource(field) {
-  const uri = props.derivedFields[field]?.from
-  if (!uri) {
-    return null
-  }
-  return props.item.versionOf?.find(item => item?.uri === uri) || { uri }
-}
 
 const kosTypeUris = computed(() => (props.item.type || []).slice(1))
 const subjects = computed(() => props.item.subject || [])
@@ -471,6 +483,30 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.terminology-dates {
+  color: var(--cc-color-muted);
+  text-align: start;
+}
+
+.inherited-field-block {
+  border-inline-start: 0.2rem dotted var(--cc-color-muted);
+  padding-inline-start: var(--cc-row-padding-x);
+}
+
+.version-inheritance-legend {
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+  justify-content: flex-end;
+  color: var(--cc-color-muted);
+  font-size: 0.875em;
+}
+
+.version-inheritance-marker {
+  block-size: 1.25em;
+  border-inline-start: 0.2rem dotted var(--cc-color-muted);
+}
+
 .terminology-versions {
   padding-inline-start: 0;
   list-style: none;

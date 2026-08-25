@@ -4,21 +4,22 @@
     class="item-dates separated-list">
     <li
       v-if="created">
-      <small>created <time>{{ created }}</time></small>
+      <small>created <time :datetime="created">{{ formatTimestamp(created) }}</time></small>
     </li>
     <li
       v-if="issued">
-      <small>issued <time>{{ issued }}</time></small>
+      <small>issued <time :datetime="issued">{{ formatTimestamp(issued) }}</time></small>
     </li>
     <li
       v-if="showModified">
-      <small>modified <time>{{ modified }}</time></small>
+      <small>modified <time :datetime="modified">{{ formatTimestamp(modified) }}</time></small>
     </li>
   </ul>
 </template>
 
 <script setup>
 import { computed } from "vue"
+import { formatTimestamp } from "../utils.js"
 
 defineOptions({ name: "ItemDates" })
 
