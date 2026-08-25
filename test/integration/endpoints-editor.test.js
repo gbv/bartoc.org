@@ -102,6 +102,20 @@ describe("EndpointsEditor", () => {
     })
   })
 
+  it("marks invalid endpoint URLs", async () => {
+    const wrapper = mountEditor()
+    const input = wrapper.find("input")
+
+    await input.setValue("api.dante.gbv.de")
+
+    expect(input.classes()).toContain("cc-form-control--invalid")
+    expect(input.attributes("aria-invalid")).toBe("true")
+    expect(input.attributes("aria-describedby")).toBe("endpoint-url-feedback-0")
+    expect(wrapper.get(".cc-form-feedback--invalid").text()).toBe(
+      "Enter a complete URL starting with http:// or https://",
+    )
+  })
+
   it("removes an endpoint row", async () => {
     const wrapper = mountEditor([
       {

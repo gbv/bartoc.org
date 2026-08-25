@@ -18,7 +18,16 @@
           <input
             v-model="api.url"
             type="text"
-            class="cc-form-control">
+            class="cc-form-control"
+            :class="{ 'cc-form-control--invalid': endpointInvalid(api) }"
+            :aria-invalid="endpointInvalid(api)"
+            :aria-describedby="endpointInvalid(api) ? `endpoint-url-feedback-${i}` : undefined">
+          <div
+            v-if="endpointInvalid(api)"
+            :id="`endpoint-url-feedback-${i}`"
+            class="cc-form-feedback--invalid">
+            Enter a complete URL starting with http:// or https://
+          </div>
         </td>
         <td class="endpoint-type-column">
           <item-select
@@ -45,7 +54,7 @@
 import { ref, watch } from "vue"
 import ItemSelect from "./ItemSelect.vue"
 import jskos from "jskos-tools"
-import { apiTypesScheme } from "../utils.js"
+import { apiTypesScheme, isValidUrl } from "../utils.js"
 
 // Form to select an API endpoint
 const props = defineProps({
@@ -73,6 +82,10 @@ watch(
 
 function remove(i) {
   endpoints.value.splice(i, 1)
+}
+
+function endpointInvalid(endpoint) {
+  return Boolean(endpoint.url?.trim()) && !isValidUrl(endpoint.url)
 }
 </script>
 

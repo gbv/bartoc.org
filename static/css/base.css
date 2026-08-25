@@ -196,6 +196,20 @@ textarea {
   resize: vertical;
 }
 
+.cc-form-control.cc-form-control--invalid {
+  border-color: var(--cc-color-danger);
+}
+
+.cc-form-control.cc-form-control--invalid:focus {
+  box-shadow: 0 0 0 var(--cc-space-xs) var(--cc-color-danger-surface);
+}
+
+.cc-form-feedback--invalid {
+  margin-top: var(--cc-space-xs);
+  color: var(--cc-color-danger);
+  font-size: var(--cc-font-size-sm);
+}
+
 img {
   max-width: 100%;
   height: auto;

@@ -304,6 +304,27 @@ describe("ItemEditor abstracts", () => {
     })
   })
 
+  it("blocks saving invalid API endpoint URLs", async () => {
+    vi.stubGlobal("fetch", vi.fn())
+
+    const w = mountEditor({
+      prefLabel: { en: ["Title"] },
+      definition: { en: ["English abstract"] },
+      type: [conceptSchemeType],
+      API: [
+        { url: "12345", type: "http://bartoc.org/api-type/webservice" },
+        { url: "", type: "http://bartoc.org/api-type/webservice" },
+      ],
+    })
+
+    await w.vm.saveItem()
+
+    expect(fetch).not.toHaveBeenCalled()
+    expect(w.vm.error).toEqual({
+      message: "Enter a complete URL starting with http:// or https://.",
+    })
+  })
+
   it("loads supporting concept lists on mount", async () => {
     mountEditor({
       prefLabel: { en: ["x"] },

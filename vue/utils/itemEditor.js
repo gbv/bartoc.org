@@ -1,4 +1,4 @@
-import { validatePublisher } from "../utils.js"
+import { isValidUrl, validatePublisher } from "../utils.js"
 import { normalizeUri } from "../../src/uri.js"
 import { hasMeaningfulValue, hasValidVersionOf } from "../../src/versioning.js"
 
@@ -82,6 +82,20 @@ export function itemError(item) {
 
   if (!hasEnglishAbstract && !hasValidVersionOf(item)) {
     return { message: "Please provide at least one English abstract." }
+  }
+
+  const hasInvalidEndpoint = item.API?.some((endpoint) => {
+    const url = endpoint?.url
+
+    if (url == null || (typeof url === "string" && !url.trim())) {
+      return false
+    }
+
+    return typeof url !== "string" || !isValidUrl(url)
+  })
+
+  if (hasInvalidEndpoint) {
+    return { message: "Enter a complete URL starting with http:// or https://." }
   }
 
   if (item.publisher?.length) {

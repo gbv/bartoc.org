@@ -66,9 +66,11 @@ describe("PublisherEditor", () => {
 
     await uriInput.setValue("not-a-url")
 
-    expect(uriInput.classes()).toContain("publisher-uri-input--invalid")
+    expect(uriInput.classes()).toContain("cc-form-control--invalid")
     expect(uriInput.attributes("aria-invalid")).toBe("true")
-    expect(wrapper.get(".publisher-uri-feedback").text()).toBe("Please enter a valid HTTP(S) URI")
+    expect(wrapper.get(".cc-form-feedback--invalid").text()).toBe(
+      "Please enter a valid HTTP(S) URI",
+    )
   })
 
 })
