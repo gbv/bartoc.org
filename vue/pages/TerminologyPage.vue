@@ -14,6 +14,13 @@
     v-model="activeTab"
     active-color="var(--cc-color-primary)"
     @change="changeTab">
+    <template #title="{ tab }">
+      <i
+        v-if="tab.title === 'Versions'"
+        class="fas fa-code-branch"
+        aria-hidden="true" />
+      {{ tab.title }}
+    </template>
     <Tab title="About">
       <p
         v-if="versionMain"

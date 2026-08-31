@@ -205,6 +205,8 @@ describe("TerminologyPage", () => {
     const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
     expect(headers).toHaveLength(5)
     expect(headers[4].text()).toBe("Versions")
+    expect(headers[4].get("i").classes()).toEqual(["fas", "fa-code-branch"])
+    expect(headers[4].get("i").attributes("aria-hidden")).toBe("true")
     expect(headers[4].classes()).toContain("jskos-vue-tabs-header-item-active")
   })
 
