@@ -35,6 +35,7 @@
     </template>
     <Tab title="About">
       <div
+        class="abstract-block"
         :class="{ 'inherited-field-block': definitionInherited }"
         :aria-describedby="definitionInherited ? INHERITANCE_LEGEND_ID : undefined">
         <i
@@ -491,15 +492,18 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.abstract-block {
+  padding-inline: var(--cc-row-padding-x);
+}
+
+.abstract-block :deep(p:last-child) {
+  margin-bottom: var(--cc-space-md);
+}
+
 .inherited-field-block {
   display: flex;
   gap: 0.5em;
   align-items: flex-start;
-  padding-inline: var(--cc-row-padding-x);
-}
-
-.inherited-field-block :deep(p:last-child) {
-  margin-bottom: 0;
 }
 
 .version-inheritance-legend {

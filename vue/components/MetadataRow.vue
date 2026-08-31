@@ -58,6 +58,7 @@ const inherited = computed(() => {
 
 <style scoped>
 .metadata-row-label {
+  width: 15%;
   white-space: nowrap;
 }
 
