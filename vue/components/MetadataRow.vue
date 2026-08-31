@@ -1,9 +1,12 @@
 <template>
   <tr
     v-if="show"
-    :class="{ 'metadata-row--inherited': inherited }"
     :aria-describedby="inherited ? fieldInheritance.descriptionId : undefined">
     <td class="metadata-row-label">
+      <i
+        v-if="inherited"
+        class="fas fa-code-branch inherited-field-marker"
+        aria-hidden="true" />
       <i
         v-if="icon"
         :class="`fas fa-${icon}`" />
@@ -58,7 +61,7 @@ const inherited = computed(() => {
   white-space: nowrap;
 }
 
-.metadata-row--inherited > .metadata-row-label {
-  border-inline-start: 0.2rem dotted var(--cc-color-muted);
+.inherited-field-marker {
+  color: var(--cc-color-primary);
 }
 </style>

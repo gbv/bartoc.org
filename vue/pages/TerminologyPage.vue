@@ -6,9 +6,21 @@
     edit
   </a>
   <h1>{{ title }}</h1>
-  <ItemDates
-    class="terminology-dates"
-    :item="item" />
+  <p
+    v-if="versionMain"
+    data-testid="version-context">
+    This is a version of <ItemLink :item="versionMain" />.
+    <span
+      v-if="hasInheritedFields"
+      :id="INHERITANCE_LEGEND_ID"
+      class="version-inheritance-legend"
+      data-testid="version-inheritance-legend">
+      Derived values from the main record are marked like this
+      <i
+        class="fas fa-code-branch version-inheritance-marker"
+        aria-hidden="true" />
+    </span>
+  </p>
 
   <Tabs
     v-model="activeTab"
@@ -22,18 +34,16 @@
       {{ tab.title }}
     </template>
     <Tab title="About">
-      <p
-        v-if="versionMain"
-        data-testid="version-context">
-        <i
-          class="fas fa-code-branch"
-          aria-hidden="true" />
-        This is a version of <ItemLink :item="versionMain" />.
-      </p>
       <div
         :class="{ 'inherited-field-block': definitionInherited }"
         :aria-describedby="definitionInherited ? INHERITANCE_LEGEND_ID : undefined">
-        <LocalizedAbstract :abstract="item.definition" />
+        <i
+          v-if="definitionInherited"
+          class="fas fa-code-branch inherited-field-marker"
+          aria-hidden="true" />
+        <div>
+          <LocalizedAbstract :abstract="item.definition" />
+        </div>
       </div>
       <table class="cc-table">
         <MetadataListRow
@@ -152,16 +162,6 @@
           </template>
         </MetadataListRow>
       </table>
-      <p
-        v-if="hasInheritedFields"
-        :id="INHERITANCE_LEGEND_ID"
-        class="version-inheritance-legend"
-        data-testid="version-inheritance-legend">
-        <span
-          class="version-inheritance-marker"
-          aria-hidden="true" />
-        Values marked with a dotted line come from the main record.
-      </p>
     </Tab>
 
     <Tab title="Access">
@@ -332,6 +332,7 @@
       </ul>
     </Tab>
   </Tabs>
+  <ItemDates :item="item" />
 </template>
 
 <script setup>
@@ -490,28 +491,19 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.terminology-dates {
-  color: var(--cc-color-muted);
-  text-align: start;
-}
-
 .inherited-field-block {
-  border-inline-start: 0.2rem dotted var(--cc-color-muted);
-  padding-inline-start: var(--cc-row-padding-x);
+  display: flex;
+  gap: 0.5em;
+  align-items: flex-start;
 }
 
 .version-inheritance-legend {
-  display: flex;
-  gap: 0.5em;
-  align-items: center;
-  justify-content: flex-end;
-  color: var(--cc-color-muted);
-  font-size: 0.875em;
+  font-weight: normal;
 }
 
-.version-inheritance-marker {
-  block-size: 1.25em;
-  border-inline-start: 0.2rem dotted var(--cc-color-muted);
+.version-inheritance-marker,
+.inherited-field-marker {
+  color: var(--cc-color-primary);
 }
 
 .terminology-versions {

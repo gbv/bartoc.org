@@ -155,14 +155,23 @@ describe("TerminologyPage", () => {
       type: source,
     })
 
-    expect(wrapper.get("[data-testid='version-inheritance-legend']").text()).toBe(
-      "Values marked with a dotted line come from the main record.",
-    )
+    const legend = wrapper.get("[data-testid='version-inheritance-legend']")
+    expect(legend.text()).toContain("Derived values from the main record")
+    expect(legend.find(".version-inheritance-marker[aria-hidden='true']").exists()).toBe(true)
     expect(wrapper.findAll("a[href='/en/node/122']")).toHaveLength(1)
     expect(wrapper.findAll("[aria-describedby='version-inheritance-legend']")).toHaveLength(2)
-    expect(rowByLabel(wrapper, "KOS Type").classes()).toContain("metadata-row--inherited")
-    expect(rowByLabel(wrapper, "Abbreviation").classes()).not.toContain(
-      "metadata-row--inherited",
+    expect(wrapper.findAll(".inherited-field-marker[aria-hidden='true']")).toHaveLength(2)
+  })
+
+  it("places version context after the title and audit dates below the tabs", () => {
+    const wrapper = mountPage({
+      created: "2026-08-21T11:46:00Z",
+    })
+
+    const context = wrapper.get("[data-testid='version-context']")
+    expect(wrapper.get("h1").element.nextElementSibling).toBe(context.element)
+    expect(wrapper.get(".item-dates").element.previousElementSibling).toBe(
+      wrapper.get(".jskos-vue-tabs").element,
     )
   })
 
@@ -205,8 +214,7 @@ describe("TerminologyPage", () => {
     const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
     expect(headers).toHaveLength(5)
     expect(headers[4].text()).toBe("Versions")
-    expect(headers[4].get("i").classes()).toEqual(["fas", "fa-code-branch"])
-    expect(headers[4].get("i").attributes("aria-hidden")).toBe("true")
+    expect(headers[4].find(".fa-code-branch[aria-hidden='true']").exists()).toBe(true)
     expect(headers[4].classes()).toContain("jskos-vue-tabs-header-item-active")
   })
 
