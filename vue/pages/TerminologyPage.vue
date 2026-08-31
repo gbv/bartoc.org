@@ -495,6 +495,11 @@ onBeforeUnmount(() => {
   display: flex;
   gap: 0.5em;
   align-items: flex-start;
+  padding-inline: var(--cc-row-padding-x);
+}
+
+.inherited-field-block :deep(p:last-child) {
+  margin-bottom: 0;
 }
 
 .version-inheritance-legend {
