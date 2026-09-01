@@ -152,7 +152,7 @@ app.get("/edit", async (req, res, next) => {
       title,
       item: item || null,
       versionMain,
-      cancelUrl: `/vocabularies?${querystring.stringify({ uri: item?.uri || "" })}`,
+      cancelUrl: item ? utils.uriLink(item.uri) : "/",
       hasIncomingVersions,
     },
   })

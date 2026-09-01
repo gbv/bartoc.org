@@ -42,15 +42,13 @@ describe("EditPage", () => {
       title: "Edit vocabulary",
       item,
       versionMain,
-      cancelUrl: "/vocabularies?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123",
+      cancelUrl: "/en/node/123",
       hasIncomingVersions: true,
     }, { token, user })
 
     expect(wrapper.get("h1").text()).toBe("Edit vocabulary")
     const cancelAction = wrapper.get("a")
-    expect(cancelAction.attributes("href")).toBe(
-      "/vocabularies?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123",
-    )
+    expect(cancelAction.attributes("href")).toBe("/en/node/123")
     expect(cancelAction.classes()).toContain("page-action")
 
     const editor = wrapper.getComponent(ItemEditorStub)
@@ -70,10 +68,11 @@ describe("EditPage", () => {
     const wrapper = mountPage({
       title: "Add vocabulary",
       item: null,
-      cancelUrl: "/vocabularies?uri=",
+      cancelUrl: "/",
     })
 
     expect(wrapper.get("h1").text()).toBe("Add vocabulary")
+    expect(wrapper.get("a").attributes("href")).toBe("/")
     expect(wrapper.getComponent(ItemEditorStub).props("current")).toEqual({})
     expect(wrapper.getComponent(ItemEditorStub).props("versionMain")).toBeNull()
   })
