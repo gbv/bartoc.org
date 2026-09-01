@@ -15,7 +15,7 @@
       :id="INHERITANCE_LEGEND_ID"
       class="version-inheritance-legend"
       data-testid="version-inheritance-legend">
-      Derived values from the main record are marked like this
+      Values derived from the main record are marked with
       <i
         class="fas fa-code-branch version-inheritance-marker"
         aria-hidden="true" />
@@ -30,6 +30,7 @@
       <i
         v-if="tab.title === 'Versions'"
         class="fas fa-code-branch"
+        title="Derived from the main record"
         aria-hidden="true" />
       {{ tab.title }}
     </template>
