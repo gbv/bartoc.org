@@ -105,6 +105,18 @@ function mountEditor(current = {}, props = {}) {
   })
 }
 
+function formLabels(wrapper) {
+  return wrapper.findAll(".form-row").map(row => row.get("label").text())
+}
+
+function stubFailedSave() {
+  vi.stubGlobal("fetch", vi.fn(async () => ({
+    ok: false,
+    status: 500,
+    json: async () => ({ message: "Save failed" }),
+  })))
+}
+
 describe("ItemEditor abstracts", () => {
   beforeEach(() => {
     utilsMocks.loadConcepts.mockClear()
@@ -135,14 +147,7 @@ describe("ItemEditor abstracts", () => {
   })
 
   it("does not save inherited fields without an override", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => ({
-        ok: false,
-        status: 500,
-        json: async () => ({ message: "Save failed" }),
-      })),
-    )
+    stubFailedSave()
 
     const w = mountEditor(
       {
@@ -230,8 +235,25 @@ describe("ItemEditor abstracts", () => {
       type: [conceptSchemeType],
     })
 
-    expect(w.text()).toContain("Version of")
+    expect(formLabels(w)).toContain("Version of")
     expect(w.vm.showVersionOfEditor).toBe(true)
+  })
+
+  it("shows Version before Version of", () => {
+    const w = mountEditor({
+      prefLabel: { en: ["x"] },
+      definition: { en: ["English abstract"] },
+      type: [conceptSchemeType],
+      version: "3.0",
+    })
+
+    const rows = w.findAll(".form-row")
+    const labels = formLabels(w)
+    const versionIndex = labels.indexOf("Version")
+
+    expect(labels.slice(versionIndex, versionIndex + 2)).toEqual(["Version", "Version of"])
+    expect(rows[versionIndex].get("input").element.value).toBe("3.0")
+    expect(w.text()).toContain("unless both Version and Version of are set")
   })
 
   it("hides the Version of editor for base vocabularies with incoming versions", () => {
@@ -243,9 +265,11 @@ describe("ItemEditor abstracts", () => {
       },
       { hasIncomingVersions: true },
     )
+    const labels = formLabels(w)
 
-    expect(w.text()).not.toContain("Version of")
-    expect(w.text()).toContain("Based on")
+    expect(labels).not.toContain("Version of")
+    expect(labels).toContain("Version")
+    expect(labels).toContain("Based on")
     expect(w.vm.showVersionOfEditor).toBe(false)
   })
 
@@ -260,7 +284,7 @@ describe("ItemEditor abstracts", () => {
       { hasIncomingVersions: true },
     )
 
-    expect(w.text()).toContain("Version of")
+    expect(formLabels(w)).toContain("Version of")
     expect(w.vm.showVersionOfEditor).toBe(true)
   })
 
@@ -605,14 +629,7 @@ describe("ItemEditor abstracts", () => {
   })
 
   it("saves an existing item with cleaned JSON and auth headers", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => ({
-        ok: false,
-        status: 500,
-        json: async () => ({ message: "Save failed" }),
-      })),
-    )
+    stubFailedSave()
 
     const w = mountEditor(
       {
@@ -662,5 +679,24 @@ describe("ItemEditor abstracts", () => {
     const errorMessage = w.get(".editor-error-row .cc-message")
     expect(errorMessage.classes()).toContain("cc-message--warning")
     expect(errorMessage.attributes("role")).toBe("alert")
+  })
+
+  it("saves a version without a title", async () => {
+    stubFailedSave()
+    const w = mountEditor({
+      uri: "http://bartoc.org/en/node/294",
+      version: "3.0",
+      versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      type: [conceptSchemeType],
+    })
+
+    await w.vm.saveItem()
+    await flushPromises()
+
+    const [, options] = fetch.mock.calls.at(-1)
+    const body = JSON.parse(options.body)
+    expect(body.version).toBe("3.0")
+    expect(body).not.toHaveProperty("prefLabel")
+    expect(w.vm.item.prefLabel).toEqual({})
   })
 })

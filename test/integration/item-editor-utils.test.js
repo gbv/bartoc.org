@@ -73,6 +73,21 @@ describe("ItemEditor business logic", () => {
     })).toBeUndefined()
   })
 
+  it("allows a version number and link instead of a title", () => {
+    const item = {
+      prefLabel: {},
+      version: "3.0",
+      versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      definition: {},
+      publisher: [],
+    }
+    const titleError = { message: "item must have at least a title!" }
+
+    expect(itemError(item)).toBeUndefined()
+    expect(itemError({ ...item, version: "" })).toEqual(titleError)
+    expect(itemError({ ...item, versionOf: [] })).toEqual(titleError)
+  })
+
   it("blocks self-references in terminology relations", () => {
     const uri = "http://bartoc.org/en/node/18410"
     const validItem = {

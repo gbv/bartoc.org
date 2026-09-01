@@ -12,7 +12,8 @@
       v-model:pref-label="item.prefLabel"
       v-model:alt-label="item.altLabel" />
     The first of each language is used as preferred title, more as aliases,
-    translations... Please provide at least an English title.
+    translations... Please provide at least an English title, unless both
+    <code>Version</code> and <code>Version of</code> are set.
     For other languages select always a value,
     it could be also "undetermined" if you do not know the language.
   </form-row>
@@ -66,6 +67,12 @@
       ref="inheritableSubjectsEditor"
       v-model="item.subject"
       :source="versionMainSource" />
+  </form-row>
+  <form-row :label="'Version'">
+    <input
+      v-model.trim="item.version"
+      type="text"
+      class="cc-form-control">
   </form-row>
   <form-row
     v-if="showVersionOfEditor"

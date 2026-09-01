@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest"
 import { canonicalItemCopy } from "../../src/itemSerialization.js"
 import { rdfResponseContentType, rdfSerialize } from "../../src/rdf.js"
+import { deriveVersionRecord } from "../../src/versioning.js"
+import { storedTheSoz2004, storedTheSozMain } from "../fixtures/versioning.js"
 
 const context = "https://gbv.github.io/jskos/context.json"
 
@@ -37,6 +39,16 @@ describe("canonical item serialization", () => {
     expect(serialized.versionOf).not.toBe(stored.versionOf)
     expect(stored).toHaveProperty("_versionOfBacklink")
     expect(stored).not.toHaveProperty("@context")
+  })
+
+  it("does not save a title from the main record", () => {
+    const stored = structuredClone(storedTheSoz2004)
+    const { effectiveItem } = deriveVersionRecord(stored, storedTheSozMain)
+    const serialized = canonicalItemCopy(stored, context)
+
+    expect(effectiveItem.prefLabel.en).toBe("Thesaurus for the Social Sciences 3.0")
+    expect(serialized.version).toBe("3.0")
+    expect(serialized).not.toHaveProperty("prefLabel")
   })
 
   it("does not mutate stored data during RDF serialization", async () => {

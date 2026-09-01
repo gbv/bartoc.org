@@ -148,6 +148,68 @@ describe("TerminologyPage", () => {
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")
   })
 
+  it("shows the version number", () => {
+    const wrapper = mountPage({ version: " 3.0 " })
+    const row = rowByLabel(wrapper, "Version")
+
+    expect(row.findAll("td")[1].text()).toBe("3.0")
+    expect(rowByLabel(mountPage({ version: undefined }), "Version")).toBeUndefined()
+  })
+
+  it("shows the version number next to the main record", () => {
+    const context = mountPage({ version: "3.0" }).get("[data-testid='version-context']")
+
+    expect(context.text()).toBe("This is version 3.0 of Earlier Version.")
+    expect(context.get("a").attributes("href")).toBe("/en/node/122")
+  })
+
+  it("marks a title from the main record", () => {
+    const wrapper = mountPage(
+      { prefLabel: { en: "Test Vocabulary 3.0" } },
+      { prefLabel: { from: "http://bartoc.org/en/node/122" } },
+    )
+    const titlesRow = rowByLabel(wrapper, "Titles")
+
+    expect(titlesRow.attributes("aria-describedby")).toBe("version-inheritance-legend")
+    expect(titlesRow.find(".inherited-field-marker").exists()).toBe(true)
+  })
+
+  it("shows linked versions", () => {
+    const versionOf = [{ uri: item.uri }]
+    const wrapper = mountPage({
+      versionOf: [],
+      _versionOfBacklink: [
+        {
+          uri: "http://bartoc.org/en/node/294",
+          version: "3.0",
+          versionOf,
+          startDate: "2004",
+          extent: "8223 classes (2022-09)",
+        },
+        {
+          uri: "http://bartoc.org/en/node/20827",
+          prefLabel: { en: "New Thesaurus for the Social Sciences" },
+          version: "4.0",
+          versionOf,
+          startDate: "2009",
+          extent: "Approximately 12,000 concepts (2025-08)",
+        },
+        {
+          uri: "http://bartoc.org/en/node/125",
+          prefLabel: { en: "Minimal version" },
+          versionOf,
+        },
+      ],
+    })
+    const entries = wrapper.findAll(".terminology-versions > li")
+
+    expect(entries.map(entry => entry.text())).toEqual([
+      "Test Vocabulary 3.0 since 2004 · 8223 classes (2022-09) · BARTOC ID 294",
+      "New Thesaurus for the Social Sciences version 4.0 · since 2009 · Approximately 12,000 concepts (2025-08) · BARTOC ID 20827",
+      "Minimal version BARTOC ID 125",
+    ])
+  })
+
   it("marks inherited fields and explains them once", () => {
     const source = { from: "http://bartoc.org/en/node/122" }
     const wrapper = mountPage({}, {

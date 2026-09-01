@@ -72,6 +72,22 @@ describe("ItemEditor save service", () => {
     })
   })
 
+  it("saves a version number without a title", async () => {
+    const result = await prepareItemForSave({
+      item: makeItem({
+        prefLabel: {},
+        version: " 3.0 ",
+        versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+        API: [],
+      }),
+      trimItemIdentifiers: vi.fn(),
+    })
+    const body = JSON.parse(result.body)
+
+    expect(body.version).toBe("3.0")
+    expect(body.prefLabel).toBeUndefined()
+  })
+
   it("prepares new items as POST requests with the next BARTOC URI", async () => {
     const fetchImpl = vi.fn(async () => ({
       json: async () => [{ uri: "http://bartoc.org/en/node/123" }],

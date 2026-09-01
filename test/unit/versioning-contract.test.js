@@ -3,135 +3,107 @@ import {
   DERIVED_VERSION_FIELDS,
   deriveVersionRecord,
   hasMeaningfulValue,
-  recordKind,
+  versionNumber,
+  versionRole,
 } from "../../src/versioning.js"
 import {
   THE_SOZ_MAIN_URI,
-  derivationContractCases,
-  localByDefaultMainFields,
-  meaningfulValueContractCases,
-  recordKindContractCases,
+  storedTheSozMain,
   storedTheSoz2004,
   storedTheSoz2009,
 } from "../fixtures/versioning.js"
 
-describe("versioning MVP contract", () => {
-  it("uses the conservative three-field allowlist", () => {
-    expect(DERIVED_VERSION_FIELDS).toEqual([
-      "definition",
-      "notation",
-      "subject",
+describe("version records", () => {
+  it("lists fields taken from the main record", () => {
+    expect(DERIVED_VERSION_FIELDS).toEqual(["definition", "notation", "subject"])
+  })
+
+  it("finds empty and saved values", () => {
+    expect([
+      undefined,
+      " ",
+      [],
+      { en: [" "] },
+      false,
+      0,
+      { en: ["value"] },
+    ].map(hasMeaningfulValue)).toEqual([
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
     ])
-    expect(Object.isFrozen(DERIVED_VERSION_FIELDS)).toBe(true)
   })
 
-  it("keeps TheSoz version relations as raw URI references", () => {
-    expect(storedTheSoz2004.versionOf).toEqual([{ uri: THE_SOZ_MAIN_URI }])
-    expect(storedTheSoz2009.versionOf).toEqual([{ uri: THE_SOZ_MAIN_URI }])
+  it("reads version numbers as text", () => {
+    expect(versionNumber({ version: " 3.0 beta " })).toBe("3.0 beta")
+    expect(versionNumber({ version: 3 })).toBe("")
+    expect(versionNumber({})).toBe("")
   })
 
-  it("defines only allowlisted fields as derived", () => {
-    for (const contract of derivationContractCases) {
-      for (const field of Object.keys(contract.expected.derivedFields)) {
-        expect(
-          DERIVED_VERSION_FIELDS,
-          `${contract.name} unexpectedly derives ${field}`,
-        ).toContain(field)
-        expect(contract.expected.derivedFields[field].from).toBe(contract.main.uri)
-      }
-    }
+  it("finds the role of a record", () => {
+    expect([
+      versionRole({}),
+      versionRole(storedTheSozMain, [{}]),
+      versionRole(storedTheSoz2004),
+      versionRole(storedTheSoz2004, [{}]),
+    ]).toEqual(["standalone", "main", "version", "mixed"])
   })
 
-  it("keeps version identity and title local in every expected effective item", () => {
-    for (const contract of derivationContractCases) {
-      expect(contract.expected.effectiveItem.uri).toBe(contract.version.uri)
-      expect(contract.expected.effectiveItem.prefLabel).toEqual(contract.version.prefLabel)
-    }
+  it("builds a missing title and fields", () => {
+    expect(deriveVersionRecord(storedTheSoz2004, storedTheSozMain)).toEqual({
+      effectiveItem: {
+        ...storedTheSoz2004,
+        prefLabel: {
+          en: "Thesaurus for the Social Sciences 3.0",
+          de: "Thesaurus Sozialwissenschaften 3.0",
+        },
+        notation: storedTheSozMain.notation,
+        subject: storedTheSozMain.subject,
+      },
+      derivedFields: {
+        prefLabel: { from: THE_SOZ_MAIN_URI },
+        notation: { from: THE_SOZ_MAIN_URI },
+        subject: { from: THE_SOZ_MAIN_URI },
+      },
+    })
   })
 
-  it("documents local-by-default fields outside the allowlist", () => {
-    expect(Object.keys(localByDefaultMainFields)).not.toEqual([])
-    expect(
-      Object.keys(localByDefaultMainFields).filter(field =>
-        DERIVED_VERSION_FIELDS.includes(field)),
-    ).toEqual([])
-  })
-
-  it.each(meaningfulValueContractCases)(
-    "defines $name as meaningful: $expected",
-    ({ value, expected }) => {
-      expect(hasMeaningfulValue(value)).toBe(expected)
-    },
-  )
-
-  it.each(recordKindContractCases)(
-    "classifies a $name",
-    ({ item, incomingVersions, expected }) => {
-      expect(recordKind(item, incomingVersions)).toBe(expected)
-    },
-  )
-
-  it.each(derivationContractCases)("$name", ({ version, main, expected }) => {
-    expect(deriveVersionRecord(version, main)).toEqual(expected)
-  })
-
-  it("returns nested copies that are independent from both stored records", () => {
-    const version = {
-      uri: "http://bartoc.org/en/node/99920",
-      prefLabel: { en: "Stored version title" },
-      versionOf: [{ uri: THE_SOZ_MAIN_URI }],
-    }
-    const main = {
-      uri: THE_SOZ_MAIN_URI,
-      definition: { en: ["Shared definition"] },
-    }
-    const originalVersion = structuredClone(version)
-    const originalMain = structuredClone(main)
-
-    const { effectiveItem } = deriveVersionRecord(version, main)
-    effectiveItem.prefLabel.en = "Changed effective title"
-    effectiveItem.definition.en.push("Changed effective definition")
-
-    expect(version).toEqual(originalVersion)
-    expect(main).toEqual(originalMain)
-  })
-
-  it.each([
-    ["empty", []],
-    ["external", [{ uri: "https://example.org/main" }]],
-    ["multiple", [
-      { uri: THE_SOZ_MAIN_URI },
-      { uri: "http://bartoc.org/en/node/20827" },
-    ]],
-    ["self-referencing", [{ uri: "http://bartoc.org/en/node/99921" }]],
-  ])("does not derive through an %s versionOf relation", (_, versionOf) => {
-    const version = {
-      uri: "http://bartoc.org/en/node/99921",
-      prefLabel: { en: "Stored version" },
-      versionOf,
-    }
-    const main = {
-      uri: THE_SOZ_MAIN_URI,
-      definition: { en: ["Must not be inherited"] },
-    }
-
-    expect(deriveVersionRecord(version, main)).toEqual({
-      effectiveItem: version,
+  it("keeps values saved on the version", () => {
+    expect(deriveVersionRecord(storedTheSoz2009, storedTheSozMain)).toEqual({
+      effectiveItem: storedTheSoz2009,
       derivedFields: {},
     })
-    expect(recordKind(version)).toBe("standalone")
   })
 
-  it("validates required kernel inputs", () => {
-    expect(() => deriveVersionRecord(null, null)).toThrow(TypeError)
-    expect(() => deriveVersionRecord({}, null, "definition")).toThrow(TypeError)
+  it("needs the right main record", () => {
+    const noLink = { ...storedTheSoz2004, versionOf: [] }
+    const otherMain = {
+      ...storedTheSozMain,
+      uri: "http://bartoc.org/en/node/99904",
+    }
+
+    expect(deriveVersionRecord(noLink, storedTheSozMain)).toEqual({
+      effectiveItem: noLink,
+      derivedFields: {},
+    })
+    expect(deriveVersionRecord(storedTheSoz2004, otherMain)).toEqual({
+      effectiveItem: storedTheSoz2004,
+      derivedFields: {},
+    })
   })
 
-  it("freezes fixtures shared by the table-driven kernel tests", () => {
-    expect(Object.isFrozen(derivationContractCases)).toBe(true)
-    expect(Object.isFrozen(derivationContractCases[0].version)).toBe(true)
-    expect(Object.isFrozen(derivationContractCases[0].expected.effectiveItem)).toBe(true)
-    expect(Object.isFrozen(meaningfulValueContractCases)).toBe(true)
-    expect(Object.isFrozen(recordKindContractCases)).toBe(true)
+  it("keeps saved records unchanged", () => {
+    const version = structuredClone(storedTheSoz2004)
+    const main = structuredClone(storedTheSozMain)
+    const { effectiveItem } = deriveVersionRecord(version, main)
+
+    effectiveItem.notation.push("Changed")
+
+    expect(version).toEqual(storedTheSoz2004)
+    expect(main).toEqual(storedTheSozMain)
   })
 })

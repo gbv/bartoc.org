@@ -7,9 +7,15 @@
   </a>
   <h1>{{ title }}</h1>
   <p
-    v-if="versionMain"
+    v-if="versionOfReference"
     data-testid="version-context">
-    This is a version of <ItemLink :item="versionMain" />.
+    <template v-if="currentVersionNumber">
+      This is version <strong>{{ currentVersionNumber }}</strong> of
+    </template>
+    <template v-else>
+      This is a version of
+    </template>
+    <ItemLink :item="versionOfReference" />.
     <span
       v-if="hasInheritedFields"
       :id="INHERITANCE_LEGEND_ID"
@@ -281,6 +287,13 @@
         </MetadataListRow>
 
         <MetadataRow
+          source-field="version"
+          :show="Boolean(currentVersionNumber)"
+          label="Version">
+          {{ currentVersionNumber }}
+        </MetadataRow>
+
+        <MetadataRow
           :show="Boolean(item.namespace)"
           label="Namespace">
           <ExternalLink :url="item.namespace" />
@@ -327,9 +340,11 @@
       title="Versions">
       <ul class="terminology-versions">
         <li
-          v-for="version in item._versionOfBacklink"
-          :key="version.uri">
-          <TerminologyVersionLink :item="version" />
+          v-for="versionRecord in item._versionOfBacklink"
+          :key="versionRecord.uri">
+          <TerminologyVersionLink
+            :version-record="versionRecord"
+            :main-record="item" />
         </li>
       </ul>
     </Tab>
@@ -341,7 +356,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, unref } from "vue"
 import { Tab, Tabs } from "jskos-vue-tabs"
 import "jskos-vue-tabs/dist/style.css"
-import { hasValidVersionOf } from "../../src/versioning.js"
+import { hasValidVersionOf, versionNumber } from "../../src/versioning.js"
 import ConceptBrowser from "../components/ConceptBrowser.vue"
 import ExternalLink from "../components/ExternalLink.vue"
 import ItemDates from "../components/ItemDates.vue"
@@ -384,6 +399,7 @@ const props = defineProps({
   },
 })
 
+// Check whether a field comes from the main record.
 function isFieldInherited(field) {
   return Boolean(field && props.derivedFields?.[field]?.from)
 }
@@ -399,6 +415,7 @@ provide("field-inheritance", {
 // inheritance marker is computed separately.
 const definitionInherited = computed(() => isFieldInherited("definition"))
 
+// Whether this terminology has linked versions.
 const hasVersions = computed(() => Boolean(props.item._versionOfBacklink?.length))
 const tabs = computed(() => [
   "about",
@@ -418,13 +435,20 @@ const titles = computed(() => [
   ...Object.values(props.item.prefLabel || {}),
   ...Object.values(props.item.altLabel || {}).flat(),
 ])
-const versionMain = computed(() => (
+// Version number shown on the page.
+const currentVersionNumber = computed(() => versionNumber(props.item))
+
+// Main terminology referenced by this version.
+const versionOfReference = computed(() => (
   hasValidVersionOf(props.item) ? props.item.versionOf[0] : null
 ))
+
+// Whether any field comes from the main record.
 const hasInheritedFields = computed(() => (
   Object.keys(props.derivedFields || {}).some(isFieldInherited)
 ))
 
+// Skip the generic SKOS ConceptScheme type.
 const kosTypeUris = computed(() => (props.item.type || []).slice(1))
 const subjects = computed(() => props.item.subject || [])
 // Mapped subjects carry enrichment provenance in MAPPING. Other subjects were
@@ -443,6 +467,8 @@ const address = computed(() => [
   "code",
   "country",
 ].map(field => props.item.ADDRESS?.[field]).filter(Boolean))
+
+// Data used by the concept browser.
 const conceptScheme = computed(() => ({
   uri: props.item.uri,
   identifier: props.item.identifier,

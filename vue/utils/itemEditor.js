@@ -1,6 +1,10 @@
 import { isValidUrl, validatePublisher } from "../utils.js"
 import { normalizeUri } from "../../src/uri.js"
-import { hasMeaningfulValue, hasValidVersionOf } from "../../src/versioning.js"
+import {
+  hasMeaningfulValue,
+  hasValidVersionOf,
+  versionNumber,
+} from "../../src/versioning.js"
 
 export { hasMeaningfulValue, hasValidVersionOf }
 
@@ -66,7 +70,8 @@ export function githubIssueUrl(title, body) {
 }
 
 export function itemError(item) {
-  if (!Object.keys(item.prefLabel).length) {
+  const canDeriveTitle = versionNumber(item) && hasValidVersionOf(item)
+  if (!hasMeaningfulValue(item?.prefLabel) && !canDeriveTitle) {
     return { message: "item must have at least a title!" }
   }
 
@@ -119,6 +124,9 @@ export function cleanupItem(item) {
   // Vocabulary record should always be a ConceptScheme.
   if (item.type[0] !== CONCEPT_SCHEME_TYPE) {
     item.type.unshift(CONCEPT_SCHEME_TYPE)
+  }
+  if ("version" in item) {
+    item.version = versionNumber(item)
   }
   // Remove empty fields recursively.
   item = filtered(item)
