@@ -156,7 +156,7 @@ describe("TerminologyPage", () => {
     })
 
     const legend = wrapper.get("[data-testid='version-inheritance-legend']")
-    expect(legend.text()).toContain("Derived values from the main record")
+    expect(legend.text()).toContain("Values derived from the main record")
     expect(legend.find(".version-inheritance-marker[aria-hidden='true']").exists()).toBe(true)
     expect(wrapper.findAll("a[href='/en/node/122']")).toHaveLength(1)
     expect(wrapper.findAll("[aria-describedby='version-inheritance-legend']")).toHaveLength(2)
