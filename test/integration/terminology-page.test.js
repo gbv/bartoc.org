@@ -215,14 +215,15 @@ describe("TerminologyPage", () => {
     const wrapper = mountPage({}, {
       definition: source,
       type: source,
+      languages: source,
     })
 
     const legend = wrapper.get("[data-testid='version-inheritance-legend']")
     expect(legend.text()).toContain("Values derived from the main record")
     expect(legend.find(".version-inheritance-marker[aria-hidden='true']").exists()).toBe(true)
     expect(wrapper.findAll("a[href='/en/node/122']")).toHaveLength(1)
-    expect(wrapper.findAll("[aria-describedby='version-inheritance-legend']")).toHaveLength(2)
-    expect(wrapper.findAll(".inherited-field-marker[aria-hidden='true']")).toHaveLength(2)
+    expect(wrapper.findAll("[aria-describedby='version-inheritance-legend']")).toHaveLength(3)
+    expect(wrapper.findAll(".inherited-field-marker[aria-hidden='true']")).toHaveLength(3)
   })
 
   it("places version context after the title and audit dates below the tabs", () => {

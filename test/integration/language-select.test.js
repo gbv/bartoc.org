@@ -16,7 +16,7 @@ vi.mock("../../vue/utils/guessLanguage.js", () => ({
 }))
 
 const ItemSelectStub = {
-  props: ["modelValue", "repeatable"],
+  props: ["modelValue", "repeatable", "disabled"],
   emits: ["update:modelValue"],
   template: `
     <div data-testid="item-select">
@@ -59,11 +59,16 @@ describe("LanguageSelect", () => {
     expect(w.get("[data-testid='val']").text()).toBe("\"\"")
   })
 
-  it("passes fallthrough attributes to ItemSelect only", () => {
-    const w = mountLang({ modelValue: "", class: "cc-form-control" })
+  it("passes attributes to ItemSelect", () => {
+    const w = mountLang({
+      modelValue: "",
+      disabled: true,
+      class: "cc-form-control",
+    })
 
     expect(w.get(".language-select").classes()).not.toContain("cc-form-control")
     expect(w.get("[data-testid='item-select']").classes()).toContain("cc-form-control")
+    expect(w.getComponent(ItemSelectStub).props("disabled")).toBe(true)
   })
 
   it("non-repeatable: emits a string and ignores arrays", async () => {

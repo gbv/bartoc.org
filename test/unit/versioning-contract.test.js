@@ -16,7 +16,12 @@ import {
 
 describe("version records", () => {
   it("lists fields taken from the main record", () => {
-    expect(DERIVED_VERSION_FIELDS).toEqual(["definition", "notation", "subject"])
+    expect(DERIVED_VERSION_FIELDS).toEqual([
+      "definition",
+      "notation",
+      "subject",
+      "languages",
+    ])
   })
 
   it("finds empty and saved values", () => {
@@ -80,7 +85,7 @@ describe("version records", () => {
     ]).toEqual(["standalone", "main", "version", "mixed"])
   })
 
-  it("builds a missing title and fields", () => {
+  it("derives missing values from the main record", () => {
     expect(deriveVersionRecord(storedTheSoz2004, storedTheSozMain)).toEqual({
       effectiveItem: {
         ...storedTheSoz2004,
@@ -89,17 +94,19 @@ describe("version records", () => {
           de: "Thesaurus Sozialwissenschaften 3.0",
         },
         notation: storedTheSozMain.notation,
+        languages: storedTheSozMain.languages,
         subject: storedTheSozMain.subject,
       },
       derivedFields: {
         prefLabel: { from: THE_SOZ_MAIN_URI },
         notation: { from: THE_SOZ_MAIN_URI },
+        languages: { from: THE_SOZ_MAIN_URI },
         subject: { from: THE_SOZ_MAIN_URI },
       },
     })
   })
 
-  it("keeps values saved on the version", () => {
+  it("keeps values stored on the version", () => {
     expect(deriveVersionRecord(storedTheSoz2009, storedTheSozMain)).toEqual({
       effectiveItem: storedTheSoz2009,
       derivedFields: {},

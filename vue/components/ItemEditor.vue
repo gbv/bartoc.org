@@ -42,10 +42,10 @@
     </div>
   </form-row>
   <form-row :label="'Languages'">
-    <language-select
+    <InheritableLanguagesEditor
+      ref="inheritableLanguagesEditor"
       v-model="item.languages"
-      class="cc-form-control"
-      :repeatable="true" />
+      :source="versionMainSource" />
   </form-row>
   <form-row :label="'Size'">
     <input
@@ -272,8 +272,8 @@ import { saveVocabularyItem } from "../utils/itemEditorSave.js"
 
 import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
-import LanguageSelect from "./LanguageSelect.vue"
 import InheritableAbstractsEditor from "./InheritableAbstractsEditor.vue"
+import InheritableLanguagesEditor from "./InheritableLanguagesEditor.vue"
 import InheritableSubjectsEditor from "./InheritableSubjectsEditor.vue"
 import LabelEditor from "./LabelEditor.vue"
 import ListEditor from "./ListEditor.vue"
@@ -319,6 +319,7 @@ const error = ref(null)
 const showJSKOS = ref(false)
 const abbreviationEditor = ref(null)
 const inheritableAbstractsEditor = ref(null)
+const inheritableLanguagesEditor = ref(null)
 const inheritableSubjectsEditor = ref(null)
 const formatScheme = {
   uri: "http://bartoc.org/en/node/20000",
@@ -408,6 +409,7 @@ function itemError() {
 
   return abbreviationEditor.value?.validationError()
     || inheritableAbstractsEditor.value?.validationError()
+    || inheritableLanguagesEditor.value?.validationError()
     || inheritableSubjectsEditor.value?.validationError()
 }
 

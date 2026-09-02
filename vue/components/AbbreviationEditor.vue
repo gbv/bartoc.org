@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { computed, ref, toRaw } from "vue"
+import { computed, ref } from "vue"
 import { hasMeaningfulValue } from "../utils/itemEditor.js"
 import InheritedFieldControl from "./InheritedFieldControl.vue"
 
@@ -75,7 +75,7 @@ function startOverride() {
   overrideActive.value = true
   emit(
     "update:modelValue",
-    structuredClone(toRaw(notationSource.value.notation)),
+    [...notationSource.value.notation],
   )
 }
 

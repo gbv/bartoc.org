@@ -161,6 +161,7 @@ describe("ItemEditor abstracts", () => {
           prefLabel: { en: "Main terminology" },
           notation: ["TheSoz"],
           definition: { en: ["Main definition"] },
+          languages: ["gsw", "eo"],
           subject: [{
             uri: "http://dewey.info/class/300/",
             inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
@@ -175,6 +176,7 @@ describe("ItemEditor abstracts", () => {
     const savedItem = JSON.parse(options.body)
     expect(savedItem.notation).toBeUndefined()
     expect(savedItem.definition).toBeUndefined()
+    expect(savedItem.languages).toBeUndefined()
     expect(savedItem.subject).toBeUndefined()
 
     await w.get("[data-testid='start-override']").trigger("click")

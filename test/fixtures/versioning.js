@@ -27,6 +27,7 @@ export const storedTheSozMain = deepFreeze({
     de: ["Allgemeine deutsche Beschreibung."],
   },
   notation: ["TheSoz"],
+  languages: ["gsw", "eo"],
   subject: [{
     uri: "subject:social-sciences",
     prefLabel: { en: "Social sciences" },
@@ -49,6 +50,7 @@ export const storedTheSoz2009 = deepFreeze({
   versionOf: [{ uri: THE_SOZ_MAIN_URI }],
   definition: { en: ["Version-specific description."] },
   notation: ["TheSoz"],
+  languages: ["it", "eo"],
   subject: [{
     uri: "subject:social-sciences",
     prefLabel: { en: "Social sciences" },
