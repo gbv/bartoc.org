@@ -340,7 +340,7 @@
       title="Versions">
       <ul class="terminology-versions">
         <li
-          v-for="versionRecord in item._versionOfBacklink"
+          v-for="versionRecord in versionRecords"
           :key="versionRecord.uri">
           <TerminologyVersionLink
             :version-record="versionRecord"
@@ -356,7 +356,11 @@
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, unref } from "vue"
 import { Tab, Tabs } from "jskos-vue-tabs"
 import "jskos-vue-tabs/dist/style.css"
-import { hasValidVersionOf, versionNumber } from "../../src/versioning.js"
+import {
+  hasValidVersionOf,
+  sortVersionRecordsByStartDate,
+  versionNumber,
+} from "../../src/versioning.js"
 import ConceptBrowser from "../components/ConceptBrowser.vue"
 import ExternalLink from "../components/ExternalLink.vue"
 import ItemDates from "../components/ItemDates.vue"
@@ -415,8 +419,11 @@ provide("field-inheritance", {
 // inheritance marker is computed separately.
 const definitionInherited = computed(() => isFieldInherited("definition"))
 
-// Whether this terminology has linked versions.
-const hasVersions = computed(() => Boolean(props.item._versionOfBacklink?.length))
+// Show linked versions in chronological order. Undated records come last.
+const versionRecords = computed(() => (
+  sortVersionRecordsByStartDate(props.item._versionOfBacklink)
+))
+const hasVersions = computed(() => Boolean(versionRecords.value.length))
 const tabs = computed(() => [
   "about",
   "access",

@@ -3,6 +3,7 @@ import {
   DERIVED_VERSION_FIELDS,
   deriveVersionRecord,
   hasMeaningfulValue,
+  sortVersionRecordsByStartDate,
   versionNumber,
   versionRole,
 } from "../../src/versioning.js"
@@ -42,6 +43,32 @@ describe("version records", () => {
     expect(versionNumber({ version: " 3.0 beta " })).toBe("3.0 beta")
     expect(versionNumber({ version: 3 })).toBe("")
     expect(versionNumber({})).toBe("")
+  })
+
+  it("sorts versions by start date without changing the source list", () => {
+    const records = [
+      { uri: "undated-1" },
+      { uri: "dated-2", startDate: "2009" },
+      { uri: "dated-1", startDate: " 2004 " },
+      { uri: "dated-3", startDate: "2009" },
+      { uri: "undated-2", startDate: " " },
+    ]
+
+    expect(sortVersionRecordsByStartDate(records).map(record => record.uri)).toEqual([
+      "dated-1",
+      "dated-2",
+      "dated-3",
+      "undated-1",
+      "undated-2",
+    ])
+    expect(records.map(record => record.uri)).toEqual([
+      "undated-1",
+      "dated-2",
+      "dated-1",
+      "dated-3",
+      "undated-2",
+    ])
+    expect(sortVersionRecordsByStartDate()).toEqual([])
   })
 
   it("finds the role of a record", () => {

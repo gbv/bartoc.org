@@ -78,6 +78,42 @@ export function versionNumber(item) {
 }
 
 /**
+ * Sort version records from the oldest start date to the newest.
+ *
+ * Keep records without a start date at the end. Keep the original order when
+ * two records have the same date, and never change the source array.
+ */
+export function sortVersionRecordsByStartDate(records) {
+  if (!Array.isArray(records)) {
+    return []
+  }
+
+  return [...records].sort((firstRecord, secondRecord) => {
+    const firstStartDate = typeof firstRecord?.startDate === "string"
+      ? firstRecord.startDate.trim()
+      : ""
+    const secondStartDate = typeof secondRecord?.startDate === "string"
+      ? secondRecord.startDate.trim()
+      : ""
+
+    // A stable sort keeps the original order for equal or missing dates.
+    if (firstStartDate === secondStartDate) {
+      return 0
+    }
+
+    // Put an undated record after a dated record.
+    if (!firstStartDate) {
+      return 1
+    }
+    if (!secondStartDate) {
+      return -1
+    }
+
+    return firstStartDate < secondStartDate ? -1 : 1
+  })
+}
+
+/**
  * Choose the title shown for a terminology version.
  *
  * Use the version's own title when it has one. Otherwise add the version number

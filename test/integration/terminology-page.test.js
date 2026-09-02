@@ -180,11 +180,9 @@ describe("TerminologyPage", () => {
       versionOf: [],
       _versionOfBacklink: [
         {
-          uri: "http://bartoc.org/en/node/294",
-          version: "3.0",
+          uri: "http://bartoc.org/en/node/125",
+          prefLabel: { en: "Minimal version" },
           versionOf,
-          startDate: "2004",
-          extent: "8223 classes (2022-09)",
         },
         {
           uri: "http://bartoc.org/en/node/20827",
@@ -195,9 +193,11 @@ describe("TerminologyPage", () => {
           extent: "Approximately 12,000 concepts (2025-08)",
         },
         {
-          uri: "http://bartoc.org/en/node/125",
-          prefLabel: { en: "Minimal version" },
+          uri: "http://bartoc.org/en/node/294",
+          version: "3.0",
           versionOf,
+          startDate: "2004",
+          extent: "8223 classes (2022-09)",
         },
       ],
     })
