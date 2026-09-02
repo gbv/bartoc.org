@@ -12,6 +12,10 @@ function storedItem() {
     prefLabel: { en: "Stored version" },
     type: ["http://www.w3.org/2004/02/skos/core#ConceptScheme"],
     versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+    created: "2024-01-01",
+    modified: "2024-02-01",
+    creator: [{ uri: "https://example.org/users/creator" }],
+    contributor: [{ uri: "https://example.org/users/contributor" }],
     _versionOfBacklink: [{ uri: "http://bartoc.org/en/node/999" }],
   }
 }
@@ -33,6 +37,10 @@ describe("canonical item serialization", () => {
       prefLabel: { en: "Stored version" },
       type: stored.type,
       versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      created: "2024-01-01",
+      modified: "2024-02-01",
+      creator: [{ uri: "https://example.org/users/creator" }],
+      contributor: [{ uri: "https://example.org/users/contributor" }],
       "@context": context,
     })
     expect(serialized).not.toBe(stored)
@@ -58,6 +66,14 @@ describe("canonical item serialization", () => {
     await rdfSerialize(stored, "nt")
 
     expect(stored).toEqual(original)
+  })
+
+  it.each(["nt", "rdfxml"])("removes record metadata from %s", async (format) => {
+    const rdf = await rdfSerialize(storedItem(), format)
+
+    expect(rdf).not.toMatch(/(?:dct:|terms\/)(created|modified|creator|contributor)/)
+    expect(rdf).not.toContain("https://example.org/users/creator")
+    expect(rdf).not.toContain("https://example.org/users/contributor")
   })
 
   it("includes the stored item in RDF/XML serialization", async () => {

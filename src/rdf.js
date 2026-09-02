@@ -10,6 +10,12 @@ const require = createRequire(import.meta.url)
 const jskosContext = require("../static/context.json")
 
 const parseRDF = util.promisify($rdf.parse)
+const RDF_RECORD_METADATA_FIELDS = [
+  "created",
+  "modified",
+  "creator",
+  "contributor",
+]
 
 export const rdfContentType = {
   nt: "application/n-triples",
@@ -50,6 +56,10 @@ export async function rdfSerialize(item, format) {
   }
 
   const document = canonicalItemCopy(item, jskosContext)
+  // These fields describe the BARTOC record, not the resource represented in RDF.
+  for (const field of RDF_RECORD_METADATA_FIELDS) {
+    delete document[field]
+  }
 
   // jsonld library only supports NTriples serialization
   if (type === "application/n-triples") {
