@@ -37,17 +37,24 @@ title: About
       <a href="https://en.wikipedia.org/wiki/BARTOC">https://en.wikipedia.org/wiki/BARTOC</a>.
     </p>
   </section>
-
-  <aside class="about__logos" aria-label="Partner logos">
-    <img src="/img/logo-isko.png" alt="ISKO logo" />
-    <img src="/img/danslogo.png" alt="DANS logo" />
-    <img src="/img/logo-tematres-home.png" alt="TemaTres logo" />
-  </aside>
 </div>
 
+<section class="partners">
+  <h3>Partners</h3>
+  <p>
+    <a href="https://terminology.services.base4nfdi.de/"><img src="/img/logo-ts4nfdi.png" alt="TS4NFDI" /></a>
+    &#20;
+    <a href="https://portal.isko.org/"><img src="/img/logo-isko.png" alt="ISKO" /></a>
+    &#20;
+    <a href="https://dans.knaw.nl/"><img src="/img/danslogo.png" alt="DANS" /></a>
+    &#20;
+    <a href="https://vocabularyserver.com/"><img src="/img/logo-tematres-home.png" alt="TemaTres" /></a>
+  </p>
+</section>
+
 <section class="publications">
-  <h3 class="publications-title">Publications</h3>
-  <ul class="publications-list">
+  <h3>Publications</h3>
+  <ul>
     <li><a href="https://nkos.dublincore.org/2022NKOSworkshop/Park-Collecting%20Distributed%20KOS.pdf" target="_blank" rel="noopener noreferrer">NKOS 2022</a></li>
     <li><a href="https://doi.org/10.5281/zenodo.4629366" target="_blank" rel="noopener noreferrer">Code4Lib 2021</a></li>
     <li><a href="https://doi.org/10.5771/9783956507762-200" target="_blank" rel="noopener noreferrer">ISKO Aalborg 2020</a></li>
