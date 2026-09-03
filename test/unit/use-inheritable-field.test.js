@@ -42,4 +42,26 @@ describe("useInheritableField", () => {
     props.source.values = []
     expect(field.fieldMode.value).toBe("editable")
   })
+
+  it("reads a custom inherited value", () => {
+    const props = reactive({
+      modelValue: [],
+      source: {
+        uri: "http://bartoc.org/en/node/1",
+        values: ["required", "inherited"],
+      },
+    })
+    const emit = vi.fn()
+    const field = useInheritableField(props, emit, {
+      field: "values",
+      getInheritedValue: source => source?.values.slice(1),
+      createEmptyValue: () => [],
+      validationMessage: "Enter a value or use the main record.",
+    })
+
+    expect(field.inheritedValue.value).toEqual(["inherited"])
+
+    field.startOverride()
+    expect(emit).toHaveBeenCalledWith("update:modelValue", ["inherited"])
+  })
 })

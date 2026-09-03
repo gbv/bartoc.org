@@ -56,10 +56,11 @@
     parenthesis (YYYY-MM).
   </form-row>
   <form-row :label="'KOS Types'">
-    <set-select
-      :model-value="type"
-      :options="kostypes"
-      @update:modelValue="item.type = $event.map((t) => t.uri)" />
+    <InheritableKosTypesEditor
+      ref="inheritableKosTypesEditor"
+      v-model="selectedKosTypes"
+      :source="versionMainSource"
+      :options="kosTypeOptions" />
     Use Shift key to deselect or select multiple types.
   </form-row>
   <form-row :label="'Subjects'">
@@ -262,16 +263,18 @@ import {
 } from "../utils.js"
 import {
   cleanupItem,
+  CONCEPT_SCHEME_TYPE,
   conceptPickerModel,
   itemError as validateItem,
   normalizeEditableItem,
   hasValidVersionOf,
+  kosTypeUris,
 } from "../utils/itemEditor.js"
 import { saveVocabularyItem } from "../utils/itemEditorSave.js"
 
 import FormRow from "./FormRow.vue"
-import SetSelect from "./SetSelect.vue"
 import InheritableAbstractsEditor from "./InheritableAbstractsEditor.vue"
+import InheritableKosTypesEditor from "./InheritableKosTypesEditor.vue"
 import InheritableLanguagesEditor from "./InheritableLanguagesEditor.vue"
 import InheritableNotationExamplesEditor from "./InheritableNotationExamplesEditor.vue"
 import InheritableSubjectsEditor from "./InheritableSubjectsEditor.vue"
@@ -309,7 +312,7 @@ const props = defineProps({
 
 // Edit a deep copy so normalization and form changes do not mutate props.current.
 const item = reactive(normalizeEditableItem(structuredClone(toRaw(props.current))))
-const kostypes = ref([])
+const kosTypeOptions = ref([])
 const licenses = ref([])
 const formats = ref([])
 const access = ref([])
@@ -318,6 +321,7 @@ const error = ref(null)
 const showJSKOS = ref(false)
 const abbreviationEditor = ref(null)
 const inheritableAbstractsEditor = ref(null)
+const inheritableKosTypesEditor = ref(null)
 const inheritableLanguagesEditor = ref(null)
 const inheritableNotationExamplesEditor = ref(null)
 const inheritableSubjectsEditor = ref(null)
@@ -352,7 +356,12 @@ const registryProvider = createRegistryProvider(() => registriesLoaded, {
   toModel: conceptPickerModel,
 })
 
-const type = computed(() => item.type.map((uri) => ({ uri })))
+const selectedKosTypes = computed({
+  get: () => kosTypeUris(item).map(uri => ({ uri })),
+  set: value => {
+    item.type = [CONCEPT_SCHEME_TYPE, ...value.map(({ uri }) => uri)]
+  },
+})
 const showVersionOfEditor = computed(() =>
   !props.hasIncomingVersions || item.versionOf.length > 0,
 )
@@ -386,7 +395,7 @@ loadConcepts(
 })
 
 loadConcepts("/api/voc/top", "http://w3id.org/nkos/nkostype").then((set) => {
-  kostypes.value = set
+  kosTypeOptions.value = set
 })
 
 loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000").then((set) => {
@@ -405,6 +414,7 @@ function itemError() {
 
   return abbreviationEditor.value?.validationError()
     || inheritableAbstractsEditor.value?.validationError()
+    || inheritableKosTypesEditor.value?.validationError()
     || inheritableLanguagesEditor.value?.validationError()
     || inheritableSubjectsEditor.value?.validationError()
     || inheritableNotationExamplesEditor.value?.validationError()
@@ -431,7 +441,7 @@ async function saveItem() {
 
 defineExpose({
   item,
-  kostypes,
+  kosTypeOptions,
   licenses,
   formats,
   access,
@@ -442,7 +452,7 @@ defineExpose({
   formatProvider,
   licenseProvider,
   registryProvider,
-  type,
+  selectedKosTypes,
   showVersionOfEditor,
   jskosPreview,
   itemError,

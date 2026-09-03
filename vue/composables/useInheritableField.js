@@ -12,17 +12,25 @@ import { hasMeaningfulValue } from "../utils/itemEditor.js"
  * It sends each change with the `update:modelValue` event.
  */
 export function useInheritableField(props, emit, options) {
-  const { field, createEmptyValue, validationMessage } = options
+  const {
+    field,
+    createEmptyValue,
+    validationMessage,
+    getInheritedValue = source => source?.[field],
+  } = options
 
   // Remember that the user chose to edit a local value. Keep the editor open
   // if the user clears that value, so they can enter a new one or use the main
   // value again.
   const overrideActive = ref(hasMeaningfulValue(props.modelValue))
 
+  // Some fields inherit only part of the source record.
+  const inheritedValue = computed(() => getInheritedValue(props.source))
+
   // The field can use the main record only when the main record has a value.
   // Otherwise, show a normal editor.
   const sourceRecord = computed(() =>
-    props.source?.uri && hasMeaningfulValue(props.source[field])
+    props.source?.uri && hasMeaningfulValue(inheritedValue.value)
       ? props.source
       : null,
   )
@@ -62,7 +70,7 @@ export function useInheritableField(props, emit, options) {
       return
     }
 
-    const value = structuredClone(toRaw(sourceRecord.value[field]))
+    const value = structuredClone(toRaw(inheritedValue.value))
     overrideActive.value = true
     emit("update:modelValue", value)
     return value
@@ -89,6 +97,7 @@ export function useInheritableField(props, emit, options) {
 
   return {
     sourceRecord,
+    inheritedValue,
     fieldMode,
     localValue,
     updateLocalValue,

@@ -67,7 +67,7 @@
         <MetadataListRow
           source-field="type"
           label="KOS Type"
-          :items="kosTypeUris"
+          :items="displayedKosTypeUris"
           list-style="inline">
           <template #item="{ item: uri }">
             <ItemLink
@@ -359,6 +359,7 @@ import { Tab, Tabs } from "jskos-vue-tabs"
 import "jskos-vue-tabs/dist/style.css"
 import {
   hasValidVersionOf,
+  kosTypeUris,
   sortVersionRecordsByStartDate,
   versionNumber,
 } from "../../src/versioning.js"
@@ -456,8 +457,7 @@ const hasInheritedFields = computed(() => (
   Object.keys(props.derivedFields || {}).some(isFieldInherited)
 ))
 
-// Skip the generic SKOS ConceptScheme type.
-const kosTypeUris = computed(() => (props.item.type || []).slice(1))
+const displayedKosTypeUris = computed(() => kosTypeUris(props.item))
 const subjects = computed(() => props.item.subject || [])
 // Mapped subjects carry enrichment provenance in MAPPING. Other subjects were
 // assigned manually.

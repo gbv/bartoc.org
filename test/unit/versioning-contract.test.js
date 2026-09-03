@@ -3,6 +3,7 @@ import {
   DERIVED_VERSION_FIELDS,
   deriveVersionRecord,
   hasMeaningfulValue,
+  kosTypeUris,
   sortVersionRecordsByStartDate,
   versionNumber,
   versionRole,
@@ -22,7 +23,20 @@ describe("version records", () => {
       "subject",
       "languages",
       "notationExamples",
+      "type",
     ])
+  })
+
+  it("returns only KOS types", () => {
+    const thesaurusType = "http://w3id.org/nkos/nkostype#thesaurus"
+
+    expect(kosTypeUris({
+      type: [
+        thesaurusType,
+        "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+      ],
+    })).toEqual([thesaurusType])
+    expect(kosTypeUris()).toEqual([])
   })
 
   it("finds empty and saved values", () => {
@@ -98,6 +112,7 @@ describe("version records", () => {
         languages: storedTheSozMain.languages,
         notationExamples: storedTheSozMain.notationExamples,
         subject: storedTheSozMain.subject,
+        type: storedTheSozMain.type,
       },
       derivedFields: {
         prefLabel: { from: THE_SOZ_MAIN_URI },
@@ -105,6 +120,7 @@ describe("version records", () => {
         languages: { from: THE_SOZ_MAIN_URI },
         notationExamples: { from: THE_SOZ_MAIN_URI },
         subject: { from: THE_SOZ_MAIN_URI },
+        type: { from: THE_SOZ_MAIN_URI },
       },
     })
   })

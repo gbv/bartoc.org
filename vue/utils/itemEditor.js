@@ -1,14 +1,19 @@
 import { isValidUrl, validatePublisher } from "../utils.js"
 import { normalizeUri } from "../../src/uri.js"
 import {
+  CONCEPT_SCHEME_TYPE,
   hasMeaningfulValue,
   hasValidVersionOf,
+  kosTypeUris,
   versionNumber,
 } from "../../src/versioning.js"
 
-export { hasMeaningfulValue, hasValidVersionOf }
-
-export const CONCEPT_SCHEME_TYPE = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+export {
+  CONCEPT_SCHEME_TYPE,
+  hasMeaningfulValue,
+  hasValidVersionOf,
+  kosTypeUris,
+}
 
 const objectFields = ["prefLabel", "altLabel", "definition", "ADDRESS", "DISPLAY"]
 const arrayFields = [

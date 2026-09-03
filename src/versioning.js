@@ -1,5 +1,7 @@
 import { isBartocUri, normalizeUri } from "./uri.js"
 
+export const CONCEPT_SCHEME_TYPE = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+
 /**
  * Fields that a version may take from its main record.
  *
@@ -12,7 +14,17 @@ export const DERIVED_VERSION_FIELDS = Object.freeze([
   "subject",
   "languages",
   "notationExamples",
+  "type",
 ])
+
+/**
+ * Get the KOS types without the required SKOS ConceptScheme type.
+ */
+export function kosTypeUris(item) {
+  return Array.isArray(item?.type)
+    ? item.type.filter(type => type !== CONCEPT_SCHEME_TYPE)
+    : []
+}
 
 /**
  * Get the main record URI from `versionOf`.
@@ -249,6 +261,21 @@ export function deriveVersionRecord(
 
   // Check every allowed field once.
   for (const field of new Set(fields)) {
+    // ConceptScheme is required on every terminology. A version can inherit
+    // only the other KOS types.
+    if (field === "type") {
+      const localKosTypes = kosTypeUris(version)
+      const mainKosTypes = kosTypeUris(main)
+
+      if (!localKosTypes.length && mainKosTypes.length) {
+        const versionTypes = Array.isArray(version.type) ? version.type : []
+        effectiveItem.type = [...versionTypes, ...mainKosTypes]
+        derivedFields.type = { from: mainUri }
+      }
+
+      continue
+    }
+
     // Keep the version's value. Use the main value only when it is missing.
     if (
       typeof field === "string" &&

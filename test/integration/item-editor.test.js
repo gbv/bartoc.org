@@ -75,6 +75,7 @@ const AbstractsEditorStub = {
 }
 
 const conceptSchemeType = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+const thesaurusType = "http://w3id.org/nkos/nkostype#thesaurus"
 const optionalEnglishMessage =
   "An English abstract is optional because this terminology is a version of another BARTOC terminology."
 
@@ -159,6 +160,7 @@ describe("ItemEditor", () => {
         versionMain: {
           uri: "http://bartoc.org/en/node/21133",
           prefLabel: { en: "Main terminology" },
+          type: [conceptSchemeType, thesaurusType],
           notation: ["TheSoz"],
           definition: { en: ["Main definition"] },
           languages: ["gsw", "eo"],
@@ -180,11 +182,40 @@ describe("ItemEditor", () => {
     expect(savedItem.languages).toBeUndefined()
     expect(savedItem.notationExamples).toBeUndefined()
     expect(savedItem.subject).toBeUndefined()
+    expect(savedItem.type).toEqual([conceptSchemeType])
 
     await w.get("[data-testid='start-override']").trigger("click")
     await w.get("[data-testid='notation-editor']").setValue("")
     expect(w.vm.itemError()).toEqual({
       message: "Enter an abbreviation or use the value from the main record.",
+    })
+  })
+
+  it("rejects an empty KOS type override", async () => {
+    const w = mountEditor(
+      {
+        uri: "http://bartoc.org/en/node/294",
+        prefLabel: { en: ["Version"] },
+        type: [conceptSchemeType],
+        versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
+      },
+      {
+        versionMain: {
+          uri: "http://bartoc.org/en/node/21133",
+          type: [conceptSchemeType, thesaurusType],
+        },
+      },
+    )
+    const rows = w.findAll(".form-row")
+    const row = rows[formLabels(w).indexOf("KOS Types")]
+
+    await row.get("[data-testid='start-override']").trigger("click")
+    row.getComponent({ name: "SetSelect" }).vm.$emit("update:modelValue", [])
+    await nextTick()
+
+    expect(w.vm.item.type).toEqual([conceptSchemeType])
+    expect(w.vm.itemError()).toEqual({
+      message: "Select a KOS type or use the value from the main record.",
     })
   })
 

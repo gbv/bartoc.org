@@ -1,5 +1,6 @@
 const CONCEPT_SCHEME_TYPE = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
 const THESAURUS_TYPE = "http://w3id.org/nkos/nkostype#thesaurus"
+const ONTOLOGY_TYPE = "http://w3id.org/nkos/nkostype#ontology"
 
 export const THE_SOZ_MAIN_URI = "http://bartoc.org/en/node/21133"
 export const THE_SOZ_2004_URI = "http://bartoc.org/en/node/294"
@@ -38,6 +39,7 @@ export const storedTheSozMain = deepFreeze({
 
 export const storedTheSoz2004 = deepFreeze({
   uri: THE_SOZ_2004_URI,
+  type: [CONCEPT_SCHEME_TYPE],
   version: "3.0",
   versionOf: [{ uri: THE_SOZ_MAIN_URI }],
   definition: { und: ["This version is outdated."] },
@@ -46,6 +48,7 @@ export const storedTheSoz2004 = deepFreeze({
 
 export const storedTheSoz2009 = deepFreeze({
   uri: THE_SOZ_2009_URI,
+  type: [CONCEPT_SCHEME_TYPE, ONTOLOGY_TYPE],
   prefLabel: { en: "New Thesaurus for the Social Sciences" },
   version: "4.0",
   versionOf: [{ uri: THE_SOZ_MAIN_URI }],

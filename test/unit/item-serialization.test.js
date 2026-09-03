@@ -49,13 +49,15 @@ describe("canonical item serialization", () => {
     expect(stored).not.toHaveProperty("@context")
   })
 
-  it("does not save a title from the main record", () => {
+  it("keeps inherited values out of saved data", () => {
     const stored = structuredClone(storedTheSoz2004)
     const { effectiveItem } = deriveVersionRecord(stored, storedTheSozMain)
     const serialized = canonicalItemCopy(stored, context)
 
     expect(effectiveItem.prefLabel.en).toBe("Thesaurus for the Social Sciences 3.0")
+    expect(effectiveItem.type).toEqual(storedTheSozMain.type)
     expect(serialized.version).toBe("3.0")
+    expect(serialized.type).toEqual(storedTheSoz2004.type)
     expect(serialized).not.toHaveProperty("prefLabel")
   })
 
