@@ -279,15 +279,8 @@ export function createConceptApiProvider({
         return [query, [], [], []]
       }
 
-      const concepts = await res.json()
-
-      // Return data in the format expected by item-select.
-      return [
-        query,
-        concepts.map(c => c.prefLabel?.en || c.notation?.[0] || c.uri || ""),
-        concepts.map(() => ""),
-        concepts.map(c => c.uri),
-      ]
+      // The suggest endpoint already returns the format used by ItemSelect.
+      return await res.json()
     },
 
     // Load narrower concepts for one tree node.

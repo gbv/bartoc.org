@@ -6,12 +6,13 @@
     <item-selected
       v-model="selected"
       view="table"
-      orderable
-      removable />
+      :orderable="!readonly"
+      :removable="!readonly" />
   </div>
 
   <!-- Search and select concepts from one scheme -->
   <item-select
+    v-if="!readonly"
     :search="provider.search"
     :placeholder="placeholder"
     :tree-concepts="showTree ? treeConcepts : null"
@@ -56,6 +57,11 @@ const props = defineProps({
   showSelected: {
     type: Boolean,
     default: true,
+  },
+  // Show selected items without edit controls.
+  readonly: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -103,7 +109,7 @@ watch(
 
 // Load top concepts and initial selected concepts on mount.
 onMounted(async () => {
-  treeConcepts.value = props.showTree && props.provider.loadTop
+  treeConcepts.value = !props.readonly && props.showTree && props.provider.loadTop
     ? await props.provider.loadTop()
     : []
 

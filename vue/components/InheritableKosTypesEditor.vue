@@ -5,18 +5,17 @@
     @start-override="startOverride"
     @use-main="useMain">
     <template #inherited>
-      <ul data-testid="inherited-kos-types">
-        <li
-          v-for="kosType in inheritedKosTypes"
-          :key="kosType.uri">
-          <ItemName :item="displayKosType(kosType)" />
-        </li>
-      </ul>
+      <JskosItemPicker
+        data-testid="inherited-kos-types"
+        :model-value="inheritedKosTypes"
+        :provider="provider"
+        readonly />
     </template>
     <template #editor>
-      <SetSelect
+      <JskosItemPicker
         v-model="localKosTypes"
-        :options="options" />
+        :provider="provider"
+        placeholder="Search KOS types…" />
     </template>
   </InheritedFieldControl>
 </template>
@@ -25,8 +24,7 @@
 import { kosTypeUris } from "../../src/versioning.js"
 import { useInheritableField } from "../composables/useInheritableField.js"
 import InheritedFieldControl from "./InheritedFieldControl.vue"
-import ItemName from "./ItemName.vue"
-import SetSelect from "./SetSelect.vue"
+import JskosItemPicker from "./JskosItemPicker.vue"
 
 defineOptions({ name: "InheritableKosTypesEditor" })
 
@@ -39,9 +37,9 @@ const props = defineProps({
     type: Object,
     default: null,
   },
-  options: {
-    type: Array,
-    default: () => [],
+  provider: {
+    type: Object,
+    required: true,
   },
 })
 
@@ -49,10 +47,6 @@ const emit = defineEmits(["update:modelValue"])
 
 function toKosTypeItems(item) {
   return kosTypeUris(item).map(uri => ({ uri }))
-}
-
-function displayKosType(kosType) {
-  return props.options.find(option => option.uri === kosType.uri) || kosType
 }
 
 const {

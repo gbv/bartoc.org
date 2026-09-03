@@ -26,7 +26,7 @@ const ItemSelectStub = {
 }
 
 const ItemSelectedStub = {
-  props: ["modelValue", "view", "removable"],
+  props: ["modelValue", "view", "orderable", "removable"],
   emits: ["update:modelValue"],
   template: `
     <div data-testid="item-selected">
@@ -92,6 +92,19 @@ describe("JskosItemPicker", () => {
     expect(provider.loadTop).not.toHaveBeenCalled()
     expect(wrapper.getComponent(ItemSelectStub).props("treeConcepts")).toBe(null)
     expect(wrapper.getComponent(ItemSelectStub).props("treeLoadNarrower")).toBe(null)
+  })
+
+  it("hides edit controls when readonly", async () => {
+    const { wrapper, provider } = await mountPicker({
+      modelValue: [{ uri: "http://example.org/a" }],
+      readonly: true,
+    })
+
+    const selected = wrapper.getComponent(ItemSelectedStub)
+    expect(wrapper.findComponent(ItemSelectStub).exists()).toBe(false)
+    expect(selected.props("orderable")).toBe(false)
+    expect(selected.props("removable")).toBe(false)
+    expect(provider.loadTop).not.toHaveBeenCalled()
   })
 
   it("adds a selected item and emits update:modelValue", async () => {

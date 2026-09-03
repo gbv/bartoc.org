@@ -95,7 +95,6 @@ function mountEditor(current = {}, props = {}) {
         LanguageSelect: true,
         ListEditor: true,
         SubjectEditor: true,
-        SetSelect: true,
         AddressEditor: true,
         EndpointsEditor: true,
         TerminologyRelationEditor: true,
@@ -145,6 +144,18 @@ describe("ItemEditor", () => {
     expect(w.vm.item.subjectOf).toEqual([])
     expect(w.vm.item.versionOf).toEqual([])
     expect(w.get("[data-testid='notation-examples-editor']").element.value).toBe("A, B")
+  })
+
+  it("shows the access selector", () => {
+    const w = mountEditor({
+      prefLabel: { en: ["x"] },
+      definition: { en: ["English abstract"] },
+      type: [conceptSchemeType],
+    })
+    const rows = w.findAll(".form-row")
+    const row = rows[formLabels(w).indexOf("Access")]
+
+    expect(row.getComponent({ name: "SetSelect" }).exists()).toBe(true)
   })
 
   it("does not save inherited fields without an override", async () => {
@@ -210,7 +221,10 @@ describe("ItemEditor", () => {
     const row = rows[formLabels(w).indexOf("KOS Types")]
 
     await row.get("[data-testid='start-override']").trigger("click")
-    row.getComponent({ name: "SetSelect" }).vm.$emit("update:modelValue", [])
+    const picker = row.getComponent({ name: "JskosItemPicker" })
+    expect(picker.props("provider")).toBe(w.vm.kosTypeProvider)
+
+    picker.vm.$emit("update:modelValue", [])
     await nextTick()
 
     expect(w.vm.item.type).toEqual([conceptSchemeType])
@@ -384,7 +398,7 @@ describe("ItemEditor", () => {
     })
   })
 
-  it("loads supporting concept lists on mount", async () => {
+  it("configures supporting concept sources", async () => {
     mountEditor({
       prefLabel: { en: ["x"] },
       definition: { en: ["English abstract"] },
@@ -398,10 +412,6 @@ describe("ItemEditor", () => {
     )
     expect(utilsMocks.loadConcepts).toHaveBeenCalledWith(
       "/api/voc/top",
-      "http://w3id.org/nkos/nkostype",
-    )
-    expect(utilsMocks.loadConcepts).toHaveBeenCalledWith(
-      "/api/voc/top",
       "http://bartoc.org/en/node/20000",
     )
     expect(utilsMocks.loadConcepts).toHaveBeenCalledWith(
@@ -409,6 +419,14 @@ describe("ItemEditor", () => {
       "http://bartoc.org/en/node/20001",
     )
     expect(utilsMocks.loadConcepts).toHaveBeenCalledWith("/registries?format=jskos")
+    expect(utilsMocks.createConceptApiProvider).toHaveBeenCalledWith({
+      schemeUri: "http://uri.gbv.de/terminology/license/",
+      topUrl: "https://api.dante.gbv.de/voc/top",
+      conceptsUrl: "https://api.dante.gbv.de/data",
+      suggestUrl: "https://api.dante.gbv.de/suggest",
+      narrowerUrl: "https://api.dante.gbv.de/narrower",
+      toModel: expect.any(Function),
+    })
   })
 
   it("uses the concept picker provider for listed-in registries", async () => {

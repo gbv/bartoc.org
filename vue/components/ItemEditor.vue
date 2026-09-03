@@ -60,8 +60,7 @@
       ref="inheritableKosTypesEditor"
       v-model="selectedKosTypes"
       :source="versionMainSource"
-      :options="kosTypeOptions" />
-    Use Shift key to deselect or select multiple types.
+      :provider="kosTypeProvider" />
   </form-row>
   <form-row :label="'Subjects'">
     <InheritableSubjectsEditor
@@ -284,6 +283,7 @@ import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
 import JskosItemPicker from "./JskosItemPicker.vue"
 import PublisherEditor from "./PublisherEditor.vue"
+import SetSelect from "./SetSelect.vue"
 import TerminologyRelationEditor from "./TerminologyRelationEditor.vue"
 import AbbreviationEditor from "./AbbreviationEditor.vue"
 
@@ -312,7 +312,6 @@ const props = defineProps({
 
 // Edit a deep copy so normalization and form changes do not mutate props.current.
 const item = reactive(normalizeEditableItem(structuredClone(toRaw(props.current))))
-const kosTypeOptions = ref([])
 const licenses = ref([])
 const formats = ref([])
 const access = ref([])
@@ -343,12 +342,21 @@ const formatProvider = createConceptApiProvider({
   toModel: conceptPickerModel,
 })
 
-const licenseProvider = createConceptApiProvider({
-  schemeUri: "http://uri.gbv.de/terminology/license/",
-  topUrl: "https://api.dante.gbv.de/voc/top",
+const kosTypeProvider = createConceptApiProvider({
+  schemeUri: "http://w3id.org/nkos/nkostype",
+  topUrl: "/api/voc/top",
   conceptsUrl: "/api/concepts",
   suggestUrl: "/api/concepts/suggest",
   narrowerUrl: "/api/concepts/narrower",
+  toModel: conceptPickerModel,
+})
+
+const licenseProvider = createConceptApiProvider({
+  schemeUri: "http://uri.gbv.de/terminology/license/",
+  topUrl: "https://api.dante.gbv.de/voc/top",
+  conceptsUrl: "https://api.dante.gbv.de/data",
+  suggestUrl: "https://api.dante.gbv.de/suggest",
+  narrowerUrl: "https://api.dante.gbv.de/narrower",
   toModel: conceptPickerModel,
 })
 
@@ -394,10 +402,6 @@ loadConcepts(
   licenses.value = set
 })
 
-loadConcepts("/api/voc/top", "http://w3id.org/nkos/nkostype").then((set) => {
-  kosTypeOptions.value = set
-})
-
 loadConcepts("/api/voc/top", "http://bartoc.org/en/node/20000").then((set) => {
   formats.value = set
 })
@@ -441,7 +445,6 @@ async function saveItem() {
 
 defineExpose({
   item,
-  kosTypeOptions,
   licenses,
   formats,
   access,
@@ -450,6 +453,7 @@ defineExpose({
   showJSKOS,
   formatScheme,
   formatProvider,
+  kosTypeProvider,
   licenseProvider,
   registryProvider,
   selectedKosTypes,
