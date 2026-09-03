@@ -8,9 +8,12 @@
     <a :href="item.uri">{{ item.uri }}</a>
   </form-row>
   <form-row :label="'Title'">
-    <label-editor
-      v-model:pref-label="item.prefLabel"
-      v-model:alt-label="item.altLabel" />
+    <InheritableTitleEditor
+      ref="inheritableTitleEditor"
+      v-model="item.prefLabel"
+      v-model:alt-label="item.altLabel"
+      :source="versionMainSource"
+      :version="item.version" />
     The first of each language is used as preferred title, more as aliases,
     translations... Please provide at least an English title, unless both
     <code>Version</code> and <code>Version of</code> are set.
@@ -277,7 +280,7 @@ import InheritableKosTypesEditor from "./InheritableKosTypesEditor.vue"
 import InheritableLanguagesEditor from "./InheritableLanguagesEditor.vue"
 import InheritableNotationExamplesEditor from "./InheritableNotationExamplesEditor.vue"
 import InheritableSubjectsEditor from "./InheritableSubjectsEditor.vue"
-import LabelEditor from "./LabelEditor.vue"
+import InheritableTitleEditor from "./InheritableTitleEditor.vue"
 import ListEditor from "./ListEditor.vue"
 import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
@@ -318,6 +321,7 @@ const access = ref([])
 const registries = ref([])
 const error = ref(null)
 const showJSKOS = ref(false)
+const inheritableTitleEditor = ref(null)
 const abbreviationEditor = ref(null)
 const inheritableAbstractsEditor = ref(null)
 const inheritableKosTypesEditor = ref(null)
@@ -370,6 +374,7 @@ const selectedKosTypes = computed({
     item.type = [CONCEPT_SCHEME_TYPE, ...value.map(({ uri }) => uri)]
   },
 })
+
 const showVersionOfEditor = computed(() =>
   !props.hasIncomingVersions || item.versionOf.length > 0,
 )
@@ -416,7 +421,8 @@ function itemError() {
     return validationError
   }
 
-  return abbreviationEditor.value?.validationError()
+  return inheritableTitleEditor.value?.validationError()
+    || abbreviationEditor.value?.validationError()
     || inheritableAbstractsEditor.value?.validationError()
     || inheritableKosTypesEditor.value?.validationError()
     || inheritableLanguagesEditor.value?.validationError()
