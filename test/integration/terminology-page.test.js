@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { defineComponent, h, nextTick, ref } from "vue"
-import { mount } from "@vue/test-utils"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { flushPromises, mount } from "@vue/test-utils"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import TerminologyPage from "../../vue/pages/TerminologyPage.vue"
 
 const selectConcept = vi.fn()
@@ -116,6 +116,10 @@ describe("TerminologyPage", () => {
     selectConcept.mockClear()
   })
 
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
   it("renders abstracts, subjects and terminology relations", () => {
     const wrapper = mountPage()
 
@@ -146,6 +150,60 @@ describe("TerminologyPage", () => {
     )
     expect(rowByLabel(wrapper, "Based on").text()).toContain("Base Terminology")
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")
+  })
+
+  it("shows Wikipedia links below the homepage", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        results: {
+          bindings: [
+            {
+              url: { value: "https://de.wikipedia.org/wiki/Test" },
+              language: { value: "de" },
+            },
+            {
+              url: { value: "https://en.wikipedia.org/wiki/Test" },
+              language: { value: "en" },
+            },
+          ],
+        },
+      }),
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    const identifier = "http://www.wikidata.org/entity/Q123"
+    const wrapper = mountPage({
+      identifier: ["TEST", identifier],
+      url: "https://example.org",
+    })
+
+    await flushPromises()
+
+    const endpoint = fetchMock.mock.calls[0][0]
+    expect(endpoint.origin + endpoint.pathname).toBe("https://query.wikidata.org/sparql")
+    expect(endpoint.searchParams.get("query")).toContain(`<${identifier}>`)
+    const labels = wrapper.findAll("tr").map(row => row.find("td").text())
+    const homepageIndex = labels.indexOf("Homepage")
+    expect(labels[homepageIndex + 1]).toBe("Wikipedia")
+    expect(rowByLabel(wrapper, "Wikipedia").findAll("a").map(link => ({
+      text: link.text(),
+      href: link.attributes("href"),
+    }))).toEqual([
+      { text: "de", href: "https://de.wikipedia.org/wiki/Test" },
+      { text: "en", href: "https://en.wikipedia.org/wiki/Test" },
+    ])
+  })
+
+  it("ignores identifiers that do not match", () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal("fetch", fetchMock)
+
+    const wrapper = mountPage({
+      identifier: ["https://www.wikidata.org/entity/Q123"],
+    })
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(rowByLabel(wrapper, "Wikipedia")).toBeUndefined()
   })
 
   it("shows the version number", () => {

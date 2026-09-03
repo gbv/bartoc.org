@@ -153,6 +153,18 @@
         </MetadataRow>
 
         <MetadataListRow
+          label="Wikipedia"
+          :items="wikipediaLinks"
+          list-style="inline"
+          :preview-limit="10">
+          <template #item="{ item: link }">
+            <ExternalLink
+              :url="link.url"
+              :label="link.language" />
+          </template>
+        </MetadataListRow>
+
+        <MetadataListRow
           source-field="basedOn"
           label="Based on"
           :items="item.basedOn">
@@ -372,6 +384,7 @@ import MetadataListRow from "../components/MetadataListRow.vue"
 import MetadataRow from "../components/MetadataRow.vue"
 import ServiceLink from "../components/ServiceLink.vue"
 import TerminologyVersionLink from "../components/TerminologyVersionLink.vue"
+import { loadWikipediaLinks } from "../utils/wikipedia.js"
 
 defineOptions({ name: "TerminologyPage" })
 
@@ -437,6 +450,7 @@ const activeTab = ref(0)
 const activeTabName = computed(() => tabs.value[activeTab.value])
 const conceptBrowser = ref(null)
 const ready = ref(false)
+const wikipediaLinks = ref([])
 const header = inject("header", {})
 const userCanAdd = computed(() => unref(header.userCanAdd) || false)
 
@@ -515,10 +529,11 @@ function isWebUrl(value) {
   return /^https?:\/\//.test(value)
 }
 
-onMounted(() => {
+onMounted(async () => {
   syncTabFromHash()
   ready.value = true
   window.addEventListener("hashchange", syncTabFromHash)
+  wikipediaLinks.value = await loadWikipediaLinks(props.item.identifier)
 })
 
 onBeforeUnmount(() => {
