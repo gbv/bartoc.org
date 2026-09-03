@@ -20,8 +20,8 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue"
-import { hasMeaningfulValue } from "../utils/itemEditor.js"
+import { computed } from "vue"
+import { useInheritableField } from "../composables/useInheritableField.js"
 import InheritedFieldControl from "./InheritedFieldControl.vue"
 
 defineOptions({ name: "AbbreviationEditor" })
@@ -39,62 +39,27 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue"])
 
-const overrideActive = ref(hasMeaningfulValue(props.modelValue))
-
-const notationSource = computed(() =>
-  props.source?.uri && hasMeaningfulValue(props.source.notation)
-    ? props.source
-    : null,
-)
-
-const mode = computed(() => {
-  if (!notationSource.value) {
-    return "editable"
-  }
-
-  return overrideActive.value || hasMeaningfulValue(props.modelValue)
-    ? "override"
-    : "inherited"
+const {
+  sourceRecord: notationSource,
+  fieldMode: mode,
+  updateLocalValue,
+  startOverride,
+  useMain,
+  validationError,
+} = useInheritableField(props, emit, {
+  field: "notation",
+  createEmptyValue: () => [],
+  validationMessage: "Enter an abbreviation or use the value from the main record.",
 })
 
 const abbreviation = computed({
   get: () => props.modelValue[0] || "",
   set: (value) => {
-    overrideActive.value = true
     const notation = [...props.modelValue]
     notation[0] = value
-    emit("update:modelValue", notation)
+    updateLocalValue(notation)
   },
 })
-
-function startOverride() {
-  if (!notationSource.value) {
-    return
-  }
-
-  overrideActive.value = true
-  emit(
-    "update:modelValue",
-    [...notationSource.value.notation],
-  )
-}
-
-function useMain() {
-  if (!notationSource.value) {
-    return
-  }
-
-  overrideActive.value = false
-  emit("update:modelValue", [])
-}
-
-function validationError() {
-  if (mode.value === "override" && !hasMeaningfulValue(props.modelValue)) {
-    return {
-      message: "Enter an abbreviation or use the value from the main record.",
-    }
-  }
-}
 
 defineExpose({ validationError })
 </script>

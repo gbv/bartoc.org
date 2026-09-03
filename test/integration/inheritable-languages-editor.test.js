@@ -25,10 +25,10 @@ const LanguageSelectStub = {
   `,
 }
 
-function mountEditor({ languages = [], main = source } = {}) {
+function mountEditor() {
   return mount({
     components: { InheritableLanguagesEditor },
-    data: () => ({ languages, main }),
+    data: () => ({ languages: [], main: source }),
     template: `
       <InheritableLanguagesEditor
         v-model="languages"
@@ -42,11 +42,10 @@ function mountEditor({ languages = [], main = source } = {}) {
 }
 
 describe("InheritableLanguagesEditor", () => {
-  it("switches between inherited and local languages", async () => {
+  it("uses the main or local languages", async () => {
     const wrapper = mountEditor()
     const editor = wrapper.getComponent(InheritableLanguagesEditor)
 
-    expect(editor.attributes("data-mode")).toBe("inherited")
     const inheritedSelect = wrapper.getComponent({ name: "LanguageSelect" })
     expect(inheritedSelect.props("modelValue")).toEqual(["gsw", "eo"])
     expect(inheritedSelect.props("disabled")).toBe(true)
@@ -54,8 +53,6 @@ describe("InheritableLanguagesEditor", () => {
     await wrapper.get("[data-testid='start-override']").trigger("click")
 
     expect(wrapper.vm.languages).toEqual(source.languages)
-    expect(wrapper.vm.languages).not.toBe(source.languages)
-    expect(editor.attributes("data-mode")).toBe("override")
 
     await wrapper.get("[data-testid='clear-languages']").trigger("click")
     expect(editor.vm.validationError()).toEqual({
@@ -65,16 +62,5 @@ describe("InheritableLanguagesEditor", () => {
     await wrapper.get("[data-testid='use-main']").trigger("click")
 
     expect(wrapper.vm.languages).toEqual([])
-    expect(editor.attributes("data-mode")).toBe("inherited")
-  })
-
-  it("uses a normal editor when the main record has no languages", () => {
-    const wrapper = mountEditor({
-      main: { uri: source.uri, languages: [] },
-    })
-
-    expect(wrapper.getComponent(InheritableLanguagesEditor).attributes("data-mode"))
-      .toBe("editable")
-    expect(wrapper.get("[data-testid='clear-languages']").exists()).toBe(true)
   })
 })

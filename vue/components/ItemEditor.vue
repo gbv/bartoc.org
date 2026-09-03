@@ -197,10 +197,10 @@
       class="cc-form-control">
   </form-row>
   <form-row :label="'example notations'">
-    <input
-      v-model="examples"
-      type="text"
-      class="cc-form-control">
+    <InheritableNotationExamplesEditor
+      ref="inheritableNotationExamplesEditor"
+      v-model="item.notationExamples"
+      :source="versionMainSource" />
     Please use comma to separate multiple notations.
   </form-row>
   <hr>
@@ -253,7 +253,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, toRaw, watch } from "vue"
+import { computed, reactive, ref, toRaw } from "vue"
 import {
   loadConcepts,
   trimItemIdentifiers,
@@ -265,7 +265,6 @@ import {
   conceptPickerModel,
   itemError as validateItem,
   normalizeEditableItem,
-  parseNotationExamples,
   hasValidVersionOf,
 } from "../utils/itemEditor.js"
 import { saveVocabularyItem } from "../utils/itemEditorSave.js"
@@ -274,6 +273,7 @@ import FormRow from "./FormRow.vue"
 import SetSelect from "./SetSelect.vue"
 import InheritableAbstractsEditor from "./InheritableAbstractsEditor.vue"
 import InheritableLanguagesEditor from "./InheritableLanguagesEditor.vue"
+import InheritableNotationExamplesEditor from "./InheritableNotationExamplesEditor.vue"
 import InheritableSubjectsEditor from "./InheritableSubjectsEditor.vue"
 import LabelEditor from "./LabelEditor.vue"
 import ListEditor from "./ListEditor.vue"
@@ -309,7 +309,6 @@ const props = defineProps({
 
 // Edit a deep copy so normalization and form changes do not mutate props.current.
 const item = reactive(normalizeEditableItem(structuredClone(toRaw(props.current))))
-const examples = ref((item.notationExamples || []).join(", "))
 const kostypes = ref([])
 const licenses = ref([])
 const formats = ref([])
@@ -320,6 +319,7 @@ const showJSKOS = ref(false)
 const abbreviationEditor = ref(null)
 const inheritableAbstractsEditor = ref(null)
 const inheritableLanguagesEditor = ref(null)
+const inheritableNotationExamplesEditor = ref(null)
 const inheritableSubjectsEditor = ref(null)
 const formatScheme = {
   uri: "http://bartoc.org/en/node/20000",
@@ -378,10 +378,6 @@ const jskosPreview = computed(() => {
   return JSON.stringify(cleaned, null, 2)
 })
 
-watch(examples, (value) => {
-  item.notationExamples = parseNotationExamples(value)
-})
-
 loadConcepts(
   "https://api.dante.gbv.de/voc/top",
   "http://uri.gbv.de/terminology/license/",
@@ -411,6 +407,7 @@ function itemError() {
     || inheritableAbstractsEditor.value?.validationError()
     || inheritableLanguagesEditor.value?.validationError()
     || inheritableSubjectsEditor.value?.validationError()
+    || inheritableNotationExamplesEditor.value?.validationError()
 }
 
 async function saveItem() {
@@ -434,7 +431,6 @@ async function saveItem() {
 
 defineExpose({
   item,
-  examples,
   kostypes,
   licenses,
   formats,

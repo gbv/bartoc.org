@@ -11,6 +11,7 @@ export const DERIVED_VERSION_FIELDS = Object.freeze([
   "notation",
   "subject",
   "languages",
+  "notationExamples",
 ])
 
 /**

@@ -117,7 +117,7 @@ function stubFailedSave() {
   })))
 }
 
-describe("ItemEditor abstracts", () => {
+describe("ItemEditor", () => {
   beforeEach(() => {
     utilsMocks.loadConcepts.mockClear()
     utilsMocks.trimItemIdentifiers.mockClear()
@@ -143,7 +143,7 @@ describe("ItemEditor abstracts", () => {
     expect(w.vm.item.languages).toEqual([])
     expect(w.vm.item.subjectOf).toEqual([])
     expect(w.vm.item.versionOf).toEqual([])
-    expect(w.vm.examples).toBe("A, B")
+    expect(w.get("[data-testid='notation-examples-editor']").element.value).toBe("A, B")
   })
 
   it("does not save inherited fields without an override", async () => {
@@ -162,6 +162,7 @@ describe("ItemEditor abstracts", () => {
           notation: ["TheSoz"],
           definition: { en: ["Main definition"] },
           languages: ["gsw", "eo"],
+          notationExamples: ["A100", "B200"],
           subject: [{
             uri: "http://dewey.info/class/300/",
             inScheme: [{ uri: "http://bartoc.org/en/node/241" }],
@@ -177,6 +178,7 @@ describe("ItemEditor abstracts", () => {
     expect(savedItem.notation).toBeUndefined()
     expect(savedItem.definition).toBeUndefined()
     expect(savedItem.languages).toBeUndefined()
+    expect(savedItem.notationExamples).toBeUndefined()
     expect(savedItem.subject).toBeUndefined()
 
     await w.get("[data-testid='start-override']").trigger("click")
@@ -437,15 +439,15 @@ describe("ItemEditor abstracts", () => {
     ])
   })
 
-  it("updates notation examples from the comma-separated input value", async () => {
+  it("parses notation examples", async () => {
     const w = mountEditor({
       prefLabel: { en: ["x"] },
       definition: { en: ["English abstract"] },
       type: [conceptSchemeType],
     })
 
-    w.vm.examples = "A, B, , C"
-    await nextTick()
+    await w.get("[data-testid='notation-examples-editor']")
+      .setValue("A, B, , C")
 
     expect(w.vm.item.notationExamples).toEqual(["A", "B", "C"])
   })

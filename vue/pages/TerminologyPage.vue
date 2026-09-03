@@ -312,6 +312,7 @@
         </MetadataRow>
 
         <MetadataListRow
+          source-field="notationExamples"
           label="Examples"
           :items="item.notationExamples" />
 

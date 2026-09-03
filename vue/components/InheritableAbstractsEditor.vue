@@ -22,8 +22,7 @@ The local value is always sent to ItemEditor through v-model.
 </template>
 
 <script setup>
-import { computed, ref, toRaw } from "vue"
-import { hasMeaningfulValue } from "../utils/itemEditor.js"
+import { useInheritableField } from "../composables/useInheritableField.js"
 import AbstractsEditor from "./AbstractsEditor.vue"
 import InheritedFieldControl from "./InheritedFieldControl.vue"
 import LocalizedAbstract from "./LocalizedAbstract.vue"
@@ -47,63 +46,18 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue"])
 
-// Keep the editor open while a user clears and rewrites an override.
-const overrideActive = ref(hasMeaningfulValue(props.modelValue))
-
-const definitionSource = computed(() =>
-  props.source?.uri && hasMeaningfulValue(props.source.definition)
-    ? props.source
-    : null,
-)
-
-const mode = computed(() => {
-  if (!definitionSource.value) {
-    return "editable"
-  }
-
-  return overrideActive.value || hasMeaningfulValue(props.modelValue)
-    ? "override"
-    : "inherited"
+const {
+  sourceRecord: definitionSource,
+  fieldMode: mode,
+  localValue: definition,
+  startOverride,
+  useMain,
+  validationError,
+} = useInheritableField(props, emit, {
+  field: "definition",
+  createEmptyValue: () => ({}),
+  validationMessage: "Enter an abstract or use the value from the main record.",
 })
-
-const definition = computed({
-  get: () => props.modelValue,
-  set: (value) => {
-    overrideActive.value = true
-    emit("update:modelValue", value)
-  },
-})
-
-function startOverride() {
-  if (!definitionSource.value) {
-    return
-  }
-
-  // Whole-field fallback copies every language into the new local override.
-  overrideActive.value = true
-  emit(
-    "update:modelValue",
-    structuredClone(toRaw(definitionSource.value.definition)),
-  )
-}
-
-function useMain() {
-  if (!definitionSource.value) {
-    return
-  }
-
-  // cleanupItem removes this empty object from the stored record.
-  overrideActive.value = false
-  emit("update:modelValue", {})
-}
-
-function validationError() {
-  if (mode.value === "override" && !hasMeaningfulValue(props.modelValue)) {
-    return {
-      message: "Enter an abstract or use the value from the main record.",
-    }
-  }
-}
 
 defineExpose({ validationError })
 </script>

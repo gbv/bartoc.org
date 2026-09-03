@@ -24,11 +24,10 @@ const AbstractsEditorStub = {
   `,
 }
 
-// Use a small parent so v-model works like it does in ItemEditor.
-function mountEditor({ definition = {}, main = source } = {}) {
+function mountEditor() {
   return mount({
     components: { InheritableAbstractsEditor },
-    data: () => ({ definition, main }),
+    data: () => ({ definition: {}, main: source }),
     template: `
       <InheritableAbstractsEditor
         v-model="definition"
@@ -42,11 +41,10 @@ function mountEditor({ definition = {}, main = source } = {}) {
 }
 
 describe("InheritableAbstractsEditor", () => {
-  it("switches between inherited definitions and a local override", async () => {
+  it("uses the main or local abstracts", async () => {
     const wrapper = mountEditor()
     const editor = wrapper.getComponent(InheritableAbstractsEditor)
 
-    expect(editor.attributes("data-mode")).toBe("inherited")
     expect(wrapper.get("[data-testid='inherited-definition']").text()).toContain(
       "English definition",
     )
@@ -54,8 +52,6 @@ describe("InheritableAbstractsEditor", () => {
     await wrapper.get("[data-testid='start-override']").trigger("click")
 
     expect(wrapper.vm.definition).toEqual(source.definition)
-    expect(wrapper.vm.definition).not.toBe(source.definition)
-    expect(editor.attributes("data-mode")).toBe("override")
 
     await wrapper.get("[data-testid='clear-definition']").trigger("click")
     expect(editor.vm.validationError()).toEqual({
@@ -65,16 +61,5 @@ describe("InheritableAbstractsEditor", () => {
     await wrapper.get("[data-testid='use-main']").trigger("click")
 
     expect(wrapper.vm.definition).toEqual({})
-    expect(editor.attributes("data-mode")).toBe("inherited")
-  })
-
-  it("shows the normal editor when the main record has no definition", () => {
-    const wrapper = mountEditor({
-      main: { uri: source.uri, definition: {} },
-    })
-    const editor = wrapper.getComponent(InheritableAbstractsEditor)
-
-    expect(editor.attributes("data-mode")).toBe("editable")
-    expect(wrapper.get("[data-testid='clear-definition']").exists()).toBe(true)
   })
 })

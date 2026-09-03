@@ -21,6 +21,7 @@ describe("version records", () => {
       "notation",
       "subject",
       "languages",
+      "notationExamples",
     ])
   })
 
@@ -95,12 +96,14 @@ describe("version records", () => {
         },
         notation: storedTheSozMain.notation,
         languages: storedTheSozMain.languages,
+        notationExamples: storedTheSozMain.notationExamples,
         subject: storedTheSozMain.subject,
       },
       derivedFields: {
         prefLabel: { from: THE_SOZ_MAIN_URI },
         notation: { from: THE_SOZ_MAIN_URI },
         languages: { from: THE_SOZ_MAIN_URI },
+        notationExamples: { from: THE_SOZ_MAIN_URI },
         subject: { from: THE_SOZ_MAIN_URI },
       },
     })
