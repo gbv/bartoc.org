@@ -6,7 +6,6 @@
     @use-main="useMain">
     <template #inherited>
       <JskosItemPicker
-        data-testid="inherited-kos-types"
         :model-value="inheritedKosTypes"
         :provider="provider"
         readonly />

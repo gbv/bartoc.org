@@ -196,7 +196,6 @@ describe("AbstractsEditor", () => {
     expect(w.findAll("textarea").length).toBe(1)
 
     const last = w.emitted("update:modelValue").at(-1)[0]
-    console.log("Emitted value after removing abstract:", last)
     expect(last).toEqual({
       de: ["Deutsch Abstract"],
     })
