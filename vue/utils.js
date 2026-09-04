@@ -30,6 +30,41 @@ export function parseJson(value, fallback = {}) {
   }
 }
 
+// Read JSON saved in the current browser tab.
+// Return the fallback value if the data is missing or invalid.
+export function readSessionJson(key, fallback = {}) {
+  try {
+    return JSON.parse(sessionStorage.getItem(key)) ?? fallback
+  } catch {
+    return fallback
+  }
+}
+
+// Save JSON for later pages in the current browser tab.
+// Ignore errors because browser storage is optional.
+export function writeSessionJson(key, value) {
+  try {
+    sessionStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // The application works without browser storage.
+  }
+}
+
+// Request JSON data from an API.
+// Return null if the request or JSON parsing fails.
+export async function fetchJson(requestUrl, accept = "application/json") {
+  try {
+    const apiResponse = await fetch(requestUrl, { headers: { Accept: accept } })
+    if (!apiResponse.ok) {
+      return null
+    }
+    const jsonData = await apiResponse.json()
+    return jsonData
+  } catch {
+    return null
+  }
+}
+
 // Format full timestamps in the user's locale and time zone. Date-only values
 // stay unchanged because converting them to Date would add time precision.
 const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {

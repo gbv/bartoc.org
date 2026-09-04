@@ -3,6 +3,7 @@ import { defineComponent, h, nextTick, ref } from "vue"
 import { flushPromises, mount } from "@vue/test-utils"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import TerminologyPage from "../../vue/pages/TerminologyPage.vue"
+import { loadWikipediaLinks } from "../../vue/utils/wikipedia.js"
 
 const selectConcept = vi.fn()
 const ConceptBrowserStub = defineComponent({
@@ -110,9 +111,25 @@ function rowByLabel(wrapper, label) {
   return wrapper.findAll("tr").find(row => row.findAll("td")[0]?.text().trim() === label)
 }
 
+function jsonResponse(data) {
+  return { ok: true, json: async () => data }
+}
+
+function wikidataResponse(pages) {
+  return jsonResponse({ results: { bindings: pages } })
+}
+
+function wikipediaPage(url, languageCode) {
+  return {
+    url: { value: url },
+    language: { value: languageCode },
+  }
+}
+
 describe("TerminologyPage", () => {
   beforeEach(() => {
     window.history.replaceState({}, "", "/en/node/123")
+    window.sessionStorage.clear()
     selectConcept.mockClear()
   })
 
@@ -153,23 +170,17 @@ describe("TerminologyPage", () => {
   })
 
   it("shows Wikipedia links below the homepage", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        results: {
-          bindings: [
-            {
-              url: { value: "https://de.wikipedia.org/wiki/Test" },
-              language: { value: "de" },
-            },
-            {
-              url: { value: "https://en.wikipedia.org/wiki/Test" },
-              language: { value: "en" },
-            },
-          ],
-        },
-      }),
-    })
+    const wikipediaPages = [
+      wikipediaPage("https://de.wikipedia.org/wiki/Test", "de"),
+      wikipediaPage("https://en.wikipedia.org/wiki/Test", "en"),
+    ]
+    const languageConcepts = [
+      { notation: ["de", "ger", "deu"], prefLabel: { en: "German " } },
+      { notation: ["en", "eng"], prefLabel: { en: "English" } },
+    ]
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(wikidataResponse(wikipediaPages))
+      .mockResolvedValueOnce(jsonResponse(languageConcepts))
     vi.stubGlobal("fetch", fetchMock)
     const identifier = "http://www.wikidata.org/entity/Q123"
     const wrapper = mountPage({
@@ -179,9 +190,19 @@ describe("TerminologyPage", () => {
 
     await flushPromises()
 
-    const endpoint = fetchMock.mock.calls[0][0]
-    expect(endpoint.origin + endpoint.pathname).toBe("https://query.wikidata.org/sparql")
-    expect(endpoint.searchParams.get("query")).toContain(`<${identifier}>`)
+    const wikidataRequestUrl = fetchMock.mock.calls[0][0]
+    expect(wikidataRequestUrl.origin + wikidataRequestUrl.pathname).toBe(
+      "https://query.wikidata.org/sparql",
+    )
+    expect(wikidataRequestUrl.searchParams.get("query")).toContain(`<${identifier}>`)
+    const languageRequestUrl = fetchMock.mock.calls[1][0]
+    expect(languageRequestUrl.pathname).toBe("/api/concepts")
+    expect(languageRequestUrl.searchParams.get("uri")).toBe(
+      "https://bartoc.org/language/de|https://bartoc.org/language/en",
+    )
+    expect(languageRequestUrl.searchParams.get("voc")).toBe(
+      "http://bartoc.org/en/node/20287",
+    )
     const labels = wrapper.findAll("tr").map(row => row.find("td").text())
     const homepageIndex = labels.indexOf("Homepage")
     expect(labels[homepageIndex + 1]).toBe("Wikipedia")
@@ -189,9 +210,67 @@ describe("TerminologyPage", () => {
       text: link.text(),
       href: link.attributes("href"),
     }))).toEqual([
-      { text: "de", href: "https://de.wikipedia.org/wiki/Test" },
-      { text: "en", href: "https://en.wikipedia.org/wiki/Test" },
+      { text: "German", href: "https://de.wikipedia.org/wiki/Test" },
+      { text: "English", href: "https://en.wikipedia.org/wiki/Test" },
     ])
+  })
+
+  it("keeps Wikipedia language codes when their labels cannot be loaded", async () => {
+    const url = "https://example.wikipedia.org/wiki/Test"
+    const wikipediaPages = [
+      wikipediaPage(url, "example"),
+    ]
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(wikidataResponse(wikipediaPages))
+      .mockResolvedValueOnce({ ok: false })
+    vi.stubGlobal("fetch", fetchMock)
+
+    const wikipediaLinks = await loadWikipediaLinks([
+      "http://www.wikidata.org/entity/Q123",
+    ])
+
+    expect(wikipediaLinks).toEqual([{ url, languageName: "example" }])
+  })
+
+  it("reuses cached Wikipedia language labels", async () => {
+    const wikipediaPages = [
+      wikipediaPage("https://de.wikipedia.org/wiki/Test", "de"),
+    ]
+    const languageConcepts = [
+      { notation: ["de"], prefLabel: { en: "German" } },
+    ]
+    const pagesResponse = wikidataResponse(wikipediaPages)
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(pagesResponse)
+      .mockResolvedValueOnce(jsonResponse(languageConcepts))
+      .mockResolvedValueOnce(pagesResponse)
+    vi.stubGlobal("fetch", fetchMock)
+
+    await loadWikipediaLinks(["http://www.wikidata.org/entity/Q123"])
+    const wikipediaLinks = await loadWikipediaLinks([
+      "http://www.wikidata.org/entity/Q456",
+    ])
+
+    expect(wikipediaLinks[0].languageName).toBe("German")
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+  })
+
+  it("loads Wikipedia language names in batches of 50", async () => {
+    const wikipediaPages = Array.from({ length: 51 }, (_, index) => (
+      wikipediaPage(`https://example.org/wiki/${index}`, `code-${index}`)
+    ))
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(wikidataResponse(wikipediaPages))
+      .mockResolvedValue(jsonResponse([]))
+    vi.stubGlobal("fetch", fetchMock)
+
+    await loadWikipediaLinks(["http://www.wikidata.org/entity/Q123"])
+
+    const languageRequests = fetchMock.mock.calls.slice(1)
+      .map(([requestUrl]) => requestUrl)
+    expect(languageRequests.map(requestUrl => (
+      requestUrl.searchParams.get("uri").split("|").length
+    ))).toEqual([50, 1])
   })
 
   it("ignores identifiers that do not match", () => {

@@ -157,10 +157,10 @@
           :items="wikipediaLinks"
           list-style="inline"
           :preview-limit="10">
-          <template #item="{ item: link }">
+          <template #item="{ item: wikipediaPage }">
             <ExternalLink
-              :url="link.url"
-              :label="link.language" />
+              :url="wikipediaPage.url"
+              :label="wikipediaPage.languageName" />
           </template>
         </MetadataListRow>
 
