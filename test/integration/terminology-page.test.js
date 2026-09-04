@@ -197,9 +197,7 @@ describe("TerminologyPage", () => {
     expect(wikidataRequestUrl.searchParams.get("query")).toContain(`<${identifier}>`)
     const languageRequestUrl = fetchMock.mock.calls[1][0]
     expect(languageRequestUrl.pathname).toBe("/api/concepts")
-    expect(languageRequestUrl.searchParams.get("uri")).toBe(
-      "https://bartoc.org/language/de|https://bartoc.org/language/en",
-    )
+    expect(languageRequestUrl.searchParams.get("notation")).toBe("de|en")
     expect(languageRequestUrl.searchParams.get("voc")).toBe(
       "http://bartoc.org/en/node/20287",
     )
@@ -269,7 +267,7 @@ describe("TerminologyPage", () => {
     const languageRequests = fetchMock.mock.calls.slice(1)
       .map(([requestUrl]) => requestUrl)
     expect(languageRequests.map(requestUrl => (
-      requestUrl.searchParams.get("uri").split("|").length
+      requestUrl.searchParams.get("notation").split("|").length
     ))).toEqual([50, 1])
   })
 

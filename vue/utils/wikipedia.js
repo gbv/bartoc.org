@@ -21,10 +21,7 @@ async function loadLanguageNames(languageCodes) {
   for (let start = 0; start < missingCodes.length; start += LANGUAGE_BATCH_SIZE) {
     const codeBatch = missingCodes.slice(start, start + LANGUAGE_BATCH_SIZE)
     const languageApiUrl = new URL("/api/concepts", window.location.origin)
-    languageApiUrl.searchParams.set(
-      "uri",
-      codeBatch.map(code => `https://bartoc.org/language/${code}`).join("|"),
-    )
+    languageApiUrl.searchParams.set("notation", codeBatch.join("|"))
     languageApiUrl.searchParams.set("voc", LANGUAGE_VOCABULARY_URI)
 
     const languageConcepts = await fetchJson(languageApiUrl)
