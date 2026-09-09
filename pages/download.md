@@ -6,8 +6,7 @@ The content of BARTOC is available in several formats under the [Public Domain D
 
 ## Linked Open Data (RDF)
 
-Each record is identifier by an URI of the form `http://bartoc.org/en/node/{ID}` where `{ID}` is a number.
-For instance the International Classification of Diseases (ICD) has URI [http://bartoc.org/en/node/447](/en/node/447) (mind it starts with `http://`, not `https://`). Record data can be accessed in RDF by appending `?format=nt` or `?format=rdfxml` to its URI. The footer contains a corresponding links **RDF** and **XML**. RDF data of all records is aggregated daily in a triple store with SPARQL query interface at <http://bartoc.org/graph/>.
+Each record is identifier by an URI of the form `http://bartoc.org/en/node/{ID}` where `{ID}` is a number. For instance the International Classification of Diseases (ICD) has URI [http://bartoc.org/en/node/447](/en/node/447) (mind it starts with `http://`, not `https://`). Record data can be accessed in RDF by appending `?format=nt` or `?format=rdfxml` to its URI. The footer contains a corresponding links **RDF** and **XML**. RDF data of all records is aggregated daily in a triple store with SPARQL query interface at <http://bartoc.org/graph/>.
 
 ## JSKOS format
 
@@ -15,7 +14,7 @@ Each BARTOC entry can be accessed in [JSKOS format](https://gbv.github.io/jskos/
 
 ## API
 
-BARTOC can be accessed at [https://bartoc.org/api/](/api/) via JSKOS API to query and filter vocabulary metadata.
+BARTOC can be accessed at [https://bartoc.org/api/](/api/) via JSKOS API to query and filter terminology and registry metadata.
 
 ## Database dumps
 
