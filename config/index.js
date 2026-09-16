@@ -1,4 +1,4 @@
-import _ from "lodash"
+import defaultsDeep from "lodash.defaultsdeep"
 import { cdk } from "cocoda-sdk"
 import {
   normalizeSparqlExamples,
@@ -33,7 +33,7 @@ try {
   configUser = {}
 }
 
-const config = _.defaultsDeep({ env }, configEnv, configUser, configDefault)
+const config = defaultsDeep({ env }, configEnv, configUser, configDefault)
 
 config.sparqlExamples = normalizeSparqlExamples(
   configEnv.sparqlExamples ??

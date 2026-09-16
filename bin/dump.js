@@ -2,7 +2,6 @@ import config from "../config/index.js"
 import fs from "fs"
 import path from "path"
 import { cdk } from "cocoda-sdk"
-import _ from "lodash"
 import * as diff from "jsondiffpatch"
 import * as consoleFormatter from "jsondiffpatch/formatters/console"
 import * as jsonpatchFormatter from "jsondiffpatch/formatters/jsonpatch"
@@ -35,21 +34,22 @@ function usage (syntax) {
   process.exit()
 }
 
-function normalize (item) {
-  return _.cloneDeepWith(item, value => {
+function normalize (value) {
+  if (typeof value === "string") {
     // apply Unicode normalization to strings
-    if (_.isString(value)) {
-      return value.normalize()
-    }
+    return value.normalize()
+  } else if (Array.isArray(value)) {
+    return value.map(normalize)
+  } else if (typeof value === "object" && value !== null) {
     // sort keys and remove keys starting with "_"
-    if (_.isPlainObject(item)) {
-      const keys = Object.keys(item).filter(key => key[0] !== "_").sort()
-      return keys.reduce((obj, key) => {
-        obj[key] = normalize(item[key])
-        return obj
-      }, {})
-    }
-  })
+    const keys = Object.keys(value).filter(key => key[0] !== "_").sort()
+    return keys.reduce((obj, key) => {
+      obj[key] = normalize(value[key])
+      return obj
+    }, {})
+  } else {
+    return value
+  }
 }
 
 function updateDump () {
@@ -70,7 +70,7 @@ function updateDump () {
     }
 
     const stream = fs.createWriteStream(latest)
-    _.sortBy(schemes, "uri").forEach(voc => {
+    schemes.sort((a,b) => a.uri.localeCompare(b.uri)).forEach(voc => {
       stream.write(JSON.stringify(normalize(voc)) + "\n")
     })
     console.log(`${latest}: ${schemes.length} vocabularies`)
@@ -99,7 +99,7 @@ function dumpDiff (fileA, fileB, showDelta) {
 
   let before = next(a), after = next(b)
 
-  while (before && after) {  
+  while (before && after) {
 
     while (after && after.uri < before.uri) {
       showDelta(addedDelta(after))
