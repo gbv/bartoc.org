@@ -24,6 +24,7 @@ report '.subject|not' 'no-subject'
 report '.type|length<2' 'no-type'
 report '.FORMAT|not' 'no-format'
 report '.languages|not' 'no-languages'
+report '.API and (.notationExamples|not)' 'api-but-no-examples'
 
 # TODO: find
 #report '.subject[]?.inScheme[]?.uri=="http://bartoc.org/en/node/241"|not' 'no-ddc'
