@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { kosTypeUris } from "../../src/versioning.js"
+import { kosTypeUris } from "../../src/editions.js"
 import { useInheritableField } from "../composables/useInheritableField.js"
 import InheritedFieldControl from "./InheritedFieldControl.vue"
 import JskosItemPicker from "./JskosItemPicker.vue"

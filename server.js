@@ -11,7 +11,7 @@ import {
   rdfSerialize,
 } from "./src/rdf.js"
 import { canonicalItemCopy } from "./src/itemSerialization.js"
-import { deriveVersionRecord, hasValidVersionOf } from "./src/versioning.js"
+import { deriveEditionRecord, hasValidVersionOf } from "./src/editions.js"
 import child_process from "child_process"
 import portfinder from "portfinder"
 import { getConceptsInBatches } from "./src/backend.js"
@@ -312,7 +312,7 @@ async function buildPresentationView(storedItem) {
     // whether the loaded record is a usable inheritance source.
     resolvedVersionOf = await resolveSchemeReferences(storedItem.versionOf)
     const mainItem = resolvedVersionOf[0]
-    const derivation = deriveVersionRecord(storedItem, mainItem)
+    const derivation = deriveEditionRecord(storedItem, mainItem)
     effectiveItem = derivation.effectiveItem
     derivedFields = derivation.derivedFields
   }

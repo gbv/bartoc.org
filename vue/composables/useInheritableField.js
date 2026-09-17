@@ -4,7 +4,7 @@ import { hasMeaningfulValue } from "../utils/itemEditor.js"
 /**
  * Manage a field that can copy a value from the main record.
  *
- * A version saves only its own value. If its value is empty, it uses the value
+ * An edition saves only its own value. If its value is empty, it uses the value
  * from the main record when one is available.
  *
  * Each component provides the field name, its empty value, and an error
@@ -77,7 +77,7 @@ export function useInheritableField(props, emit, options) {
   }
 
   // Stop using the local value and send an empty value. ItemEditor removes the
-  // empty field before saving, so the version keeps using the main value.
+  // empty field before saving, so the edition keeps using the main value.
   function useMain() {
     if (!sourceRecord.value) {
       return

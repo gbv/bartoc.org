@@ -6,7 +6,7 @@ import {
   hasValidVersionOf,
   kosTypeUris,
   versionNumber,
-} from "../../src/versioning.js"
+} from "../../src/editions.js"
 
 export {
   CONCEPT_SCHEME_TYPE,
@@ -81,7 +81,7 @@ export function itemError(item) {
   }
 
   if (hasSelfReference(item, "versionOf")) {
-    return { message: "A vocabulary cannot be a version of itself." }
+    return { message: "A vocabulary cannot be an edition of itself." }
   }
 
   if (hasSelfReference(item, "basedOn")) {

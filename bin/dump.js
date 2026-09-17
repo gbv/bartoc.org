@@ -42,10 +42,8 @@ function updateDump () {
     fs.mkdirSync(dumpsDir)
   }
 
-  const backend = cdk.initializeRegistry({
-    provider: "ConceptApi",
-    api: `http://localhost:${config.port}/api/`,
-  })
+  const api = `http://localhost:${config.port}/api/`
+  const backend = cdk.initializeRegistry({ provider: "ConceptApi", api })
 
   backend.getSchemes({ params: { limit: 9999 } }).then(schemes => {
     const latest = `${dumpsDir}/latest.ndjson`
@@ -58,7 +56,7 @@ function updateDump () {
     schemes.sort((a,b) => a.uri.localeCompare(b.uri)).forEach(voc => {
       stream.write(JSON.stringify(normalize(voc)) + "\n")
     })
-    console.log(`${latest}: ${schemes.length} vocabularies`)
+    console.log(`${latest}: ${schemes.length} vocabularies from ${api}`)
   })
 }
 

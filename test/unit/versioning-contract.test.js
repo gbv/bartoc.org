@@ -1,23 +1,23 @@
 import { describe, expect, it } from "vitest"
 import {
-  DERIVED_VERSION_FIELDS,
-  deriveVersionRecord,
+  DERIVED_EDITION_FIELDS,
+  deriveEditionRecord,
   hasMeaningfulValue,
   kosTypeUris,
-  sortVersionRecordsByStartDate,
+  sortEditionRecordsByStartDate,
   versionNumber,
   versionRole,
-} from "../../src/versioning.js"
+} from "../../src/editions.js"
 import {
   THE_SOZ_MAIN_URI,
   storedTheSozMain,
   storedTheSoz2004,
   storedTheSoz2009,
-} from "../fixtures/versioning.js"
+} from "../fixtures/editions.js"
 
-describe("version records", () => {
+describe("edition records", () => {
   it("lists fields taken from the main record", () => {
-    expect(DERIVED_VERSION_FIELDS).toEqual([
+    expect(DERIVED_EDITION_FIELDS).toEqual([
       "definition",
       "notation",
       "subject",
@@ -74,7 +74,7 @@ describe("version records", () => {
       { uri: "undated-2", startDate: " " },
     ]
 
-    expect(sortVersionRecordsByStartDate(records).map(record => record.uri)).toEqual([
+    expect(sortEditionRecordsByStartDate(records).map(record => record.uri)).toEqual([
       "dated-1",
       "dated-2",
       "dated-3",
@@ -88,7 +88,7 @@ describe("version records", () => {
       "dated-3",
       "undated-2",
     ])
-    expect(sortVersionRecordsByStartDate()).toEqual([])
+    expect(sortEditionRecordsByStartDate()).toEqual([])
   })
 
   it("finds the role of a record", () => {
@@ -101,7 +101,7 @@ describe("version records", () => {
   })
 
   it("derives missing values from the main record", () => {
-    expect(deriveVersionRecord(storedTheSoz2004, storedTheSozMain)).toEqual({
+    expect(deriveEditionRecord(storedTheSoz2004, storedTheSozMain)).toEqual({
       effectiveItem: {
         ...storedTheSoz2004,
         prefLabel: {
@@ -126,7 +126,7 @@ describe("version records", () => {
   })
 
   it("keeps values stored on the version", () => {
-    expect(deriveVersionRecord(storedTheSoz2009, storedTheSozMain)).toEqual({
+    expect(deriveEditionRecord(storedTheSoz2009, storedTheSozMain)).toEqual({
       effectiveItem: storedTheSoz2009,
       derivedFields: {},
     })
@@ -139,11 +139,11 @@ describe("version records", () => {
       uri: "http://bartoc.org/en/node/99904",
     }
 
-    expect(deriveVersionRecord(noLink, storedTheSozMain)).toEqual({
+    expect(deriveEditionRecord(noLink, storedTheSozMain)).toEqual({
       effectiveItem: noLink,
       derivedFields: {},
     })
-    expect(deriveVersionRecord(storedTheSoz2004, otherMain)).toEqual({
+    expect(deriveEditionRecord(storedTheSoz2004, otherMain)).toEqual({
       effectiveItem: storedTheSoz2004,
       derivedFields: {},
     })
@@ -152,7 +152,7 @@ describe("version records", () => {
   it("keeps saved records unchanged", () => {
     const version = structuredClone(storedTheSoz2004)
     const main = structuredClone(storedTheSozMain)
-    const { effectiveItem } = deriveVersionRecord(version, main)
+    const { effectiveItem } = deriveEditionRecord(version, main)
 
     effectiveItem.notation.push("Changed")
 

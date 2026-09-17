@@ -45,7 +45,7 @@ describe("ItemEditor save service", () => {
     })
   })
 
-  it("prepares a version without an abstract", async () => {
+  it("prepares an edition without an abstract", async () => {
     const result = await prepareItemForSave({
       item: makeItem({
         definition: { en: [""] },
@@ -72,7 +72,7 @@ describe("ItemEditor save service", () => {
     })
   })
 
-  it("saves a version number without a title", async () => {
+  it("saves an version number without a title", async () => {
     const result = await prepareItemForSave({
       item: makeItem({
         prefLabel: {},

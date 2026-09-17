@@ -10,10 +10,10 @@
     v-if="versionOfReference"
     data-testid="version-context">
     <template v-if="currentVersionNumber">
-      This is version <strong>{{ currentVersionNumber }}</strong> of
+      This is edition <strong>{{ currentVersionNumber }}</strong> of
     </template>
     <template v-else>
-      This is a version of
+      This is an edition of
     </template>
     <ItemLink :item="versionOfReference" />.
     <span
@@ -34,7 +34,7 @@
     @change="changeTab">
     <template #title="{ tab }">
       <i
-        v-if="tab.title === 'Versions'"
+        v-if="tab.title === 'Editions'"
         class="fas fa-code-branch"
         title="Derived from the main record"
         aria-hidden="true" />
@@ -314,14 +314,14 @@
     </Tab>
 
     <Tab
-      v-if="hasVersions"
-      title="Versions">
-      <ul class="terminology-versions">
+      v-if="hasEditions"
+      title="Editions">
+      <ul class="terminology-editions">
         <li
-          v-for="versionRecord in versionRecords"
-          :key="versionRecord.uri">
-          <TerminologyVersionLink
-            :version-record="versionRecord"
+          v-for="edition in editionRecords"
+          :key="edition.uri">
+          <EditionLink
+            :edition-record="edition"
             :main-record="item" />
         </li>
       </ul>
@@ -337,9 +337,9 @@ import "jskos-vue-tabs/dist/style.css"
 import {
   hasValidVersionOf,
   kosTypeUris,
-  sortVersionRecordsByStartDate,
+  sortEditionRecordsByStartDate,
   versionNumber,
-} from "../../src/versioning.js"
+} from "../../src/editions.js"
 import ConceptBrowser from "../components/ConceptBrowser.vue"
 import ExternalLink from "../components/ExternalLink.vue"
 import ItemDates from "../components/ItemDates.vue"
@@ -348,7 +348,7 @@ import LocalizedAbstract from "../components/LocalizedAbstract.vue"
 import MetadataListRow from "../components/MetadataListRow.vue"
 import MetadataRow from "../components/MetadataRow.vue"
 import ServiceLink from "../components/ServiceLink.vue"
-import TerminologyVersionLink from "../components/TerminologyVersionLink.vue"
+import EditionLink from "../components/EditionLink.vue"
 import { loadWikipediaLinks } from "../utils/wikipedia.js"
 
 defineOptions({ name: "TerminologyPage" })
@@ -399,17 +399,17 @@ provide("field-inheritance", {
 // inheritance marker is computed separately.
 const definitionInherited = computed(() => isFieldInherited("definition"))
 
-// Show linked versions in chronological order. Undated records come last.
-const versionRecords = computed(() => (
-  sortVersionRecordsByStartDate(props.item._versionOfBacklink)
+// Show linked editions in chronological order. Undated records come last.
+const editionRecords = computed(() => (
+  sortEditionRecordsByStartDate(props.item._versionOfBacklink)
 ))
-const hasVersions = computed(() => Boolean(versionRecords.value.length))
+const hasEditions = computed(() => Boolean(editionRecords.value.length))
 const tabs = computed(() => [
   "about",
   "access",
   "identifiers",
   ...(props.item.API?.length ? ["content"] : []),
-  ...(hasVersions.value ? ["versions"] : []),
+  ...(hasEditions.value ? ["editions"] : []),
 ])
 const activeTab = ref(0)
 const conceptBrowser = ref(null)
@@ -529,12 +529,12 @@ onBeforeUnmount(() => {
   color: var(--cc-color-primary);
 }
 
-.terminology-versions {
+.terminology-editions {
   padding-inline-start: 0;
   list-style: none;
 }
 
-.terminology-versions > li + li {
+.terminology-editions > li + li {
   margin-block-start: var(--cc-row-gap);
 }
 </style>

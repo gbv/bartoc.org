@@ -41,7 +41,7 @@
     <div
       v-if="!requireEnglish"
       class="editor-help-text">
-      An English abstract is optional because this terminology is a version of another BARTOC terminology.
+      An English abstract is optional because this terminology is an edition of another BARTOC terminology.
     </div>
   </form-row>
   <form-row :label="'Languages'">

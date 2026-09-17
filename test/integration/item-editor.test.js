@@ -77,7 +77,7 @@ const AbstractsEditorStub = {
 const conceptSchemeType = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
 const thesaurusType = "http://w3id.org/nkos/nkostype#thesaurus"
 const optionalEnglishMessage =
-  "An English abstract is optional because this terminology is a version of another BARTOC terminology."
+  "An English abstract is optional because this terminology is an edition of another BARTOC terminology."
 
 function mountEditor(current = {}, props = {}) {
   return mount(ItemEditor, {
@@ -353,7 +353,7 @@ describe("ItemEditor", () => {
 
     expect(fetch).not.toHaveBeenCalled()
     expect(w.vm.error).toEqual({
-      message: "A vocabulary cannot be a version of itself.",
+      message: "A vocabulary cannot be an edition of itself.",
     })
   })
 
@@ -734,7 +734,7 @@ describe("ItemEditor", () => {
     expect(errorMessage.attributes("role")).toBe("alert")
   })
 
-  it("saves a version without a title", async () => {
+  it("saves an edition without a title", async () => {
     stubFailedSave()
     const w = mountEditor({
       uri: "http://bartoc.org/en/node/294",

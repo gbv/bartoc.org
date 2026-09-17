@@ -100,7 +100,7 @@ describe("ItemEditor business logic", () => {
     expect(itemError({
       ...validItem,
       versionOf: [{ uri }],
-    })).toEqual({ message: "A vocabulary cannot be a version of itself." })
+    })).toEqual({ message: "A vocabulary cannot be an edition of itself." })
 
     expect(itemError({
       ...validItem,
@@ -114,7 +114,7 @@ describe("ItemEditor business logic", () => {
     })).toBeUndefined()
   })
 
-  it("allows a version record without an English abstract", () => {
+  it("allows an edition record without an English abstract", () => {
     expect(itemError({
       prefLabel: { en: ["Version title"] },
       definition: {},
@@ -149,7 +149,7 @@ describe("ItemEditor business logic", () => {
       definition: {},
       versionOf: [{ uri }],
       publisher: [],
-    })).toEqual({ message: "A vocabulary cannot be a version of itself." })
+    })).toEqual({ message: "A vocabulary cannot be an edition of itself." })
   })
 
   it("cleans empty fields and normalizes relation-like values", () => {
