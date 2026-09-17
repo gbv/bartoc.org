@@ -302,24 +302,6 @@
           source-field="notationExamples"
           label="Examples"
           :items="item.notationExamples" />
-
-        <MetadataRow
-          v-if="item.MARCSPEC"
-          label="MARCspec">
-          {{ item.MARCSPEC }}
-        </MetadataRow>
-
-        <MetadataRow
-          v-if="item.PICAPATH"
-          label="PICA path">
-          {{ item.PICAPATH }}
-        </MetadataRow>
-
-        <MetadataRow
-          v-if="item.CQLKEY"
-          label="CQL key">
-          {{ item.CQLKEY }}
-        </MetadataRow>
       </table>
     </Tab>
 
