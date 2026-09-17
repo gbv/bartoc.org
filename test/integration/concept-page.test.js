@@ -59,8 +59,7 @@ describe("ConceptPage", () => {
     expect(rows.Identifiers.text()).toContain("<unsafe>")
     expect(rows.Identifiers.html()).not.toContain("<unsafe>")
     expect(rows.Homepage.get("a").attributes("href")).toBe("https://example.org/german")
-    expect(rows.Created.text()).toBe("2001")
-    expect(rows.Dissolved.text()).toBe("2020")
+    expect(rows.Existence.text()).toBe("2001–2020")
     expect(rows.Publisher.get("a").attributes("href")).toBe(
       "/publisher?uri=https%3A%2F%2Fexample.org%2Fpublishers%2F1",
     )

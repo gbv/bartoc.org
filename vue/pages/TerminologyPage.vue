@@ -59,6 +59,13 @@
           label="Titles"
           :items="titles" />
 
+        <MetadataRow
+          v-if="currentVersionNumber"
+          source-field="version"
+          label="Version">
+          {{ currentVersionNumber }}
+        </MetadataRow>
+
         <MetadataListRow
           source-field="notation"
           label="Abbreviation"
@@ -121,35 +128,25 @@
           list-style="inline" />
 
         <MetadataRow
-          source-field="startDate"
-          :show="Boolean(item.startDate)"
-          icon="calendar"
-          label="Created">
-          {{ item.startDate }}
+          v-if="item.extent"
+          label="Size">
+          {{ item.extent }}
         </MetadataRow>
 
         <MetadataRow
-          source-field="endDate"
-          :show="Boolean(item.endDate)"
+          v-if="item.startDate || item.endDate"
+          source-field="[startDate, endDate]"
           icon="calendar"
-          label="Dissolved">
-          {{ item.endDate }}
+          label="Existence">
+          {{ item.startDate }}–{{ item.endDate }}
         </MetadataRow>
 
         <MetadataRow
+          v-if="item.uri"
           source-field="uri"
-          :show="Boolean(item.uri)"
           icon="link"
           label="URI">
           <ExternalLink :url="item.uri" />
-        </MetadataRow>
-
-        <MetadataRow
-          source-field="url"
-          :show="Boolean(item.url)"
-          icon="home"
-          label="Homepage">
-          <ExternalLink :url="item.url" />
         </MetadataRow>
 
         <MetadataListRow
@@ -186,6 +183,14 @@
 
     <Tab title="Access">
       <table class="cc-table">
+        <MetadataRow
+          v-if="item.url"
+          source-field="url"
+          icon="home"
+          label="Homepage">
+          <ExternalLink :url="item.url" />
+        </MetadataRow>
+
         <MetadataListRow
           label="Access"
           :items="item.ACCESS"
@@ -207,15 +212,6 @@
         </MetadataListRow>
 
         <MetadataListRow
-          label="Format"
-          :items="item.FORMAT"
-          list-style="inline">
-          <template #item="{ item: format }">
-            <ItemLink :item="formats[format.uri] || format" />
-          </template>
-        </MetadataListRow>
-
-        <MetadataListRow
           label="Publisher"
           :items="item.publisher">
           <template #item="{ item: publisher }">
@@ -228,16 +224,17 @@
           :items="address" />
 
         <MetadataRow
-          :show="Boolean(item.CONTACT)"
+          v-if="item.CONTACT"
           label="Contact">
           {{ item.CONTACT }}
         </MetadataRow>
 
         <MetadataListRow
-          label="Part of"
-          :items="item.partOf">
-          <template #item="{ item: terminology }">
-            <ItemLink :item="terminology" />
+          label="Format"
+          :items="item.FORMAT"
+          list-style="inline">
+          <template #item="{ item: format }">
+            <ItemLink :item="formats[format.uri] || format" />
           </template>
         </MetadataListRow>
 
@@ -250,36 +247,21 @@
               :endpoint="endpoint" />
           </template>
         </MetadataListRow>
-      </table>
-    </Tab>
-
-    <Tab title="Content">
-      <table class="cc-table">
-        <MetadataRow
-          :show="Boolean(item.extent)"
-          label="Size">
-          {{ item.extent }}
-        </MetadataRow>
 
         <MetadataListRow
-          label="Languages"
-          :items="item.languages"
-          list-style="inline" />
+          label="Part of"
+          :items="item.partOf">
+          <template #item="{ item: terminology }">
+            <ItemLink :item="terminology" />
+          </template>
+        </MetadataListRow>
       </table>
-
-      <!-- Avoid initializing the browser on inactive tabs or without an API. -->
-      <template v-if="activeTabName === 'content' && item.API?.length">
-        <hr>
-        <ConceptBrowser
-          ref="conceptBrowser"
-          :scheme="conceptScheme" />
-      </template>
     </Tab>
 
     <Tab title="Identifiers">
       <table class="cc-table">
         <MetadataRow
-          :show="Boolean(item.uri)"
+          v-if="item.uri"
           icon="link"
           label="URI">
           <ExternalLink :url="item.uri" />
@@ -299,26 +281,19 @@
         </MetadataListRow>
 
         <MetadataRow
-          source-field="version"
-          :show="Boolean(currentVersionNumber)"
-          label="Version">
-          {{ currentVersionNumber }}
-        </MetadataRow>
-
-        <MetadataRow
-          :show="Boolean(item.namespace)"
+          v-if="item.namespace"
           label="Namespace">
           <ExternalLink :url="item.namespace" />
         </MetadataRow>
 
         <MetadataRow
-          :show="Boolean(item.notationPattern)"
+          v-if="item.notationPattern"
           label="Notation pattern">
           {{ item.notationPattern }}
         </MetadataRow>
 
         <MetadataRow
-          :show="Boolean(item.uriPattern)"
+          v-if="item.uriPattern"
           label="URI pattern">
           {{ item.uriPattern }}
         </MetadataRow>
@@ -329,23 +304,31 @@
           :items="item.notationExamples" />
 
         <MetadataRow
-          :show="Boolean(item.MARCSPEC)"
+          v-if="item.MARCSPEC"
           label="MARCspec">
           {{ item.MARCSPEC }}
         </MetadataRow>
 
         <MetadataRow
-          :show="Boolean(item.PICAPATH)"
+          v-if="item.PICAPATH"
           label="PICA path">
           {{ item.PICAPATH }}
         </MetadataRow>
 
         <MetadataRow
-          :show="Boolean(item.CQLKEY)"
+          v-if="item.CQLKEY"
           label="CQL key">
           {{ item.CQLKEY }}
         </MetadataRow>
       </table>
+    </Tab>
+
+    <Tab
+      v-if="item.API?.length"
+      title="Content">
+      <ConceptBrowser
+        ref="conceptBrowser"
+        :scheme="conceptScheme" />
     </Tab>
 
     <Tab
@@ -442,12 +425,11 @@ const hasVersions = computed(() => Boolean(versionRecords.value.length))
 const tabs = computed(() => [
   "about",
   "access",
-  "content",
   "identifiers",
+  ...(props.item.API?.length ? ["content"] : []),
   ...(hasVersions.value ? ["versions"] : []),
 ])
 const activeTab = ref(0)
-const activeTabName = computed(() => tabs.value[activeTab.value])
 const conceptBrowser = ref(null)
 const ready = ref(false)
 const wikipediaLinks = ref([])

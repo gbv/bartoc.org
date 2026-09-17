@@ -1,7 +1,5 @@
 <template>
-  <tr
-    v-if="show"
-    :aria-describedby="inherited ? fieldInheritance.descriptionId : undefined">
+  <tr :aria-describedby="inherited ? fieldInheritance.descriptionId : undefined">
     <td class="metadata-row-label">
       <i
         v-if="inherited"
@@ -31,10 +29,6 @@ const props = defineProps({
   icon: {
     type: String,
     default: "",
-  },
-  show: {
-    type: Boolean,
-    default: true,
   },
   sourceField: {
     type: [String, Array],

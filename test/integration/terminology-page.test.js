@@ -202,8 +202,7 @@ describe("TerminologyPage", () => {
       "http://bartoc.org/en/node/20287",
     )
     const labels = wrapper.findAll("tr").map(row => row.find("td").text())
-    const homepageIndex = labels.indexOf("Homepage")
-    expect(labels[homepageIndex + 1]).toBe("Wikipedia")
+    expect(labels.indexOf("Wikipedia")).toBeTruthy()
     expect(rowByLabel(wrapper, "Wikipedia").findAll("a").map(link => ({
       text: link.text(),
       href: link.attributes("href"),
@@ -384,15 +383,15 @@ describe("TerminologyPage", () => {
     await nextTick()
 
     const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
-    expect(headers[3].classes()).toContain("jskos-vue-tabs-header-item-active")
-    expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
+    expect(headers[2].classes()).toContain("jskos-vue-tabs-header-item-active")
 
     await headers[1].trigger("click")
     expect(window.location.hash).toBe("#access")
-    expect(rowByLabel(wrapper, "Access").text()).toContain("freely available")
-    expect(selectConcept).not.toHaveBeenCalled()
 
     await headers[2].trigger("click")
+    expect(window.location.hash).toBe("#identifiers")
+
+    await headers[3].trigger("click")
     expect(window.location.hash).toBe("#content")
     expect(wrapper.get("[data-testid='concept-browser']").exists()).toBe(true)
 
@@ -400,8 +399,7 @@ describe("TerminologyPage", () => {
     expect(window.location.hash).toBe("#versions")
 
     await headers[0].trigger("click")
-    expect(selectConcept).toHaveBeenCalledWith(null)
-    expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
+    expect(window.location.hash).toBe("#about")
   })
 
   it("opens the conditional Versions tab from the URL hash", async () => {

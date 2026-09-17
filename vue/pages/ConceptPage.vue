@@ -11,7 +11,7 @@
     </MetadataRow>
 
     <MetadataRow
-      :show="Boolean(item.uri)"
+      v-if="item.uri"
       icon="link"
       label="URI">
       <ExternalLink :url="item.uri" />
@@ -27,24 +27,18 @@
       :items="item.identifier" />
 
     <MetadataRow
-      :show="Boolean(item.url)"
+      v-if="item.url"
       icon="home"
       label="Homepage">
       <ExternalLink :url="item.url" />
     </MetadataRow>
 
     <MetadataRow
-      :show="Boolean(item.startDate)"
+      v-if="item.startDate || item.endDate"
+      source-field="[startDate, endDate]"
       icon="calendar"
-      label="Created">
-      {{ item.startDate }}
-    </MetadataRow>
-
-    <MetadataRow
-      :show="Boolean(item.endDate)"
-      icon="calendar"
-      label="Dissolved">
-      {{ item.endDate }}
+      label="Existence">
+      {{ item.startDate }}–{{ item.endDate }}
     </MetadataRow>
 
     <MetadataListRow
