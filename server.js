@@ -1,5 +1,6 @@
 import config from "./config/index.js"
 import utils from "./src/utils.js"
+import { clone } from "./src/utils.js"
 import path from "path"
 import jskos from "jskos-tools"
 import fs from "fs"
@@ -261,7 +262,7 @@ async function resolveIncomingSchemeReferences(item, relation) {
 
 async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
   // Presentation enrichment must never consume the only canonical copy.
-  const item = structuredClone(storedItem)
+  const item = clone(storedItem)
   const subjects = item && item.subject || []
   if (subjects.length) {
     let found = []

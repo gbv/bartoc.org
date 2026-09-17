@@ -78,3 +78,28 @@ export default {
   },
 
 }
+
+// structuredClone omitting functions, optionally normalizing and removing interal keys
+export function clone (value, { normalize, removeUnderscore } = {}) {
+  if (typeof value === "string") {
+    // apply Unicode normalization to strings
+    return normalize ? value.normalize() : value
+  } else if (Array.isArray(value)) {
+    return value.map(v => clone(v, { normalize, removeUnderscore }))
+  } else if (typeof value === "object" && value !== null) {
+    let keys = Object.keys(value)
+    // sort keys and remove keys starting with "_"
+    if (removeUnderscore) {
+      keys = keys.filter(key => key[0] !== "_")
+    }
+    if (normalize) {
+      keys = keys.sort()
+    }
+    return keys.reduce((obj, key) => {
+      obj[key] = clone(value[key], { normalize, removeUnderscore })
+      return obj
+    }, {})
+  } else {
+    return value
+  }
+}

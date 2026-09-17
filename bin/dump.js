@@ -1,4 +1,5 @@
 import config from "../config/index.js"
+import { clone } from "../src/utils.js"
 import fs from "fs"
 import path from "path"
 import { cdk } from "cocoda-sdk"
@@ -34,23 +35,7 @@ function usage (syntax) {
   process.exit()
 }
 
-function normalize (value) {
-  if (typeof value === "string") {
-    // apply Unicode normalization to strings
-    return value.normalize()
-  } else if (Array.isArray(value)) {
-    return value.map(normalize)
-  } else if (typeof value === "object" && value !== null) {
-    // sort keys and remove keys starting with "_"
-    const keys = Object.keys(value).filter(key => key[0] !== "_").sort()
-    return keys.reduce((obj, key) => {
-      obj[key] = normalize(value[key])
-      return obj
-    }, {})
-  } else {
-    return value
-  }
-}
+const normalize = value => clone(value, { normalize: true, removeUnderscore: true })
 
 function updateDump () {
   if (!fs.existsSync(dumpsDir)) {
