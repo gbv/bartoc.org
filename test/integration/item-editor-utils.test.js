@@ -27,6 +27,7 @@ describe("ItemEditor business logic", () => {
     expect(item.DISPLAY).toEqual({})
     expect(item.notation).toEqual([])
     expect(item.identifier).toEqual([])
+    expect(item.media).toEqual([])
     expect(item.subjectOf).toEqual([])
     expect(item.versionOf).toEqual([])
     expect(item.basedOn).toEqual([])
@@ -70,6 +71,29 @@ describe("ItemEditor business logic", () => {
       prefLabel: { en: ["Title"] },
       definition: { en: ["English abstract"] },
       publisher: [{ prefLabel: { en: "Publisher" }, uri: "https://example.org" }],
+    })).toBeUndefined()
+  })
+
+  it("validates media thumbnail URLs", () => {
+    const item = {
+      prefLabel: { en: ["Title"] },
+      definition: { en: ["English abstract"] },
+      publisher: [],
+    }
+
+    expect(itemError({
+      ...item,
+      media: [{ thumbnail: "logo.png" }],
+    })).toEqual({
+      message: "Enter a complete media URL starting with http:// or https://.",
+    })
+
+    expect(itemError({
+      ...item,
+      media: [
+        { thumbnail: "https://example.org/logo.png" },
+        { thumbnail: "" },
+      ],
     })).toBeUndefined()
   })
 
