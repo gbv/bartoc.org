@@ -102,11 +102,14 @@ describe("EndpointsEditor", () => {
     })
   })
 
-  it("marks invalid endpoint URLs", async () => {
+  it.each([
+    "api.dante.gbv.de",
+    "https://api.example.org.",
+  ])("marks invalid endpoint URL %s", async (url) => {
     const wrapper = mountEditor()
     const input = wrapper.find("input")
 
-    await input.setValue("api.dante.gbv.de")
+    await input.setValue(url)
 
     expect(input.classes()).toContain("cc-form-control--invalid")
     expect(input.attributes("aria-invalid")).toBe("true")

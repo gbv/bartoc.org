@@ -201,6 +201,12 @@ export function trimItemIdentifiers(item) {
       .filter(p => p.uri)
   }
 
+  if (Array.isArray(item.media)) {
+    item.media = item.media
+      .map(media => ({ ...media, thumbnail: trimString(media?.thumbnail) }))
+      .filter(media => media.thumbnail)
+  }
+
   if (Array.isArray(item.publisher)) {
     item.publisher = item.publisher.map(p => ({ ...p, uri: trimString(p.uri) }))
   }
@@ -578,7 +584,11 @@ export function createSubjectProvider(scheme) {
 export function isValidUrl(value) {
   try {
     const url = new URL(value)
-    return url.protocol === "http:" || url.protocol === "https:"
+    const isHttp = url.protocol === "http:" || url.protocol === "https:"
+
+    // URL accepts fully-qualified DNS names with a trailing dot. In metadata
+    // input this is usually sentence punctuation pasted together with the URL.
+    return isHttp && !url.hostname.endsWith(".")
   } catch {
     return false
   }
