@@ -15,22 +15,30 @@ export {
   kosTypeUris,
 }
 
-const objectFields = ["prefLabel", "altLabel", "definition", "ADDRESS", "DISPLAY"]
+const objectFields = [
+  "ADDRESS",
+  "DISPLAY",
+  "altLabel",
+  "definition",
+  "prefLabel",
+]
+
 const arrayFields = [
-  "notation",
+  "ACCESS",
+  "API",
+  "FORMAT",
+  "basedOn",
   "identifier",
   "languages",
   "license",
-  "type",
+  "media",
+  "notation",
+  "partOf",
+  "publisher",
   "subject",
   "subjectOf",
-  "partOf",
-  "FORMAT",
-  "API",
-  "ACCESS",
-  "publisher",
+  "type",
   "versionOf",
-  "basedOn",
 ]
 
 export function normalizeEditableItem(current = {}) {
@@ -106,6 +114,20 @@ export function itemError(item) {
 
   if (hasInvalidEndpoint) {
     return { message: "Enter a complete URL starting with http:// or https://." }
+  }
+
+  const hasInvalidMedia = item.media?.some((media) => {
+    const thumbnail = media?.thumbnail
+
+    if (thumbnail == null || (typeof thumbnail === "string" && !thumbnail.trim())) {
+      return false
+    }
+
+    return typeof thumbnail !== "string" || !isValidUrl(thumbnail)
+  })
+
+  if (hasInvalidMedia) {
+    return { message: "Enter a complete media URL starting with http:// or https://." }
   }
 
   if (item.publisher?.length) {

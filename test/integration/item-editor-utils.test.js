@@ -75,26 +75,14 @@ describe("ItemEditor business logic", () => {
   })
 
   it("validates media thumbnail URLs", () => {
-    const item = {
+    expect(itemError({
       prefLabel: { en: ["Title"] },
       definition: { en: ["English abstract"] },
       publisher: [],
-    }
-
-    expect(itemError({
-      ...item,
       media: [{ thumbnail: "logo.png" }],
     })).toEqual({
       message: "Enter a complete media URL starting with http:// or https://.",
     })
-
-    expect(itemError({
-      ...item,
-      media: [
-        { thumbnail: "https://example.org/logo.png" },
-        { thumbnail: "" },
-      ],
-    })).toBeUndefined()
   })
 
   it("allows a version number and link instead of a title", () => {

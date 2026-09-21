@@ -44,6 +44,11 @@
       An English abstract is optional because this terminology is an edition of another BARTOC terminology.
     </div>
   </form-row>
+  <!-- Media values are objects, so they need their own editor. -->
+  <form-row :label="'Media'">
+    <media-editor v-model="item.media" />
+    URLs of logos or other images representing the terminology.
+  </form-row>
   <form-row :label="'Languages'">
     <InheritableLanguagesEditor
       ref="inheritableLanguagesEditor"
@@ -282,6 +287,7 @@ import InheritableNotationExamplesEditor from "./InheritableNotationExamplesEdit
 import InheritableSubjectsEditor from "./InheritableSubjectsEditor.vue"
 import InheritableTitleEditor from "./InheritableTitleEditor.vue"
 import ListEditor from "./ListEditor.vue"
+import MediaEditor from "./MediaEditor.vue"
 import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
 import JskosItemPicker from "./JskosItemPicker.vue"

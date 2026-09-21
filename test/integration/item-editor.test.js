@@ -128,12 +128,14 @@ describe("ItemEditor", () => {
     vi.unstubAllGlobals()
   })
 
-  it("initializes missing object and array fields", () => {
+  it("initializes fields and passes media to its editor", () => {
+    const media = [{ thumbnail: "https://example.org/logo.png" }]
     const w = mountEditor({
       notationExamples: ["A", "B"],
       prefLabel: { en: ["x"] },
       definition: { en: ["English abstract"] },
       type: [conceptSchemeType],
+      media,
     })
 
     expect(w.vm.item.ADDRESS).toEqual({})
@@ -144,6 +146,7 @@ describe("ItemEditor", () => {
     expect(w.vm.item.subjectOf).toEqual([])
     expect(w.vm.item.versionOf).toEqual([])
     expect(w.get("[data-testid='notation-examples-editor']").element.value).toBe("A, B")
+    expect(w.getComponent({ name: "MediaEditor" }).props("modelValue")).toEqual(media)
   })
 
   it("shows the access selector", () => {
