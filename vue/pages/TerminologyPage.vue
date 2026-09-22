@@ -205,6 +205,14 @@
         </MetadataRow>
 
         <MetadataListRow
+          label="Issue tracker"
+          :items="item.issueTracker">
+          <template #item="{ item: tracker }">
+            <ExternalLink :url="tracker.uri" />
+          </template>
+        </MetadataListRow>
+
+        <MetadataListRow
           label="Access"
           :items="item.ACCESS"
           list-style="inline">

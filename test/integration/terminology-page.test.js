@@ -212,6 +212,22 @@ describe("TerminologyPage", () => {
     ])
   })
 
+  it("shows issue tracker links in Access", () => {
+    const wrapper = mountPage({
+      issueTracker: [
+        { uri: "https://github.com/example/project/issues" },
+      ],
+    })
+    const link = rowByLabel(wrapper, "Issue tracker").get("a")
+
+    expect(link.text()).toBe("https://github.com/example/project/issues")
+    expect(link.attributes()).toMatchObject({
+      href: "https://github.com/example/project/issues",
+      target: "_blank",
+      rel: "noopener noreferrer",
+    })
+  })
+
   it("shows Wikipedia links below the homepage", async () => {
     const wikipediaPages = [
       wikipediaPage("https://de.wikipedia.org/wiki/Test", "de"),
