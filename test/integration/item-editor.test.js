@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { mount, flushPromises } from "@vue/test-utils"
 import { nextTick } from "vue"
 import ItemEditor from "../../vue/components/ItemEditor.vue"
+import { imageMedia } from "../helpers/media.js"
 
 const utilsMocks = vi.hoisted(() => ({
   loadConcepts: vi.fn(() => Promise.resolve([])),
@@ -129,7 +130,7 @@ describe("ItemEditor", () => {
   })
 
   it("initializes fields and passes media to its editor", () => {
-    const media = [{ thumbnail: "https://example.org/logo.png" }]
+    const media = [imageMedia("https://example.org/logo.png")]
     const w = mountEditor({
       notationExamples: ["A", "B"],
       prefLabel: { en: ["x"] },

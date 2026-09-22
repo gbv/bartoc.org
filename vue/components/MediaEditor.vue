@@ -1,18 +1,18 @@
 <template>
-  <!-- Edit the supported JSKOS media field: media[].thumbnail. -->
+  <!-- Edit one thumbnail URL for each supported JSKOS media manifest. -->
   <div class="cc-media-editor">
     <OrderedList
       :model-value="rows"
       @update:model-value="updateRows">
       <template #default="{ item: media, index, update }">
         <input
-          :value="media.thumbnail"
+          :value="mediaThumbnailUrl(media)"
           type="url"
           class="cc-form-control"
           :class="{ 'cc-form-control--invalid': thumbnailInvalid(media) }"
           :aria-invalid="thumbnailInvalid(media)"
           :aria-describedby="thumbnailInvalid(media) ? `media-url-feedback-${index}` : undefined"
-          @input="update({ ...media, thumbnail: $event.target.value })">
+          @input="update(withMediaThumbnail(media, $event.target.value))">
         <div
           v-if="thumbnailInvalid(media)"
           :id="`media-url-feedback-${index}`"
@@ -32,7 +32,11 @@
 
 <script setup>
 import { ref } from "vue"
-import { isValidUrl } from "../utils.js"
+import {
+  isValidUrl,
+  mediaThumbnailUrl,
+  withMediaThumbnail,
+} from "../utils.js"
 import OrderedList from "./OrderedList.vue"
 
 const props = defineProps({
@@ -45,21 +49,24 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"])
 
 // Keep local copies so empty rows are not added to the JSKOS record.
-const rows = ref(props.modelValue.map(media => ({ ...media })))
+const rows = ref(props.modelValue.map(media => withMediaThumbnail(
+  media,
+  mediaThumbnailUrl(media),
+)))
 
 function emitMedia() {
   // Do not send empty rows to the parent.
   emit(
     "update:modelValue",
     rows.value
-      .filter(media => media.thumbnail?.trim())
-      .map(media => ({ ...media })),
+      .filter(media => mediaThumbnailUrl(media)?.trim())
+      .map(media => withMediaThumbnail(media, mediaThumbnailUrl(media))),
   )
 }
 
 function add() {
   // Do not update the parent until the user enters a URL.
-  rows.value.push({ thumbnail: "" })
+  rows.value.push(withMediaThumbnail())
 }
 
 function updateRows(value) {
@@ -69,7 +76,8 @@ function updateRows(value) {
 }
 
 function thumbnailInvalid(media) {
-  return Boolean(media.thumbnail?.trim()) && !isValidUrl(media.thumbnail)
+  const thumbnail = mediaThumbnailUrl(media)
+  return Boolean(thumbnail?.trim()) && !isValidUrl(thumbnail)
 }
 </script>
 

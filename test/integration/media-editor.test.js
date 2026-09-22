@@ -2,6 +2,7 @@
 import { describe, it, expect } from "vitest"
 import { mount } from "@vue/test-utils"
 import MediaEditor from "../../vue/components/MediaEditor.vue"
+import { imageMedia } from "../helpers/media.js"
 
 function mountEditor(modelValue = []) {
   return mount(MediaEditor, {
@@ -27,7 +28,7 @@ describe("MediaEditor", () => {
     await input.setValue("https://example.org/logo.png")
 
     expect(wrapper.emitted("update:modelValue").at(-1)[0]).toEqual([
-      { thumbnail: "https://example.org/logo.png" },
+      imageMedia("https://example.org/logo.png"),
     ])
   })
 })

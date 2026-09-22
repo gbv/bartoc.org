@@ -1,4 +1,9 @@
-import { isValidUrl, validatePublisher } from "../utils.js"
+import {
+  isValidUrl,
+  mediaThumbnailUrl,
+  validatePublisher,
+  withMediaThumbnail,
+} from "../utils.js"
 import { normalizeUri } from "../../src/uri.js"
 import {
   CONCEPT_SCHEME_TYPE,
@@ -55,6 +60,12 @@ export function normalizeEditableItem(current = {}) {
       item[key] = []
     }
   })
+
+  // Convert the old issue example to the current JSKOS media shape.
+  item.media = item.media.map(media => withMediaThumbnail(
+    media,
+    mediaThumbnailUrl(media),
+  ))
 
   return item
 }
@@ -117,13 +128,18 @@ export function itemError(item) {
   }
 
   const hasInvalidMedia = item.media?.some((media) => {
-    const thumbnail = media?.thumbnail
+    const thumbnail = mediaThumbnailUrl(media)
 
     if (thumbnail == null || (typeof thumbnail === "string" && !thumbnail.trim())) {
       return false
     }
 
-    return typeof thumbnail !== "string" || !isValidUrl(thumbnail)
+    return media?.type !== "Manifest"
+      || !Array.isArray(media.items)
+      || !Array.isArray(media.thumbnail)
+      || media.thumbnail[0]?.type !== "Image"
+      || typeof thumbnail !== "string"
+      || !isValidUrl(thumbnail)
   })
 
   if (hasInvalidMedia) {

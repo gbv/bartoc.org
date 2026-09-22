@@ -49,7 +49,20 @@
           v-if="definitionInherited"
           class="fas fa-code-branch inherited-field-marker"
           aria-hidden="true" />
-        <div>
+        <div class="cc-abstract-content">
+          <div
+            v-if="mediaThumbnails.length"
+            class="cc-terminology-media">
+            <img
+              v-for="(thumbnail, index) in mediaThumbnails"
+              :key="`${thumbnail}-${index}`"
+              :src="thumbnail"
+              alt=""
+              class="cc-terminology-media-image"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer">
+          </div>
           <LocalizedAbstract :abstract="item.definition" />
         </div>
       </div>
@@ -349,6 +362,7 @@ import MetadataListRow from "../components/MetadataListRow.vue"
 import MetadataRow from "../components/MetadataRow.vue"
 import ServiceLink from "../components/ServiceLink.vue"
 import EditionLink from "../components/EditionLink.vue"
+import { mediaThumbnailUrl } from "../utils.js"
 import { loadWikipediaLinks } from "../utils/wikipedia.js"
 
 defineOptions({ name: "TerminologyPage" })
@@ -398,6 +412,13 @@ provide("field-inheritance", {
 // The abstract is introductory text rather than a metadata-table row, so its
 // inheritance marker is computed separately.
 const definitionInherited = computed(() => isFieldInherited("definition"))
+
+// Only render the thumbnail subset supported by the BARTOC editor.
+const mediaThumbnails = computed(() => (
+  (props.item.media || [])
+    .map(mediaThumbnailUrl)
+    .filter(thumbnail => typeof thumbnail === "string" && isWebUrl(thumbnail))
+))
 
 // Show linked editions in chronological order. Undated records come last.
 const editionRecords = computed(() => (
@@ -512,6 +533,28 @@ onBeforeUnmount(() => {
 
 .abstract-block :deep(p:last-child) {
   margin-bottom: var(--cc-space-md);
+}
+
+.cc-abstract-content {
+  display: flow-root;
+  flex: 1;
+  min-width: 0;
+}
+
+.cc-terminology-media {
+  float: right;
+  display: flex;
+  width: min(12rem, 35%);
+  margin: 0 0 var(--cc-space-md) var(--cc-space-md);
+  gap: var(--cc-space-sm);
+  flex-direction: column;
+}
+
+.cc-terminology-media-image {
+  display: block;
+  width: 100%;
+  max-height: 8rem;
+  object-fit: contain;
 }
 
 .inherited-field-block {

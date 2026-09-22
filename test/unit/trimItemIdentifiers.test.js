@@ -22,10 +22,6 @@ describe("trimItemIdentifiers", () => {
       languages: [" en ", ""],
       subjectOf: [{ url: "  https://x  " }, { url: "   " }],
       partOf: [{ uri: "  http://r  " }, { uri: "   " }],
-      media: [
-        { thumbnail: "  https://example.org/logo.png  " },
-        { thumbnail: "   " },
-      ],
       API: [{ url: "  /api  ", type: "  t  " }, { url: "   ", type: "x" }],
       subject: [
         { uri: "  http://c  ", notation: [" 01 ", "  "], inScheme: [{ uri: "  http://s  " }, { uri: " " }] },
@@ -41,7 +37,6 @@ describe("trimItemIdentifiers", () => {
 
     expect(out.subjectOf).toEqual([{ url: "https://x" }])
     expect(out.partOf).toEqual([{ uri: "http://r" }])
-    expect(out.media).toEqual([{ thumbnail: "https://example.org/logo.png" }])
 
     expect(out.API).toEqual([{ url: "/api", type: "t" }])
 

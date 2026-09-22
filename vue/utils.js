@@ -146,6 +146,33 @@ function trimStringArray(value) {
     .filter(v => !(typeof v === "string" && v === ""))
 }
 
+// Return the image URL from the media shape used by the editor.
+// The string fallback supports records created with the older issue example.
+export function mediaThumbnailUrl(media) {
+  if (typeof media?.thumbnail === "string") {
+    return media.thumbnail
+  }
+  return media?.thumbnail?.[0]?.id
+}
+
+// Keep the editor simple while storing a valid JSKOS/IIIF manifest.
+export function withMediaThumbnail(media = {}, url = "") {
+  const thumbnail = Array.isArray(media.thumbnail) && media.thumbnail[0]
+    ? media.thumbnail[0]
+    : {}
+
+  return {
+    ...media,
+    type: "Manifest",
+    items: Array.isArray(media.items) ? media.items : [],
+    thumbnail: [{
+      ...thumbnail,
+      type: "Image",
+      id: url,
+    }],
+  }
+}
+
 // Trim all relevant string fields in an item identifier object
 export function trimItemIdentifiers(item) {
   if (!item || typeof item !== "object") {
@@ -203,8 +230,11 @@ export function trimItemIdentifiers(item) {
 
   if (Array.isArray(item.media)) {
     item.media = item.media
-      .map(media => ({ ...media, thumbnail: trimString(media?.thumbnail) }))
-      .filter(media => media.thumbnail)
+      .map(media => withMediaThumbnail(
+        media,
+        trimString(mediaThumbnailUrl(media)),
+      ))
+      .filter(media => media.thumbnail[0].id)
   }
 
   if (Array.isArray(item.publisher)) {

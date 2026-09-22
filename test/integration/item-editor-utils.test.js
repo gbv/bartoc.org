@@ -9,6 +9,7 @@ import {
   parseNotationExamples,
   hasValidVersionOf,
 } from "../../vue/utils/itemEditor.js"
+import { imageMedia } from "../helpers/media.js"
 
 describe("ItemEditor business logic", () => {
   it("normalizes missing object and array fields for editing", () => {
@@ -31,6 +32,16 @@ describe("ItemEditor business logic", () => {
     expect(item.subjectOf).toEqual([])
     expect(item.versionOf).toEqual([])
     expect(item.basedOn).toEqual([])
+  })
+
+  it("converts the old media shape for editing", () => {
+    const item = normalizeEditableItem({
+      media: [{ thumbnail: "https://example.org/logo.png" }],
+    })
+
+    expect(item.media).toEqual([
+      imageMedia("https://example.org/logo.png"),
+    ])
   })
 
   it("parses notation examples from comma-separated input", () => {
@@ -79,7 +90,7 @@ describe("ItemEditor business logic", () => {
       prefLabel: { en: ["Title"] },
       definition: { en: ["English abstract"] },
       publisher: [],
-      media: [{ thumbnail: "logo.png" }],
+      media: [imageMedia("logo.png")],
     })).toEqual({
       message: "Enter a complete media URL starting with http:// or https://.",
     })

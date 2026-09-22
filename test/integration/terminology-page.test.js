@@ -4,6 +4,7 @@ import { flushPromises, mount } from "@vue/test-utils"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import TerminologyPage from "../../vue/pages/TerminologyPage.vue"
 import { loadWikipediaLinks } from "../../vue/utils/wikipedia.js"
+import { imageMedia } from "../helpers/media.js"
 
 const selectConcept = vi.fn()
 const ConceptBrowserStub = defineComponent({
@@ -167,6 +168,27 @@ describe("TerminologyPage", () => {
     )
     expect(rowByLabel(wrapper, "Based on").text()).toContain("Base Terminology")
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")
+  })
+
+  it("shows media thumbnails next to the abstract", () => {
+    const wrapper = mountPage({
+      media: [
+        imageMedia("https://example.org/logo.png"),
+        imageMedia("https://example.org/banner.png"),
+        imageMedia("not-a-url"),
+      ],
+    })
+
+    const images = wrapper.findAll(".cc-terminology-media-image")
+    expect(images).toHaveLength(2)
+    expect(images[0].attributes()).toMatchObject({
+      src: "https://example.org/logo.png",
+      alt: "",
+      loading: "lazy",
+      decoding: "async",
+      referrerpolicy: "no-referrer",
+    })
+    expect(images[1].attributes("src")).toBe("https://example.org/banner.png")
   })
 
   it("shows Wikipedia links below the homepage", async () => {

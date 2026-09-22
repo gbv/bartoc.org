@@ -6,6 +6,7 @@ import {
   saveVocabularyItem,
 } from "../../vue/utils/itemEditorSave.js"
 import { CONCEPT_SCHEME_TYPE } from "../../vue/utils/itemEditor.js"
+import { imageMedia } from "../helpers/media.js"
 
 function makeItem(overrides = {}) {
   return {
@@ -43,6 +44,21 @@ describe("ItemEditor save service", () => {
         { type: "http://bartoc.org/api-type/jskos", url: "https://example.org/api" },
       ],
     })
+  })
+
+  it("keeps valid media and removes empty media when saving", async () => {
+    const result = await prepareItemForSave({
+      item: makeItem({
+        media: [
+          imageMedia(" https://example.org/logo.png "),
+          imageMedia(" "),
+        ],
+      }),
+    })
+
+    expect(JSON.parse(result.body).media).toEqual([
+      imageMedia("https://example.org/logo.png"),
+    ])
   })
 
   it("prepares an edition without an abstract", async () => {
