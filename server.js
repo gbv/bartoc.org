@@ -209,6 +209,34 @@ async function resolveSchemeReferences(references) {
   ]
 }
 
+// Add registry titles to references shown on the terminology page.
+// Keep the original URI references when they cannot be resolved.
+async function resolveRegistryReferences(references) {
+  const refs = (references || []).filter(reference => reference?.uri)
+  if (!refs.length) {
+    return []
+  }
+
+  try {
+    // The data endpoint can resolve several JSKOS item types in one request.
+    const api = `${config.backend.api}data?${querystring.stringify({
+      uri: refs.map(reference => reference.uri).join("|"),
+    })}`
+    const records = await fetch(api).then(response => response.json())
+
+    return refs.map(reference => {
+      const registry = records.find(record => record.uri === reference.uri)
+      return registry ? jskos.clean(registry) : reference
+    })
+  } catch (error) {
+    config.warn(
+      "Could not resolve registry references. Keeping URI references.",
+      error,
+    )
+    return refs
+  }
+}
+
 /**
  * Load the main record referenced by versionOf for the editor.
  * Keep it separate from the editable item so inherited values are not saved.
@@ -289,6 +317,10 @@ async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
 
   if (item?.basedOn?.length) {
     item.basedOn = await resolveSchemeReferences(item.basedOn)
+  }
+
+  if (item?.partOf?.length) {
+    item.partOf = await resolveRegistryReferences(item.partOf)
   }
 
   // Add backlinks for selected fields

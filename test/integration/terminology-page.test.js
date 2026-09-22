@@ -191,6 +191,27 @@ describe("TerminologyPage", () => {
     expect(images[1].attributes("src")).toBe("https://example.org/banner.png")
   })
 
+  it("shows registry titles in Part of", () => {
+    const wrapper = mountPage({
+      partOf: [
+        {
+          uri: "http://bartoc.org/en/node/18942",
+          prefLabel: { en: "GESIS Controlled Vocabulary Browser" },
+        },
+        {
+          uri: "http://bartoc.org/en/node/missing",
+        },
+      ],
+    })
+
+    const links = rowByLabel(wrapper, "Part of").findAll("a")
+
+    expect(links.map(link => link.text())).toEqual([
+      "GESIS Controlled Vocabulary Browser",
+      "http://bartoc.org/en/node/missing",
+    ])
+  })
+
   it("shows Wikipedia links below the homepage", async () => {
     const wikipediaPages = [
       wikipediaPage("https://de.wikipedia.org/wiki/Test", "de"),
