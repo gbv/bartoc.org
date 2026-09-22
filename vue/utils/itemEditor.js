@@ -34,6 +34,7 @@ const arrayFields = [
   "FORMAT",
   "basedOn",
   "identifier",
+  "issueTracker",
   "languages",
   "license",
   "media",

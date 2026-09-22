@@ -20,6 +20,7 @@ describe("trimItemIdentifiers", () => {
       url: "  https://example.org  ",
       identifier: ["  a  ", "   ", "b"],
       languages: [" en ", ""],
+      issueTracker: [{ uri: "  https://example.org/issues  " }, { uri: "   " }],
       subjectOf: [{ url: "  https://x  " }, { url: "   " }],
       partOf: [{ uri: "  http://r  " }, { uri: "   " }],
       API: [{ url: "  /api  ", type: "  t  " }, { url: "   ", type: "x" }],
@@ -34,6 +35,7 @@ describe("trimItemIdentifiers", () => {
     expect(out.url).toBe("https://example.org")
     expect(out.identifier).toEqual(["a", "b"])
     expect(out.languages).toEqual(["en"])
+    expect(out.issueTracker).toEqual([{ uri: "https://example.org/issues" }])
 
     expect(out.subjectOf).toEqual([{ url: "https://x" }])
     expect(out.partOf).toEqual([{ uri: "http://r" }])

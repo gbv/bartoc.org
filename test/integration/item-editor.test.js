@@ -143,11 +143,30 @@ describe("ItemEditor", () => {
     expect(w.vm.item.DISPLAY).toEqual({})
     expect(w.vm.item.notation).toEqual([])
     expect(w.vm.item.identifier).toEqual([])
+    expect(w.vm.item.issueTracker).toEqual([])
     expect(w.vm.item.languages).toEqual([])
     expect(w.vm.item.subjectOf).toEqual([])
     expect(w.vm.item.versionOf).toEqual([])
     expect(w.get("[data-testid='notation-examples-editor']").element.value).toBe("A, B")
     expect(w.getComponent({ name: "MediaEditor" }).props("modelValue")).toEqual(media)
+  })
+
+  it("maps issue tracker URLs to JSKOS items", async () => {
+    const w = mountEditor({
+      issueTracker: [{ uri: "https://example.org/issues" }],
+    })
+    const rows = w.findAll(".form-row")
+    const editor = rows[formLabels(w).indexOf("Issue tracker")]
+      .getComponent({ name: "ListEditor" })
+
+    expect(editor.props("modelValue")).toEqual(["https://example.org/issues"])
+
+    editor.vm.$emit("update:modelValue", ["https://example.org/bugs"])
+    await nextTick()
+
+    expect(w.vm.item.issueTracker).toEqual([
+      { uri: "https://example.org/bugs" },
+    ])
   })
 
   it("shows the access selector", () => {

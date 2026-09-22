@@ -123,6 +123,12 @@
       :model-value="item.subjectOf.map((s) => s.url)"
       @update:modelValue="item.subjectOf = $event.map((url) => ({ url }))" />
   </form-row>
+  <form-row :label="'Issue tracker'">
+    <list-editor
+      :model-value="item.issueTracker.map((tracker) => tracker.uri)"
+      @update:modelValue="item.issueTracker = $event.map((uri) => ({ uri }))" />
+    Where issues about this terminology are managed.
+  </form-row>
   <form-row :label="'Formats'">
     <jskos-item-picker
       v-model="item.FORMAT"

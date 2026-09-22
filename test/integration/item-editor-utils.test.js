@@ -28,6 +28,7 @@ describe("ItemEditor business logic", () => {
     expect(item.DISPLAY).toEqual({})
     expect(item.notation).toEqual([])
     expect(item.identifier).toEqual([])
+    expect(item.issueTracker).toEqual([])
     expect(item.media).toEqual([])
     expect(item.subjectOf).toEqual([])
     expect(item.versionOf).toEqual([])
