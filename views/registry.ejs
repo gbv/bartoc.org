@@ -4,7 +4,6 @@
 
 <table class="cc-table cc-table--divided">
   <%- include('row', { icon: 'link', label: 'URI', content: include('link', { url: item.uri })}) %>
-  <%- include('row', { icon: 'download', label: 'JSKOS', content: `<a href="/api/data?${querystring.stringify({uri:item.uri})}" class="cc-button cc-button-action">download registry metadata</a>` }) %>
   <%- include('row-list', { label: 'Services (API)', list: item.API,
        view: s => `<service-link :scheme='{"uri":"${item.uri}"}' :endpoint='${JSON.stringify(s)}'></service-link>` }) %>
   <!-- TODO: alternative titles and English Title -->
