@@ -1,12 +1,12 @@
 <template>
   <ul
-    v-for="type in noteTypes"
-    :key="type"
+    v-for="property in visibleProperties"
+    :key="property"
     class="item-note-list">
     <li
-      v-for="note in notes(type)"
+      v-for="note in values(property)"
       :key="`${note.lang}:${note.note}`"
-      :title="type">
+      :title="property">
       <span
         class="language-tag"
         :lang="note.lang">{{ note.note }}</span>
@@ -17,29 +17,32 @@
 <script setup>
 import { computed } from "vue"
 
-const noteTypeNames = [
-  "scopeNote",
-  "definition",
-  "note",
-  "historyNote",
-  "editorialNote",
-  "changeNote",
-  "example",
-]
-
 const props = defineProps({
   item: {
     type: Object,
     required: true,
   },
+  properties: {
+    type: Array,
+    // Limit the language maps when some fields are rendered elsewhere.
+    default: () => [
+      "scopeNote",
+      "definition",
+      "note",
+      "historyNote",
+      "editorialNote",
+      "changeNote",
+      "example",
+    ],
+  },
 })
 
-const noteTypes = computed(() => {
-  return noteTypeNames.filter(name => props.item[name])
+const visibleProperties = computed(() => {
+  return props.properties.filter(name => props.item[name])
 })
 
-function notes(type) {
-  const languageMap = props.item[type] || {}
+function values(property) {
+  const languageMap = props.item[property] || {}
   const allNotes = []
   for (let lang in languageMap) {
     for (let note of languageMap[lang]) {

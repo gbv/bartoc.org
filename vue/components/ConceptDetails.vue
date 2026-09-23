@@ -1,96 +1,34 @@
 <template>
-  <div class="concept-details">
-    <ul class="ancestors">
-      <li
-        v-for="ancestor in ancestors.filter(Boolean).reverse()"
-        :key="ancestor.uri"
-        @click="selectConcept(ancestor)">
-        <icon name="levelUp" />
-        <item-name
-          :item="ancestor"
-          :notation="!display.hideNotation"
-          class="clickable" />
-      </li>
-    </ul>
-    <div v-if="selected">
-      <div class="concept-details-selected">
-        <item-name
-          :item="selected"
-          :notation="!display.hideNotation" />
-        <a
-          v-if="k10plus"
-          :href="k10plus"
-          class="concept-details-catalog-link"
-          title="search in K10plus library catalog"
-          target="k10plus">📚</a>
-      </div>
-      <div v-if="selected.uri || (selected.identifier||[]).length">
-        <ul
-          class="concept-details-identifiers separated-list">
-          <li
-            v-if="selected.uri">
-            <icon name="link" />
-            <a :href="selected.uri">{{ selected.uri }}</a>
-          </li>
-          <li
-            v-for="id in (selected.identifier||[])"
-            :key="id">
-            {{ id }}
-          </li>
-        </ul>
-      </div>
-      <item-labels :item="selected" />
-      <item-notes :item="selected" />
-      <ul class="concept-details-dates separated-list">
-        <li
-          v-if="selected.created"
-          title="created">
-          <icon
-            name="created"
-            padding="" />
-          {{ selected.created }}
-        </li>
-        <li
-          v-if="selected.issued"
-          title="issued">
-          <icon
-            name="modified"
-            padding="" />
-          {{ selected.issued }}
-        </li>
-        <li
-          v-if="selected.modified"
-          title="modified">
-          <icon
-            name="modified"
-            padding="" />
-          {{ selected.modified }}
-        </li>
-      </ul>
-    </div>
-
-    <div v-if="narrower">
-      <ul class="narrower">
-        <li
-          v-for="child in narrower"
-          :key="child.uri"
-          @click="selectConcept(child)">
-          <icon name="levelDown" />
-          <item-name
-            :item="child"
-            :notation="!display.hideNotation"
-            class="clickable" />
-        </li>
-      </ul>
-    </div>
-  </div>
+  <ItemDetails
+    v-if="item?.uri"
+    class="cc-concept-item-details"
+    :class="{ 'cc-concept-item-details--hide-notation': display.hideNotation }"
+    :item="item"
+    flat
+    :dropzone="false"
+    :draggable="false"
+    :fields="detailFields"
+    :item-list-options="itemListOptions"
+    @select="emit('update:concept', $event.item)">
+    <template #afterName>
+      <a
+        v-if="k10plus"
+        :href="k10plus"
+        class="cc-concept-catalog-link"
+        title="search in K10plus library catalog"
+        target="k10plus">📚</a>
+    </template>
+    <template #afterTabs>
+      <ItemNotes
+        :item="item"
+        :properties="additionalProperties" />
+    </template>
+  </ItemDetails>
 </template>
 
 <script setup>
 import { computed, ref, watch } from "vue"
-import Icon from "./Icon.vue"
-import ItemLabels from "./ItemLabels.vue"
-import ItemName from "./ItemName.vue"
+import { ItemDetails } from "jskos-vue"
 import ItemNotes from "./ItemNotes.vue"
 import { sortConcepts } from "../utils.js"
 import k10plusikt from "../../data/k10plus-ikt.json"
@@ -116,68 +54,79 @@ const props = defineProps({
 
 const emit = defineEmits(["update:concept"])
 
-const selected = ref({})
-const ancestors = ref([])
-const narrower = ref([])
+const item = ref(null)
 
+// The preferred label is already shown as the details heading.
+const detailFields = { prefLabel: false }
+
+// ItemDetails does not render these JSKOS language maps.
+const additionalProperties = [
+  "hiddenLabel",
+  "note",
+  "historyNote",
+  "changeNote",
+  "example",
+]
+
+// Disable drag and drop and follow the terminology notation setting.
+const itemListOptions = computed(() => ({
+  draggable: false,
+  itemNameOptions: {
+    draggable: false,
+    showNotation: !props.display.hideNotation,
+  },
+}))
+
+// Build a catalog search link when the scheme supports it.
 const k10plus = computed(() => {
-  if (!selected.value || !selected.value.notation) {
-    return
-  }
+  const notation = item.value?.notation?.[0]
   const ikt = k10plusikt[(props.scheme.CQLKEY || "").toUpperCase()]
-  const notation = selected.value.notation || []
-  return ikt ? `https://opac.k10plus.de/DB=2.299/CMD?ACT=SRCHA&IKT=${ikt}&TRM=${notation[0]}` : null
+
+  return ikt && notation
+    ? `https://opac.k10plus.de/DB=2.299/CMD?ACT=SRCHA&IKT=${ikt}&TRM=${notation}`
+    : null
 })
 
+// ItemDetails reads ancestors and narrower concepts from the item itself.
+// Load these relations together with the complete concept.
+async function loadConcept(concept) {
+  item.value = concept
+
+  if (!concept?.uri) {
+    return
+  }
+
+  const [details] = await props.registry.getConcepts({ concepts: [concept] })
+  const loaded = { ...concept, ...(details || {}), inScheme: [props.scheme] }
+
+  const [ancestors, narrower] = await Promise.all([
+    props.registry.getAncestors({ concept: loaded }),
+    props.registry.getNarrower({ concept: loaded }),
+  ])
+
+  item.value = {
+    ...loaded,
+    ancestors,
+    narrower: sortConcepts(narrower, props.scheme),
+  }
+}
+
+// Reload the item when the parent browser selects another concept.
 watch(
   () => props.concept,
-  async (concept) => {
-    selected.value = concept
-    ancestors.value = []
-    narrower.value = []
-
-    if (concept && concept.uri) {
-      // Load and merge details into the selected concept.
-      const details = (await props.registry.getConcepts({ concepts: [concept] }))[0]
-      selected.value = Object.assign(concept, details || {})
-
-      // Inject access scheme. Required to get VOCID. Should better be fixed in cocoda-sdk?
-      concept.inScheme = [props.scheme]
-
-      ancestors.value = await props.registry.getAncestors({ concept })
-      narrower.value = sortConcepts(
-        await props.registry.getNarrower({ concept }),
-        props.scheme,
-      )
-    }
-  },
+  loadConcept,
   { immediate: true },
 )
-
-function selectConcept(concept) {
-  emit("update:concept", concept)
-}
 </script>
 
 <style scoped>
-ul.narrower {
-  padding-top: var(--cc-space-md);
+.cc-concept-item-details {
+  --jskos-vue-fontSize-small: var(--cc-font-size-base);
 }
-ul.narrower, ul.ancestors {
-  list-style: none;
+.cc-concept-catalog-link {
   padding-left: var(--cc-space-sm);
 }
-.clickable:hover {
-  text-decoration: underline;
-  cursor: pointer;
-}
-.concept-details-selected {
-  font-size: var(--cc-font-size-lg);
-}
-.concept-details-catalog-link {
-  padding-left: var(--cc-space-sm);
-}
-.concept-details-identifiers {
-  margin-bottom: var(--cc-space-xs);
+.cc-concept-item-details--hide-notation :deep(.jskos-vue-itemDetails-name .jskos-vue-itemName-notation) {
+  display: none;
 }
 </style>

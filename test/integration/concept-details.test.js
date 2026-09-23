@@ -7,41 +7,48 @@ const utilsMocks = vi.hoisted(() => ({
   sortConcepts: vi.fn((concepts) => concepts),
 }))
 
+const componentMocks = vi.hoisted(() => ({
+  ItemDetails: {
+    props: {
+      item: Object,
+      flat: Boolean,
+      dropzone: Boolean,
+      draggable: Boolean,
+      fields: Object,
+      itemListOptions: Object,
+    },
+    emits: ["select"],
+    template: `
+      <section data-testid="item-details">
+        <span data-testid="selected-name">{{ item.prefLabel?.en }}</span>
+        <button
+          v-for="ancestor in (item.ancestors || []).filter(Boolean).reverse()"
+          :key="ancestor.uri"
+          data-testid="select-ancestor"
+          @click="$emit('select', { item: ancestor })">
+          {{ ancestor.uri }}
+        </button>
+        <button
+          v-for="child in item.narrower || []"
+          :key="child.uri"
+          data-testid="select-narrower"
+          @click="$emit('select', { item: child })">
+          {{ child.uri }}
+        </button>
+        <slot name="afterName" />
+        <slot name="afterTabs" />
+      </section>
+    `,
+  },
+}))
+
 vi.mock("../../vue/utils.js", () => ({
   sortConcepts: utilsMocks.sortConcepts,
 }))
 
-const IconStub = {
-  props: ["name"],
-  template: "<span data-testid=\"icon\">{{ name }}</span>",
-}
-
-const ItemLabelsStub = {
-  props: ["item"],
-  template: `
-    <div data-testid="item-labels">
-      {{ item.altLabel?.en?.join(",") || "" }}
-    </div>
-  `,
-}
-
-const ItemNameStub = {
-  props: ["item", "notation"],
-  template: `
-    <span data-testid="item-name">
-      {{ item.prefLabel?.en || item.uri }}:{{ notation }}
-    </span>
-  `,
-}
-
-const ItemNotesStub = {
-  props: ["item"],
-  template: `
-    <div data-testid="item-notes">
-      {{ item.definition?.en?.[0] || "" }}
-    </div>
-  `,
-}
+vi.mock("jskos-vue", () => ({
+  ItemDetails: componentMocks.ItemDetails,
+}))
 
 const scheme = {
   uri: "scheme:primary",
@@ -58,21 +65,16 @@ const concept = {
 
 const details = {
   prefLabel: { en: "Selected after load" },
-  altLabel: { en: ["Loaded alias"] },
-  definition: { en: ["Loaded definition"] },
-  notation: ["A.1"],
-  identifier: ["ID-1"],
-  created: "2024-01-02",
+  hiddenLabel: { en: ["Hidden label"] },
+  historyNote: { en: ["History note"] },
 }
 
 const ancestors = [
   { uri: "concept:parent", prefLabel: { en: "Parent" } },
-  { uri: "concept:root", prefLabel: { en: "Root" } },
 ]
 
 const narrower = [
-  { uri: "concept:child-b", prefLabel: { en: "Child B" } },
-  { uri: "concept:child-a", prefLabel: { en: "Child A" } },
+  { uri: "concept:child", prefLabel: { en: "Child" } },
 ]
 
 function createRegistry() {
@@ -93,14 +95,6 @@ function mountDetails(props = {}) {
       scheme,
       display,
       ...props,
-    },
-    global: {
-      stubs: {
-        Icon: IconStub,
-        ItemLabels: ItemLabelsStub,
-        ItemName: ItemNameStub,
-        ItemNotes: ItemNotesStub,
-      },
     },
   })
 
@@ -129,32 +123,41 @@ describe("ConceptDetails", () => {
     expect(registry.getNarrower).toHaveBeenCalledWith({ concept: loadedConcept })
     expect(utilsMocks.sortConcepts).toHaveBeenCalledWith(narrower, scheme)
 
-    expect(wrapper.findAll("[data-testid='item-name']").map(item => item.text())).toEqual([
-      "Root:true",
-      "Parent:true",
-      "Selected after load:true",
-      "Child B:true",
-      "Child A:true",
-    ])
-    expect(wrapper.get("[data-testid='item-labels']").text()).toBe("Loaded alias")
-    expect(wrapper.get("[data-testid='item-notes']").text()).toBe("Loaded definition")
-    expect(wrapper.get("a[href='concept:selected']").text()).toBe("concept:selected")
-    expect(wrapper.text()).toContain("ID-1")
-    expect(wrapper.text()).toContain("2024-01-02")
-    expect(wrapper.get(".concept-details-identifiers").classes()).toContain("separated-list")
-    expect(wrapper.get(".concept-details-dates").classes()).toContain("separated-list")
+    const itemDetails = wrapper.getComponent(componentMocks.ItemDetails)
+    expect(itemDetails.props()).toMatchObject({
+      item: {
+        ...concept,
+        ...details,
+        inScheme: [scheme],
+        ancestors,
+        narrower,
+      },
+      flat: true,
+      dropzone: false,
+      draggable: false,
+      fields: { prefLabel: false },
+      itemListOptions: {
+        draggable: false,
+        itemNameOptions: {
+          draggable: false,
+          showNotation: true,
+        },
+      },
+    })
+    expect(wrapper.text()).toContain("Hidden label")
+    expect(wrapper.text()).toContain("History note")
   })
 
   it("emits selected ancestors and narrower concepts", async () => {
     const { wrapper } = mountDetails()
     await flushPromises()
 
-    await wrapper.findAll("ul.ancestors li")[0].trigger("click")
-    await wrapper.findAll("ul.narrower li")[1].trigger("click")
+    await wrapper.findAll("[data-testid='select-ancestor']")[0].trigger("click")
+    await wrapper.findAll("[data-testid='select-narrower']")[0].trigger("click")
 
     expect(wrapper.emitted("update:concept")).toEqual([
-      [ancestors[1]],
-      [narrower[1]],
+      [ancestors[0]],
+      [narrower[0]],
     ])
   })
 
@@ -166,8 +169,18 @@ describe("ConceptDetails", () => {
     })
     await flushPromises()
 
-    expect(wrapper.findAll("[data-testid='item-name']").map(item => item.text())).toContain(
-      "Selected after load:false",
-    )
+    const itemDetails = wrapper.getComponent(componentMocks.ItemDetails)
+    expect(itemDetails.props("itemListOptions").itemNameOptions.showNotation).toBe(false)
+    expect(itemDetails.classes()).toContain("cc-concept-item-details--hide-notation")
+  })
+
+  it("links a notation to the K10plus catalog", async () => {
+    const registry = createRegistry()
+    registry.getConcepts.mockResolvedValue([{ notation: ["20"] }])
+    const { wrapper } = mountDetails({ registry, scheme: { CQLKEY: "DDC" } })
+    await flushPromises()
+
+    expect(wrapper.get(".cc-concept-catalog-link").attributes("href"))
+      .toBe("https://opac.k10plus.de/DB=2.299/CMD?ACT=SRCHA&IKT=3011&TRM=20")
   })
 })

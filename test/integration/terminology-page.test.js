@@ -454,8 +454,10 @@ describe("TerminologyPage", () => {
     expect(window.location.hash).toBe("#content")
     expect(wrapper.get("[data-testid='concept-browser']").exists()).toBe(true)
 
+    selectConcept.mockClear()
     await headers[4].trigger("click")
     expect(window.location.hash).toBe("#editions")
+    expect(selectConcept).toHaveBeenCalledWith(null)
 
     await headers[0].trigger("click")
     expect(window.location.hash).toBe("#about")
