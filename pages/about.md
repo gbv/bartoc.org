@@ -43,11 +43,11 @@ title: About
   <h3>Partners</h3>
   <p>
     <a href="https://terminology.services.base4nfdi.de/"><img src="/img/logo-ts4nfdi.png" alt="TS4NFDI" /></a>
-    &#20;
+  
     <a href="https://portal.isko.org/"><img src="/img/logo-isko.png" alt="ISKO" /></a>
-    &#20;
+    
     <a href="https://dans.knaw.nl/"><img src="/img/danslogo.png" alt="DANS" /></a>
-    &#20;
+    
     <a href="https://vocabularyserver.com/"><img src="/img/logo-tematres-home.png" alt="TemaTres" /></a>
   </p>
 </section>
