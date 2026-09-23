@@ -34,6 +34,11 @@ const topConcepts = [
   },
 ]
 
+const endpoints = [
+  { url: "/first/", type: "http://bartoc.org/api-type/jskos" },
+  { url: "/second/", type: "http://bartoc.org/api-type/jskos" },
+]
+
 const ConceptDetailsStub = {
   props: ["concept", "registry"],
   template: `
@@ -92,6 +97,7 @@ function makeRegistry(concepts = topConcepts, id = "registry") {
       schemes: [{ VOCID: "voc-id" }],
     },
     getTop: vi.fn(async () => concepts),
+    getConcepts: vi.fn(async ({ concepts }) => concepts),
     suggest: vi.fn(async ({ search }) => [search, [], [], []]),
   }
 }
@@ -209,10 +215,6 @@ describe("ConceptBrowser", () => {
     const first = makeRegistry(topConcepts, "first")
     const secondConcepts = [{ uri: "concept:gamma", prefLabel: { en: "Gamma" } }]
     const second = makeRegistry(secondConcepts, "second")
-    const endpoints = [
-      { url: "/first/", type: "http://bartoc.org/api-type/jskos" },
-      { url: "/second/", type: "http://bartoc.org/api-type/jskos" },
-    ]
     utilsMocks.registryForScheme.mockImplementation(currentScheme =>
       currentScheme.API[0].url === "/second/" ? second : first,
     )
@@ -240,6 +242,7 @@ describe("ConceptBrowser", () => {
       uri: "concept:alpha",
       inScheme: [tree.props("scheme")],
     })
+    expect(new URL(window.location.href).searchParams.get("source")).toBe("/second/")
   })
 
   it("opens search results in the concept tree", async () => {
@@ -289,5 +292,29 @@ describe("ConceptBrowser", () => {
 
     expect(wrapper.find("[data-testid='concept-details']").exists()).toBe(false)
     expect(new URL(window.location.href).searchParams.has("uri")).toBe(false)
+  })
+
+  it("shows an error for an unknown concept from the URL", async () => {
+    window.history.replaceState({}, "", "/vocabulary?uri=concept:missing")
+    const registry = makeRegistry()
+    registry.getConcepts.mockResolvedValue([])
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser()
+    await flushPromises()
+
+    expect(wrapper.get("[role='alert']").text()).toBe(
+      "This concept was not found in the selected data source.",
+    )
+  })
+
+  it("opens the data source from the URL", async () => {
+    window.history.replaceState({}, "", "/vocabulary?source=%2Fsecond%2F")
+    utilsMocks.registryForScheme.mockReturnValue(makeRegistry())
+
+    const wrapper = mountBrowser({ scheme: { ...scheme, API: endpoints } })
+    await flushPromises()
+
+    expect(wrapper.get("select").element.value).toBe("1")
   })
 })

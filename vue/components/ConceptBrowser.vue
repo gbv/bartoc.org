@@ -1,6 +1,5 @@
 <template>
   <div v-if="source">
-    <h3>Explore vocabulary</h3>
     <div class="cc-concept-controls">
       <div class="cc-concept-field cc-concept-field--search">
         <label class="cc-concept-search-label">
@@ -34,10 +33,10 @@
       </div>
     </div>
     <p
-      v-if="sourceError"
+      v-if="error"
       class="cc-form-feedback--invalid"
       role="alert">
-      {{ sourceError }}
+      {{ error }}
     </p>
     <!-- Keep the concept tree visible while reading the selected concept. -->
     <div
@@ -115,7 +114,7 @@ const selected = ref(null)
 // State of API source loading.
 const initialized = ref(false)
 const loadingSource = ref(false)
-const sourceError = ref("")
+const error = ref("")
 
 // Display options defined by the terminology.
 const display = computed(() => props.scheme.DISPLAY || {})
@@ -164,6 +163,23 @@ async function selectConcept(concept) {
     await nextTick()
     await conceptTree.value?.navigateToUri(concept)
   }
+}
+
+// Load a concept from the active source before showing its details.
+async function selectConceptFromSource(uri) {
+  const reference = { uri, inScheme: [source.value.scheme] }
+  const concepts = await source.value.registry
+    .getConcepts({ concepts: [reference] })
+    .catch(() => null)
+
+  if (!concepts?.[0]) {
+    selected.value = null
+    error.value = "This concept was not found in the selected data source."
+    return
+  }
+
+  error.value = ""
+  await selectConcept(concepts[0])
 }
 
 // Allow the parent page to clear the selection when leaving the Content tab.
@@ -215,7 +231,7 @@ async function findSource(option) {
 // Find the source before replacing the current browser data.
 async function activateSource(option) {
   loadingSource.value = true
-  sourceError.value = ""
+  error.value = ""
 
   try {
     const nextSource = await findSource(option)
@@ -229,10 +245,7 @@ async function activateSource(option) {
 
     if (selectedUri) {
       // Reload details because another source may return different data.
-      await selectConcept({
-        uri: selectedUri,
-        inScheme: [nextSource.scheme],
-      })
+      await selectConceptFromSource(selectedUri)
     }
 
     return nextSource
@@ -245,10 +258,26 @@ async function activateSource(option) {
 async function changeSource(event) {
   const option = sourceOptions.value.find(({ index }) => index === Number(event.target.value))
 
-  if (option && !await activateSource(option)) {
-    sourceError.value = "This API cannot browse the vocabulary."
-    event.target.value = source.value.option.index
+  if (!option) {
+    return
   }
+
+  // Keep the current source when the new one cannot load the vocabulary.
+  if (!await activateSource(option)) {
+    error.value = "This API cannot browse the vocabulary."
+    event.target.value = source.value.option.index
+    return
+  }
+
+  // Make the selected source part of a shareable URL.
+  updateSourceUrl(option)
+}
+
+// Store the endpoint URL so a shared link can open the same data source.
+function updateSourceUrl(option) {
+  const url = new URL(window.location.href)
+  url.searchParams.set("source", option.endpoint.url)
+  window.history.replaceState({}, "", url)
 }
 
 // Keep the selected concept in the URL without adding browser history entries.
@@ -257,6 +286,9 @@ function updateConceptUrl(concept) {
 
   if (concept?.uri) {
     url.searchParams.set("uri", concept.uri)
+    if (sourceOptions.value.length > 1) {
+      url.searchParams.set("source", source.value.option.endpoint.url)
+    }
   } else {
     url.searchParams.delete("uri")
   }
@@ -264,22 +296,34 @@ function updateConceptUrl(concept) {
   window.history.replaceState({}, "", url)
 }
 
-watch(selected, updateConceptUrl)
+watch(selected, concept => {
+  if (concept?.uri) {
+    error.value = ""
+  }
+  updateConceptUrl(concept)
+})
 
 onMounted(async () => {
-  // Get URI for selected concept from URL
+  // Read the selected concept and data source from the URL.
   const urlParams = new URLSearchParams(window.location.search)
   const selectedUri = urlParams.get("uri")
+  const requestedSource = urlParams.get("source")
+  const requestedOption = sourceOptions.value.find(
+    option => option.endpoint.url === requestedSource,
+  )
+  const options = requestedOption
+    ? [requestedOption, ...sourceOptions.value.filter(option => option !== requestedOption)]
+    : sourceOptions.value
 
   try {
-    // Use the first endpoint that accepts the scheme or one of its identifiers.
-    for (const option of sourceOptions.value) {
+    // Try the requested endpoint first, then fall back to other working sources.
+    for (const option of options) {
       if (await activateSource(option)) {
         if (selectedUri) {
-          await selectConcept({
-            uri: selectedUri,
-            inScheme: [source.value.scheme],
-          })
+          await selectConceptFromSource(selectedUri)
+        }
+        if (requestedSource && option.endpoint.url !== requestedSource) {
+          updateSourceUrl(option)
         }
         break
       }
