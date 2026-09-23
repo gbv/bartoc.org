@@ -132,6 +132,7 @@ describe("TerminologyPage", () => {
     window.history.replaceState({}, "", "/en/node/123")
     window.sessionStorage.clear()
     selectConcept.mockClear()
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }))
   })
 
   afterEach(() => {
@@ -228,6 +229,19 @@ describe("TerminologyPage", () => {
     })
   })
 
+  it("shows full language names", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([
+      { notation: ["en"], prefLabel: { en: "English" } },
+      { notation: ["de"], prefLabel: { en: "German" } },
+    ])))
+
+    const wrapper = mountPage()
+    await flushPromises()
+
+    expect(rowByLabel(wrapper, "Languages").findAll("li").map(value => value.text()))
+      .toEqual(["English", "German"])
+  })
+
   it("shows Wikipedia links below the homepage", async () => {
     const wikipediaPages = [
       wikipediaPage("https://de.wikipedia.org/wiki/Test", "de"),
@@ -238,8 +252,8 @@ describe("TerminologyPage", () => {
       { notation: ["en", "eng"], prefLabel: { en: "English" } },
     ]
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(wikidataResponse(wikipediaPages))
       .mockResolvedValueOnce(jsonResponse(languageConcepts))
+      .mockResolvedValueOnce(wikidataResponse(wikipediaPages))
     vi.stubGlobal("fetch", fetchMock)
     const identifier = "http://www.wikidata.org/entity/Q123"
     const wrapper = mountPage({
@@ -249,17 +263,17 @@ describe("TerminologyPage", () => {
 
     await flushPromises()
 
-    const wikidataRequestUrl = fetchMock.mock.calls[0][0]
+    const languageRequestUrl = fetchMock.mock.calls[0][0]
+    expect(languageRequestUrl.pathname).toBe("/api/concepts")
+    expect(languageRequestUrl.searchParams.get("notation")).toBe("en|de")
+    expect(languageRequestUrl.searchParams.get("voc")).toBe(
+      "http://bartoc.org/en/node/20287",
+    )
+    const wikidataRequestUrl = fetchMock.mock.calls[1][0]
     expect(wikidataRequestUrl.origin + wikidataRequestUrl.pathname).toBe(
       "https://query.wikidata.org/sparql",
     )
     expect(wikidataRequestUrl.searchParams.get("query")).toContain(`<${identifier}>`)
-    const languageRequestUrl = fetchMock.mock.calls[1][0]
-    expect(languageRequestUrl.pathname).toBe("/api/concepts")
-    expect(languageRequestUrl.searchParams.get("notation")).toBe("de|en")
-    expect(languageRequestUrl.searchParams.get("voc")).toBe(
-      "http://bartoc.org/en/node/20287",
-    )
     const labels = wrapper.findAll("tr").map(row => row.find("td").text())
     expect(labels.indexOf("Wikipedia")).toBeTruthy()
     expect(rowByLabel(wrapper, "Wikipedia").findAll("a").map(link => ({
@@ -335,6 +349,7 @@ describe("TerminologyPage", () => {
 
     const wrapper = mountPage({
       identifier: ["https://www.wikidata.org/entity/Q123"],
+      languages: [],
     })
 
     expect(fetchMock).not.toHaveBeenCalled()

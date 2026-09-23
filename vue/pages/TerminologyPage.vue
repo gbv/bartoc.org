@@ -137,7 +137,7 @@
           source-field="languages"
           icon="language"
           label="Languages"
-          :items="item.languages"
+          :items="displayedLanguages"
           list-style="inline" />
 
         <MetadataRow
@@ -371,6 +371,7 @@ import MetadataRow from "../components/MetadataRow.vue"
 import ServiceLink from "../components/ServiceLink.vue"
 import EditionLink from "../components/EditionLink.vue"
 import { mediaThumbnailUrl } from "../utils.js"
+import { loadLanguageNames } from "../utils/languages.js"
 import { loadWikipediaLinks } from "../utils/wikipedia.js"
 
 defineOptions({ name: "TerminologyPage" })
@@ -443,6 +444,7 @@ const tabs = computed(() => [
 const activeTab = ref(0)
 const conceptBrowser = ref(null)
 const ready = ref(false)
+const displayedLanguages = ref([...(props.item.languages || [])])
 const wikipediaLinks = ref([])
 const header = inject("header", {})
 const userCanAdd = computed(() => unref(header.userCanAdd) || false)
@@ -526,6 +528,12 @@ onMounted(async () => {
   syncTabFromHash()
   ready.value = true
   window.addEventListener("hashchange", syncTabFromHash)
+
+  // Keep the stored codes unchanged and use full names only for display.
+  const languageCodes = props.item.languages || []
+  const languageNames = await loadLanguageNames(languageCodes)
+  displayedLanguages.value = languageCodes.map(code => languageNames[code] || code)
+
   wikipediaLinks.value = await loadWikipediaLinks(props.item.identifier)
 })
 
