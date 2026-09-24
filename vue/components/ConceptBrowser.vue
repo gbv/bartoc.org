@@ -2,20 +2,34 @@
   <div v-if="source">
     <div class="cc-concept-controls">
       <div class="cc-concept-field cc-concept-field--search">
-        <label class="cc-concept-search-label">
+        <label
+          v-if="source.registry.has.suggest"
+          class="cc-concept-search-label">
           <span>Search</span>
           <ItemSelect
             :search="searchConcepts"
             placeholder="Search concepts…"
             @select="selectConcept" />
         </label>
+        <template v-else>
+          <span class="cc-concept-field-label">Search</span>
+          <span>Terminology search not supported</span>
+        </template>
       </div>
       <!-- One terminology may provide the same concepts through several APIs. -->
-      <div
-        v-if="sourceOptions.length > 1"
-        class="cc-concept-field cc-concept-field--source">
-        <label for="concept-api">Data source</label>
+      <div class="cc-concept-field cc-concept-field--source">
+        <label
+          v-if="sourceOptions.length > 1"
+          for="concept-api">
+          Data source
+        </label>
+        <span
+          v-else
+          class="cc-concept-field-label">
+          Data source
+        </span>
         <select
+          v-if="sourceOptions.length > 1"
           id="concept-api"
           class="cc-form-control"
           :value="source.option.index"
@@ -29,7 +43,17 @@
             {{ option.label }}
           </option>
         </select>
-        <small class="cc-concept-help">Results may differ between sources.</small>
+        <span
+          v-else
+          class="cc-concept-source-name"
+          :title="source.option.endpoint.url">
+          {{ source.option.label }}
+        </span>
+        <small
+          v-if="sourceOptions.length > 1"
+          class="cc-concept-help">
+          Results may differ between sources.
+        </small>
       </div>
     </div>
     <p
@@ -371,6 +395,7 @@ h4 {
   flex: 0 1 22rem;
 }
 .cc-concept-field--source > label,
+.cc-concept-field-label,
 .cc-concept-search-label > span {
   display: block;
   margin-bottom: var(--cc-space-xs);
@@ -394,6 +419,9 @@ h4 {
 .cc-concept-help {
   display: block;
   margin-top: var(--cc-space-xs);
+}
+.cc-concept-source-name {
+  display: block;
 }
 .cc-concept-workspace--split {
   display: flex;

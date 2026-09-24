@@ -188,6 +188,9 @@ describe("ConceptBrowser", () => {
     const wrapper = mountBrowser()
     await flushPromises()
 
+    expect(wrapper.text()).toContain("Data source")
+    expect(wrapper.text()).toContain("/api")
+    expect(wrapper.find("select").exists()).toBe(false)
     expect(registry.getTop).toHaveBeenCalledWith({
       scheme: expect.objectContaining({
         uri: "scheme:primary",
@@ -229,6 +232,19 @@ describe("ConceptBrowser", () => {
     expect(wrapper.get("[data-testid='item-select']").exists()).toBe(true)
     expect(wrapper.find("[data-testid='concept-tree']").exists()).toBe(false)
     expect(registry.getTop).not.toHaveBeenCalled()
+  })
+
+  it("shows when an API does not support search", async () => {
+    const registry = makeRegistry()
+    registry.has.suggest = false
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain("Search")
+    expect(wrapper.text()).toContain("Terminology search not supported")
+    expect(wrapper.find("[data-testid='item-select']").exists()).toBe(false)
   })
 
   it("switches the API used by the browser", async () => {
