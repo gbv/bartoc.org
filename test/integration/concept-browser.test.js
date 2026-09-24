@@ -428,7 +428,7 @@ describe("ConceptBrowser", () => {
     await flushPromises()
 
     expect(wrapper.get("[role='alert']").text()).toBe(
-      "This concept was not found in the selected data source.",
+      "The concept concept:missing was not found in the selected data source.",
     )
   })
 

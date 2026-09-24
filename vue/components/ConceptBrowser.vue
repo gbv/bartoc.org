@@ -282,7 +282,7 @@ async function selectConceptFromSource(uri) {
 
   if (!concepts?.[0]) {
     selectedConcept.value = null
-    conceptError.value = "This concept was not found in the selected data source."
+    conceptError.value = `The concept ${uri} was not found in the selected data source.`
     return
   }
 
