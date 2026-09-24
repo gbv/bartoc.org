@@ -134,38 +134,54 @@ describe("ConceptBrowser", () => {
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     utilsMocks.registryForScheme.mockReset()
     utilsMocks.sortConcepts.mockReset()
     navigateToUri.mockClear()
   })
 
-  it("shows API links when no registry can browse the scheme", async () => {
+  it("shows registered APIs when browsing is not supported", async () => {
     utilsMocks.registryForScheme.mockReturnValue(null)
 
     const wrapper = mountBrowser()
     await flushPromises()
 
-    expect(wrapper.text()).toContain("Access to this repository is possible via APIs")
+    expect(wrapper.text()).toContain("Search")
+    expect(wrapper.text()).toContain("Terminology search not supported")
+    expect(wrapper.text()).toContain("Data source")
     expect(wrapper.get("[data-testid='service-link']").text()).toBe("/api/")
     expect(utilsMocks.registryForScheme).toHaveBeenCalledWith(expect.objectContaining({
       uri: "scheme:primary",
     }))
   })
 
-  it("falls back to API links when the registry rejects every scheme URI", async () => {
+  it("times out and retries source loading", async () => {
+    vi.useFakeTimers()
     const registry = makeRegistry()
-    registry.getTop.mockRejectedValue(new Error("Unsupported scheme"))
+    registry.getTop.mockImplementation(() => new Promise(() => {}))
     utilsMocks.registryForScheme.mockReturnValue(registry)
 
     const wrapper = mountBrowser()
     await flushPromises()
 
-    expect(registry.getTop).toHaveBeenCalledTimes(2)
-    expect(wrapper.text()).toContain("Access to this repository is possible via APIs")
-    expect(wrapper.find("[data-testid='item-select']").exists()).toBe(false)
+    expect(wrapper.get("[role='status']").text()).toContain("Loading data source")
+
+    await vi.advanceTimersByTimeAsync(30000)
+    await flushPromises()
+
+    expect(wrapper.get("[role='alert']").text()).toContain(
+      "The data source /api cannot browse this vocabulary.",
+    )
+
+    registry.getTop.mockResolvedValue(topConcepts)
+    await wrapper.get("button").trigger("click")
+    await flushPromises()
+
+    expect(wrapper.find("[role='alert']").exists()).toBe(false)
+    expect(wrapper.get("[data-testid='concept-tree']").exists()).toBe(true)
   })
 
-  it("waits before showing the API fallback", async () => {
+  it("shows loading while a source loads", async () => {
     let finishLoading
     const registry = makeRegistry()
     registry.getTop.mockImplementation(() => new Promise(resolve => {
@@ -174,8 +190,10 @@ describe("ConceptBrowser", () => {
     utilsMocks.registryForScheme.mockReturnValue(registry)
 
     const wrapper = mountBrowser()
+    await Promise.resolve()
 
-    expect(wrapper.text()).not.toContain("Access to this repository is possible via APIs")
+    expect(wrapper.get("[role='status']").text()).toContain("Loading data source")
+    expect(wrapper.text()).not.toContain("Terminology search not supported")
 
     await Promise.resolve()
     finishLoading(topConcepts)

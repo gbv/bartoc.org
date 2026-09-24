@@ -1,4 +1,25 @@
 <template>
+  <p
+    v-if="loadingSource"
+    class="cc-concept-loading"
+    role="status">
+    <LoadingIndicator size="lg" />
+    Loading data source…
+  </p>
+  <p
+    v-if="sourceError || conceptError"
+    class="cc-form-feedback--invalid"
+    role="alert">
+    {{ sourceError || conceptError }}
+    <button
+      v-if="sourceError"
+      type="button"
+      class="cc-button cc-button-secondary cc-button-sm"
+      :disabled="loadingSource"
+      @click="retrySource">
+      Retry
+    </button>
+  </p>
   <div v-if="source">
     <div class="cc-concept-controls">
       <div class="cc-concept-field cc-concept-field--search">
@@ -57,12 +78,6 @@
         </small>
       </div>
     </div>
-    <p
-      v-if="sourceError || conceptError"
-      class="cc-form-feedback--invalid"
-      role="alert">
-      {{ sourceError || conceptError }}
-    </p>
     <!-- Keep the concept tree visible while reading the selected concept. -->
     <div
       v-if="showContent && (source.concepts.length || showDetails)"
@@ -97,26 +112,32 @@
       </section>
     </div>
   </div>
-  <div v-else-if="initialized && (scheme.API || []).length">
-    <p>
-      Access to this repository is possible via APIs
-      but inclusion in BARTOC has not been implemented yet:
-    </p>
-    <ul>
-      <li
-        v-for="endpoint in scheme.API"
-        :key="endpoint.url">
-        <ServiceLink
-          :scheme="scheme"
-          :endpoint="endpoint" />
-      </li>
-    </ul>
+  <!-- Show registered APIs when none of them can provide vocabulary search. -->
+  <div v-else-if="initialized && !sourceError && (scheme.API || []).length">
+    <div class="cc-concept-controls">
+      <div class="cc-concept-field cc-concept-field--search">
+        <span class="cc-concept-field-label">Search</span>
+        <span>Terminology search not supported</span>
+      </div>
+      <div class="cc-concept-field cc-concept-field--source">
+        <span class="cc-concept-field-label">Data source</span>
+        <ul>
+          <li
+            v-for="endpoint in scheme.API"
+            :key="endpoint.url">
+            <ServiceLink
+              :scheme="scheme"
+              :endpoint="endpoint" />
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue"
-import { ConceptTree, ItemSelect } from "jskos-vue"
+import { ConceptTree, ItemSelect, LoadingIndicator } from "jskos-vue"
 import jskos from "jskos-tools"
 import ConceptDetails from "./ConceptDetails.vue"
 import ServiceLink from "./ServiceLink.vue"
@@ -128,6 +149,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const sourceTimeout = 30000
 
 // Active API source and its vocabulary data.
 const source = shallowRef(null)
@@ -208,12 +231,12 @@ function endpointLabel(endpoint, index) {
 }
 
 // Combine the endpoint address with its registered API type and support status.
-function sourceOptionLabel(option) {
-  const apiType = apiTypeLabels.value[option.endpoint.type]
+function sourceOptionLabel(sourceOption) {
+  const apiType = apiTypeLabels.value[sourceOption.endpoint.type]
   const type = apiType ? ` (${apiType})` : ""
-  const status = option.supported ? "" : " — Not supported"
+  const status = sourceOption.supported ? "" : " — Not supported"
 
-  return `${option.label}${type}${status}`
+  return `${sourceOption.label}${type}${status}`
 }
 
 // API entries contain type URIs. Resolve their readable labels from BARTOC.
@@ -278,11 +301,11 @@ function schemeForEndpoint(uri, endpoint) {
 
 // A service may know the scheme by its main URI or by an identifier.
 // Try each URI until the selected endpoint accepts one.
-async function findSource(option) {
+async function findSource(sourceOption) {
   const possibleUris = [props.scheme.uri, ...(props.scheme.identifier || [])]
 
   for (const uri of possibleUris) {
-    const scheme = schemeForEndpoint(uri, option.endpoint)
+    const scheme = schemeForEndpoint(uri, sourceOption.endpoint)
     const registry = registryForScheme(scheme)
 
     if (!registry) {
@@ -315,7 +338,7 @@ async function findSource(option) {
     sortConcepts(concepts, props.scheme)
 
     return {
-      option,
+      option: sourceOption,
       registry,
       scheme,
       // A new array makes ConceptTree reset its top concepts.
@@ -326,14 +349,25 @@ async function findSource(option) {
   return null
 }
 
+// Stop waiting without cancelling the request still handled by cocoda-sdk.
+function withSourceTimeout(promise) {
+  let timeout
+  const expired = new Promise((_, reject) => {
+    timeout = setTimeout(reject, sourceTimeout)
+  })
+
+  return Promise.race([promise, expired])
+    .finally(() => clearTimeout(timeout))
+}
+
 // Find the source before replacing the current browser data.
-async function activateSource(option) {
+async function activateSource(sourceOption) {
   loadingSource.value = true
   sourceError.value = ""
   conceptError.value = ""
 
   try {
-    const nextSource = await findSource(option)
+    const nextSource = await withSourceTimeout(findSource(sourceOption)).catch(() => null)
 
     if (!nextSource) {
       return null
@@ -341,7 +375,7 @@ async function activateSource(option) {
 
     const selectedUri = selected.value?.uri
     source.value = nextSource
-    selectedSourceIndex.value = option.index
+    selectedSourceIndex.value = sourceOption.index
 
     if (selectedUri) {
       // Reload details because another source may return different data.
@@ -354,29 +388,52 @@ async function activateSource(option) {
   }
 }
 
-// Keep the previous endpoint if the new one cannot load the scheme.
-async function changeSource(event) {
-  const option = sourceOptions.value.find(({ index }) => index === Number(event.target.value))
+function setSourceError(sourceOption) {
+  selectedSourceIndex.value = sourceOption.index
+  sourceError.value = `The data source ${sourceOption.label} cannot browse this vocabulary.`
+}
 
-  if (!option) {
+// Select one source and keep the choice in the URL even when loading fails.
+async function selectSource(sourceOption) {
+  selectedSourceIndex.value = sourceOption.index
+  updateSourceUrl(sourceOption)
+
+  if (!await activateSource(sourceOption)) {
+    setSourceError(sourceOption)
+    return false
+  }
+
+  return true
+}
+
+// Read the selected option from the data source dropdown.
+async function changeSource(event) {
+  const sourceOption = sourceOptions.value.find(
+    ({ index }) => index === Number(event.target.value),
+  )
+
+  if (!sourceOption) {
     return
   }
 
-  // Keep the requested source selected even if it cannot load the vocabulary.
-  selectedSourceIndex.value = option.index
-  updateSourceUrl(option)
+  await selectSource(sourceOption)
+}
 
-  // Keep the current source when the new one cannot load the vocabulary.
-  if (!await activateSource(option)) {
-    sourceError.value = `The data source ${option.label} cannot browse this vocabulary.`
-    return
+// Retry the source that is still selected in the dropdown.
+async function retrySource() {
+  const sourceOption = sourceOptions.value.find(
+    ({ index }) => index === selectedSourceIndex.value,
+  )
+
+  if (sourceOption) {
+    await selectSource(sourceOption)
   }
 }
 
 // Store the endpoint URL so a shared link can open the same data source.
-function updateSourceUrl(option) {
+function updateSourceUrl(sourceOption) {
   const url = new URL(window.location.href)
-  url.searchParams.set("source", option.endpoint.url)
+  url.searchParams.set("source", sourceOption.endpoint.url)
   window.history.replaceState({}, "", url)
 }
 
@@ -414,22 +471,27 @@ onMounted(async () => {
     option => option.endpoint.url === requestedSource,
   )
   const supportedOptions = sourceOptions.value.filter(option => option.supported)
-  const options = requestedOption?.supported
+  const sourceCandidates = requestedOption?.supported
     ? [requestedOption, ...supportedOptions.filter(option => option !== requestedOption)]
     : supportedOptions
 
   try {
     // Try the requested endpoint first, then fall back to other working sources.
-    for (const option of options) {
-      if (await activateSource(option)) {
+    for (const sourceOption of sourceCandidates) {
+      if (await activateSource(sourceOption)) {
         if (selectedUri) {
           await selectConceptFromSource(selectedUri)
         }
-        if (requestedSource && option.endpoint.url !== requestedSource) {
-          updateSourceUrl(option)
+        if (requestedSource && sourceOption.endpoint.url !== requestedSource) {
+          updateSourceUrl(sourceOption)
         }
         break
       }
+    }
+
+    // A supported API may still be unavailable or not contain this vocabulary.
+    if (!source.value && sourceCandidates.length) {
+      setSourceError(sourceCandidates[0])
     }
   } finally {
     // Do not show the API fallback while the first source is still loading.
@@ -483,6 +545,11 @@ h4 {
 .cc-concept-help {
   display: block;
   margin-top: var(--cc-space-xs);
+}
+.cc-concept-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-xs);
 }
 .cc-concept-source-name {
   display: block;
