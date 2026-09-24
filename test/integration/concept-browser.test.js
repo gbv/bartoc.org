@@ -93,9 +93,15 @@ const ServiceLinkStub = {
 function makeRegistry(concepts = topConcepts, id = "registry") {
   return {
     id,
+    has: {
+      concepts: true,
+      suggest: true,
+      top: true,
+    },
     _jskos: {
       schemes: [{ VOCID: "voc-id" }],
     },
+    init: vi.fn(async () => {}),
     getTop: vi.fn(async () => concepts),
     getConcepts: vi.fn(async ({ concepts }) => concepts),
     suggest: vi.fn(async ({ search }) => [search, [], [], []]),
@@ -168,6 +174,7 @@ describe("ConceptBrowser", () => {
 
     expect(wrapper.text()).not.toContain("Access to this repository is possible via APIs")
 
+    await Promise.resolve()
     finishLoading(topConcepts)
     await flushPromises()
 
@@ -209,6 +216,19 @@ describe("ConceptBrowser", () => {
     expect(wrapper.get("[data-testid='details-uri']").text()).toBe("concept:alpha")
     expect(new URL(window.location.href).searchParams.get("uri")).toBe("concept:alpha")
 
+  })
+
+  it("uses search when an API has no top concepts", async () => {
+    const registry = makeRegistry()
+    registry.has.top = false
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser()
+    await flushPromises()
+
+    expect(wrapper.get("[data-testid='item-select']").exists()).toBe(true)
+    expect(wrapper.find("[data-testid='concept-tree']").exists()).toBe(false)
+    expect(registry.getTop).not.toHaveBeenCalled()
   })
 
   it("switches the API used by the browser", async () => {

@@ -206,8 +206,23 @@ async function findSource(option) {
       continue
     }
 
+    // Initialize the provider before checking which API features are available.
+    try {
+      await registry.init()
+    } catch {
+      continue
+    }
+
+    if (!registry.has.suggest && !registry.has.top) {
+      continue
+    }
+
+    // Search-only APIs do not provide top concepts for a tree.
+    const concepts = registry.has.top
+      ? await registry.getTop({ scheme }).catch(() => null)
+      : []
+
     // A failed URI may be known by another identifier.
-    const concepts = await registry.getTop({ scheme }).catch(() => null)
     if (!concepts) {
       continue
     }
