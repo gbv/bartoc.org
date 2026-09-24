@@ -353,7 +353,7 @@ h4 {
   max-width: 50%;
 }
 .cc-concept-field--source {
-  flex: 0 1 30rem;
+  flex: 0 1 22rem;
 }
 .cc-concept-field--source > label,
 .cc-concept-search-label > span {
@@ -363,6 +363,18 @@ h4 {
 }
 .cc-concept-search-label {
   display: block;
+}
+.cc-concept-field--search :deep(.jskos-vue-itemSuggest) {
+  height: auto;
+}
+.cc-concept-field--search :deep(.jskos-vue-itemSuggest > input) {
+  box-sizing: border-box;
+  min-height: 2.375rem;
+  padding: .375rem .75rem;
+  border: 1px solid var(--cc-border-color-control);
+  border-radius: var(--cc-radius-sm);
+  font-size: var(--cc-font-size-base);
+  line-height: 1.5;
 }
 .cc-concept-help {
   display: block;
@@ -388,7 +400,8 @@ h4 {
 }
 .cc-concept-tree,
 .cc-concept-details {
-  border: 1px solid var(--cc-border-color);
+  border: 1px solid var(--cc-border-color-strong);
+  background: var(--cc-color-surface);
 }
 .cc-concept-workspace--split .cc-concept-panel + .cc-concept-panel .cc-concept-details {
   border-left: 0;

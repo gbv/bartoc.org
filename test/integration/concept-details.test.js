@@ -16,28 +16,31 @@ const componentMocks = vi.hoisted(() => ({
       draggable: Boolean,
       fields: Object,
       itemListOptions: Object,
+      showAncestors: Boolean,
+      showBroader: Boolean,
+      showNarrower: Boolean,
     },
     emits: ["select"],
     template: `
       <section data-testid="item-details">
         <span data-testid="selected-name">{{ item.prefLabel?.en }}</span>
-        <button
-          v-for="ancestor in (item.ancestors || []).filter(Boolean).reverse()"
-          :key="ancestor.uri"
-          data-testid="select-ancestor"
-          @click="$emit('select', { item: ancestor })">
-          {{ ancestor.uri }}
-        </button>
-        <button
-          v-for="child in item.narrower || []"
-          :key="child.uri"
-          data-testid="select-narrower"
-          @click="$emit('select', { item: child })">
-          {{ child.uri }}
-        </button>
         <slot name="afterName" />
         <slot name="afterTabs" />
       </section>
+    `,
+  },
+  ItemList: {
+    props: ["items", "draggable", "itemNameOptions"],
+    emits: ["select"],
+    template: `
+      <div>
+        <button
+          v-for="item in items"
+          :key="item.uri"
+          @click="$emit('select', { item })">
+          {{ item.uri }}
+        </button>
+      </div>
     `,
   },
 }))
@@ -48,6 +51,7 @@ vi.mock("../../vue/utils.js", () => ({
 
 vi.mock("jskos-vue", () => ({
   ItemDetails: componentMocks.ItemDetails,
+  ItemList: componentMocks.ItemList,
 }))
 
 const scheme = {
@@ -135,6 +139,9 @@ describe("ConceptDetails", () => {
       flat: true,
       dropzone: false,
       draggable: false,
+      showAncestors: false,
+      showBroader: false,
+      showNarrower: false,
       fields: { prefLabel: false },
       itemListOptions: {
         draggable: false,
@@ -146,14 +153,16 @@ describe("ConceptDetails", () => {
     })
     expect(wrapper.text()).toContain("Hidden label")
     expect(wrapper.text()).toContain("History note")
+    expect(wrapper.get(".cc-concept-broader h5").text()).toBe("Broader concept")
+    expect(wrapper.get(".cc-concept-narrower h5").text()).toBe("Narrower concepts")
   })
 
   it("emits selected ancestors and narrower concepts", async () => {
     const { wrapper } = mountDetails()
     await flushPromises()
 
-    await wrapper.findAll("[data-testid='select-ancestor']")[0].trigger("click")
-    await wrapper.findAll("[data-testid='select-narrower']")[0].trigger("click")
+    await wrapper.get(".cc-concept-broader button").trigger("click")
+    await wrapper.get(".cc-concept-narrower button").trigger("click")
 
     expect(wrapper.emitted("update:concept")).toEqual([
       [ancestors[0]],

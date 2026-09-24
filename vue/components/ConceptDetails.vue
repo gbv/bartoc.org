@@ -9,6 +9,9 @@
     :draggable="false"
     :fields="detailFields"
     :item-list-options="itemListOptions"
+    :show-ancestors="false"
+    :show-broader="false"
+    :show-narrower="false"
     @select="emit('update:concept', $event.item)">
     <template #afterName>
       <a
@@ -22,13 +25,32 @@
       <ItemNotes
         :item="item"
         :properties="additionalProperties" />
+      <!-- Show the hierarchy after the metadata with clear relation labels. -->
+      <section
+        v-if="broaderConcepts.length"
+        class="cc-concept-relations cc-concept-broader">
+        <h5>{{ broaderConcepts.length === 1 ? "Broader concept" : "Broader concepts" }}</h5>
+        <ItemList
+          v-bind="itemListOptions"
+          :items="broaderConcepts"
+          @select="emit('update:concept', $event.item)" />
+      </section>
+      <section
+        v-if="narrowerConcepts.length"
+        class="cc-concept-relations cc-concept-narrower">
+        <h5>Narrower concepts</h5>
+        <ItemList
+          v-bind="itemListOptions"
+          :items="narrowerConcepts"
+          @select="emit('update:concept', $event.item)" />
+      </section>
     </template>
   </ItemDetails>
 </template>
 
 <script setup>
 import { computed, ref, watch } from "vue"
-import { ItemDetails } from "jskos-vue"
+import { ItemDetails, ItemList } from "jskos-vue"
 import ItemNotes from "./ItemNotes.vue"
 import { sortConcepts } from "../utils.js"
 import k10plusikt from "../../data/k10plus-ikt.json"
@@ -67,6 +89,19 @@ const additionalProperties = [
   "changeNote",
   "example",
 ]
+
+// Show the full path without repeating broader concepts returned separately.
+const broaderConcepts = computed(() => {
+  const ancestors = (item.value?.ancestors || []).filter(Boolean)
+  const broader = (item.value?.broader || [])
+    .filter(concept => (
+      concept && !ancestors.some(ancestor => ancestor.uri === concept.uri)
+    ))
+
+  return [...ancestors].reverse().concat(broader)
+})
+
+const narrowerConcepts = computed(() => item.value?.narrower || [])
 
 // Disable drag and drop and follow the terminology notation setting.
 const itemListOptions = computed(() => ({
@@ -123,8 +158,20 @@ watch(
 .cc-concept-item-details {
   --jskos-vue-fontSize-small: var(--cc-font-size-base);
 }
+.cc-concept-item-details :deep(.jskos-vue-itemDetails-list) {
+  padding-left: 0;
+  list-style: none;
+}
 .cc-concept-catalog-link {
   padding-left: var(--cc-space-sm);
+}
+.cc-concept-relations {
+  margin-top: var(--cc-space-md);
+}
+.cc-concept-relations h5 {
+  margin-bottom: var(--cc-space-xs);
+  font-size: var(--cc-font-size-base);
+  font-weight: var(--cc-font-weight-bold);
 }
 .cc-concept-item-details--hide-notation :deep(.jskos-vue-itemDetails-name .jskos-vue-itemName-notation) {
   display: none;
