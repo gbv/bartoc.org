@@ -138,7 +138,13 @@
           icon="language"
           label="Languages"
           :items="displayedLanguages"
-          list-style="inline" />
+          list-style="inline">
+          <template #item="{ item: language }">
+            <a :href="`/vocabularies/?filter=language:${language.code}`">
+              {{ language.label }}
+            </a>
+          </template>
+        </MetadataListRow>
 
         <MetadataRow
           v-if="item.extent"
@@ -444,7 +450,10 @@ const tabs = computed(() => [
 const activeTab = ref(0)
 const conceptBrowser = ref(null)
 const ready = ref(false)
-const displayedLanguages = ref([...(props.item.languages || [])])
+const displayedLanguages = ref((props.item.languages || []).map(code => ({
+  code,
+  label: code,
+})))
 const wikipediaLinks = ref([])
 const header = inject("header", {})
 const userCanAdd = computed(() => unref(header.userCanAdd) || false)
@@ -529,10 +538,13 @@ onMounted(async () => {
   ready.value = true
   window.addEventListener("hashchange", syncTabFromHash)
 
-  // Keep the stored codes unchanged and use full names only for display.
+  // Keep each language code for its search link and use the full name as label.
   const languageCodes = props.item.languages || []
   const languageNames = await loadLanguageNames(languageCodes)
-  displayedLanguages.value = languageCodes.map(code => languageNames[code] || code)
+  displayedLanguages.value = languageCodes.map(code => ({
+    code,
+    label: languageNames[code] || code,
+  }))
 
   wikipediaLinks.value = await loadWikipediaLinks(props.item.identifier)
 })

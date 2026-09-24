@@ -229,7 +229,7 @@ describe("TerminologyPage", () => {
     })
   })
 
-  it("shows full language names", async () => {
+  it("links full language names to vocabulary searches", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([
       { notation: ["en"], prefLabel: { en: "English" } },
       { notation: ["de"], prefLabel: { en: "German" } },
@@ -238,8 +238,11 @@ describe("TerminologyPage", () => {
     const wrapper = mountPage()
     await flushPromises()
 
-    expect(rowByLabel(wrapper, "Languages").findAll("li").map(value => value.text()))
-      .toEqual(["English", "German"])
+    const links = rowByLabel(wrapper, "Languages").findAll("a")
+    expect(links.map(link => [link.text(), link.attributes("href")])).toEqual([
+      ["English", "/vocabularies/?filter=language:en"],
+      ["German", "/vocabularies/?filter=language:de"],
+    ])
   })
 
   it("shows Wikipedia links below the homepage", async () => {
