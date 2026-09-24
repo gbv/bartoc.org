@@ -10,6 +10,7 @@ const utilsMocks = vi.hoisted(() => ({
 }))
 
 vi.mock("../../vue/utils.js", () => ({
+  apiTypesScheme: { uri: "http://bartoc.org/en/node/20002", API: [{ url: "/api/" }] },
   registryForScheme: utilsMocks.registryForScheme,
   sortConcepts: utilsMocks.sortConcepts,
 }))
@@ -38,6 +39,8 @@ const endpoints = [
   { url: "/first/", type: "http://bartoc.org/api-type/jskos" },
   { url: "/second/", type: "http://bartoc.org/api-type/jskos" },
 ]
+
+const apiTypesSchemeUri = "http://bartoc.org/en/node/20002"
 
 const ConceptDetailsStub = {
   props: ["concept", "registry"],
@@ -281,18 +284,57 @@ describe("ConceptBrowser", () => {
     expect(new URL(window.location.href).searchParams.get("source")).toBe("/second/")
   })
 
+  it("shows registered API types and disables unsupported sources", async () => {
+    const registry = makeRegistry()
+    const sru = { url: "/sru/", type: "http://bartoc.org/api-type/sru" }
+    const apiTypes = {
+      getConcepts: vi.fn(async () => [
+        { uri: endpoints[0].type, prefLabel: { en: "JSKOS API" } },
+        { uri: sru.type, prefLabel: { en: "SRU" } },
+      ]),
+    }
+
+    utilsMocks.registryForScheme.mockImplementation(currentScheme => {
+      if (currentScheme.uri === apiTypesSchemeUri) {
+        return apiTypes
+      }
+      return currentScheme.API[0].type === sru.type ? null : registry
+    })
+
+    const wrapper = mountBrowser({
+      scheme: {
+        ...scheme,
+        API: [sru, endpoints[0]],
+      },
+    })
+    await flushPromises()
+
+    const options = wrapper.findAll("option")
+    expect(options[0].text()).toBe("/first (JSKOS API)")
+    expect(options[1].text()).toBe("/sru (SRU) — Not supported")
+    expect(options[1].element.disabled).toBe(true)
+  })
+
   it("opens search results in the concept tree", async () => {
     const registry = makeRegistry()
+    registry.suggest.mockResolvedValue([
+      "alpha",
+      ["Alpha", "Beta"],
+      ["First result"],
+      ["concept:alpha", "concept:beta"],
+    ])
     utilsMocks.registryForScheme.mockReturnValue(registry)
     const wrapper = mountBrowser()
     await flushPromises()
 
     const itemSelect = wrapper.getComponent(ItemSelectStub)
-    await itemSelect.props("search")("alpha")
-    expect(registry.suggest).toHaveBeenCalledWith({
-      search: "alpha",
-      scheme: wrapper.getComponent(ConceptTreeStub).props("scheme"),
-    })
+    const result = await itemSelect.props("search")("alpha")
+    expect(result).toEqual([
+      "alpha",
+      ["Alpha", "Beta"],
+      ["First result", ""],
+      ["concept:alpha", "concept:beta"],
+    ])
 
     await wrapper.get("[data-testid='select-search-result']").trigger("click")
     await flushPromises()

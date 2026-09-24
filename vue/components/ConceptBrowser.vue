@@ -39,15 +39,16 @@
             v-for="option in sourceOptions"
             :key="option.index"
             :value="option.index"
+            :disabled="!option.supported"
             :title="option.endpoint.url">
-            {{ option.label }}
+            {{ sourceOptionLabel(option) }}
           </option>
         </select>
         <span
           v-else
           class="cc-concept-source-name"
           :title="source.option.endpoint.url">
-          {{ source.option.label }}
+          {{ sourceOptionLabel(source.option) }}
         </span>
         <small
           v-if="sourceOptions.length > 1"
@@ -115,9 +116,10 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue"
 import { ConceptTree, ItemSelect } from "jskos-vue"
+import jskos from "jskos-tools"
 import ConceptDetails from "./ConceptDetails.vue"
 import ServiceLink from "./ServiceLink.vue"
-import { registryForScheme, sortConcepts } from "../utils.js"
+import { apiTypesScheme, registryForScheme, sortConcepts } from "../utils.js"
 
 const props = defineProps({
   scheme: {
@@ -139,18 +141,21 @@ const selected = ref(null)
 const initialized = ref(false)
 const loadingSource = ref(false)
 const error = ref("")
+const apiTypeLabels = ref({})
 
 // Display options defined by the terminology.
 const display = computed(() => props.scheme.DISPLAY || {})
 
-// Only show endpoints for which cocoda-sdk has a concept provider.
+// Keep unsupported endpoints visible so users can see every registered source.
 const sourceOptions = computed(() => (props.scheme.API || [])
   .map((endpoint, index) => ({
     endpoint,
     index,
     label: endpointLabel(endpoint, index),
+    supported: Boolean(registryForScheme(schemeForEndpoint(props.scheme.uri, endpoint))),
   }))
-  .filter(({ endpoint }) => registryForScheme(schemeForEndpoint(props.scheme.uri, endpoint))))
+  // List usable sources first while keeping the registered order in each group.
+  .sort((first, second) => Number(second.supported) - Number(first.supported)))
 
 // Disable drag and drop in both the tree and its items.
 // Show concept notations unless the terminology asks to hide them.
@@ -163,11 +168,19 @@ const treeOptions = computed(() => ({
 }))
 
 // ItemSelect only receives search, so it does not add another concept tree.
-function searchConcepts(search) {
-  return source.value.registry.suggest({
+async function searchConcepts(search) {
+  const [query, labels = [], descriptions = [], uris = []] = await source.value.registry.suggest({
     search,
     scheme: source.value.scheme,
   })
+
+  // Keep all OpenSearch Suggest columns aligned when an API omits descriptions.
+  return [
+    query,
+    labels,
+    labels.map((_, index) => descriptions[index] || ""),
+    uris,
+  ]
 }
 
 // Remove the protocol and trailing slash to make source names easier to scan.
@@ -175,6 +188,35 @@ function endpointLabel(endpoint, index) {
   return endpoint.url?.replace(/^https?:\/\//, "").replace(/\/$/, "")
     || endpoint.type
     || `API ${index + 1}`
+}
+
+// Combine the endpoint address with its registered API type and support status.
+function sourceOptionLabel(option) {
+  const apiType = apiTypeLabels.value[option.endpoint.type]
+  const type = apiType ? ` (${apiType})` : ""
+  const status = option.supported ? "" : " — Not supported"
+
+  return `${option.label}${type}${status}`
+}
+
+// API entries contain type URIs. Resolve their readable labels from BARTOC.
+async function loadApiTypeLabels() {
+  const registry = registryForScheme(apiTypesScheme)
+  const types = [...new Set(
+    (props.scheme.API || []).map(endpoint => endpoint.type).filter(Boolean),
+  )]
+
+  if (!registry || !types.length) {
+    return
+  }
+
+  const concepts = await registry.getConcepts({
+    concepts: types.map(uri => ({ uri })),
+  }).catch(() => [])
+
+  apiTypeLabels.value = Object.fromEntries(
+    concepts.map(concept => [concept.uri, jskos.prefLabel(concept)]),
+  )
 }
 
 // A concept can be selected outside the tree, for example from search results,
@@ -343,6 +385,8 @@ watch(selected, concept => {
 })
 
 onMounted(async () => {
+  loadApiTypeLabels()
+
   // Read the selected concept and data source from the URL.
   const urlParams = new URLSearchParams(window.location.search)
   const selectedUri = urlParams.get("uri")
@@ -350,9 +394,10 @@ onMounted(async () => {
   const requestedOption = sourceOptions.value.find(
     option => option.endpoint.url === requestedSource,
   )
-  const options = requestedOption
-    ? [requestedOption, ...sourceOptions.value.filter(option => option !== requestedOption)]
-    : sourceOptions.value
+  const supportedOptions = sourceOptions.value.filter(option => option.supported)
+  const options = requestedOption?.supported
+    ? [requestedOption, ...supportedOptions.filter(option => option !== requestedOption)]
+    : supportedOptions
 
   try {
     // Try the requested endpoint first, then fall back to other working sources.
