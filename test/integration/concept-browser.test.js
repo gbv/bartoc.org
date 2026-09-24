@@ -284,6 +284,34 @@ describe("ConceptBrowser", () => {
     expect(new URL(window.location.href).searchParams.get("source")).toBe("/second/")
   })
 
+  it("hides old details when changing the source fails", async () => {
+    const first = makeRegistry()
+    const second = makeRegistry()
+    second.getTop.mockRejectedValue(new Error("Unavailable"))
+    utilsMocks.registryForScheme.mockImplementation(currentScheme =>
+      currentScheme.API[0].url === "/second/" ? second : first,
+    )
+
+    const wrapper = mountBrowser({ scheme: { ...scheme, API: endpoints } })
+    await flushPromises()
+    await wrapper.findAll("[data-testid='tree-concept']")[0].trigger("click")
+    const select = wrapper.get("select")
+    await select.setValue("1")
+    await flushPromises()
+
+    expect(select.element.value).toBe("1")
+    expect(wrapper.text()).toContain("The data source /second cannot browse this vocabulary.")
+    expect(wrapper.find("[data-testid='concept-details']").exists()).toBe(false)
+    expect(new URL(window.location.href).searchParams.get("source")).toBe("/second/")
+
+    await select.setValue("0")
+    await flushPromises()
+
+    expect(wrapper.find("[role='alert']").exists()).toBe(false)
+    expect(wrapper.find("[data-testid='concept-details']").exists()).toBe(true)
+    expect(new URL(window.location.href).searchParams.get("source")).toBe("/first/")
+  })
+
   it("shows registered API types and disables unsupported sources", async () => {
     const registry = makeRegistry()
     const sru = { url: "/sru/", type: "http://bartoc.org/api-type/sru" }

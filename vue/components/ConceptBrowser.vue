@@ -3,7 +3,7 @@
     <div class="cc-concept-controls">
       <div class="cc-concept-field cc-concept-field--search">
         <label
-          v-if="source.registry.has.suggest"
+          v-if="!sourceError && source.registry.has.suggest"
           class="cc-concept-search-label">
           <span>Search</span>
           <ItemSelect
@@ -13,7 +13,7 @@
         </label>
         <template v-else>
           <span class="cc-concept-field-label">Search</span>
-          <span>Terminology search not supported</span>
+          <span>{{ sourceError ? "Terminology search unavailable" : "Terminology search not supported" }}</span>
         </template>
       </div>
       <!-- One terminology may provide the same concepts through several APIs. -->
@@ -32,7 +32,7 @@
           v-if="sourceOptions.length > 1"
           id="concept-api"
           class="cc-form-control"
-          :value="source.option.index"
+          :value="selectedSourceIndex ?? source.option.index"
           :disabled="loadingSource"
           @change="changeSource">
           <option
@@ -58,15 +58,15 @@
       </div>
     </div>
     <p
-      v-if="error"
+      v-if="sourceError || conceptError"
       class="cc-form-feedback--invalid"
       role="alert">
-      {{ error }}
+      {{ sourceError || conceptError }}
     </p>
     <!-- Keep the concept tree visible while reading the selected concept. -->
     <div
-      v-if="source.concepts.length || selected?.uri"
-      :class="{ 'cc-concept-workspace--split': source.concepts.length && selected?.uri }">
+      v-if="showContent && (source.concepts.length || showDetails)"
+      :class="{ 'cc-concept-workspace--split': source.concepts.length && showDetails }">
       <section
         v-if="source.concepts.length"
         class="cc-concept-panel">
@@ -82,8 +82,9 @@
           :item-list-options="treeOptions" />
       </section>
       <section
-        v-if="selected?.uri"
-        class="cc-concept-panel">
+        v-if="showDetails"
+        class="cc-concept-panel"
+        :class="{ 'cc-concept-panel--details-only': !source.concepts.length }">
         <h4>Concept details</h4>
         <div class="cc-concept-details">
           <ConceptDetails
@@ -137,14 +138,30 @@ const conceptTree = ref(null)
 // Currently selected concept.
 const selected = ref(null)
 
-// State of API source loading.
+// True after the first source check has finished.
 const initialized = ref(false)
+
+// Hide old content while a source is being checked.
 const loadingSource = ref(false)
-const error = ref("")
+
+// The dropdown can show a failed source while the last working source stays loaded.
+const selectedSourceIndex = ref(null)
+
+// A source error means that the selected API cannot load this vocabulary.
+const sourceError = ref("")
+
+// A concept error means that the API works but cannot return the requested concept.
+const conceptError = ref("")
+
+// Readable labels for the API type URIs stored in the terminology record.
 const apiTypeLabels = ref({})
 
 // Display options defined by the terminology.
 const display = computed(() => props.scheme.DISPLAY || {})
+
+// Do not show content from the previous source while another source fails or loads.
+const showContent = computed(() => !loadingSource.value && !sourceError.value)
+const showDetails = computed(() => showContent.value && selected.value?.uri && !conceptError.value)
 
 // Keep unsupported endpoints visible so users can see every registered source.
 const sourceOptions = computed(() => (props.scheme.API || [])
@@ -240,11 +257,11 @@ async function selectConceptFromSource(uri) {
 
   if (!concepts?.[0]) {
     selected.value = null
-    error.value = "This concept was not found in the selected data source."
+    conceptError.value = "This concept was not found in the selected data source."
     return
   }
 
-  error.value = ""
+  conceptError.value = ""
   await selectConcept(concepts[0])
 }
 
@@ -312,7 +329,8 @@ async function findSource(option) {
 // Find the source before replacing the current browser data.
 async function activateSource(option) {
   loadingSource.value = true
-  error.value = ""
+  sourceError.value = ""
+  conceptError.value = ""
 
   try {
     const nextSource = await findSource(option)
@@ -323,6 +341,7 @@ async function activateSource(option) {
 
     const selectedUri = selected.value?.uri
     source.value = nextSource
+    selectedSourceIndex.value = option.index
 
     if (selectedUri) {
       // Reload details because another source may return different data.
@@ -343,15 +362,15 @@ async function changeSource(event) {
     return
   }
 
+  // Keep the requested source selected even if it cannot load the vocabulary.
+  selectedSourceIndex.value = option.index
+  updateSourceUrl(option)
+
   // Keep the current source when the new one cannot load the vocabulary.
   if (!await activateSource(option)) {
-    error.value = "This API cannot browse the vocabulary."
-    event.target.value = source.value.option.index
+    sourceError.value = `The data source ${option.label} cannot browse this vocabulary.`
     return
   }
-
-  // Make the selected source part of a shareable URL.
-  updateSourceUrl(option)
 }
 
 // Store the endpoint URL so a shared link can open the same data source.
@@ -379,7 +398,7 @@ function updateConceptUrl(concept) {
 
 watch(selected, concept => {
   if (concept?.uri) {
-    error.value = ""
+    conceptError.value = ""
   }
   updateConceptUrl(concept)
 })
@@ -476,6 +495,9 @@ h4 {
   flex: 1 1 0;
   flex-direction: column;
   min-width: 0;
+}
+.cc-concept-panel--details-only {
+  width: 50%;
 }
 .cc-concept-tree {
   flex: 1 1 auto;
