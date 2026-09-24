@@ -1,6 +1,25 @@
 <template>
+  <p
+    v-if="loading"
+    class="cc-concept-loading"
+    role="status">
+    <LoadingIndicator size="lg" />
+    Loading concept details…
+  </p>
+  <p
+    v-if="!loading && loadError"
+    class="cc-form-feedback--invalid"
+    role="alert">
+    {{ loadError }}
+    <button
+      type="button"
+      class="cc-button cc-button-secondary cc-button-sm"
+      @click="loadConcept(concept)">
+      Retry
+    </button>
+  </p>
   <ItemDetails
-    v-if="item?.uri"
+    v-if="!loading && item?.uri"
     class="cc-concept-item-details"
     :class="{ 'cc-concept-item-details--hide-notation': display.hideNotation }"
     :item="item"
@@ -50,7 +69,7 @@
 
 <script setup>
 import { computed, ref, watch } from "vue"
-import { ItemDetails, ItemList } from "jskos-vue"
+import { ItemDetails, ItemList, LoadingIndicator } from "jskos-vue"
 import ItemNotes from "./ItemNotes.vue"
 import { sortConcepts } from "../utils.js"
 import k10plusikt from "../../data/k10plus-ikt.json"
@@ -76,7 +95,15 @@ const props = defineProps({
 
 const emit = defineEmits(["update:concept"])
 
+// Stop waiting before cocoda-sdk's longer network timeout.
+const detailsTimeout = 30000
+
 const item = ref(null)
+const loading = ref(false)
+const loadError = ref("")
+
+// Each request gets an ID so late responses can be ignored.
+let loadId = 0
 
 // The preferred label is already shown as the details heading.
 const detailFields = { prefLabel: false }
@@ -122,27 +149,77 @@ const k10plus = computed(() => {
     : null
 })
 
-// ItemDetails reads ancestors and narrower concepts from the item itself.
-// Load these relations together with the complete concept.
+// Load the complete concept and the relations supported by the API.
+async function requestConcept(concept) {
+  const registry = props.registry
+  const scheme = props.scheme
+
+  // Replace the small search result with the complete concept.
+  const [details] = await registry.getConcepts({ concepts: [concept] })
+  const loaded = { ...concept, ...(details || {}), inScheme: [scheme] }
+
+  // Use embedded relations when an API has no hierarchy endpoints.
+  // Also keep them as a fallback when a hierarchy request fails.
+  const [ancestors, narrower] = await Promise.all([
+    registry.has?.ancestors === false
+      ? loaded.ancestors || []
+      : registry.getAncestors({ concept: loaded }).catch(() => loaded.ancestors || []),
+    registry.has?.narrower === false
+      ? loaded.narrower || []
+      : registry.getNarrower({ concept: loaded }).catch(() => loaded.narrower || []),
+  ])
+
+  return {
+    ...loaded,
+    ancestors,
+    narrower: sortConcepts(narrower, scheme),
+  }
+}
+
+// Stop updating the UI when a request takes too long.
+// The SDK request keeps running because cancelling it currently causes an error.
+function withTimeout(promise) {
+  let timeout
+
+  // Reject the promise after a timeout.
+  const expired = new Promise((_, reject) => {
+    timeout = setTimeout(reject, detailsTimeout)
+  })
+
+  // Use the first result: the API response or the timeout error.
+  // Promise.race does not cancel the request that is still running.
+  return Promise.race([promise, expired])
+    .finally(() => clearTimeout(timeout))
+}
+
+// Do not let an older response replace a newer selection.
 async function loadConcept(concept) {
+  const currentLoad = ++loadId
+
+  // Keep the small search result in case loading fails.
   item.value = concept
+  loading.value = Boolean(concept?.uri)
+  loadError.value = ""
 
   if (!concept?.uri) {
     return
   }
 
-  const [details] = await props.registry.getConcepts({ concepts: [concept] })
-  const loaded = { ...concept, ...(details || {}), inScheme: [props.scheme] }
+  try {
+    const loaded = await withTimeout(requestConcept(concept))
 
-  const [ancestors, narrower] = await Promise.all([
-    props.registry.getAncestors({ concept: loaded }),
-    props.registry.getNarrower({ concept: loaded }),
-  ])
-
-  item.value = {
-    ...loaded,
-    ancestors,
-    narrower: sortConcepts(narrower, props.scheme),
+    // The user may have selected another concept while this request was running.
+    if (currentLoad === loadId) {
+      item.value = loaded
+    }
+  } catch {
+    if (currentLoad === loadId) {
+      loadError.value = "Concept details could not be loaded."
+    }
+  } finally {
+    if (currentLoad === loadId) {
+      loading.value = false
+    }
   }
 }
 
@@ -157,6 +234,11 @@ watch(
 <style scoped>
 .cc-concept-item-details {
   --jskos-vue-fontSize-small: var(--cc-font-size-base);
+}
+.cc-concept-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-xs);
 }
 .cc-concept-item-details :deep(.jskos-vue-itemDetails-list) {
   padding-left: 0;

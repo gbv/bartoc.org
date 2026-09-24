@@ -43,6 +43,10 @@ const componentMocks = vi.hoisted(() => ({
       </div>
     `,
   },
+  LoadingIndicator: {
+    props: ["size"],
+    template: "<span data-testid=\"loading-indicator\" />",
+  },
 }))
 
 vi.mock("../../vue/utils.js", () => ({
@@ -52,6 +56,7 @@ vi.mock("../../vue/utils.js", () => ({
 vi.mock("jskos-vue", () => ({
   ItemDetails: componentMocks.ItemDetails,
   ItemList: componentMocks.ItemList,
+  LoadingIndicator: componentMocks.LoadingIndicator,
 }))
 
 const scheme = {
@@ -108,10 +113,16 @@ function mountDetails(props = {}) {
 describe("ConceptDetails", () => {
   afterEach(() => {
     utilsMocks.sortConcepts.mockClear()
+    vi.useRealTimers()
   })
 
   it("loads concept details, ancestors and narrower concepts", async () => {
     const { wrapper, registry } = mountDetails()
+
+    expect(wrapper.get("[role='status']").text()).toContain("Loading concept details")
+    expect(wrapper.getComponent(componentMocks.LoadingIndicator).props("size")).toBe("lg")
+    expect(wrapper.find("[data-testid='item-details']").exists()).toBe(false)
+
     await flushPromises()
 
     const loadedConcept = expect.objectContaining({
@@ -155,6 +166,57 @@ describe("ConceptDetails", () => {
     expect(wrapper.text()).toContain("History note")
     expect(wrapper.get(".cc-concept-broader h5").text()).toBe("Broader concept")
     expect(wrapper.get(".cc-concept-narrower h5").text()).toBe("Narrower concepts")
+    expect(wrapper.find("[role='status']").exists()).toBe(false)
+  })
+
+  it("uses embedded relations when hierarchy endpoints are unavailable", async () => {
+    const registry = createRegistry()
+    registry.has = { ancestors: false, narrower: false }
+    registry.getConcepts.mockResolvedValue([{ ancestors, narrower }])
+
+    mountDetails({ registry })
+    await flushPromises()
+
+    expect(registry.getAncestors).not.toHaveBeenCalled()
+    expect(registry.getNarrower).not.toHaveBeenCalled()
+    expect(utilsMocks.sortConcepts).toHaveBeenCalledWith(narrower, scheme)
+  })
+
+  it("keeps the selected concept when details cannot be loaded", async () => {
+    const registry = createRegistry()
+    registry.getConcepts.mockRejectedValue(new Error("Network error"))
+
+    const { wrapper } = mountDetails({ registry })
+    await flushPromises()
+
+    expect(wrapper.get("[data-testid='selected-name']").text())
+      .toBe("Selected before load")
+    expect(wrapper.get("[role='alert']").text())
+      .toContain("Concept details could not be loaded.")
+
+    registry.getConcepts.mockResolvedValue([details])
+    await wrapper.get("button").trigger("click")
+    await flushPromises()
+
+    expect(wrapper.find("[role='alert']").exists()).toBe(false)
+    expect(wrapper.get("[data-testid='selected-name']").text())
+      .toBe("Selected after load")
+  })
+
+  it("stops loading when concept details take too long", async () => {
+    vi.useFakeTimers()
+    const registry = createRegistry()
+    registry.getConcepts.mockReturnValue(new Promise(() => {}))
+
+    const { wrapper } = mountDetails({ registry })
+
+    expect(wrapper.get("[role='status']").exists()).toBe(true)
+
+    await vi.advanceTimersByTimeAsync(30000)
+
+    expect(wrapper.find("[role='status']").exists()).toBe(false)
+    expect(wrapper.get("[role='alert']").text())
+      .toContain("Concept details could not be loaded.")
   })
 
   it("emits selected ancestors and narrower concepts", async () => {
