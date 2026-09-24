@@ -1,6 +1,6 @@
 <template>
   <p
-    v-if="loadingSource"
+    v-if="isSourceLoading"
     class="cc-concept-loading"
     role="status">
     <LoadingIndicator size="lg" />
@@ -15,16 +15,16 @@
       v-if="sourceError"
       type="button"
       class="cc-button cc-button-secondary cc-button-sm"
-      :disabled="loadingSource"
+      :disabled="isSourceLoading"
       @click="retrySource">
       Retry
     </button>
   </p>
-  <div v-if="source">
+  <div v-if="activeSource">
     <div class="cc-concept-controls">
       <div class="cc-concept-field cc-concept-field--search">
         <label
-          v-if="!sourceError && source.registry.has.suggest"
+          v-if="!sourceError && activeSource.registry.has.suggest"
           class="cc-concept-search-label">
           <span>Search</span>
           <ItemSelect
@@ -53,8 +53,8 @@
           v-if="sourceOptions.length > 1"
           id="concept-api"
           class="cc-form-control"
-          :value="selectedSourceIndex ?? source.option.index"
-          :disabled="loadingSource"
+          :value="selectedSourceOption?.index ?? activeSource.sourceOption.index"
+          :disabled="isSourceLoading"
           @change="changeSource">
           <option
             v-for="option in sourceOptions"
@@ -68,8 +68,8 @@
         <span
           v-else
           class="cc-concept-source-name"
-          :title="source.option.endpoint.url">
-          {{ sourceOptionLabel(source.option) }}
+          :title="activeSource.sourceOption.endpoint.url">
+          {{ sourceOptionLabel(activeSource.sourceOption) }}
         </span>
         <small
           v-if="sourceOptions.length > 1"
@@ -80,40 +80,40 @@
     </div>
     <!-- Keep the concept tree visible while reading the selected concept. -->
     <div
-      v-if="showContent && (source.concepts.length || showDetails)"
-      :class="{ 'cc-concept-workspace--split': source.concepts.length && showDetails }">
+      v-if="showSourceContent && (activeSource.concepts.length || showConceptDetails)"
+      :class="{ 'cc-concept-workspace--split': activeSource.concepts.length && showConceptDetails }">
       <section
-        v-if="source.concepts.length"
+        v-if="activeSource.concepts.length"
         class="cc-concept-panel">
         <h4>Browse concepts</h4>
         <ConceptTree
-          :key="source.option.index"
+          :key="activeSource.sourceOption.index"
           ref="conceptTree"
-          v-model="selected"
+          v-model="selectedConcept"
           class="cc-concept-tree"
-          :concepts="source.concepts"
-          :registry="source.registry"
-          :scheme="source.scheme"
+          :concepts="activeSource.concepts"
+          :registry="activeSource.registry"
+          :scheme="activeSource.scheme"
           :item-list-options="treeOptions" />
       </section>
       <section
-        v-if="showDetails"
+        v-if="showConceptDetails"
         class="cc-concept-panel"
-        :class="{ 'cc-concept-panel--details-only': !source.concepts.length }">
+        :class="{ 'cc-concept-panel--details-only': !activeSource.concepts.length }">
         <h4>Concept details</h4>
         <div class="cc-concept-details">
           <ConceptDetails
-            :concept="selected"
-            :scheme="source.scheme"
-            :display="display"
-            :registry="source.registry"
+            :concept="selectedConcept"
+            :scheme="activeSource.scheme"
+            :display="displayOptions"
+            :registry="activeSource.registry"
             @update:concept="selectConcept" />
         </div>
       </section>
     </div>
   </div>
   <!-- Show registered APIs when none of them can provide vocabulary search. -->
-  <div v-else-if="initialized && !sourceError && (scheme.API || []).length">
+  <div v-else-if="sourcesInitialized && !sourceError && (scheme.API || []).length">
     <div class="cc-concept-controls">
       <div class="cc-concept-field cc-concept-field--search">
         <span class="cc-concept-field-label">Search</span>
@@ -152,23 +152,23 @@ const props = defineProps({
 
 const sourceTimeout = 30000
 
-// Active API source and its vocabulary data.
-const source = shallowRef(null)
+// The last source that loaded the vocabulary successfully.
+const activeSource = shallowRef(null)
 
 // ConceptTree component instance.
 const conceptTree = ref(null)
 
-// Currently selected concept.
-const selected = ref(null)
+// The concept selected in search, the tree, details, or the page URL.
+const selectedConcept = ref(null)
 
 // True after the first source check has finished.
-const initialized = ref(false)
+const sourcesInitialized = ref(false)
 
 // Hide old content while a source is being checked.
-const loadingSource = ref(false)
+const isSourceLoading = ref(false)
 
-// The dropdown can show a failed source while the last working source stays loaded.
-const selectedSourceIndex = ref(null)
+// The source requested by the user, even if it could not be loaded.
+const selectedSourceOption = shallowRef(null)
 
 // A source error means that the selected API cannot load this vocabulary.
 const sourceError = ref("")
@@ -180,11 +180,13 @@ const conceptError = ref("")
 const apiTypeLabels = ref({})
 
 // Display options defined by the terminology.
-const display = computed(() => props.scheme.DISPLAY || {})
+const displayOptions = computed(() => props.scheme.DISPLAY || {})
 
 // Do not show content from the previous source while another source fails or loads.
-const showContent = computed(() => !loadingSource.value && !sourceError.value)
-const showDetails = computed(() => showContent.value && selected.value?.uri && !conceptError.value)
+const showSourceContent = computed(() => !isSourceLoading.value && !sourceError.value)
+const showConceptDetails = computed(() => (
+  showSourceContent.value && selectedConcept.value?.uri && !conceptError.value
+))
 
 // Keep unsupported endpoints visible so users can see every registered source.
 const sourceOptions = computed(() => (props.scheme.API || [])
@@ -203,15 +205,15 @@ const treeOptions = computed(() => ({
   draggable: false,
   itemNameOptions: {
     draggable: false,
-    showNotation: !display.value.hideNotation,
+    showNotation: !displayOptions.value.hideNotation,
   },
 }))
 
 // ItemSelect only receives search, so it does not add another concept tree.
 async function searchConcepts(search) {
-  const [query, labels = [], descriptions = [], uris = []] = await source.value.registry.suggest({
+  const [query, labels = [], descriptions = [], uris = []] = await activeSource.value.registry.suggest({
     search,
-    scheme: source.value.scheme,
+    scheme: activeSource.value.scheme,
   })
 
   // Keep all OpenSearch Suggest columns aligned when an API omits descriptions.
@@ -263,7 +265,7 @@ async function loadApiTypeLabels() {
 // the details panel, or the page URL.
 // Update the selection first, then open the concept and its hierarchy in ConceptTree.
 async function selectConcept(concept) {
-  selected.value = concept
+  selectedConcept.value = concept
 
   if (concept?.uri) {
     await nextTick()
@@ -273,13 +275,13 @@ async function selectConcept(concept) {
 
 // Load a concept from the active source before showing its details.
 async function selectConceptFromSource(uri) {
-  const reference = { uri, inScheme: [source.value.scheme] }
-  const concepts = await source.value.registry
+  const reference = { uri, inScheme: [activeSource.value.scheme] }
+  const concepts = await activeSource.value.registry
     .getConcepts({ concepts: [reference] })
     .catch(() => null)
 
   if (!concepts?.[0]) {
-    selected.value = null
+    selectedConcept.value = null
     conceptError.value = "This concept was not found in the selected data source."
     return
   }
@@ -301,7 +303,7 @@ function schemeForEndpoint(uri, endpoint) {
 
 // A service may know the scheme by its main URI or by an identifier.
 // Try each URI until the selected endpoint accepts one.
-async function findSource(sourceOption) {
+async function resolveSource(sourceOption) {
   const possibleUris = [props.scheme.uri, ...(props.scheme.identifier || [])]
 
   for (const uri of possibleUris) {
@@ -338,7 +340,7 @@ async function findSource(sourceOption) {
     sortConcepts(concepts, props.scheme)
 
     return {
-      option: sourceOption,
+      sourceOption,
       registry,
       scheme,
       // A new array makes ConceptTree reset its top concepts.
@@ -362,40 +364,40 @@ function withSourceTimeout(promise) {
 
 // Find the source before replacing the current browser data.
 async function activateSource(sourceOption) {
-  loadingSource.value = true
+  isSourceLoading.value = true
   sourceError.value = ""
   conceptError.value = ""
 
   try {
-    const nextSource = await withSourceTimeout(findSource(sourceOption)).catch(() => null)
+    const resolvedSource = await withSourceTimeout(resolveSource(sourceOption)).catch(() => null)
 
-    if (!nextSource) {
+    if (!resolvedSource) {
       return null
     }
 
-    const selectedUri = selected.value?.uri
-    source.value = nextSource
-    selectedSourceIndex.value = sourceOption.index
+    const selectedUri = selectedConcept.value?.uri
+    activeSource.value = resolvedSource
+    selectedSourceOption.value = sourceOption
 
     if (selectedUri) {
       // Reload details because another source may return different data.
       await selectConceptFromSource(selectedUri)
     }
 
-    return nextSource
+    return resolvedSource
   } finally {
-    loadingSource.value = false
+    isSourceLoading.value = false
   }
 }
 
 function setSourceError(sourceOption) {
-  selectedSourceIndex.value = sourceOption.index
+  selectedSourceOption.value = sourceOption
   sourceError.value = `The data source ${sourceOption.label} cannot browse this vocabulary.`
 }
 
 // Select one source and keep the choice in the URL even when loading fails.
 async function selectSource(sourceOption) {
-  selectedSourceIndex.value = sourceOption.index
+  selectedSourceOption.value = sourceOption
   updateSourceUrl(sourceOption)
 
   if (!await activateSource(sourceOption)) {
@@ -421,12 +423,8 @@ async function changeSource(event) {
 
 // Retry the source that is still selected in the dropdown.
 async function retrySource() {
-  const sourceOption = sourceOptions.value.find(
-    ({ index }) => index === selectedSourceIndex.value,
-  )
-
-  if (sourceOption) {
-    await selectSource(sourceOption)
+  if (selectedSourceOption.value) {
+    await selectSource(selectedSourceOption.value)
   }
 }
 
@@ -444,7 +442,7 @@ function updateConceptUrl(concept) {
   if (concept?.uri) {
     url.searchParams.set("uri", concept.uri)
     if (sourceOptions.value.length > 1) {
-      url.searchParams.set("source", source.value.option.endpoint.url)
+      url.searchParams.set("source", activeSource.value.sourceOption.endpoint.url)
     }
   } else {
     url.searchParams.delete("uri")
@@ -453,14 +451,14 @@ function updateConceptUrl(concept) {
   window.history.replaceState({}, "", url)
 }
 
-watch(selected, concept => {
+watch(selectedConcept, concept => {
   if (concept?.uri) {
     conceptError.value = ""
   }
   updateConceptUrl(concept)
 })
 
-onMounted(async () => {
+async function initializeBrowser() {
   loadApiTypeLabels()
 
   // Read the selected concept and data source from the URL.
@@ -490,14 +488,16 @@ onMounted(async () => {
     }
 
     // A supported API may still be unavailable or not contain this vocabulary.
-    if (!source.value && sourceCandidates.length) {
+    if (!activeSource.value && sourceCandidates.length) {
       setSourceError(sourceCandidates[0])
     }
   } finally {
     // Do not show the API fallback while the first source is still loading.
-    initialized.value = true
+    sourcesInitialized.value = true
   }
-})
+}
+
+onMounted(initializeBrowser)
 </script>
 
 <style scoped>
