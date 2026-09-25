@@ -181,6 +181,24 @@ describe("ConceptBrowser", () => {
     expect(wrapper.get("[data-testid='concept-tree']").exists()).toBe(true)
   })
 
+  it("keeps source selection available when all sources fail", async () => {
+    const registry = makeRegistry()
+    registry.getTop.mockRejectedValue(new Error("Unavailable"))
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser({ scheme: { ...scheme, API: endpoints } })
+    await flushPromises()
+
+    const select = wrapper.get("select")
+    await select.setValue("1")
+    await flushPromises()
+
+    expect(select.element.value).toBe("1")
+    expect(wrapper.get(".cc-concept-field--source [role=alert]").text()).toContain(
+      "The data source /second cannot browse this vocabulary.",
+    )
+  })
+
   it("shows loading while a source loads", async () => {
     let finishLoading
     const registry = makeRegistry()

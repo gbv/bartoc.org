@@ -7,24 +7,16 @@
     Loading data source…
   </p>
   <p
-    v-if="sourceError || conceptError"
+    v-if="conceptError"
     class="cc-form-feedback--invalid"
     role="alert">
-    {{ sourceError || conceptError }}
-    <button
-      v-if="sourceError"
-      type="button"
-      class="cc-button cc-button-secondary cc-button-sm"
-      :disabled="isSourceLoading"
-      @click="retrySource">
-      Retry
-    </button>
+    {{ conceptError }}
   </p>
-  <div v-if="activeSource">
+  <div v-if="displayedSourceOption">
     <div class="cc-concept-controls">
       <div class="cc-concept-field cc-concept-field--search">
         <label
-          v-if="!sourceError && activeSource.registry.has.suggest"
+          v-if="!sourceError && activeSource?.registry.has.suggest"
           class="cc-concept-search-label">
           <span>Search</span>
           <ItemSelect
@@ -53,7 +45,7 @@
           v-if="sourceOptions.length > 1"
           id="concept-api"
           class="cc-form-control"
-          :value="selectedSourceOption?.index ?? activeSource.sourceOption.index"
+          :value="displayedSourceOption.index"
           :disabled="isSourceLoading"
           @change="changeSource">
           <option
@@ -68,14 +60,28 @@
         <span
           v-else
           class="cc-concept-source-name"
-          :title="activeSource.sourceOption.endpoint.url">
-          {{ sourceOptionLabel(activeSource.sourceOption) }}
+          :title="displayedSourceOption.endpoint.url">
+          {{ sourceOptionLabel(displayedSourceOption) }}
         </span>
         <small
           v-if="sourceOptions.length > 1"
           class="cc-concept-help">
           Results may differ between sources.
         </small>
+        <!-- Keep source recovery beside the source that caused the error. -->
+        <p
+          v-if="sourceError"
+          class="cc-form-feedback--invalid"
+          role="alert">
+          {{ sourceError }}
+          <button
+            type="button"
+            class="cc-button cc-button-secondary cc-button-sm"
+            :disabled="isSourceLoading"
+            @click="retrySource">
+            Retry
+          </button>
+        </p>
       </div>
     </div>
     <!-- Keep the concept tree visible while reading the selected concept. -->
@@ -182,8 +188,15 @@ const apiTypeLabels = ref({})
 // Display options defined by the terminology.
 const displayOptions = computed(() => props.scheme.DISPLAY || {})
 
+// Show the source chosen by the user, including one that failed to load.
+const displayedSourceOption = computed(() => (
+  selectedSourceOption.value || activeSource.value?.sourceOption
+))
+
 // Do not show content from the previous source while another source fails or loads.
-const showSourceContent = computed(() => !isSourceLoading.value && !sourceError.value)
+const showSourceContent = computed(() => (
+  Boolean(activeSource.value) && !isSourceLoading.value && !sourceError.value
+))
 const showConceptDetails = computed(() => (
   showSourceContent.value && selectedConcept.value?.uri && !conceptError.value
 ))
