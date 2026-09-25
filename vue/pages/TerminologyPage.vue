@@ -336,7 +336,6 @@
       v-if="item.API?.length"
       title="Content">
       <ConceptBrowser
-        ref="conceptBrowser"
         :scheme="conceptScheme" />
     </Tab>
 
@@ -448,7 +447,6 @@ const tabs = computed(() => [
   ...(hasEditions.value ? ["editions"] : []),
 ])
 const activeTab = ref(0)
-const conceptBrowser = ref(null)
 const ready = ref(false)
 const displayedLanguages = ref((props.item.languages || []).map(code => ({
   code,
@@ -517,10 +515,6 @@ function changeTab({ index }) {
   // jskos-vue-tabs emits changes while its Tab children are still registering.
   if (!ready.value) {
     return
-  }
-
-  if (tabs.value[index] !== "content") {
-    conceptBrowser.value?.selectConcept(null)
   }
 
   const hash = `#${tabs.value[index]}`

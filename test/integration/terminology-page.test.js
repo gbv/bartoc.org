@@ -475,10 +475,33 @@ describe("TerminologyPage", () => {
     selectConcept.mockClear()
     await headers[4].trigger("click")
     expect(window.location.hash).toBe("#editions")
-    expect(selectConcept).toHaveBeenCalledWith(null)
+    expect(selectConcept).not.toHaveBeenCalled()
 
     await headers[0].trigger("click")
     expect(window.location.hash).toBe("#about")
+  })
+
+  it("keeps the selected concept when switching away from Content", async () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/en/node/123?uri=concept%3Aselected#content",
+    )
+
+    const wrapper = mountPage()
+    await nextTick()
+
+    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
+    expect(headers[3].classes()).toContain("jskos-vue-tabs-header-item-active")
+
+    selectConcept.mockClear()
+
+    await headers[0].trigger("click")
+
+    expect(window.location.hash).toBe("#about")
+    expect(selectConcept).not.toHaveBeenCalled()
+    expect(new URL(window.location.href).searchParams.get("uri"))
+      .toBe("concept:selected")
   })
 
   it("opens the conditional Editions tab from the URL hash", async () => {
