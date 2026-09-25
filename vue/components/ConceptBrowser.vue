@@ -66,11 +66,6 @@
           :title="displayedSourceOption.endpoint.url">
           {{ sourceOptionLabel(displayedSourceOption) }}
         </span>
-        <small
-          v-if="sourceOptions.length > 1"
-          class="cc-concept-help">
-          Results may differ between sources.
-        </small>
         <!-- Keep source recovery beside the source that caused the error. -->
         <p
           v-if="sourceError"
@@ -94,7 +89,7 @@
       <section
         v-if="activeSource.concepts.length"
         class="cc-concept-panel">
-        <h4>Browse concepts</h4>
+        <label>Browse concepts</label>
         <ConceptTree
           :key="activeSource.sourceOption.index"
           ref="conceptTree"
@@ -109,7 +104,7 @@
         v-if="showConceptDetails"
         class="cc-concept-panel"
         :class="{ 'cc-concept-panel--details-only': !activeSource.concepts.length }">
-        <h4>Concept details</h4>
+        <label>Selected Concept</label>
         <div class="cc-concept-details">
           <ConceptDetails
             :concept="selectedConcept"
