@@ -266,7 +266,7 @@
         </MetadataListRow>
 
         <MetadataListRow
-          label="Services (API)"
+          label="Data sources"
           :items="item.API">
           <template #item="{ item: endpoint }">
             <ServiceLink

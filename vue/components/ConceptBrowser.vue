@@ -1,4 +1,7 @@
 <template>
+  <p>
+    Terminology content is not stored in BARTOC but retrieved live from data sources listed in BARTOC.
+  </p>
   <p
     v-if="isSourceLoading"
     class="cc-concept-loading"
