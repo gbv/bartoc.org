@@ -29,7 +29,7 @@
         </label>
         <template v-else>
           <span class="cc-concept-field-label">Search</span>
-          <span>{{ sourceError ? "Terminology search unavailable" : "Terminology search not supported" }}</span>
+          <span class="cc-message--warning">{{ sourceError ? "Terminology search unavailable!" : "Terminology search not supported!" }}</span>
         </template>
       </div>
       <!-- One terminology may provide the same concepts through several APIs. -->
@@ -69,9 +69,9 @@
         <!-- Keep source recovery beside the source that caused the error. -->
         <p
           v-if="sourceError"
-          class="cc-form-feedback--invalid"
+          class="cc-message--warning"
           role="alert">
-          {{ sourceError }}
+          Failed to load vocabulary!&nbsp;
           <button
             type="button"
             class="cc-button cc-button-secondary cc-button-sm"
@@ -175,7 +175,7 @@ const isSourceLoading = ref(false)
 const selectedSourceOption = shallowRef(null)
 
 // A source error means that the selected API cannot load this vocabulary.
-const sourceError = ref("")
+const sourceError = ref(false)
 
 // A concept error means that the API works but cannot return the requested concept.
 const conceptError = ref("")
@@ -376,7 +376,7 @@ function withSourceTimeout(promise) {
 // Find the source before replacing the current browser data.
 async function activateSource(sourceOption) {
   isSourceLoading.value = true
-  sourceError.value = ""
+  sourceError.value = false
   conceptError.value = ""
 
   try {
@@ -401,18 +401,14 @@ async function activateSource(sourceOption) {
   }
 }
 
-function setSourceError(sourceOption) {
-  selectedSourceOption.value = sourceOption
-  sourceError.value = `The data source ${sourceOption.label} cannot browse this vocabulary.`
-}
-
 // Select one source and keep the choice in the URL even when loading fails.
 async function selectSource(sourceOption) {
   selectedSourceOption.value = sourceOption
   updateSourceUrl(sourceOption)
 
   if (!await activateSource(sourceOption)) {
-    setSourceError(sourceOption)
+    selectedSourceOption.value = sourceOption
+    sourceError.value = true
     return false
   }
 
@@ -442,7 +438,7 @@ async function retrySource() {
 // Store the endpoint URL so a shared link can open the same data source.
 function updateSourceUrl(sourceOption) {
   const url = new URL(window.location.href)
-  url.searchParams.set("source", sourceOption.endpoint.url)
+  url.searchParams.set("endpoint", sourceOption.endpoint.url)
   window.history.replaceState({}, "", url)
 }
 
@@ -453,7 +449,7 @@ function updateConceptUrl(concept) {
   if (concept?.uri) {
     url.searchParams.set("uri", concept.uri)
     if (sourceOptions.value.length > 1) {
-      url.searchParams.set("source", activeSource.value.sourceOption.endpoint.url)
+      url.searchParams.set("endpoint", activeSource.value.sourceOption.endpoint.url)
     }
   } else {
     url.searchParams.delete("uri")
@@ -475,7 +471,7 @@ async function initializeBrowser() {
   // Read the selected concept and data source from the URL.
   const urlParams = new URLSearchParams(window.location.search)
   const selectedUri = urlParams.get("uri")
-  const requestedSource = urlParams.get("source")
+  const requestedSource = urlParams.get("endpoint")
   const requestedOption = sourceOptions.value.find(
     option => option.endpoint.url === requestedSource,
   )
@@ -500,7 +496,8 @@ async function initializeBrowser() {
 
     // A supported API may still be unavailable or not contain this vocabulary.
     if (!activeSource.value && sourceCandidates.length) {
-      setSourceError(sourceCandidates[0])
+      selectedSourceOption.value = sourceCandidates[0]
+      sourceError.value = true
     }
   } finally {
     // Do not show the API fallback while the first source is still loading.
@@ -512,9 +509,6 @@ onMounted(initializeBrowser)
 </script>
 
 <style scoped>
-h4 {
-  padding-top: var(--cc-row-padding-x);
-}
 .cc-concept-field {
   max-width: 30rem;
   margin-bottom: var(--cc-space-md);

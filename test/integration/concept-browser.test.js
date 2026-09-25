@@ -169,9 +169,7 @@ describe("ConceptBrowser", () => {
     await vi.advanceTimersByTimeAsync(30000)
     await flushPromises()
 
-    expect(wrapper.get("[role='alert']").text()).toContain(
-      "The data source /api cannot browse this vocabulary.",
-    )
+    expect(wrapper.get("[role='alert']").text()).toContain("Failed to load vocabulary!   Retry")
 
     registry.getTop.mockResolvedValue(topConcepts)
     await wrapper.get("button").trigger("click")
@@ -194,9 +192,7 @@ describe("ConceptBrowser", () => {
     await flushPromises()
 
     expect(select.element.value).toBe("1")
-    expect(wrapper.get(".cc-concept-field--source [role=alert]").text()).toContain(
-      "The data source /second cannot browse this vocabulary.",
-    )
+    expect(wrapper.get(".cc-concept-field--source [role=alert]").text()).toContain("Failed to load vocabulary!   Retry")
   })
 
   it("shows loading while a source loads", async () => {
@@ -317,7 +313,7 @@ describe("ConceptBrowser", () => {
       uri: "concept:alpha",
       inScheme: [tree.props("scheme")],
     })
-    expect(new URL(window.location.href).searchParams.get("source")).toBe("/second/")
+    expect(new URL(window.location.href).searchParams.get("endpoint")).toBe("/second/")
   })
 
   it("hides old details when changing the source fails", async () => {
@@ -336,16 +332,16 @@ describe("ConceptBrowser", () => {
     await flushPromises()
 
     expect(select.element.value).toBe("1")
-    expect(wrapper.text()).toContain("The data source /second cannot browse this vocabulary.")
+    expect(wrapper.text()).toContain("Failed to load")
     expect(wrapper.find("[data-testid='concept-details']").exists()).toBe(false)
-    expect(new URL(window.location.href).searchParams.get("source")).toBe("/second/")
+    expect(new URL(window.location.href).searchParams.get("endpoint")).toBe("/second/")
 
     await select.setValue("0")
     await flushPromises()
 
     expect(wrapper.find("[role='alert']").exists()).toBe(false)
     expect(wrapper.find("[data-testid='concept-details']").exists()).toBe(true)
-    expect(new URL(window.location.href).searchParams.get("source")).toBe("/first/")
+    expect(new URL(window.location.href).searchParams.get("endpoint")).toBe("/first/")
   })
 
   it("shows registered API types and disables unsupported sources", async () => {
@@ -451,7 +447,7 @@ describe("ConceptBrowser", () => {
   })
 
   it("opens the data source from the URL", async () => {
-    window.history.replaceState({}, "", "/vocabulary?source=%2Fsecond%2F")
+    window.history.replaceState({}, "", "/vocabulary?endpoint=%2Fsecond%2F")
     utilsMocks.registryForScheme.mockReturnValue(makeRegistry())
 
     const wrapper = mountBrowser({ scheme: { ...scheme, API: endpoints } })
