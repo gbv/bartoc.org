@@ -116,6 +116,61 @@ describe("ConceptDetails", () => {
     vi.useRealTimers()
   })
 
+  it("adds the active scheme when loading a concept without inScheme", async () => {
+    const registry = createRegistry()
+
+    mountDetails({ registry })
+    await flushPromises()
+
+    expect(registry.getConcepts).toHaveBeenCalledWith({
+      concepts: [
+        expect.objectContaining({
+          uri: "concept:selected",
+          inScheme: [scheme],
+        }),
+      ],
+    })
+  })
+
+  it("retries loading concept details with the active scheme", async () => {
+    const registry = createRegistry()
+
+    registry.getConcepts
+      .mockRejectedValueOnce(new Error("Network error"))
+      .mockResolvedValueOnce([details])
+
+    const { wrapper } = mountDetails({ registry })
+    await flushPromises()
+
+    expect(wrapper.get("[role='alert']").text())
+      .toContain("Concept details could not be loaded.")
+
+    expect(registry.getConcepts).toHaveBeenNthCalledWith(1, {
+      concepts: [
+        expect.objectContaining({
+          uri: "concept:selected",
+          inScheme: [scheme],
+        }),
+      ],
+    })
+
+    await wrapper.get("button").trigger("click")
+    await flushPromises()
+
+    expect(registry.getConcepts).toHaveBeenNthCalledWith(2, {
+      concepts: [
+        expect.objectContaining({
+          uri: "concept:selected",
+          inScheme: [scheme],
+        }),
+      ],
+    })
+
+    expect(wrapper.find("[role='alert']").exists()).toBe(false)
+    expect(wrapper.get("[data-testid='selected-name']").text())
+      .toBe("Selected after load")
+  })
+
   it("loads concept details, ancestors and narrower concepts", async () => {
     const { wrapper, registry } = mountDetails()
 

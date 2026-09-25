@@ -154,9 +154,20 @@ async function requestConcept(concept) {
   const registry = props.registry
   const scheme = props.scheme
 
-  // Replace the small search result with the complete concept.
-  const [details] = await registry.getConcepts({ concepts: [concept] })
-  const loaded = { ...concept, ...(details || {}), inScheme: [scheme] }
+  // Some providers need the active scheme to resolve and load the concept.
+  const reference = {
+    ...concept,
+    inScheme: [scheme],
+  }
+
+  const [details] = await registry.getConcepts({ concepts: [reference] })
+
+  // Ensure the concept has its scheme context before asking the provider for details.
+  const loaded = {
+    ...reference,
+    ...(details || {}),
+    inScheme: [scheme],
+  }
 
   // Use embedded relations when an API has no hierarchy endpoints.
   // Also keep them as a fallback when a hierarchy request fails.
