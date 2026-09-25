@@ -41,13 +41,10 @@ title: About
 
 <section class="partners">
   <h3>Partners</h3>
-  <p>
+  <p class="about__logos">
     <a href="https://terminology.services.base4nfdi.de/"><img src="/img/logo-ts4nfdi.png" alt="TS4NFDI" /></a>
-  
     <a href="https://portal.isko.org/"><img src="/img/logo-isko.png" alt="ISKO" /></a>
-    
     <a href="https://dans.knaw.nl/"><img src="/img/danslogo.png" alt="DANS" /></a>
-    
     <a href="https://vocabularyserver.com/"><img src="/img/logo-tematres-home.png" alt="TemaTres" /></a>
   </p>
 </section>
