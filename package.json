@@ -15,7 +15,7 @@
     "data": "npm run data:nkostype; make -C data",
     "validate": "jskos-validate",
     "jskos-convert": "cd $INIT_CWD; jskos-convert",
-    "dump": "node ./bin/dump.js update && ./bin/reports.sh && ./bin/stats.sh",
+    "dump": "node ./bin/dump.js update && node ./bin/reports.js && ./bin/stats.sh",
     "vue:serve": "vite",
     "build": "vite build",
     "express:serve": "NODE_ENV=development nodemon -L --ext js,mjs,cjs,json,ejs,ndjson server.js",

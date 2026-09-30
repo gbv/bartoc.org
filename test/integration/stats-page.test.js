@@ -4,11 +4,12 @@ import { describe, expect, it } from "vitest"
 import StatsPage from "../../vue/pages/StatsPage.vue"
 
 describe("StatsPage", () => {
-  it("renders the vocabulary count and report links", () => {
+  it("shows available reports with records", () => {
     const wrapper = mount(StatsPage, {
       props: {
         schemesCount: 2345,
-        reports: ["no-abstract.csv", "no-license.json"],
+        reports: ["no-abstract.csv", "no-license.json", "no-kos-type.json", "quality-stats.json"],
+        warningCounts: { "no-abstract": 1, "no-license": 2, "no-kos-type": 0 },
       },
     })
 
@@ -16,18 +17,13 @@ describe("StatsPage", () => {
     expect(wrapper.get("a[href='/vocabularies']").text()).toBe("2345 vocabularies")
     expect(wrapper.get("a[href='/data/reports/growth.csv']").exists()).toBe(true)
     expect(wrapper.get("a[href='/data/reports/stats.json']").exists()).toBe(true)
-    expect(wrapper.findAll(".stats-panel")).toHaveLength(4)
-    expect(wrapper.findAll(".stats-panel--summary")).toHaveLength(2)
-
-    const reportLinks = wrapper.findAll(".action-group a")
-    expect(reportLinks.map(link => link.text())).toEqual([
-      "no-abstract.csv",
-      "no-license.json",
-    ])
-    expect(reportLinks.map(link => link.attributes("href"))).toEqual([
-      "/data/reports/no-abstract.csv",
-      "/data/reports/no-license.json",
-    ])
+    expect(wrapper.text()).toContain("Missing abstract")
+    expect(wrapper.text()).toContain("Missing license")
+    expect(wrapper.text()).not.toContain("Missing KOS type")
+    expect(wrapper.get("a[href='/data/reports/no-abstract.csv']").text()).toBe("CSV")
+    expect(wrapper.get("a[href='/data/reports/no-license.json']").text()).toBe("JSON")
+    expect(wrapper.get("a[href='/data/reports/quality-stats.json']").text()).toBe("JSON")
+    expect(wrapper.find("a[href='/data/reports/no-kos-type.json']").exists()).toBe(false)
   })
 
   it("hides the daily report section when there are no reports", () => {
@@ -38,7 +34,5 @@ describe("StatsPage", () => {
     })
 
     expect(wrapper.text()).not.toContain("Daily Data Quality Reports")
-    expect(wrapper.find(".action-group").exists()).toBe(false)
-    expect(wrapper.findAll(".stats-panel")).toHaveLength(3)
   })
 })

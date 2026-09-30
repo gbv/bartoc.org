@@ -41,37 +41,105 @@
     </section>
 
     <section
-      v-if="reports.length"
+      v-if="qualityReports.length || summaryReports.length"
       class="stats-panel">
       <h4>
         Daily Data Quality Reports
       </h4>
-      <div class="action-group">
-        <a
-          v-for="file in reports"
-          :key="file"
-          :href="`/data/reports/${file}`"
-          class="cc-button cc-button-primary">
-          {{ file }}
-        </a>
+      <p class="reports-intro">
+        Review records that may need attention. Open a CSV file in a spreadsheet,
+        or use JSON for data processing.
+      </p>
+      <div
+        v-if="summaryReports.length"
+        class="report-summary">
+        <div
+          v-for="report in summaryReports"
+          :key="report.file"
+          class="report-summary-item">
+          <strong>{{ report.title }}</strong>
+          <span>{{ report.description }}</span>
+          <a
+            :href="'/data/reports/' + report.file"
+            :aria-label="report.title + ' (JSON, opens in a new tab)'"
+            target="_blank"
+            rel="noopener noreferrer">JSON</a>
+        </div>
+      </div>
+      <div class="report-list">
+        <article
+          v-for="report in qualityReports"
+          :key="report.id"
+          class="report-item">
+          <h5>{{ report.title }}</h5>
+          <p>{{ report.description }}</p>
+          <div class="report-links">
+            <a
+              v-for="format in report.formats"
+              :key="format"
+              :href="'/data/reports/' + report.id + '.' + format"
+              :aria-label="report.title + ' (' + format.toUpperCase() + ', opens in a new tab)'"
+              target="_blank"
+              rel="noopener noreferrer">
+              {{ format.toUpperCase() }}
+            </a>
+          </div>
+        </article>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
+import { computed } from "vue"
+
 defineOptions({ name: "StatsPage" })
 
-defineProps({
+const props = defineProps({
   schemesCount: {
     type: Number,
     required: true,
   },
+  // The server passes file names from data/reports, not the report contents.
   reports: {
     type: Array,
     default: () => [],
   },
+  warningCounts: {
+    type: Object,
+    default: null,
+  },
 })
+
+// Each ID is a file name without its extension. Add a clear title and description.
+const reportInfo = [
+  { id: "api-but-no-examples", title: "API without examples", description: "API endpoints with no notation examples." },
+  { id: "no-abstract", title: "Missing abstract", description: "Records without an abstract." },
+  { id: "no-extent", title: "Missing size", description: "Records without an extent or size." },
+  { id: "no-format", title: "Missing format", description: "Records without a format." },
+  { id: "no-homepage", title: "Missing homepage", description: "Records without a website URL." },
+  { id: "no-languages", title: "Missing languages", description: "Records without listed content languages." },
+  { id: "no-license", title: "Missing license", description: "Records without a license." },
+  { id: "no-publisher", title: "Missing publisher", description: "Records without a publisher." },
+  { id: "no-subject", title: "Missing subject", description: "Records without a subject classification." },
+  { id: "no-kos-type", title: "Missing KOS type", description: "Records without a specific knowledge organization system type." },
+]
+
+// Show only checks with records when counts are available.
+// Also show only files the server found. A report may have one or both formats.
+const qualityReports = computed(() => reportInfo
+  .filter(report => !props.warningCounts || props.warningCounts[report.id] > 0)
+  .map(report => ({
+    ...report,
+    formats: ["csv", "json"].filter(format => props.reports.includes(report.id + "." + format)),
+  }))
+  .filter(report => report.formats.length))
+
+// The summary reports are JSON only. Hide links to files that do not exist.
+const summaryReports = computed(() => [
+  { file: "validation-errors.json", title: "Validation errors", description: "Records that fail editor checks." },
+  { file: "quality-stats.json", title: "Report counts", description: "Record, error, and warning counts." },
+].filter(report => props.reports.includes(report.file)))
 </script>
 
 <style scoped>
@@ -90,6 +158,10 @@ defineProps({
   background: var(--cc-color-surface);
 }
 
+.stats-panel--summary {
+  flex: 1 1 0;
+}
+
 .stats-panel > :first-child {
   margin-top: 0;
 }
@@ -98,9 +170,58 @@ defineProps({
   margin-bottom: 0;
 }
 
-@media (min-width: 48rem) {
-  .stats-panel--summary {
-    flex: 1 1 0;
-  }
+.reports-intro,
+.report-item p,
+.report-summary-item span {
+  color: var(--cc-color-muted);
 }
+
+.report-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-sm) var(--cc-space-lg);
+  padding-block: var(--cc-space-md);
+  border-block: 1px solid var(--cc-border-color);
+}
+
+.report-summary-item {
+  display: flex;
+  flex: 1 1 20rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--cc-space-xs);
+}
+
+.report-list {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--cc-space-lg);
+}
+
+.report-item {
+  flex: 1 1 45%;
+  min-width: 0;
+  padding-block: var(--cc-space-md);
+  border-bottom: 1px solid var(--cc-border-color);
+}
+
+.report-item h5 {
+  margin: 0;
+}
+
+.report-item p {
+  margin: var(--cc-space-xs) 0;
+}
+
+.report-links {
+  display: flex;
+  gap: var(--cc-space-md);
+}
+
+.report-links a,
+.report-summary a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 </style>

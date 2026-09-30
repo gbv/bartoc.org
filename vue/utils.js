@@ -1,3 +1,5 @@
+import { isValidUrl, mediaThumbnailUrl, validatePublisher } from "../src/validation.js"
+export { isValidUrl, mediaThumbnailUrl, validatePublisher }
 import { cdk, addAllProviders } from "cocoda-sdk"
 import { franc } from "franc-min"
 import convert3To1 from "iso-639-3-to-1"
@@ -146,14 +148,6 @@ function trimStringArray(value) {
     .filter(v => !(typeof v === "string" && v === ""))
 }
 
-// Return the image URL from the media shape used by the editor.
-// The string fallback supports records created with the older issue example.
-export function mediaThumbnailUrl(media) {
-  if (typeof media?.thumbnail === "string") {
-    return media.thumbnail
-  }
-  return media?.thumbnail?.[0]?.id
-}
 
 // Keep the editor simple while storing a valid JSKOS/IIIF manifest.
 export function withMediaThumbnail(media = {}, url = "") {
@@ -616,32 +610,7 @@ export function createSubjectProvider(scheme) {
   }
 }
 
-// Check if a value is a valid HTTP(S) URL
-export function isValidUrl(value) {
-  try {
-    const url = new URL(value)
-    const isHttp = url.protocol === "http:" || url.protocol === "https:"
 
-    // URL accepts fully-qualified DNS names with a trailing dot. In metadata
-    // input this is usually sentence punctuation pasted together with the URL.
-    return isHttp && !url.hostname.endsWith(".")
-  } catch {
-    return false
-  }
-}
-
-// validate publisher object with fields `prefLabel.en` and `uri`
-export function validatePublisher(publisher) {
-  if (!publisher.prefLabel?.en?.trim()) {
-    return { message: "Publisher name is required!" }
-  }
-
-  if (!publisher.uri) {
-    return { message: "Publisher URI is required!" }
-  } else if (!isValidUrl(publisher.uri)) {
-    return { message: "Publisher URI must be a valid HTTP(S) URL!" }
-  }
-}
 
 /**
  * Compare two item lists by URI only.

@@ -1,10 +1,7 @@
 import {
-  isValidUrl,
   mediaThumbnailUrl,
-  validatePublisher,
   withMediaThumbnail,
 } from "../utils.js"
-import { normalizeUri } from "../../src/uri.js"
 import {
   CONCEPT_SCHEME_TYPE,
   hasMeaningfulValue,
@@ -12,6 +9,7 @@ import {
   kosTypeUris,
   versionNumber,
 } from "../../src/editions.js"
+import { validateItem } from "../../src/validation.js"
 
 export {
   CONCEPT_SCHEME_TYPE,
@@ -95,74 +93,10 @@ export function githubIssueUrl(title, body) {
 }
 
 export function itemError(item) {
-  const canDeriveTitle = versionNumber(item) && hasValidVersionOf(item)
-  if (!hasMeaningfulValue(item?.prefLabel) && !canDeriveTitle) {
-    return { message: "item must have at least a title!" }
-  }
-
-  if (hasSelfReference(item, "versionOf")) {
-    return { message: "A vocabulary cannot be an edition of itself." }
-  }
-
-  if (hasSelfReference(item, "basedOn")) {
-    return { message: "A vocabulary cannot be based on itself." }
-  }
-
-  const hasEnglishAbstract = item.definition?.en?.some(text => text?.trim())
-
-  if (!hasEnglishAbstract && !hasValidVersionOf(item)) {
-    return { message: "Please provide at least one English abstract." }
-  }
-
-  const hasInvalidEndpoint = item.API?.some((endpoint) => {
-    const url = endpoint?.url
-
-    if (url == null || (typeof url === "string" && !url.trim())) {
-      return false
-    }
-
-    return typeof url !== "string" || !isValidUrl(url)
-  })
-
-  if (hasInvalidEndpoint) {
-    return { message: "Enter a complete URL starting with http:// or https://." }
-  }
-
-  const hasInvalidMedia = item.media?.some((media) => {
-    const thumbnail = mediaThumbnailUrl(media)
-
-    if (thumbnail == null || (typeof thumbnail === "string" && !thumbnail.trim())) {
-      return false
-    }
-
-    return media?.type !== "Manifest"
-      || !Array.isArray(media.items)
-      || !Array.isArray(media.thumbnail)
-      || media.thumbnail[0]?.type !== "Image"
-      || typeof thumbnail !== "string"
-      || !isValidUrl(thumbnail)
-  })
-
-  if (hasInvalidMedia) {
-    return { message: "Enter a complete media URL starting with http:// or https://." }
-  }
-
-  if (item.publisher?.length) {
-    const publisherError = validatePublisher(item.publisher[0])
-    if (publisherError) {
-      return publisherError
-    }
-  }
+  const error = validateItem(item)[0]
+  return error ? { message: error.message } : undefined
 }
 
-function hasSelfReference(item, field) {
-  const uri = normalizeUri(item?.uri)
-  return Boolean(
-    uri &&
-    Array.isArray(item?.[field]) &&
-    item[field].some(reference => normalizeUri(reference?.uri) === uri),
-  )
-}
 
 export function cleanupItem(item) {
   // Vocabulary record should always be a ConceptScheme.

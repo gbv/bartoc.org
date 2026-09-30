@@ -361,11 +361,21 @@ app.get("/stats", async (req, res, next) => {
       const schemesCount = schemes._totalCount
       const reportsDir = `${__dirname}data/reports`
       const reports = fs.existsSync(reportsDir) ? fs.readdirSync(reportsDir) : []
+      let warningCounts = null
+      if (reports.includes("quality-stats.json")) {
+        try {
+          const statsFile = path.join(reportsDir, "quality-stats.json")
+          warningCounts = JSON.parse(fs.readFileSync(statsFile, "utf8")).warnings ?? null
+        } catch (error) {
+          console.warn("Could not read quality-stats.json:", error.message)
+        }
+      }
       render(req, res, "vue-page", {
         title: "Statistics",
         vuePage: "stats",
         vuePageProps: {
           reports,
+          warningCounts,
           schemesCount,
         },
       })
