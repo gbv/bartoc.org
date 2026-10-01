@@ -67,18 +67,17 @@ describe("quality reports", () => {
       const summary = JSON.parse(readFileSync(join(reports, "quality-stats.json")))
       const missingExtent = JSON.parse(readFileSync(join(reports, "no-extent.json")))
 
-      expect(validation.schemes).toEqual([
+      expect(validation.errors).toEqual([
         expect.objectContaining({
-          uri: bad.uri,
+          dimension: "id",
+          address: bad.uri,
           errors: [expect.objectContaining({ position: { jsonpointer: "/versionOf" } })],
         }),
       ])
-      expect(missingExtent.schemes.map(item => item.uri)).toEqual([bad.uri])
-      expect(missingExtent.schemes[0]).toHaveProperty("modified", null)
+      expect(missingExtent.errors.map(e => e.position.id)).toEqual([bad.uri])
       expect(summary).toMatchObject({
         records: 2,
         invalidRecords: 1,
-        validationErrors: 1,
         warnings: { "no-extent": 1, "no-kos-type": 0 },
       })
       expect(readFileSync(join(reports, "no-license.csv"), "utf8")).toContain("\"Good, title\"")

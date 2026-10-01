@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { createReadStream, existsSync, mkdirSync, writeFileSync } from "node:fs"
 import { createInterface } from "node:readline"
-import { qualityReportNames, qualityWarning } from "../src/quality.js"
+import { qualityChecks, qualityWarning } from "../src/quality.js"
 import { validateItem } from "../src/validation.js"
 
 /*
@@ -21,18 +21,21 @@ try {
 
   // Read the dump once for each quality report.
   // This keeps one report in memory.
-  for (const title of qualityReportNames()) {
+  for (const ruleId of qualityChecks.map(rule => rule.id)) {
     const schemes = []
     for await (const item of readItems(dump)) {
-      if (qualityWarning(item, title)) {
+      if (qualityWarning(item, ruleId)) {
         schemes.push(reportScheme(item))
       }
     }
 
-    warningCounts[title] = schemes.length
-    writeJson(`${reportsDirectory}/${title}.json`, { title, schemes })
+    warningCounts[ruleId] = schemes.length
+    writeJson(`${reportsDirectory}/${ruleId}.json`, {
+      types: [ruleId],
+      errors: schemes.map(s => ({ position: { id: s.uri } })),
+    })
 
-    // CSV columns: URI, English title, types, and modified date.
+    // CSV columns: URI, English ruleId, types, and modified date.
     const csv = schemes.map(({ uri, prefLabel, modified, type }) => [
       uri,
       prefLabel?.en,
@@ -40,39 +43,44 @@ try {
       modified,
     ].map(csvField).join(","))
     writeFileSync(
-      `${reportsDirectory}/${title}.csv`,
+      `${reportsDirectory}/${ruleId}.csv`,
       csv.length ? `${csv.join("\n")}\n` : "",
     )
   }
 
   // Read the dump again for validation errors and the total record count.
-  // Quality warnings were counted above.
-  const invalidRecords = []
-  let recordCount = 0
-  let errorCount = 0
+  const errors = []
+  const skipped = []
+  let totalFindings = 0
   for await (const item of readItems(dump)) {
-    recordCount++
-    let errors
+    const locator = { dimension: "id", address: item.uri }
+    totalFindings++
     try {
-      errors = validateItem(item)
+      const validationErrors = validateItem(item)
+      if (validationErrors.length) {
+        errors.push({ ...locator, errors: validationErrors })
+      }
     } catch (error) {
-      // A bad field type may make a validator fail. Keep that record visible.
-      errors = [{ message: `Validation could not run: ${error.message}` }]
-    }
-    if (errors.length) {
-      invalidRecords.push({ uri: item.uri, prefLabel: item.prefLabel, errors })
-      errorCount += errors.length
+      skipped.push(locator)
     }
   }
 
-  writeJson(`${reportsDirectory}/validation-errors.json`, {
-    title: "validation-errors",
-    schemes: invalidRecords,
-  })
+  const errorReport = {
+    title: "Validation errors",
+    description: "BARTOC records not passing mandatory integrity and quality constraints",
+    errors,
+    skipped,
+    totalSkipped: skipped.length,
+    totalErrors: errors.length,
+    totalCompliances: totalFindings - errors.length - skipped.length,
+    totalFindings,
+  }
+  writeJson(`${reportsDirectory}/validation-errors.json`, errorReport)
+
+  // Summary of all reports
   writeJson(`${reportsDirectory}/quality-stats.json`, {
-    records: recordCount,
-    invalidRecords: invalidRecords.length,
-    validationErrors: errorCount,
+    records: errorReport.totalFindings,
+    invalidRecords: errorReport.totalErrors,
     warnings: warningCounts,
   })
 } catch (error) {

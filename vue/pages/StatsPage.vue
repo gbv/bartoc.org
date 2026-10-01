@@ -92,6 +92,7 @@
 
 <script setup>
 import { computed } from "vue"
+import { qualityChecks } from "../../src/quality.js"
 
 defineOptions({ name: "StatsPage" })
 
@@ -111,27 +112,13 @@ const props = defineProps({
   },
 })
 
-// Each ID is a file name without its extension. Add a clear title and description.
-const reportInfo = [
-  { id: "api-but-no-examples", title: "API without examples", description: "API endpoints with no notation examples." },
-  { id: "no-abstract", title: "Missing abstract", description: "Records without an abstract." },
-  { id: "no-extent", title: "Missing size", description: "Records without an extent or size." },
-  { id: "no-format", title: "Missing format", description: "Records without a format." },
-  { id: "no-homepage", title: "Missing homepage", description: "Records without a website URL." },
-  { id: "no-languages", title: "Missing languages", description: "Records without listed content languages." },
-  { id: "no-license", title: "Missing license", description: "Records without a license." },
-  { id: "no-publisher", title: "Missing publisher", description: "Records without a publisher." },
-  { id: "no-subject", title: "Missing subject", description: "Records without a subject classification." },
-  { id: "no-kos-type", title: "Missing KOS type", description: "Records without a specific knowledge organization system type." },
-]
-
 // Show only checks with records when counts are available.
 // Also show only files the server found. A report may have one or both formats.
-const qualityReports = computed(() => reportInfo
+const qualityReports = computed(() => qualityChecks
   .filter(report => !props.warningCounts || props.warningCounts[report.id] > 0)
-  .map(report => ({
-    ...report,
-    formats: ["csv", "json"].filter(format => props.reports.includes(report.id + "." + format)),
+  .map(({ id, message, description }) => ({
+    id, title: message, description,
+    formats: ["csv", "json"].filter(format => props.reports.includes(id + "." + format)),
   }))
   .filter(report => report.formats.length))
 
