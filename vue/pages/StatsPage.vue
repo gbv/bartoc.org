@@ -116,8 +116,8 @@ const props = defineProps({
 // Also show only files the server found. A report may have one or both formats.
 const qualityReports = computed(() => qualityChecks
   .filter(report => !props.warningCounts || props.warningCounts[report.id] > 0)
-  .map(({ id, message, description }) => ({
-    id, title: message, description,
+  .map(({ id, title, description }) => ({
+    id, title, description,
     formats: ["csv", "json"].filter(format => props.reports.includes(id + "." + format)),
   }))
   .filter(report => report.formats.length))

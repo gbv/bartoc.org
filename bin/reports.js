@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import { createReadStream, existsSync, mkdirSync, writeFileSync } from "node:fs"
-import { createInterface } from "node:readline"
-import { qualityChecks, qualityWarning } from "../src/quality.js"
+import { readFileSync, mkdirSync, writeFileSync } from "node:fs"
+import { qualityChecks } from "../src/quality.js"
 import { validateItem } from "../src/validation.js"
+import { ErrorReport } from "../src/dvrf.js"
 
 /*
  * Create reports from an NDJSON dump: one vocabulary record on each line.
@@ -11,110 +11,86 @@ import { validateItem } from "../src/validation.js"
 const dump = process.argv[2] || "data/dumps/latest.ndjson"
 const reportsDirectory = "data/reports"
 
-try {
-  if (!existsSync(dump)) {
-    throw new Error(`Missing file: ${dump}`)
-  }
-  mkdirSync(reportsDirectory, { recursive: true })
+const items = readFileSync(dump, "utf8").split("\n").filter(Boolean).map(JSON.parse)
 
-  const warningCounts = {}
+mkdirSync(reportsDirectory, { recursive: true })
 
-  // Read the dump once for each quality report.
-  // This keeps one report in memory.
-  for (const ruleId of qualityChecks.map(rule => rule.id)) {
-    const schemes = []
-    for await (const item of readItems(dump)) {
-      if (qualityWarning(item, ruleId)) {
-        schemes.push(reportScheme(item))
-      }
-    }
+const warningCounts = {}
 
-    warningCounts[ruleId] = schemes.length
-    writeJson(`${reportsDirectory}/${ruleId}.json`, {
-      types: [ruleId],
-      errors: schemes.map(s => ({ position: { id: s.uri } })),
-    })
-
-    // CSV columns: URI, English ruleId, types, and modified date.
-    const csv = schemes.map(({ uri, prefLabel, modified, type }) => [
-      uri,
-      prefLabel?.en,
-      type.join("|"),
-      modified,
-    ].map(csvField).join(","))
-    writeFileSync(
-      `${reportsDirectory}/${ruleId}.csv`,
-      csv.length ? `${csv.join("\n")}\n` : "",
-    )
-  }
-
-  // Read the dump again for validation errors and the total record count.
-  const errors = []
-  const skipped = []
-  let totalFindings = 0
-  for await (const item of readItems(dump)) {
-    const locator = { dimension: "id", address: item.uri }
-    totalFindings++
-    try {
-      const validationErrors = validateItem(item)
-      if (validationErrors.length) {
-        errors.push({ ...locator, errors: validationErrors })
-      }
-    } catch (error) {
-      skipped.push(locator)
-    }
-  }
-
-  const errorReport = {
-    title: "Validation errors",
-    description: "BARTOC records not passing mandatory integrity and quality constraints",
-    errors,
-    skipped,
-    totalSkipped: skipped.length,
-    totalErrors: errors.length,
-    totalCompliances: totalFindings - errors.length - skipped.length,
-    totalFindings,
-  }
-  writeJson(`${reportsDirectory}/validation-errors.json`, errorReport)
-
-  // Summary of all reports
-  writeJson(`${reportsDirectory}/quality-stats.json`, {
-    records: errorReport.totalFindings,
-    invalidRecords: errorReport.totalErrors,
-    warnings: warningCounts,
+for (const rule of qualityChecks) {
+  const report = new ErrorReport({
+    title: rule.title,
+    description: rule.description,
+    types: [rule.id],
+    level: "warning",
+    errors: [],
+    skipped: [],
   })
-} catch (error) {
-  console.error(error.message)
-  process.exitCode = 1
+
+  const itemData = {}
+  for (const item of items) {
+    itemData[item.uri] = {
+      prefLabel: item.prefLabel ?? null,
+      modified: item.modified ?? null,
+      type: item.type,
+    }
+    const validator = item => rule.fails(item) ? [{
+      position: { jsonpointer: rule.jsonpointer },
+    }] : []
+    const context = { position: { id: item.uri } }
+    report.checkFinding(item, validator, context)
+  }
+
+  writeJson(`${reportsDirectory}/${rule.id}.json`, report.finish())
+  warningCounts[rule.id] = report.totalErrors
+
+  // CSV columns: URI, English rule.id, types, and modified date.
+  const csv = report.errors.map(({ position }) => {
+    const { prefLabel, type, modified } = itemData[position.id]
+    return [
+      position.id,
+      prefLabel?.en,
+      (type?.slice(1).map(uri => uri.replace(/.+#/, "")) ?? []).join("|"),
+      modified,
+    ].map(csvField).join(",")
+  },
+  )
+  writeFileSync(
+    `${reportsDirectory}/${rule.id}.csv`,
+    csv.length ? `${csv.join("\n")}\n` : "",
+  )
 }
 
-// Read one JSON record from each non-empty line of the dump.
-async function* readItems(file) {
-  const input = createInterface({ input: createReadStream(file), crlfDelay: Infinity })
-  let lineNumber = 0
-  for await (const line of input) {
-    lineNumber++
-    if (!line.trim()) {
-      continue
-    }
-    let item
-    try {
-      item = JSON.parse(line)
-    } catch (error) {
-      throw new Error(`${file}:${lineNumber}: ${error.message}`)
-    }
-    if (!item || typeof item !== "object" || Array.isArray(item)) {
-      throw new Error(`${file}:${lineNumber}: expected a record object`)
-    }
-    yield item
+// Generate validation report
+const report = new ErrorReport({
+  title: "Validation errors",
+  description: "BARTOC records not passing mandatory integrity and quality constraints",
+  errors: [],
+  skipped: [],
+})
+
+for (const item of items) {
+  const context = {
+    position: { id: item.uri },
+    message: `Record ${item.uri} does not conform to validation constraints`,
   }
+  report.checkFinding(item, validateItem, context)
 }
+
+writeJson(`${reportsDirectory}/validation-errors.json`, report.finish())
+
+// Summary of all reports
+writeJson(`${reportsDirectory}/quality-stats.json`, {
+  records: report.totalFindings,
+  invalidRecords: report.totalErrors,
+  warnings: warningCounts,
+})
 
 function writeJson(file, value) {
   writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`)
 }
 
-// Match jq @csv: quote text values and leave missing values empty.
+// quote text values and leave missing values empty.
 function csvField(value) {
   if (value == null) {
     return ""
@@ -123,14 +99,4 @@ function csvField(value) {
     return "\"" + value.replaceAll("\"", "\"\"") + "\""
   }
   return JSON.stringify(value)
-}
-
-// Omit the main JSKOS type and shorten the other type URIs.
-function reportScheme({ uri, prefLabel, modified, type }) {
-  return {
-    uri: uri ?? null,
-    prefLabel: prefLabel ?? null,
-    modified: modified ?? null,
-    type: Array.isArray(type) ? type.slice(1).map(value => String(value).replace(/.+#/, "")) : [],
-  }
 }
