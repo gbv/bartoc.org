@@ -34,39 +34,36 @@
       </div>
       <!-- One terminology may provide the same concepts through several APIs. -->
       <div class="cc-concept-field cc-concept-field--source">
-        <label
-          v-if="sourceOptions.length > 1"
-          for="concept-api">
-          Data source
-        </label>
-        <span
-          v-else
-          class="cc-concept-field-label">
-          Data source
-        </span>
-        <select
-          v-if="sourceOptions.length > 1"
-          id="concept-api"
-          class="cc-form-control"
-          :value="displayedSourceOption.index"
-          :disabled="isSourceLoading"
-          @change="changeSource">
-          <option
-            v-for="option in sourceOptions"
-            :key="option.index"
-            :value="option.index"
-            :disabled="!option.supported"
-            :title="option.endpoint.url">
-            {{ sourceOptionLabel(option) }}
-          </option>
-        </select>
-        <span
-          v-else
-          class="cc-concept-source-name"
-          :title="displayedSourceOption.endpoint.url">
-          {{ sourceOptionLabel(displayedSourceOption) }}
-        </span>
-        <!-- Keep source recovery beside the source that caused the error. -->
+        <div v-if="sourceOptions.length > 1">
+          <label
+            for="concept-api">
+            Data source
+          </label>
+          <select
+            id="concept-api"
+            class="cc-form-control"
+            :value="displayedSourceOption.index"
+            :disabled="isSourceLoading"
+            @change="changeSource">
+            <option
+              v-for="option in sourceOptions"
+              :key="option.index"
+              :value="option.index"
+              :disabled="!option.supported"
+              :title="option.endpoint.url">
+              {{ sourceOptionLabel(option) }}
+            </option>
+          </select>
+        </div>
+        <div v-else>
+          <span
+            class="cc-concept-field-label">
+            Data source
+          </span>
+          <ServiceLink
+            :scheme="scheme"
+            :endpoint="displayedSourceOption.endpoint" />
+        </div>
         <p
           v-if="sourceError"
           class="cc-message--warning"
@@ -247,9 +244,8 @@ function endpointLabel(endpoint, index) {
 function sourceOptionLabel(sourceOption) {
   const apiType = apiTypeLabels.value[sourceOption.endpoint.type]
   const type = apiType ? ` (${apiType})` : ""
-  const status = sourceOption.supported ? "" : " — Not supported"
 
-  return `${sourceOption.label}${type}${status}`
+  return `${sourceOption.label}${type}`
 }
 
 // API entries contain type URIs. Resolve their readable labels from BARTOC.

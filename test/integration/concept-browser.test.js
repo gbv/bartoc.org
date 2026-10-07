@@ -371,7 +371,7 @@ describe("ConceptBrowser", () => {
 
     const options = wrapper.findAll("option")
     expect(options[0].text()).toBe("/first (JSKOS API)")
-    expect(options[1].text()).toBe("/sru (SRU) — Not supported")
+    expect(options[1].text()).toBe("/sru (SRU)")
     expect(options[1].element.disabled).toBe(true)
   })
 
