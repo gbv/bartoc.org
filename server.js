@@ -3,7 +3,6 @@ import utils from "./src/utils.js"
 import { clone } from "./src/utils.js"
 import path from "path"
 import jskos from "jskos-tools"
-import fs from "fs"
 import querystring from "querystring"
 import {
   rdfContentType,
@@ -15,6 +14,7 @@ import { deriveEditionRecord, hasValidVersionOf } from "./src/editions.js"
 import child_process from "child_process"
 import portfinder from "portfinder"
 import { getConceptsInBatches } from "./src/backend.js"
+import { ReportsDirectory } from "./src/dvrf.js"
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
 
@@ -355,28 +355,16 @@ async function buildPresentationView(storedItem) {
 }
 
 // Statistics
+const reports = new ReportsDirectory(`${__dirname}data/reports`)
 app.get("/stats", async (req, res, next) => {
   backend.getSchemes({ params: { limit: 1 } })
     .then(schemes => {
-      const schemesCount = schemes._totalCount
-      const reportsDir = `${__dirname}data/reports`
-      const reports = fs.existsSync(reportsDir) ? fs.readdirSync(reportsDir) : []
-      let warningCounts = null
-      if (reports.includes("quality-stats.json")) {
-        try {
-          const statsFile = path.join(reportsDir, "quality-stats.json")
-          warningCounts = JSON.parse(fs.readFileSync(statsFile, "utf8")).warnings ?? null
-        } catch (error) {
-          console.warn("Could not read quality-stats.json:", error.message)
-        }
-      }
       render(req, res, "vue-page", {
         title: "Statistics",
         vuePage: "stats",
         vuePageProps: {
-          reports,
-          warningCounts,
-          schemesCount,
+          reports: reports.getReports(),
+          schemesCount: schemes._totalCount,
         },
       })
     })

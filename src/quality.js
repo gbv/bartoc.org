@@ -1,7 +1,3 @@
-// Each rule has a report name, a message, a JSON Pointer, and a test.
-// The test is true when the record needs a warning.
-// Each ID is a file name without its extension. Add a clear title and description.
-
 // Additional Constraints
 export const qualityChecks = [
   { id: "no-extent",

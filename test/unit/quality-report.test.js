@@ -65,7 +65,6 @@ describe("quality reports", () => {
 
       const reports = join(directory, "data/reports")
       const validation = JSON.parse(readFileSync(join(reports, "validation-errors.json")))
-      const summary = JSON.parse(readFileSync(join(reports, "quality-stats.json")))
       const missingExtent = JSON.parse(readFileSync(join(reports, "no-extent.json")))
 
       expect(validation.errors).toEqual([{
@@ -77,11 +76,6 @@ describe("quality reports", () => {
         }],
       }])
       expect(missingExtent.errors.map(e => e.position.id)).toEqual([bad.uri])
-      expect(summary).toMatchObject({
-        records: 2,
-        invalidRecords: 1,
-        warnings: { "no-extent": 1, "no-kos-type": 0 },
-      })
       expect(readFileSync(join(reports, "no-license.csv"), "utf8")).toContain("\"Good, title\"")
       expect(readFileSync(join(reports, "no-extent.csv"), "utf8")).toContain(JSON.stringify(bad.uri) + ",")
     } finally {

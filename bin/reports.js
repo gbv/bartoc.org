@@ -1,21 +1,17 @@
 #!/usr/bin/env node
-import { readFileSync, mkdirSync, writeFileSync } from "node:fs"
+import { readFileSync, writeFileSync } from "node:fs"
 import { qualityChecks } from "../src/quality.js"
 import { validateItem } from "../src/validation.js"
-import { ErrorReport } from "../src/dvrf.js"
+import { ErrorReport, ReportsDirectory } from "../src/dvrf.js"
 
 /*
  * Create reports from an NDJSON dump: one vocabulary record on each line.
  * Pass the dump file as the first argument, or use the latest dump.
  */
 const dump = process.argv[2] || "data/dumps/latest.ndjson"
-const reportsDirectory = "data/reports"
+const reports = new ReportsDirectory("data/reports")
 
 const items = readFileSync(dump, "utf8").split("\n").filter(Boolean).map(JSON.parse)
-
-mkdirSync(reportsDirectory, { recursive: true })
-
-const warningCounts = {}
 
 for (const rule of qualityChecks) {
   const report = new ErrorReport({
@@ -41,8 +37,7 @@ for (const rule of qualityChecks) {
     report.checkFinding(item, validator, context)
   }
 
-  writeJson(`${reportsDirectory}/${rule.id}.json`, report.finish())
-  warningCounts[rule.id] = report.totalErrors
+  reports.writeReport(report, rule.id)
 
   // CSV columns: URI, English rule.id, types, and modified date.
   const csv = report.errors.map(({ position }) => {
@@ -56,7 +51,7 @@ for (const rule of qualityChecks) {
   },
   )
   writeFileSync(
-    `${reportsDirectory}/${rule.id}.csv`,
+    `${reports.path}/${rule.id}.csv`,
     csv.length ? `${csv.join("\n")}\n` : "",
   )
 }
@@ -77,18 +72,7 @@ for (const item of items) {
   report.checkFinding(item, validateItem, context)
 }
 
-writeJson(`${reportsDirectory}/validation-errors.json`, report.finish())
-
-// Summary of all reports
-writeJson(`${reportsDirectory}/quality-stats.json`, {
-  records: report.totalFindings,
-  invalidRecords: report.totalErrors,
-  warnings: warningCounts,
-})
-
-function writeJson(file, value) {
-  writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`)
-}
+reports.writeReport(report, "validation-errors")
 
 // quote text values and leave missing values empty.
 function csvField(value) {

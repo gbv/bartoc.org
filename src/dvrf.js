@@ -1,3 +1,5 @@
+import fs from "node:fs"
+
 /**
  * An error report in Data Validation Report Format (DVRF).
  */
@@ -67,5 +69,73 @@ export class ErrorReport {
     }
 
     return this
+  }
+}
+
+/**
+ * A directory of error reports stored as files.
+ */
+export class ReportsDirectory {
+  constructor(path) {
+    this.path = path
+    this.reports = {}
+    fs.mkdirSync(path, { recursive: true })
+    for (let id of this._files()) {
+      this.readReport(id)
+    }
+  }
+
+  readReport(id) {
+    const file = `${this.path}/${id}.json`
+    const report = JSON.parse(fs.readFileSync(file))
+    this._add(id, report)
+  }
+
+  writeReport(report, id) {
+    const file = `${this.path}/${id}.json`
+    const json = JSON.stringify(report.finish(), null, 2)
+    fs.writeFileSync(file, json)
+    this._add(id, report)
+  }
+
+  getReports() {
+    this._sync()
+    return this.reports
+  }
+
+  _add(id, report) {
+    report.issued = this._issued(id)
+    report.formats = ["json"]
+    if (fs.existsSync(`${this.path}/${id}.csv`)) {
+      report.formats.push("csv")
+    }
+    this.reports[id] = report
+  }
+
+  _files() {
+    return fs.readdirSync(this.path)
+      .filter(id => /\.json/.test(id) && !/stats/.test(id))
+      .map(id => id.slice(0,-5))
+  }
+
+
+  _issued(id) {
+    return fs.statSync(`${this.path}/${id}.json`).mtime
+  }
+
+  _sync() {
+    const files = this._files()
+
+    for (let id in this.reports) {
+      if (!(files.includes(id))) {
+        delete this.reports[id]
+      }
+    }
+
+    for (let id of files) {
+      if (!(this.reports[id]?.issued >= this._issued(id))) {
+        this.readReport(id)
+      }
+    }
   }
 }
