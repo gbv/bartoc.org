@@ -9,7 +9,7 @@
     :active-path="activePath"
     :user-can-add="userCanAdd"
     edit-url="/edit"
-    add-label="add">
+    add-label="Add">
     <template #user-status>
       <UserStatus redirect />
     </template>
@@ -46,9 +46,10 @@ const navLinks = configuredMenu.map(item => ({
 const utilityLinks = [
   { href: "/contact", label: "Contact & Editors" },
 ]
-const activePath = computed(() => (
-  props.activePath || providedHeader.activePath || window.location.pathname
-))
+const activePath = computed(() => {
+  const path = props.activePath || providedHeader.activePath || window.location.pathname
+  return path.replace(/\/+$/, "") || "/"
+})
 const userCanAdd = computed(() => (
   props.userCanAdd ?? unref(providedHeader.userCanAdd) ?? false
 ))

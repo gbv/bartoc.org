@@ -39,8 +39,9 @@ const auth = computed(() => token.value ? { token: token.value } : null)
 const userCanAdd = ref(false)
 
 watch(token, async currentToken => {
+  // Clear the previous login's permission while checking the new token.
+  userCanAdd.value = false
   if (!currentToken) {
-    userCanAdd.value = false
     return
   }
 
@@ -48,9 +49,14 @@ watch(token, async currentToken => {
   const headers = { Authorization: `Bearer ${currentToken}` }
   try {
     const response = await fetch(url, { headers })
-    userCanAdd.value = response.ok
+    // Ignore a response if the user has logged out or changed tokens.
+    if (token.value === currentToken) {
+      userCanAdd.value = response.ok
+    }
   } catch {
-    userCanAdd.value = false
+    if (token.value === currentToken) {
+      userCanAdd.value = false
+    }
   }
 }, { immediate: true })
 

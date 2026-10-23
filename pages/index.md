@@ -3,7 +3,7 @@ title:
 ---
 
 <div class="homepage">
-  <img src="/img/bartoc-logo.svg" alt="BARTOC.org" style="max-width: 350px;">
+  <img src="/img/bartoc-logo.svg" alt="BARTOC.org" style="width: 100%; max-width: 350px;">
   <vocabulary-search></vocabulary-search>
   <div>
     BARTOC unites information about

@@ -49,7 +49,7 @@ const externalLinks = [
   { label: "Imprint", href: "https://www.gbv.de/impressum" },
   { label: "Privacy Policy", href: "https://www.gbv.de/datenschutz" },
   { label: "Mastodon", href: "https://code4lib.social/@bartoc", rel: "me" },
-  { label: "sources", href: "https://github.com/gbv/bartoc.org" },
+  { label: "BARTOC sources", href: "https://github.com/gbv/bartoc.org" },
   { label: "issues", href: "https://github.com/gbv/bartoc.org/issues" },
 ]
 

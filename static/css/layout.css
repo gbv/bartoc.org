@@ -148,18 +148,8 @@ a[href*="orcid.org"]:before {
   padding: var(--cc-space-xl);
   background: var(--cc-color-surface-muted);
   border-radius: var(--cc-radius-lg);
-  width: 70%;
-  max-width: 100%;
-  --bartoc-search-bar-input-width: 20rem;
-  --bartoc-search-bar-input-min-width: min(15rem, 100%);
-  --bartoc-search-bar-field-width: 11rem;
-  --bartoc-search-bar-field-min-width: min(10rem, 100%);
-}
-.vocabulary-search .bartoc-search-bar {
   width: 100%;
-}
-.vocabulary-search .bartoc-search-bar__controls {
-  width: 100%;
+  max-width: 55rem;
 }
 .vocabulary-search .bartoc-search-bar__summary {
   padding-bottom: var(--cc-space-sm);
@@ -168,16 +158,28 @@ a[href*="orcid.org"]:before {
   font-weight: var(--cc-font-weight-bold);
 }
 
-/* Temporary compatibility shim for gbv-login-client-vue. */
-.bartoc-header__user-status > .user-status > a {
-  color: inherit;
-  font-size: var(--cc-font-size-base);
-  font-weight: var(--cc-font-weight-light);
+@media (max-width: 22.5rem) {
+  .vocabulary-search {
+    /* Keep the field selector and Search button on the same row. */
+    padding-inline: var(--cc-space-sm);
+  }
 }
 
+/* Keep the login dropdown above the page content. */
 .bartoc-header__user-status .user-status-dropdown {
-  color: var(--cc-color-text);
   z-index: 1000;
+}
+
+.bartoc-header__user-status .user-status:focus-within .user-status-dropdown {
+  display: block;
+}
+
+@media (max-width: 75rem) {
+  .bartoc-header__user-status .user-status .user-status-dropdown {
+    /* Keep account links inside the mobile menu's scrollable area. */
+    position: static;
+    width: 100%;
+  }
 }
 
 /* About page */
