@@ -9,35 +9,75 @@ import { ErrorReport, ReportsDirectory } from "../src/dvrf.js"
  * Pass the dump file as the first argument, or use the latest dump.
  */
 const dump = process.argv[2] || "data/dumps/latest.ndjson"
-const reports = new ReportsDirectory("data/reports")
+const reportsDir = new ReportsDirectory("data/reports")
 
 const items = readFileSync(dump, "utf8").split("\n").filter(Boolean).map(JSON.parse)
+const rules = Object.fromEntries(qualityChecks.map(rule => [rule.id, rule]))
 
-for (const rule of qualityChecks) {
-  const report = new ErrorReport({
-    title: rule.title,
-    description: rule.description,
-    types: [rule.id],
-    level: "warning",
-    errors: [],
-    skipped: [],
-  })
+const reports = Object.fromEntries(
+  qualityChecks.map(rule => [
+    rule.id,
+    new ErrorReport({
+      title: rule.title,
+      description: rule.description,
+      types: [rule.id],
+      level: "warning",
+      errors: [],
+      skipped: [],
+    }),
+  ]))
 
-  const itemData = {}
-  for (const item of items) {
-    itemData[item.uri] = {
-      prefLabel: item.prefLabel ?? null,
-      modified: item.modified ?? null,
-      type: item.type,
-    }
-    const validator = item => rule.fails(item) ? [{
-      position: { jsonpointer: rule.jsonpointer },
-    }] : []
-    const context = { position: { id: item.uri } }
-    report.checkFinding(item, validator, context)
+reports["validation-errors"] = new ErrorReport({
+  title: "Validation errors",
+  description: "BARTOC records not passing mandatory integrity and quality constraints",
+  errors: [],
+  skipped: [],
+})
+
+const summaryReport = new ErrorReport({
+  title: "BARTOC full quality report",
+  description: "Errors and warnings for each record",
+  errors: [],
+})
+
+const itemData = {}
+for (const item of items) {
+  itemData[item.uri] = {
+    prefLabel: item.prefLabel ?? null,
+    modified: item.modified ?? null,
+    type: item.type,
   }
 
-  reports.writeReport(report, rule.id)
+  const itemContext = { position: { id: item.uri } }
+  const errors = []
+
+  for (const reportId in reports) {
+    const report = reports[reportId]
+    let defects = []
+    if (reportId === "validation-errors") {
+      const context = {
+        position: { id: item.uri },
+        message: `Record ${item.uri} does not conform to validation constraints`,
+      }
+      defects = report.checkFinding(item, validateItem, context)
+    } else {
+      const rule = rules[reportId]
+      const validator = item => rule.fails(item) ? [{
+        position: { jsonpointer: rule.jsonpointer },
+      }] : []
+      defects = report.checkFinding(item, validator, itemContext)
+    }
+
+    if (defects?.length) {
+      errors.push(...defects.map(defect => ({ type: [reportId], ...defect })))
+    }
+  }
+
+  summaryReport.checkFinding(item, () => errors, itemContext)
+}
+
+Object.entries(reports).forEach(([reportId, report]) => {
+  reportsDir.writeReport(report, reportId)
 
   // CSV columns: URI, English rule.id, types, and modified date.
   const csv = report.errors.map(({ position }) => {
@@ -51,28 +91,12 @@ for (const rule of qualityChecks) {
   },
   )
   writeFileSync(
-    `${reports.path}/${rule.id}.csv`,
+    `${reportsDir.path}/${reportId}.csv`,
     csv.length ? `${csv.join("\n")}\n` : "",
   )
-}
-
-// Generate validation report
-const report = new ErrorReport({
-  title: "Validation errors",
-  description: "BARTOC records not passing mandatory integrity and quality constraints",
-  errors: [],
-  skipped: [],
 })
 
-for (const item of items) {
-  const context = {
-    position: { id: item.uri },
-    message: `Record ${item.uri} does not conform to validation constraints`,
-  }
-  report.checkFinding(item, validateItem, context)
-}
-
-reports.writeReport(report, "validation-errors")
+reportsDir.writeReport(summaryReport, "summary")
 
 // quote text values and leave missing values empty.
 function csvField(value) {

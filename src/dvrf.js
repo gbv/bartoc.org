@@ -34,7 +34,7 @@ export class ErrorReport {
         } else {
           this.totalCompliances++
         }
-        return
+        return violation
       } catch (error) {
         if (this.partial) {
           this.partial.push({ message: error.message })
