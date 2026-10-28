@@ -21,15 +21,22 @@ export function validateItem(item = {}) {
   // A record must not link to itself as an edition or a derived work.
   if (hasSelfReference(item, "versionOf")) {
     errors.push({
-      message: "A vocabulary cannot be an edition of itself.",
+      message: "A terminology cannot be an edition of itself.",
       position: { jsonpointer: "/versionOf" },
     })
   }
 
   if (hasSelfReference(item, "basedOn")) {
     errors.push({
-      message: "A vocabulary cannot be based on itself.",
+      message: "A terminology cannot be based on itself.",
       position: { jsonpointer: "/basedOn" },
+    })
+  }
+
+  if (hasSelfReference(item, "replacedBy")) {
+    errors.push({
+      message: "A terminology cannot be replaced by itself.",
+      position: { jsonpointer: "/replacedBy" },
     })
   }
 

@@ -124,12 +124,12 @@ describe("ItemEditor business logic", () => {
     expect(itemError({
       ...validItem,
       versionOf: [{ uri }],
-    })).toEqual({ message: "A vocabulary cannot be an edition of itself." })
+    })).toEqual({ message: "A terminology cannot be an edition of itself." })
 
     expect(itemError({
       ...validItem,
       basedOn: [{ uri: ` ${uri} ` }],
-    })).toEqual({ message: "A vocabulary cannot be based on itself." })
+    })).toEqual({ message: "A terminology cannot be based on itself." })
 
     expect(itemError({
       ...validItem,
@@ -173,7 +173,7 @@ describe("ItemEditor business logic", () => {
       definition: {},
       versionOf: [{ uri }],
       publisher: [],
-    })).toEqual({ message: "A vocabulary cannot be an edition of itself." })
+    })).toEqual({ message: "A terminology cannot be an edition of itself." })
   })
 
   it("cleans empty fields and normalizes relation-like values", () => {

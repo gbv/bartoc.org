@@ -197,6 +197,15 @@
             <ItemLink :item="terminology" />
           </template>
         </MetadataListRow>
+
+        <MetadataListRow
+          source-field="replacedBy"
+          label="Replaced by"
+          :items="item.replacedBy">
+          <template #item="{ item: terminology }">
+            <ItemLink :item="terminology" />
+          </template>
+        </MetadataListRow>
       </table>
     </Tab>
 

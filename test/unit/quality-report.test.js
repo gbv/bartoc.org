@@ -28,7 +28,7 @@ describe("quality reports", () => {
 
     expect(validateItem(item)).toEqual([
       {
-        message: "A vocabulary cannot be an edition of itself.",
+        message: "A terminology cannot be an edition of itself.",
         position: { jsonpointer: "/versionOf" },
       },
       {
@@ -71,7 +71,7 @@ describe("quality reports", () => {
         position: { id: "http://bartoc.org/en/node/103" },
         message: "Record http://bartoc.org/en/node/103 does not conform to validation constraints",
         errors: [ {
-          message: "A vocabulary cannot be an edition of itself.",
+          message: "A terminology cannot be an edition of itself.",
           position: { jsonpointer: "/versionOf" },
         }],
       }])

@@ -96,6 +96,13 @@
       :multiple="true"
       placeholder="Select another terminology from BARTOC" />
   </form-row>
+  <form-row :label="'Replaced by'">
+    <terminology-relation-editor
+      v-model="item.replacedBy"
+      :multiple="true"
+      placeholder="Select another terminology from BARTOC" />
+  </form-row>
+
   <hr>
   <p>How the vocabulary is made available:</p>
   <form-row :label="'Created'">

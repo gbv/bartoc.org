@@ -376,7 +376,7 @@ describe("ItemEditor", () => {
 
     expect(fetch).not.toHaveBeenCalled()
     expect(w.vm.error).toEqual({
-      message: "A vocabulary cannot be an edition of itself.",
+      message: "A terminology cannot be an edition of itself.",
     })
   })
 
@@ -396,7 +396,7 @@ describe("ItemEditor", () => {
 
     expect(fetch).not.toHaveBeenCalled()
     expect(w.vm.error).toEqual({
-      message: "A vocabulary cannot be based on itself.",
+      message: "A terminology cannot be based on itself.",
     })
   })
 
