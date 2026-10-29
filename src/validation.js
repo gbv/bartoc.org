@@ -11,7 +11,7 @@ export function validateItem(item = {}) {
   // A title may come from the main record only when the edition has a version number.
   const canDeriveTitle = versionNumber(item) && validVersionOf
 
-  if (!hasMeaningfulValue(item?.prefLabel) && !canDeriveTitle) {
+  if (!hasMeaningfulValue(item.prefLabel) && !canDeriveTitle) {
     errors.push({
       message: "item must have at least a title!",
       position: { jsonpointer: "/prefLabel" },
@@ -42,9 +42,9 @@ export function validateItem(item = {}) {
 
   // A valid versionOf link lets an edition inherit the English abstract.
   const hasEnglishAbstract = item.definition?.en?.some(text => text?.trim())
-  if (!hasEnglishAbstract && !validVersionOf) {
+  if (!hasEnglishAbstract && !validVersionOf && !item.prefLabel?.en) {
     errors.push({
-      message: "Please provide at least one English abstract.",
+      message: "Please provide at least an English title or abstract.",
       position: { jsonpointer: "/definition/en" },
     })
   }

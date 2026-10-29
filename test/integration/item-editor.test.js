@@ -603,17 +603,17 @@ describe("ItemEditor", () => {
     })
   })
 
-  it("itemError requires at least one English abstract", async () => {
+  it("itemError requires at least an English title or abstract", async () => {
     const w = mountEditor({
       definition: {},
-      prefLabel: { en: ["x"] },
+      prefLabel: { de: ["x"] },
       type: [conceptSchemeType],
     })
 
     await w.get("[data-testid='emit-no-en']").trigger("click")
 
     expect(w.vm.itemError()).toEqual({
-      message: "Please provide at least one English abstract.",
+      message: "Please provide at least an English title or abstract.",
     })
   })
 

@@ -68,10 +68,10 @@ describe("ItemEditor business logic", () => {
     })).toEqual({ message: "item must have at least a title!" })
 
     expect(itemError({
-      prefLabel: { en: ["Title"] },
+      prefLabel: { de: ["Titel"] },
       definition: { en: ["   "] },
       publisher: [],
-    })).toEqual({ message: "Please provide at least one English abstract." })
+    })).toEqual({ message: "Please provide at least an English title or abstract." })
 
     expect(itemError({
       prefLabel: { en: ["Title"] },
@@ -155,13 +155,13 @@ describe("ItemEditor business logic", () => {
       { uri: "http://bartoc.org/en/node/21133" },
       { uri: "http://bartoc.org/en/node/20827" },
     ]],
-  ])("does not let %s bypass the English abstract requirement", (_, versionOf) => {
+  ])("does not let %s bypass the English title/abstract requirement", (_, versionOf) => {
     expect(itemError({
-      prefLabel: { en: ["Version title"] },
+      prefLabel: { de: ["Version"] },
       definition: {},
       versionOf,
       publisher: [],
-    })).toEqual({ message: "Please provide at least one English abstract." })
+    })).toEqual({ message: "Please provide at least an English title or abstract." })
   })
 
   it("reports a versionOf self-reference before a missing abstract", () => {
