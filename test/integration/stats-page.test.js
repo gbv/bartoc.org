@@ -13,8 +13,10 @@ describe("StatsPage", () => {
             title: "Missing abstract",
             level: "warning",
             totalErrors: 42,
+            types: ["no-abstract"],
             formats: ["json", "csv"],
           },
+          summary: { title: "Full report", totalErrors: 3, formats: ["json"] },
         },
       },
     })
@@ -24,6 +26,9 @@ describe("StatsPage", () => {
     expect(wrapper.get("a[href='/data/reports/growth.csv']").exists()).toBe(true)
     expect(wrapper.get("a[href='/data/reports/stats.json']").exists()).toBe(true)
     expect(wrapper.text()).toContain("Missing abstract (42 warnings)")
+    expect(wrapper.get("h5 a").attributes("href")).toBe("/vocabularies/?filter=error%3Ano-abstract")
+    expect(wrapper.get("h5 a").text()).toBe("42 warnings")
+    expect(wrapper.findAll("h5 a")).toHaveLength(1)
     expect(wrapper.get("a[href='/data/reports/no-abstract.csv']").text()).toBe("CSV")
   })
 })

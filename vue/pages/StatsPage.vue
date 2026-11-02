@@ -53,7 +53,12 @@
           v-for="(report, id) in reports"
           :key="id"
           class="report-item">
-          <h5>{{ report.title }} ({{ report.totalErrors }} {{ report.level || "error" }}s)</h5>
+          <h5 v-if="report.types?.[0]">
+            {{ report.title }} (<a :href="searchUrl(report.types[0])">{{ report.totalErrors }} {{ report.level || "error" }}s</a>)
+          </h5>
+          <h5 v-else>
+            {{ report.title }} ({{ report.totalErrors }} {{ report.level || "error" }}s)
+          </h5>
           <p>{{ report.description }}</p>
           <div class="report-links">
             <a
@@ -74,6 +79,8 @@
 
 <script setup>
 defineOptions({ name: "StatsPage" })
+
+const searchUrl = code => `/vocabularies/?filter=${encodeURIComponent(`error:${code}`)}`
 
 defineProps({
   schemesCount: {
