@@ -56,6 +56,9 @@
           <h5 v-if="report.types?.[0]">
             {{ report.title }} (<a :href="searchUrl(report.types[0])">{{ report.totalErrors }} {{ report.level || "error" }}s</a>)
           </h5>
+          <h5 v-else-if="id === 'summary'">
+            {{ report.title }} ({{ report.totalErrors }} records with findings)
+          </h5>
           <h5 v-else>
             {{ report.title }} ({{ report.totalErrors }} {{ report.level || "error" }}s)
           </h5>

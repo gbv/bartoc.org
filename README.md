@@ -184,6 +184,6 @@ Note that `NODE_ENV` has to be set to `production`, otherwise Vue files will be 
 
 ## Database dumps and statistics
 
-To regularly update dumps, add a cronjob with command `npm run dump update`. Dumps will be placed in directory `data/dumps` and statistics are placed in `data/reports`. To compare two dump files run `npm run dump diff`.
+To regularly update dumps, add a cronjob with command `npm run dump`. Dumps are placed in `data/dumps` and reports in `data/reports`. To compare dump files, run `node bin/dump.js diff FILE1 [FILE2]`.
 
-The dump command also creates quality reports as JSON and CSV files. `validation-errors.json` lists records with validation errors, and `quality-stats.json` contains counts for records, errors, and quality warnings.
+The dump command also creates quality reports as JSON and CSV files. `validation-errors.json` lists records with validation errors, and `summary.json` groups validation errors and quality warnings by record.
