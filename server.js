@@ -18,23 +18,28 @@ import { ReportsDirectory } from "./src/dvrf.js"
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
 
-// build our vue project on first run if report.json can't be found
+// Build the browser assets and the server renderer on first run.
 // TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
+let vueBuildPromise = Promise.resolve(true)
 if (config.env !== "development") {
   console.log("Building Vue project in background... (old Vue files might be served in the meantime)")
-  child_process.exec("npm run build", { env: process.env }, (error) => {
-    if (error) {
-      console.warn("Vue build failed!", error)
-    } else {
-      console.log("Vue project built successfully.")
-      // Add manifest to config
-      const file = "dist/.vite/manifest.json"
-      try {
-        config.vue.manifest = utils.readJson(__dirname, file)
-      } catch(error) {
-        console.warn(`Could not read Vite manifest in ${file}, there might be issues with the front end build.`)
+  vueBuildPromise = new Promise(resolve => {
+    child_process.exec("npm run build", { env: process.env }, (error) => {
+      if (error) {
+        console.warn("Vue build failed!", error)
+        resolve(false)
+      } else {
+        console.log("Vue project built successfully.")
+        // Add manifest to config
+        const file = "dist/.vite/manifest.json"
+        try {
+          config.vue.manifest = utils.readJson(__dirname, file)
+        } catch(error) {
+          console.warn(`Could not read Vite manifest in ${file}, there might be issues with the front end build.`)
+        }
+        resolve(true)
       }
-    }
+    })
   })
 }
 
@@ -113,6 +118,25 @@ function render (req, res, view, locals) {
     page: path.replace(/^\/|\/$/g, ""),
   }
   return res.render(view, { ...vars, ...locals, vuePagePropsJson })
+}
+
+let viteSsrPromise
+async function renderRegistryHtml(props) {
+  if (config.env === "development") {
+    viteSsrPromise ||= import("vite").then(({ createServer }) => createServer({
+      server: { middlewareMode: true },
+      appType: "custom",
+    }))
+    const vite = await viteSsrPromise
+    const renderer = await vite.ssrLoadModule("/vue/entry-server.js")
+    return renderer.renderRegistryPage(props)
+  }
+
+  if (!await vueBuildPromise) {
+    throw new Error("Vue build failed")
+  }
+  const renderer = await import("./dist/server/entry-server.js")
+  return renderer.renderRegistryPage(props)
 }
 
 // edit form
@@ -438,7 +462,11 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
     path = storedItem.type?.[0] === "http://www.w3.org/ns/dcat#Catalog"
       ? "/registries"
       : "/vocabularies"
-    return sendItem(req, res, storedItem, { path, ...presentationView })
+    try {
+      return await sendItem(req, res, storedItem, { path, ...presentationView })
+    } catch (error) {
+      return next(error)
+    }
   } else {
     return next()
   }
@@ -450,13 +478,10 @@ async function backendDataByUri(uri) {
   return items.find(item => item.uri === uri)
 }
 
-const viewsByType = {
-  "http://www.w3.org/ns/dcat#Catalog": "registry",
-}
-
 const vuePagesByType = {
   "http://www.w3.org/2004/02/skos/core#Concept": "concept",
   "http://www.w3.org/2004/02/skos/core#ConceptScheme": "terminology",
+  "http://www.w3.org/ns/dcat#Catalog": "registry",
 }
 
 async function sendItem (
@@ -484,12 +509,15 @@ async function sendItem (
       const item = presentationItem
       const itemType = item.type[0]
       const vuePage = vuePagesByType[itemType]
-      const view = vuePage ? "vue-page" : viewsByType[itemType]
       const title = utils.label(item.prefLabel).value
-      render(req, res, view, {
+      const ssrHtml = vuePage === "registry"
+        ? await renderRegistryHtml({ item, title })
+        : undefined
+      render(req, res, "vue-page", {
         ...vars,
         item,
         title,
+        ssrHtml,
         ...(vuePage && {
           vuePage,
           vuePageProps: {

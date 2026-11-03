@@ -17,7 +17,7 @@
     "jskos-convert": "cd $INIT_CWD; jskos-convert",
     "dump": "node ./bin/dump.js update && node ./bin/reports.js && ./bin/stats.sh",
     "vue:serve": "vite",
-    "build": "vite build",
+    "build": "vite build && vite build --ssr vue/entry-server.js --outDir dist/server",
     "express:serve": "NODE_ENV=development nodemon -L --ext js,mjs,cjs,json,ejs,ndjson server.js",
     "dev": "concurrently -k \"npm:express:serve\" \"npm:vue:serve\"",
     "yesno": "node -e \"const yesno = require('yesno'); yesno({ question: 'Are you sure you want to continue?' }).then(ok => process.exit(ok ? 0 : 1));\"",

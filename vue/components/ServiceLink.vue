@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { onMounted, ref, watch } from "vue"
 import ItemName from "./ItemName.vue"
 import { apiTypesScheme, registryForScheme } from "../utils.js"
 
@@ -40,7 +40,8 @@ async function reload() {
   }
 }
 
-watch(() => props.endpoint, reload, { deep: true, immediate: true })
+watch(() => props.endpoint, reload, { deep: true })
+onMounted(reload)
 </script>
 
 <style scoped>

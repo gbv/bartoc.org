@@ -3,6 +3,7 @@ import EditPage from "./EditPage.vue"
 import ErrorPage from "./ErrorPage.vue"
 import MissingSearchPage from "./MissingSearchPage.vue"
 import RegistriesPage from "./RegistriesPage.vue"
+import RegistryPage from "./RegistryPage.vue"
 import SparqlPage from "./SparqlPage.vue"
 import StatsPage from "./StatsPage.vue"
 import TerminologyPage from "./TerminologyPage.vue"
@@ -14,6 +15,7 @@ export const pages = {
   error: ErrorPage,
   missingSearch: MissingSearchPage,
   registries: RegistriesPage,
+  registry: RegistryPage,
   stats: StatsPage,
   terminology: TerminologyPage,
   notFound: notFoundPage,

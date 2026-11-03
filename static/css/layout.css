@@ -50,10 +50,6 @@ body {
   color: var(--cc-border-color);
 }
 
-.registry-metadata-list {
-  padding-left: 0;
-  list-style: none;
-}
 td > ul {
   margin-bottom: 0;
 }

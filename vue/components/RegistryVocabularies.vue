@@ -60,7 +60,8 @@ const props = defineProps({
 })
 
 const previewLimit = 10
-const status = ref("loading")
+// The server renders the search link before the browser starts the preview request.
+const status = ref("idle")
 const terminologies = ref([])
 const terminologyCount = ref(0)
 
@@ -106,7 +107,10 @@ async function loadTerminologies() {
   }
 }
 
-onMounted(loadTerminologies)
+onMounted(() => {
+  status.value = "loading"
+  loadTerminologies()
+})
 </script>
 
 <style scoped>

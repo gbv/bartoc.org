@@ -68,4 +68,22 @@ describe("Vue page view", () => {
     expect(propsElement.textContent).not.toContain("</script>")
     expect(JSON.parse(propsElement.textContent)).toEqual(pageProps)
   })
+
+  it("includes server-rendered registry content without a duplicate heading", async () => {
+    const html = await ejs.renderFile(template, {
+      config: {
+        name: "BARTOC.org",
+        env: "development",
+        vue: { assetPrefix: "/" },
+      },
+      title: "Registry",
+      path: "/registries",
+      vuePage: "registry",
+      ssrHtml: "<h1>Registry</h1><p>Registry metadata</p>",
+    })
+
+    document.documentElement.innerHTML = html
+    expect(document.querySelectorAll("#app h1")).toHaveLength(1)
+    expect(document.querySelector("#app p").textContent).toBe("Registry metadata")
+  })
 })

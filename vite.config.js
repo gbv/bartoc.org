@@ -12,12 +12,11 @@ export default defineConfig({
     port,
   },
   resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./vue", import.meta.url)),
-      // Relevant discussion: https://github.com/vitejs/vite/discussions/4158
-      // See also: https://vite.dev/guide/backend-integration.html
-      vue: "vue/dist/vue.esm-bundler.js",
-    },
+    alias: [
+      { find: "@", replacement: fileURLToPath(new URL("./vue", import.meta.url)) },
+      // Keep the browser compiler alias from matching vue/server-renderer.
+      { find: /^vue$/, replacement: "vue/dist/vue.esm-bundler.js" },
+    ],
   },
   build: {
     manifest: true,
