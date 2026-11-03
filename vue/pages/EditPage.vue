@@ -7,6 +7,7 @@
   <h1>{{ title }}</h1>
 
   <ItemEditor
+    v-if="showEditor"
     :user="user"
     :auth="auth"
     :current="currentItem"
@@ -15,7 +16,7 @@
 </template>
 
 <script setup>
-import { computed, inject, unref } from "vue"
+import { computed, inject, onMounted, ref, unref } from "vue"
 import ItemEditor from "../components/ItemEditor.vue"
 
 defineOptions({ name: "EditPage" })
@@ -50,4 +51,10 @@ const auth = computed(() => {
 })
 const user = computed(() => unref(login.user))
 const currentItem = computed(() => props.item || {})
+
+// The editor loads browser-only providers, so mount it after hydration.
+const showEditor = ref(false)
+onMounted(() => {
+  showEditor.value = true
+})
 </script>

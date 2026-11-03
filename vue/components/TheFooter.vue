@@ -12,7 +12,7 @@ import { BartocFooter } from "@gbv/bartoc-components"
 
 defineOptions({ name: "TheFooter" })
 
-// Default footer context is provided by the root app from EJS data attributes.
+// The root app provides footer context for the current page.
 const providedFooter = inject("footer", {})
 
 // Props stay available for tests and for pages that need an explicit override.

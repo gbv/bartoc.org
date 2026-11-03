@@ -12,7 +12,7 @@ import { onMounted, ref, watch } from "vue"
 import ItemName from "./ItemName.vue"
 import { apiTypesScheme, registryForScheme } from "../utils.js"
 
-const registry = registryForScheme(apiTypesScheme)
+let registry
 
 const props = defineProps({
   endpoint: {
@@ -34,6 +34,7 @@ async function reload() {
   apiType.value = { uri: props.endpoint.type }
 
   const currentApiType = apiType.value
+  registry ||= registryForScheme(apiTypesScheme)
   const result = await registry.getConcepts({ concepts: [currentApiType] })
   if (apiType.value === currentApiType && result.length) {
     apiType.value = result[0]

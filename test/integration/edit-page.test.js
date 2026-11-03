@@ -45,6 +45,7 @@ describe("EditPage", () => {
       cancelUrl: "/en/node/123",
       hasIncomingVersions: true,
     }, { token, user })
+    await nextTick()
 
     expect(wrapper.get("h1").text()).toBe("Edit vocabulary")
     const cancelAction = wrapper.get("a")
@@ -64,12 +65,13 @@ describe("EditPage", () => {
     expect(editor.props("auth")).toBeNull()
   })
 
-  it("uses an empty item when adding a vocabulary", () => {
+  it("uses an empty item when adding a vocabulary", async () => {
     const wrapper = mountPage({
       title: "Add vocabulary",
       item: null,
       cancelUrl: "/",
     })
+    await nextTick()
 
     expect(wrapper.get("h1").text()).toBe("Add vocabulary")
     expect(wrapper.get("a").attributes("href")).toBe("/")

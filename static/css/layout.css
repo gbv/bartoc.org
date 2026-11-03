@@ -4,36 +4,19 @@ body {
   flex-direction: column;
 }
 
-#header-app,
-#footer-app {
-  flex-shrink: 0;
-}
-
-#header-app {
-  display: flow-root;
-}
-
-#header-app:empty {
-  min-height: calc(
-    var(--cc-header-logo-height) +
-    var(--cc-space-sm) +
-    var(--cc-space-sm) +
-    var(--cc-space-lg)
-  );
-  background: linear-gradient(
-    to bottom,
-    var(--cc-header-background) 0,
-    var(--cc-header-background) calc(
-      var(--cc-header-logo-height) + var(--cc-space-sm) + var(--cc-space-sm)
-    ),
-    transparent calc(
-      var(--cc-header-logo-height) + var(--cc-space-sm) + var(--cc-space-sm)
-    )
-  );
-}
-
 #app {
   flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#app > main {
+  flex: 1 0 auto;
+}
+
+#app > header,
+#app > footer {
+  flex-shrink: 0;
 }
 
 .separated-list {
@@ -154,7 +137,7 @@ a[href*="orcid.org"]:before {
   font-weight: var(--cc-font-weight-bold);
 }
 
-@media (max-width: 22.5rem) {
+@media (max-width: 30rem) {
   .vocabulary-search {
     /* Keep the field selector and Search button on the same row. */
     padding-inline: var(--cc-space-sm);

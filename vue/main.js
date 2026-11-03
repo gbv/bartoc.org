@@ -1,41 +1,22 @@
-import { computed, createApp, markRaw, ref, toRefs, watch } from "vue"
+import { ref, toRefs, watch } from "vue"
 
-import App from "./App.vue"
-import VocabularySearch from "./components/VocabularySearch.vue"
-import ServiceLink from "./components/ServiceLink.vue"
-import RegistryList from "./components/RegistryList.vue"
-import RegistryVocabularies from "./components/RegistryVocabularies.vue"
+import { createBartocApp } from "./appFactory.js"
 import { pages } from "./pages/index.js"
-import { library } from "@fortawesome/fontawesome-svg-core"
-import { faLanguage } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
 import { parseJson } from "./utils.js"
 import { Login } from "gbv-login-client-vue"
-
-// Add icons to the library, in this case language
-library.add(faLanguage)
 
 // Note: Using the JSON files directly because Lodash is used in config/index.js
 import configDefault from "../config/config.default.json"
 import configUser from "../config/config.json"
 const login = Object.assign({}, configDefault.login, configUser.login || {})
 
-// Footer context comes from EJS-rendered data attributes on the app root.
-const rootElement = document.getElementById("app")
-const pageProps = parseJson(document.getElementById("page-props")?.textContent)
-const footer = {
-  siteName: rootElement?.dataset.siteName || "BARTOC.org",
-  itemUri: rootElement?.dataset.itemUri || "",
-  resourcePath: rootElement?.dataset.resourcePath || "",
-  api: rootElement?.dataset.api || "",
-  query: parseJson(rootElement?.dataset.query),
-}
+// Read the data used for server rendering so Vue can hydrate the same page.
+const serverState = parseJson(document.getElementById("page-state")?.textContent)
 
 import { render } from "../node_modules/timeago.js/"
 import "jskos-vue/dist/style.css"
 
-const { token, user } = toRefs(Login)
-const auth = computed(() => token.value ? { token: token.value } : null)
+const { token } = toRefs(Login)
 const userCanAdd = ref(false)
 
 watch(token, async currentToken => {
@@ -60,34 +41,20 @@ watch(token, async currentToken => {
   }
 }, { immediate: true })
 
-// EJS still renders the route-specific page markup. App.vue owns the shell
-// and renders this component where bartoc-search would render RouterView.
-const EjsPageContent = markRaw({
-  name: "PageContent",
-  components: {
-    VocabularySearch,
-    ServiceLink,
-    RegistryList,
-    RegistryVocabularies,
+// Recreate the server app with its page, props, and shared shell data.
+const app = createBartocApp({
+  pageComponent: pages[serverState.page],
+  pageProps: serverState.pageProps || {},
+  footer: serverState.footer || {},
+  header: {
+    activePath: serverState.header?.activePath || "",
+    userCanAdd,
   },
-  setup() {
-    return { auth, user, userCanAdd }
-  },
-  template: rootElement?.innerHTML || "",
 })
 
-const pageComponent = markRaw(pages[rootElement?.dataset.page] || EjsPageContent)
-const app = createApp(App, { pageComponent, pageProps })
-app.provide("footer", footer)
-app.provide("header", {
-  activePath: rootElement?.dataset.pagePath || "",
-  userCanAdd,
-})
-app.use(Login)
-Login.connect(login.api, { ssl: login.ssl })
-app.component("FontAwesomeIcon", FontAwesomeIcon)
-
+// Keep the SSR login state anonymous until Vue has hydrated the header.
 app.mount("#app")
+Login.connect(login.api, { ssl: login.ssl })
 
 // Plain JavaScript is sufficient for relative timestamps.
 // See https://github.com/hustcc/timeago.js/issues/230

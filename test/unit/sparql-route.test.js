@@ -12,8 +12,8 @@ const examples = [
 
 function createApp(endpoint) {
   const app = express()
-  const render = vi.fn((_req, res, view, locals) => {
-    res.json({ view, locals })
+  const render = vi.fn(async (_req, res, locals) => {
+    res.json({ locals })
   })
 
   app.use(createSparqlRoute({
@@ -36,7 +36,6 @@ describe("SPARQL route", () => {
       .expect(200)
 
     expect(response.body).toMatchObject({
-      view: "vue-page",
       locals: {
         vuePage: "sparql",
         vuePageProps: {

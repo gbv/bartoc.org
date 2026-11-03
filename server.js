@@ -1,7 +1,6 @@
 import config from "./config/index.js"
 import utils from "./src/utils.js"
 import { clone } from "./src/utils.js"
-import path from "path"
 import jskos from "jskos-tools"
 import querystring from "querystring"
 import {
@@ -15,11 +14,11 @@ import child_process from "child_process"
 import portfinder from "portfinder"
 import { getConceptsInBatches } from "./src/backend.js"
 import { ReportsDirectory } from "./src/dvrf.js"
+import { renderVueDocument } from "./src/vueDocument.js"
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
 
 // Build the browser assets and the server renderer on first run.
-// TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
 let vueBuildPromise = Promise.resolve(true)
 if (config.env !== "development") {
   console.log("Building Vue project in background... (old Vue files might be served in the meantime)")
@@ -57,10 +56,6 @@ import express from "express"
 const app = express()
 app.set("json spaces", 2)
 
-// Configure view engine to render EJS templates.
-app.set("views", path.join(__dirname, "/views"))
-app.set("view engine", "ejs")
-
 // static assets
 app.use(express.static("static"))
 app.use("/data/dumps/", express.static("data/dumps"))
@@ -82,7 +77,6 @@ app.use(
 import redirectsRoute from "./routes/redirects.js"
 import apiRoute from "./routes/api.js"
 import uriRoute from "./routes/uri.js"
-import pageRoute from "./routes/page.js"
 import createSparqlRoute from "./routes/sparql.js"
 
 app.use(redirectsRoute)
@@ -92,51 +86,96 @@ app.use(uriRoute)
 app.use(createSparqlRoute({
   endpoint: config.sparql,
   examples: config.sparqlExamples,
-  render,
+  render: sendVuePage,
 }))
 
-app.use(pageRoute)
+app.get("/software", (req, res, next) => sendVuePage(req, res, {
+  title: "Software",
+  vuePage: "software",
+}).catch(next))
 
-// render HTML page with EJS
-function render (req, res, view, locals) {
-  const { query, path } = req
-  const vuePagePropsJson = locals.vuePageProps === undefined
-    ? ""
-    : utils.serializeJsonForHtml(locals.vuePageProps)
-  // pass environment
-  const vars = {
-    config,
-    query,
-    path,
-    // Keep the requested resource path separate from the active navigation path.
-    resourcePath: path,
-    utils,
-    querystring,
-    nkostypes,
-    accesstypes,
-    formats,
-    page: path.replace(/^\/|\/$/g, ""),
+app.get("/download", (req, res, next) => sendVuePage(req, res, {
+  title: "Download",
+  vuePage: "download",
+}).catch(next))
+
+app.get("/contributing", (req, res, next) => sendVuePage(req, res, {
+  title: "Contributing",
+  vuePage: "contributing",
+}).catch(next))
+
+app.get("/about", (req, res, next) => sendVuePage(req, res, {
+  title: "About",
+  vuePage: "about",
+}).catch(next))
+
+app.get("/contact", (req, res, next) => sendVuePage(req, res, {
+  vuePage: "contact",
+}).catch(next))
+
+app.get("/top-rated-points", (req, res, next) => sendVuePage(req, res, {
+  vuePage: "topRatedPoints",
+}).catch(next))
+
+app.get(["/", "/index"], async (req, res, next) => {
+  try {
+    const schemes = await backend.getSchemes({ params: { limit: 1 } })
+    await sendVuePage(req, res, {
+      vuePage: "home",
+      vuePageProps: { schemesCount: schemes?._totalCount ?? 0 },
+    })
+  } catch (error) {
+    next(error)
   }
-  return res.render(view, { ...vars, ...locals, vuePagePropsJson })
+})
+
+// Render the Vue page and send the complete HTML response.
+async function sendVuePage(req, res, locals) {
+  const { query, path } = req
+  const renderer = await loadVueRenderer()
+  // Render and hydrate the same JSON-safe values.
+  const pageProps = JSON.parse(utils.serializeJsonForHtml(locals.vuePageProps || {}))
+  const footer = {
+    siteName: config.name,
+    itemUri: locals.item?.uri || "",
+    resourcePath: locals.resourcePath || path,
+    api: locals.api || "",
+    query,
+  }
+  const header = { activePath: locals.path || path, userCanAdd: false }
+  const state = { page: locals.vuePage, pageProps, footer, header: { activePath: header.activePath } }
+  const html = await renderer.renderVuePage({
+    page: state.page,
+    pageProps,
+    footer,
+    header,
+  })
+  return res.type("html").send(renderVueDocument({
+    config,
+    title: locals.title,
+    item: locals.item,
+    stylesheets: locals.stylesheets,
+    scripts: locals.scripts,
+    state,
+    html,
+  }))
 }
 
 let viteSsrPromise
-async function renderRegistryHtml(props) {
+async function loadVueRenderer() {
   if (config.env === "development") {
     viteSsrPromise ||= import("vite").then(({ createServer }) => createServer({
       server: { middlewareMode: true },
       appType: "custom",
     }))
     const vite = await viteSsrPromise
-    const renderer = await vite.ssrLoadModule("/vue/entry-server.js")
-    return renderer.renderRegistryPage(props)
+    return vite.ssrLoadModule("/vue/entry-server.js")
   }
 
   if (!await vueBuildPromise) {
     throw new Error("Vue build failed")
   }
-  const renderer = await import("./dist/server/entry-server.js")
-  return renderer.renderRegistryPage(props)
+  return import("./dist/server/entry-server.js")
 }
 
 // edit form
@@ -165,7 +204,7 @@ app.get("/edit", async (req, res, next) => {
     }
   }
 
-  render(req, res, "vue-page", {
+  return sendVuePage(req, res, {
     title,
     vuePage: "edit",
     vuePageProps: {
@@ -175,14 +214,14 @@ app.get("/edit", async (req, res, next) => {
       cancelUrl: item ? utils.uriLink(item.uri) : "/",
       hasIncomingVersions,
     },
-  })
+  }).catch(next)
 })
 
 // vocabulary search should be delivered by bartoc-search instead
-app.get("/vocabularies", (req, res) => render(req, res, "vue-page", {
+app.get("/vocabularies", (req, res, next) => sendVuePage(req, res, {
   title: "Missing bartoc-search",
   vuePage: "missingSearch",
-}))
+}).catch(next))
 
 function mergeSubjectMetadata(subject, resolved) {
   const cleaned = jskos.clean({
@@ -387,9 +426,10 @@ const reports = new ReportsDirectory(`${__dirname}data/reports`)
 app.get("/stats", async (req, res, next) => {
   backend.getSchemes({ params: { limit: 1 } })
     .then(schemes => {
-      render(req, res, "vue-page", {
+      return sendVuePage(req, res, {
         title: "Statistics",
         vuePage: "stats",
+        stylesheets: ["/css/stats.css"],
         vuePageProps: {
           reports: reports.getReports(),
           schemesCount: schemes._totalCount,
@@ -415,14 +455,14 @@ function conceptPageHandler(prefix) {
 app.get("/ILC/1/:id([a-z0-9-]+)", conceptPageHandler("https://bartoc.org/ILC/1/") )
 
 // list of terminology registries
-app.get("/registries", (req, res) => {
+app.get("/registries", (req, res, next) => {
   if (req.query.format === "jskos") {
     return res.redirect("/api/registries?limit=1000")
   }
-  render(req, res, "vue-page", {
+  return sendVuePage(req, res, {
     title: "Terminology Registries",
     vuePage: "registries",
-  })
+  }).catch(next)
 })
 
 // BARTOC ID => registry or vocabulary (if found)
@@ -510,14 +550,10 @@ async function sendItem (
       const itemType = item.type[0]
       const vuePage = vuePagesByType[itemType]
       const title = utils.label(item.prefLabel).value
-      const ssrHtml = vuePage === "registry"
-        ? await renderRegistryHtml({ item, title })
-        : undefined
-      render(req, res, "vue-page", {
+      await sendVuePage(req, res, {
         ...vars,
         item,
         title,
-        ssrHtml,
         ...(vuePage && {
           vuePage,
           vuePageProps: {
@@ -547,7 +583,7 @@ const schemesWithBartocNamespacePromise = backend.getSchemes({})
   })
 
 // BARTOC namespace redirect + error handling
-app.use(async (req, res) => {
+app.use(async (req, res, next) => {
 
   // Try to find whether the URL belongs to one of the vocabularies that use the BARTOC namespace
   const schemesWithBartocNamespace = await schemesWithBartocNamespacePromise
@@ -566,10 +602,10 @@ app.use(async (req, res) => {
   } else if (req.query.format === "nt") {
     res.type("txt").send(title)
   } else {
-    render(req, res, "vue-page", {
+    return sendVuePage(req, res, {
       title: title,
       vuePage: "notFound",
-    })
+    }).catch(next)
 
   }
 })
@@ -581,14 +617,14 @@ app.use((err, req, res, next) => {
   }
   const title = err.message || "Technical problems"
   res.status(500)
-  render(req, res, "vue-page", {
+  sendVuePage(req, res, {
     title,
     vuePage: "error",
     vuePageProps: {
       title,
       message: String(err),
     },
-  })
+  }).catch(next)
 })
 
 // Start service
