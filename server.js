@@ -283,9 +283,13 @@ async function resolveIncomingSchemeReferences(item, relation) {
   }
 }
 
+/**
+ * Add labels and incoming links needed by the page without changing stored data.
+ */
 async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
-  // Presentation enrichment must never consume the only canonical copy.
   const item = clone(storedItem)
+
+  // Load subject labels and notation. Keep each original reference if lookup fails.
   const subjects = item && item.subject || []
   if (subjects.length) {
     let found = []
@@ -302,9 +306,9 @@ async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
     })
   }
 
-  // Direct relations are stored on this item and can be edited there.
+  // Direct relations are saved as URI references. Load their labels for display.
   if (resolvedVersionOf !== undefined) {
-    // Reuse the main record loaded for derivation instead of fetching it twice.
+    // The main record was already loaded to derive this edition.
     item.versionOf = structuredClone(resolvedVersionOf)
   } else if (item?.versionOf?.length) {
     item.versionOf = await resolveSchemeReferences(item.versionOf)
@@ -314,12 +318,17 @@ async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
     item.basedOn = await resolveSchemeReferences(item.basedOn)
   }
 
+  if (item?.replacedBy?.length) {
+    item.replacedBy = await resolveSchemeReferences(item.replacedBy)
+  }
+
+  // partOf points to registries, which use a different lookup.
   if (item?.partOf?.length) {
     item.partOf = await resolveRegistryReferences(item.partOf)
   }
 
-  // Add backlinks for selected fields
-  for (let key of ["versionOf", "basedOn"]) {
+  // Find other schemes that point to this one. These links exist only on the page.
+  for (let key of ["versionOf", "basedOn", "replacedBy"]) {
     const backlinks = await resolveIncomingSchemeReferences(item, key)
     if (backlinks.length) {
       item[`_${key}Backlink`] = backlinks

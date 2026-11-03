@@ -33,6 +33,7 @@ describe("ItemEditor business logic", () => {
     expect(item.subjectOf).toEqual([])
     expect(item.versionOf).toEqual([])
     expect(item.basedOn).toEqual([])
+    expect(item.replacedBy).toEqual([])
   })
 
   it("converts the old media shape for editing", () => {
@@ -133,6 +134,11 @@ describe("ItemEditor business logic", () => {
 
     expect(itemError({
       ...validItem,
+      replacedBy: [{ uri }],
+    })).toEqual({ message: "A terminology cannot be replaced by itself." })
+
+    expect(itemError({
+      ...validItem,
       versionOf: [{ uri: "http://bartoc.org/en/node/21133" }],
       basedOn: [{ uri: "http://bartoc.org/en/node/17963" }],
     })).toBeUndefined()
@@ -203,6 +209,9 @@ describe("ItemEditor business logic", () => {
       basedOn: [
         { uri: "vocabulary:base", prefLabel: { en: "Base" } },
       ],
+      replacedBy: [
+        { uri: "vocabulary:new", prefLabel: { en: "New" } },
+      ],
       _private: "hidden",
     })
 
@@ -227,6 +236,9 @@ describe("ItemEditor business logic", () => {
       ],
       basedOn: [
         { uri: "vocabulary:base" },
+      ],
+      replacedBy: [
+        { uri: "vocabulary:new" },
       ],
     })
   })

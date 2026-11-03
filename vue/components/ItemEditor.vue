@@ -101,6 +101,7 @@
       v-model="item.replacedBy"
       :multiple="true"
       placeholder="Select another terminology from BARTOC" />
+    Select the terminology that replaces this one. Its page will link back here.
   </form-row>
 
   <hr>

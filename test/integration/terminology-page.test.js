@@ -171,6 +171,24 @@ describe("TerminologyPage", () => {
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")
   })
 
+  it("shows replaced-by relations in both directions", () => {
+    const wrapper = mountPage({
+      replacedBy: [{
+        uri: "http://bartoc.org/en/node/500",
+        prefLabel: { en: "New Terminology" },
+      }],
+      _replacedByBacklink: [{
+        uri: "http://bartoc.org/en/node/600",
+        prefLabel: { en: "Old Terminology" },
+      }],
+    })
+
+    expect(rowByLabel(wrapper, "Replaced by").get("a").attributes("href")).toBe("/en/node/500")
+    expect(rowByLabel(wrapper, "Replaced by").text()).toContain("New Terminology")
+    expect(rowByLabel(wrapper, "Successor of").get("a").attributes("href")).toBe("/en/node/600")
+    expect(rowByLabel(wrapper, "Successor of").text()).toContain("Old Terminology")
+  })
+
   it("shows media thumbnails next to the abstract", () => {
     const wrapper = mountPage({
       media: [

@@ -39,6 +39,7 @@ const arrayFields = [
   "notation",
   "partOf",
   "publisher",
+  "replacedBy",
   "subject",
   "subjectOf",
   "type",
@@ -133,6 +134,12 @@ export function cleanupItem(item) {
   // BasedOn
   if (item.basedOn) {
     item.basedOn = item.basedOn
+      .map(({ uri }) => ({ uri }))
+      .filter(value => value.uri)
+  }
+
+  if (item.replacedBy) {
+    item.replacedBy = item.replacedBy
       .map(({ uri }) => ({ uri }))
       .filter(value => value.uri)
   }

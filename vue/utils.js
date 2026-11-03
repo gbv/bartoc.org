@@ -267,6 +267,12 @@ export function trimItemIdentifiers(item) {
       .filter(v => v.uri)
   }
 
+  if (Array.isArray(item.replacedBy)) {
+    item.replacedBy = item.replacedBy
+      .map(v => ({ ...v, uri: trimString(v.uri) }))
+      .filter(v => v.uri)
+  }
+
   if (Array.isArray(item.issueTracker)) {
     item.issueTracker = item.issueTracker
       .map(tracker => ({ ...tracker, uri: trimString(tracker.uri) }))
