@@ -229,6 +229,19 @@ describe("TerminologyPage", () => {
     })
   })
 
+  it("links a publisher to matching vocabularies", () => {
+    const uri = "http://viaf.org/viaf/156706556"
+    const wrapper = mountPage({
+      publisher: [{ uri, prefLabel: { en: "Example publisher" } }],
+    })
+    const link = rowByLabel(wrapper, "Publisher").get("a")
+
+    expect(link.text()).toBe("Example publisher")
+    expect(link.attributes("href")).toBe(
+      `/vocabularies/?field=publisher_en&search=${encodeURIComponent(uri)}`,
+    )
+  })
+
   it("links full language names to vocabulary searches", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([
       { notation: ["en"], prefLabel: { en: "English" } },

@@ -251,7 +251,9 @@
           label="Publisher"
           :items="item.publisher">
           <template #item="{ item: publisher }">
-            <ItemLink :item="publisher" />
+            <ItemLink
+              :item="publisher"
+              base="/vocabularies/?field=publisher_en&search=" />
           </template>
         </MetadataListRow>
 
