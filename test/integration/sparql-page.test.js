@@ -5,10 +5,10 @@ import SparqlPage from "../../vue/pages/SparqlPage.vue"
 
 const endpoint = "https://example.org/sparql"
 const fetchMock = vi.fn()
-let yasgui
+let matgui
 let tab
 
-class YasguiMock {
+class MatguiMock {
   constructor(element, options) {
     tab = {
       query: vi.fn(),
@@ -18,7 +18,7 @@ class YasguiMock {
     this.options = options
     this.getTab = () => tab
     this.destroy = vi.fn()
-    yasgui = this
+    matgui = this
   }
 }
 
@@ -35,7 +35,7 @@ describe("SparqlPage", () => {
       json: async () => ({ results: { bindings: [] } }),
     })
     vi.stubGlobal("fetch", fetchMock)
-    vi.stubGlobal("Yasgui", YasguiMock)
+    vi.stubGlobal("Yasgui", MatguiMock)
     vi.stubGlobal("Yasr", { defaults: yasrDefaults })
   })
 
@@ -43,29 +43,30 @@ describe("SparqlPage", () => {
     vi.unstubAllGlobals()
   })
 
-  it("configures YASGUI, loads an example, and destroys it", async () => {
+  it("configures MatGUI, loads an example, and destroys it", async () => {
     const example = { label: "Construct triples", query: "CONSTRUCT WHERE { ?s ?p ?o }" }
     const wrapper = mount(SparqlPage, {
       props: { endpoint, examples: [example] },
     })
 
-    expect(yasgui.element).toBe(wrapper.get(".sparql-yasgui").element)
-    expect(yasgui.options).toMatchObject({
+    expect(matgui.element).toBe(wrapper.get(".sparql-matgui").element)
+    expect(matgui.options).toMatchObject({
       autofocus: false,
       persistenceId: null,
       populateFromUrl: false,
+      quickStartOnFirstVisit: false,
       requestConfig: { endpoint, method: "POST" },
       yasqe: { value: "ASK {}" },
     })
     expect(window.Yasr.defaults.plugins.Geo).toBe(false)
-    expect(yasgui.options.endpointCatalogueOptions.getData()).toEqual([{ endpoint }])
+    expect(matgui.options.endpointCatalogueOptions.getData()).toEqual([{ endpoint }])
 
     await wrapper.get("#sparql-example").setValue("0")
     expect(tab.setQuery).toHaveBeenCalledWith(example.query)
     expect(tab.query).not.toHaveBeenCalled()
 
     wrapper.unmount()
-    expect(yasgui.destroy).toHaveBeenCalledOnce()
+    expect(matgui.destroy).toHaveBeenCalledOnce()
   })
 
   it("shows the knowledge graph update time", async () => {
@@ -92,8 +93,8 @@ describe("SparqlPage", () => {
     wrapper.unmount()
   })
 
-  it("shows a danger message when YASGUI cannot be initialized", async () => {
-    const initializationError = new Error("YASGUI failed")
+  it("shows a danger message when MatGUI cannot be initialized", async () => {
+    const initializationError = new Error("MatGUI failed")
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
     vi.stubGlobal("Yasgui", class {
       constructor() {

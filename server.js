@@ -73,11 +73,6 @@ app.use(
   "/vendor/yasgui/",
   express.static("node_modules/@matdata/yasgui/build"),
 )
-app.use(
-  "/vendor/fontawesome/",
-  express.static("node_modules/@fortawesome/fontawesome-free"),
-)
-
 
 import redirectsRoute from "./routes/redirects.js"
 import apiRoute from "./routes/api.js"

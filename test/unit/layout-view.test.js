@@ -56,10 +56,7 @@ describe("layout view", () => {
 
   it("includes page-specific assets", async () => {
     document.documentElement.innerHTML = await renderLayout("/graph/", {
-      stylesheets: [
-        "/vendor/yasgui/yasgui.min.css",
-        "/vendor/fontawesome/css/all.min.css",
-      ],
+      stylesheets: ["/vendor/yasgui/yasgui.min.css"],
       scripts: ["/vendor/yasgui/yasgui.min.js"],
     })
 
@@ -67,7 +64,6 @@ describe("layout view", () => {
       .map(link => link.getAttribute("href"))
 
     expect(stylesheetUrls).toContain("/vendor/yasgui/yasgui.min.css")
-    expect(stylesheetUrls).toContain("/vendor/fontawesome/css/all.min.css")
     expect(document.querySelector("script[src='/vendor/yasgui/yasgui.min.js']")).not.toBeNull()
   })
 

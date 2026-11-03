@@ -18,10 +18,7 @@ export default function createSparqlRoute({ endpoint, examples, render }) {
           endpoint,
           examples,
         },
-        stylesheets: [
-          "/vendor/yasgui/yasgui.min.css",
-          "/vendor/fontawesome/css/all.min.css",
-        ],
+        stylesheets: ["/vendor/yasgui/yasgui.min.css"],
         scripts: ["/vendor/yasgui/yasgui.min.js"],
       })
     })

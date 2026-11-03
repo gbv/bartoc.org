@@ -41,12 +41,11 @@
     "node": ">=22.19.0"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.7.2",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@gbv/bartoc-components": "github:gbv/bartoc-components#v0.5.0",
-    "@matdata/yasgui": "^5.20.3",
+    "@matdata/yasgui": "^6.12.0",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vueform/multiselect": "^2.6.10",
     "axios": "^1.7.7",
@@ -71,7 +70,7 @@
     "rdflib": "^2.2.35",
     "timeago.js": "^4.0.2",
     "vite": "^7.1.7",
-    "vue": "^3.5.12"
+    "vue": "^3.5.44"
   },
   "optionalDependencies": {
     "fsevents": "2.3.3"

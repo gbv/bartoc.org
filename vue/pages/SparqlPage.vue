@@ -43,8 +43,8 @@
 
   <div
     v-else
-    ref="yasguiElement"
-    class="sparql-yasgui" />
+    ref="matguiElement"
+    class="sparql-matgui" />
 </template>
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from "vue"
@@ -61,10 +61,10 @@ const props = defineProps({
   },
 })
 
-const yasguiElement = ref(null)
+const matguiElement = ref(null)
 const editorFailed = ref(false)
 const updatedAt = ref("")
-let yasgui
+let matgui
 
 // The graph metadata contains the timestamp of the latest completed import.
 const updatedAtQuery = `
@@ -107,7 +107,7 @@ async function loadUpdatedAt() {
 function loadExample(event) {
   const example = props.examples[event.target.value]
   if (example) {
-    yasgui?.getTab()?.setQuery(example.query)
+    matgui?.getTab()?.setQuery(example.query)
   }
 }
 
@@ -123,10 +123,11 @@ onMounted(() => {
   try {
     disableGeoPlugin()
 
-    yasgui = new window.Yasgui(yasguiElement.value, {
+    matgui = new window.Yasgui(matguiElement.value, {
       autofocus: false,
       persistenceId: null,
       populateFromUrl: false,
+      quickStartOnFirstVisit: false,
       requestConfig: {
         endpoint: props.endpoint,
         method: "POST",
@@ -145,7 +146,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  yasgui?.destroy()
+  matgui?.destroy()
 })
 </script>
 <style scoped>
@@ -166,56 +167,74 @@ onBeforeUnmount(() => {
   margin: 0;
 }
 
-.sparql-yasgui {
+.sparql-matgui {
+  /* MatGUI still uses yasgui-* names for its theme variables. */
+  --yasgui-surface: var(--cc-color-page);
+  --yasgui-surface-raised: var(--cc-color-surface);
+  --yasgui-surface-sunken: var(--cc-color-surface-muted);
+  --yasgui-surface-selected: var(--cc-color-accent);
+  --yasgui-nav-bg: var(--cc-color-page);
+  --yasgui-ink: var(--cc-color-text);
+  --yasgui-ink-body: var(--cc-color-text);
+  --yasgui-ink-muted: var(--cc-color-muted);
+  --yasgui-line: var(--cc-border-color);
+  --yasgui-brand: var(--cc-color-primary);
+  --yasgui-brand-fill: var(--cc-color-primary);
+  --yasgui-brand-fill-strong: var(--cc-color-link);
+  --yasgui-brand-strong: var(--cc-color-link);
+  --yasgui-brand-soft: var(--cc-color-accent);
+  --yasgui-on-brand: var(--cc-color-on-primary);
+  --yasgui-focus: var(--cc-color-primary);
   --yasgui-accent-color: var(--cc-color-primary);
+  --yasgui-accent-bg: var(--cc-color-accent);
   --yasgui-link-color: var(--cc-color-link);
-  --yasgui-link-hover: var(--cc-color-primary-hover);
-  --yasgui-button-hover: var(--cc-color-primary);
+  --yasgui-link-hover: var(--cc-color-primary);
   --yasgui-input-focus: var(--cc-color-primary);
-  --yasgui-button-text: var(--cc-color-text);
   --yasgui-input-border: var(--cc-border-color-control);
-  --yasgui-border-color: var(--cc-border-color);
   --yasgui-bg-primary: var(--cc-color-surface);
-  --yasgui-bg-secondary: var(--cc-color-surface-muted);
+  --yasgui-bg-secondary: var(--cc-color-page);
+  --yasgui-border-color: var(--cc-border-color);
+  --yasgui-font-family: inherit;
+  --yasgui-radius-sm: var(--cc-radius-sm);
+  --yasgui-radius-md: var(--cc-radius-md);
+  --yasgui-radius-lg: var(--cc-radius-lg);
+  --yasgui-radius-button: var(--cc-radius-sm);
   --yasgui-graph-button-bg: var(--cc-color-primary);
-  --yasgui-graph-button-hover: var(--cc-color-primary-hover);
+  --yasgui-graph-button-hover: var(--cc-color-link);
   --yasgui-graph-button-text: var(--cc-color-on-primary);
 
   min-height: 800px;
   margin-bottom: var(--cc-space-xl);
 }
 
-.sparql-yasgui :deep(.yasqe_queryButton) {
-  --yasgui-button-text: var(--cc-color-on-primary);
-
-  border: 1px solid var(--cc-color-primary);
-  border-radius: var(--cc-radius-sm);
-  background: var(--cc-color-primary);
-  color: var(--cc-color-on-primary);
-}
-
-.sparql-yasgui :deep(.yasqe_queryButton:hover),
-.sparql-yasgui :deep(.yasqe_queryButton:focus-visible) {
-  border-color: var(--cc-color-primary-hover);
-  background: var(--cc-color-primary-hover);
-}
-
-.sparql-yasgui :deep(.yasqe_queryButton:focus-visible) {
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--cc-color-primary) 20%, transparent);
-}
-
-.sparql-yasgui :deep(.tabsList .tab.active > a) {
-  border-bottom-color: var(--cc-color-primary);
-}
-
-.sparql-yasgui :deep(.tabPanel:not(.orientation-horizontal) > .yasrWrapperEl) {
-  margin-top: var(--cc-space-md);
-}
-
 /* The endpoint is public page configuration, not a user-editable field. */
-.sparql-yasgui :deep(.autocompleteWrapper),
-.sparql-yasgui :deep(.endpointButtonsContainer) {
+.sparql-matgui :deep(.autocompleteWrapper) {
   display: none;
+}
+
+.sparql-matgui :deep(.yasgui-graph-settings-panel) {
+  --yasgui-text-primary: var(--cc-color-text);
+  --yasgui-text-secondary: var(--cc-color-muted);
+  --yasgui-border-color: var(--cc-border-color-control);
+
+  background: var(--cc-color-surface);
+  color: var(--cc-color-text);
+  border-radius: var(--cc-radius-md);
+  box-shadow: var(--cc-shadow-md);
+  font-size: var(--cc-font-size-sm);
+}
+
+.sparql-matgui :deep(.yasgui-graph-settings-section) {
+  font-size: var(--cc-font-size-sm);
+}
+
+.sparql-matgui :deep(.yasgui-graph-settings-select) {
+  font-size: var(--cc-font-size-sm);
+  padding: var(--cc-space-xs) var(--cc-space-sm);
+  border-radius: var(--cc-radius-sm);
+}
+
+.sparql-matgui :deep(.yasgui-graph-settings-row input[type="checkbox"] + span) {
+  margin-right: auto;
 }
 </style>
