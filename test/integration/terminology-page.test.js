@@ -2,7 +2,7 @@
 import { defineComponent, h, nextTick, ref } from "vue"
 import { flushPromises, mount } from "@vue/test-utils"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import TerminologyPage from "../../vue/pages/TerminologyPage.vue"
+import ItemPage from "../../vue/pages/ItemPage.vue"
 import { loadWikipediaLinks } from "../../vue/utils/wikipedia.js"
 import { imageMedia } from "../helpers/media.js"
 
@@ -75,7 +75,7 @@ const item = {
 }
 
 function mountPage(itemOverrides = {}, derivedFields = {}) {
-  return mount(TerminologyPage, {
+  return mount(ItemPage, {
     props: {
       title: "Test Vocabulary",
       item: { ...item, ...itemOverrides },
@@ -127,7 +127,7 @@ function wikipediaPage(url, languageCode) {
   }
 }
 
-describe("TerminologyPage", () => {
+describe("ItemPage (terminology)", () => {
   beforeEach(() => {
     window.history.replaceState({}, "", "/en/node/123")
     window.sessionStorage.clear()

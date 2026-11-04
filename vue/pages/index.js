@@ -6,13 +6,12 @@ import DownloadPage from "./DownloadPage.vue"
 import EditPage from "./EditPage.vue"
 import ErrorPage from "./ErrorPage.vue"
 import HomePage from "./HomePage.vue"
+import ItemPage from "./ItemPage.vue"
 import MissingSearchPage from "./MissingSearchPage.vue"
 import RegistriesPage from "./RegistriesPage.vue"
-import RegistryPage from "./RegistryPage.vue"
 import SoftwarePage from "./SoftwarePage.vue"
 import SparqlPage from "./SparqlPage.vue"
 import StatsPage from "./StatsPage.vue"
-import TerminologyPage from "./TerminologyPage.vue"
 import TopRatedPointsPage from "./TopRatedPointsPage.vue"
 import notFoundPage from "./NotFoundPage.vue"
 
@@ -27,10 +26,10 @@ export const pages = {
   home: HomePage,
   missingSearch: MissingSearchPage,
   registries: RegistriesPage,
-  registry: RegistryPage,
+  registry: ItemPage,
   software: SoftwarePage,
   stats: StatsPage,
-  terminology: TerminologyPage,
+  terminology: ItemPage,
   topRatedPoints: TopRatedPointsPage,
   notFound: notFoundPage,
   sparql: SparqlPage,

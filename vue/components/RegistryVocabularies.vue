@@ -58,6 +58,7 @@ const props = defineProps({
     required: true,
   },
 })
+const emit = defineEmits(["count"])
 
 const previewLimit = 10
 // The server renders the search link before the browser starts the preview request.
@@ -100,6 +101,7 @@ async function loadTerminologies() {
       ? items.filter(terminology => terminology?.uri)
       : []
     terminologyCount.value = responseTotalCount(response) ?? terminologies.value.length
+    emit("count", terminologyCount.value)
     status.value = "ready"
   } catch {
     // Fall back to the plain search link when the preview cannot be loaded.

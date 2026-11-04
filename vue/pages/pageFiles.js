@@ -10,11 +10,11 @@ export const pageFiles = {
   home: "HomePage.vue",
   missingSearch: "MissingSearchPage.vue",
   registries: "RegistriesPage.vue",
-  registry: "RegistryPage.vue",
+  registry: "ItemPage.vue",
   software: "SoftwarePage.vue",
   sparql: "SparqlPage.vue",
   stats: "StatsPage.vue",
-  terminology: "TerminologyPage.vue",
+  terminology: "ItemPage.vue",
   topRatedPoints: "TopRatedPointsPage.vue",
   notFound: "NotFoundPage.vue",
 }

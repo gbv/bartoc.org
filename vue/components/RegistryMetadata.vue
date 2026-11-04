@@ -1,5 +1,4 @@
 <template>
-  <h1>{{ title }}</h1>
   <LocalizedAbstract :abstract="item.definition" />
   <LocalizedAbstract :abstract="item.scopeNote" />
 
@@ -74,45 +73,20 @@
         <ItemLink :item="license" />
       </template>
     </MetadataListRow>
-
-    <MetadataRow label="Function">
-      <a
-        v-if="isFullRepository"
-        href="/full-repository">
-        terminology {{ item.API?.length ? "service" : "repository" }}
-      </a>
-      <template v-else>
-        metadata registry
-      </template>
-    </MetadataRow>
-
-    <MetadataRow label="Terminologies in BARTOC">
-      <RegistryVocabularies :registry-uri="item.uri" />
-    </MetadataRow>
   </table>
-
-  <ItemDates :item="item" />
 </template>
 
 <script setup>
-import { computed } from "vue"
-import ExternalLink from "../components/ExternalLink.vue"
-import ItemDates from "../components/ItemDates.vue"
-import ItemLink from "../components/ItemLink.vue"
-import LocalizedAbstract from "../components/LocalizedAbstract.vue"
-import MetadataListRow from "../components/MetadataListRow.vue"
-import MetadataRow from "../components/MetadataRow.vue"
-import RegistryVocabularies from "../components/RegistryVocabularies.vue"
-import ServiceLink from "../components/ServiceLink.vue"
+import ExternalLink from "./ExternalLink.vue"
+import ItemLink from "./ItemLink.vue"
+import LocalizedAbstract from "./LocalizedAbstract.vue"
+import MetadataListRow from "./MetadataListRow.vue"
+import MetadataRow from "./MetadataRow.vue"
+import ServiceLink from "./ServiceLink.vue"
 
-defineOptions({ name: "RegistryPage" })
+defineOptions({ name: "RegistryMetadata" })
 
-const props = defineProps({
-  title: { type: String, required: true },
+defineProps({
   item: { type: Object, required: true },
 })
-
-const isFullRepository = computed(() =>
-  props.item.type?.includes("http://bartoc.org/full-repository"),
-)
 </script>

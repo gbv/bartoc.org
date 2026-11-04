@@ -30,7 +30,7 @@ describe("registry page", () => {
     expect(document.querySelector("p[lang='en']").textContent).toBe("A registry of vocabularies.")
     expect(document.querySelector(".metadata-list").textContent).toContain("https://example.org/registry")
     expect(document.querySelector("a[href='http://example.org/subject']").textContent).toBe("Agriculture")
-    expect(document.querySelector("a[href='/full-repository']").textContent).toContain("terminology repository")
+    expect(document.body.textContent).toContain("This is a terminology repository.")
     expect(document.querySelector("a[href^='/vocabularies?partOf=']").getAttribute("href"))
       .toContain(encodeURIComponent(uri))
     expect(document.querySelector(".item-dates time").getAttribute("datetime")).toBe("2024-01-02")
