@@ -2,7 +2,7 @@ import { computed, ref, toRefs, watch } from "vue"
 
 import { createBartocApp } from "./appFactory.js"
 import { loadClientPage } from "./pages/client.js"
-import { parseJson } from "./utils.js"
+import { parseJson } from "./utils/parseJson.js"
 import { Login } from "gbv-login-client-vue"
 
 // Read the data used for server rendering so Vue can hydrate the same page.

@@ -1,5 +1,6 @@
 import { isValidUrl, mediaThumbnailUrl, validatePublisher } from "../src/validation.js"
 export { isValidUrl, mediaThumbnailUrl, validatePublisher }
+export { parseJson } from "./utils/parseJson.js"
 import { cdk, addAllProviders } from "cocoda-sdk"
 import { franc } from "franc-min"
 import convert3To1 from "iso-639-3-to-1"
@@ -18,18 +19,6 @@ export async function cdkLoadConcepts(scheme, uri) {
 
   const result = await registry.getConcepts({ concepts: [{ uri, inScheme: [scheme] }] })
   return result
-}
-
-export function parseJson(value, fallback = {}) {
-  if (!value) {
-    return fallback
-  }
-
-  try {
-    return JSON.parse(value)
-  } catch {
-    return fallback
-  }
 }
 
 // Read JSON saved in the current browser tab.

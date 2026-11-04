@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from "vitest"
 import { createBartocApp } from "../../vue/appFactory.js"
 import { renderVuePage } from "../../vue/entry-server.js"
-import { pages } from "../../vue/pages/index.js"
+import { loadClientPage } from "../../vue/pages/client.js"
 
 describe("Vue SSR hydration", () => {
   it("renders the home search with the server count", async () => {
@@ -123,6 +123,7 @@ describe("Vue SSR hydration", () => {
         item: { uri: "http://bartoc.org/en/node/100", type: ["http://www.w3.org/2004/02/skos/core#ConceptScheme"] },
       },
     },
+    { page: "edit", pageProps: { title: "Add vocabulary", cancelUrl: "/" } },
   ])("hydrates $page, header, and footer without replacing their markup", async ({ page, pageProps }) => {
     const footer = { siteName: "BARTOC.org", resourcePath: "/missing", query: {} }
     const header = { activePath: "/missing", userCanAdd: false }
@@ -134,9 +135,12 @@ describe("Vue SSR hydration", () => {
     const mainElement = document.querySelector("#app main")
     const footerElement = document.querySelector("#app footer")
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const fetch = page === "edit"
+      ? vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true, json: async () => [] })
+      : null
 
     const app = createBartocApp({
-      pageComponent: pages[page],
+      pageComponent: await loadClientPage(page),
       pageProps,
       footer,
       header,
@@ -150,6 +154,7 @@ describe("Vue SSR hydration", () => {
       expect(warn.mock.calls.flat().join(" ")).not.toMatch(/hydration mismatch/i)
     } finally {
       app.unmount()
+      fetch?.mockRestore()
       warn.mockRestore()
     }
   })
