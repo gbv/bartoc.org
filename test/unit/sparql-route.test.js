@@ -3,12 +3,7 @@ import request from "supertest"
 import { describe, expect, it, vi } from "vitest"
 import createSparqlRoute from "../../routes/sparql.js"
 
-const examples = [
-  {
-    label: "Example query",
-    query: "ASK {}",
-  },
-]
+const examples = "http://example.org/workspace.json"
 
 function createApp(endpoint) {
   const app = express()
@@ -16,11 +11,7 @@ function createApp(endpoint) {
     res.json({ locals })
   })
 
-  app.use(createSparqlRoute({
-    endpoint,
-    examples,
-    render,
-  }))
+  app.use(createSparqlRoute({ endpoint, examples, render }))
   app.use((_req, res) => {
     res.sendStatus(404)
   })

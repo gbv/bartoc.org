@@ -9,44 +9,7 @@
   "name": "BARTOC.org",
   "fullname": "Basic Register of Thesauri, Ontologies & Classifications",
   "sparql": null,
-  "sparqlExamples": [
-    {
-      "label": "Count triples by graph",
-      "query": "SELECT ?g (COUNT(*) AS ?triples)\nWHERE {\n  GRAPH ?g {\n    ?s ?p ?o\n  }\n}\nGROUP BY ?g\nORDER BY DESC(?triples)"
-    },
-    {
-      "label": "Describe a BK concept (Graph)",
-      "query": "DESCRIBE <http://uri.gbv.de/terminology/bk/74.07>\nFROM <https://bartoc.org/graph/terminology/>"
-    },
-    {
-      "label": "Basic Classification metadata (Graph)",
-      "query": "PREFIX dct: <http://purl.org/dc/terms/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nCONSTRUCT {\n  ?scheme a skos:ConceptScheme ;\n    skos:prefLabel ?label ;\n    skos:notation ?notation ;\n    dct:publisher ?publisher ;\n    dct:subject ?subject ;\n    dct:license ?license .\n  ?subject skos:prefLabel ?subjectLabel ;\n    skos:notation ?subjectNotation .\n}\nWHERE {\n  GRAPH <https://bartoc.org/graph/terminology/> {\n    BIND(<http://bartoc.org/en/node/18785> AS ?scheme)\n    ?scheme a skos:ConceptScheme .\n    OPTIONAL { ?scheme skos:prefLabel ?label . FILTER (LANG(?label) = \"en\") }\n    OPTIONAL { ?scheme skos:notation ?notation }\n    OPTIONAL { ?scheme dct:publisher ?publisher }\n    OPTIONAL { ?scheme dct:license ?license }\n    OPTIONAL {\n      ?scheme dct:subject ?subject .\n      OPTIONAL { ?subject skos:prefLabel ?subjectLabel . FILTER (LANG(?subjectLabel) = \"en\") }\n      OPTIONAL { ?subject skos:notation ?subjectNotation }\n    }\n  }\n}"
-    },
-    {
-      "label": "Terminologies about historical geography (Graph)",
-      "query": "PREFIX dct: <http://purl.org/dc/terms/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nCONSTRUCT {\n  ?terminology dct:subject ?subject ;\n    skos:prefLabel ?terminologyLabel .\n  ?subject a skos:Concept ;\n    skos:prefLabel ?subjectLabel ;\n    skos:notation ?notation ;\n    skos:inScheme ?scheme .\n  ?scheme skos:prefLabel ?schemeLabel .\n}\nWHERE {\n  GRAPH <https://bartoc.org/graph/terminology/> {\n    BIND(<http://uri.gbv.de/terminology/bk/74.07> AS ?subject)\n    ?terminology dct:subject ?subject ;\n      skos:prefLabel ?terminologyLabel .\n    FILTER (LANG(?terminologyLabel) = \"en\")\n    ?subject a skos:Concept ;\n      skos:prefLabel ?subjectLabel ;\n      skos:notation ?notation ;\n      skos:inScheme ?scheme .\n    FILTER (LANG(?subjectLabel) = \"en\")\n    ?scheme skos:prefLabel ?schemeLabel .\n    FILTER (LANG(?schemeLabel) = \"en\")\n  }\n}"
-    },
-    {
-      "label": "Classes by number of instances",
-      "query": "SELECT ?class (COUNT(?instance) AS ?count)\nWHERE {\n  ?instance a ?class\n}\nGROUP BY ?class\nORDER BY DESC(?count)"
-    },
-    {
-      "label": "Properties by number of triples",
-      "query": "SELECT ?property (COUNT(*) AS ?count)\nWHERE {\n  ?subject ?property ?object\n}\nGROUP BY ?property\nORDER BY DESC(?count)"
-    },
-    {
-      "label": "Publishers",
-      "query": "PREFIX dct: <http://purl.org/dc/terms/>\n\nSELECT ?publisher (COUNT(*) AS ?count)\nWHERE {\n  ?x dct:publisher ?publisher\n}\nGROUP BY ?publisher\nORDER BY DESC(?count)"
-    },
-    {
-      "label": "Publishers with DDC main subjects",
-      "query": "PREFIX dct: <http://purl.org/dc/terms/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX bartoc: <http://bartoc.org/en/node/>\n\nSELECT ?publisher ?class ?label (COUNT(?terminology) AS ?count)\nWHERE {\n  ?terminology dct:publisher ?publisher .\n  ?terminology dct:subject ?ddc .\n  ?ddc skos:inScheme bartoc:241 .\n  ?ddc skos:notation ?class .\n  ?ddc skos:prefLabel ?label .\n  FILTER (STRLEN(?class) = 1)\n}\nGROUP BY ?publisher ?class ?label\nORDER BY DESC(?count)"
-    },
-    {
-      "label": "Terminologies by decade of creation",
-      "query": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\n\nSELECT ?decade (COUNT(?terminology) AS ?count)\nWHERE {\n  ?terminology a skos:ConceptScheme .\n  ?terminology schema:startDate ?date .\n  BIND(CONCAT(SUBSTR(STR(?date), 1, 3), \"0\") AS ?decade)\n}\nGROUP BY ?decade\nORDER BY ?decade"
-    }
-  ],
+  "sparqlExamples": "https://gbv.github.io/bartoc-queries/workspace.json",
   "menu": [
      {
       "url": "/about",

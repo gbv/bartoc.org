@@ -43,10 +43,9 @@ describe("SparqlPage", () => {
     vi.unstubAllGlobals()
   })
 
-  it("configures MatGUI, loads an example, and destroys it", async () => {
-    const example = { label: "Construct triples", query: "CONSTRUCT WHERE { ?s ?p ?o }" }
+  it("configures MatGUI, and destroys it", async () => {
     const wrapper = mount(SparqlPage, {
-      props: { endpoint, examples: [example] },
+      props: { endpoint },
     })
 
     expect(matgui.element).toBe(wrapper.get(".sparql-matgui").element)
@@ -60,10 +59,6 @@ describe("SparqlPage", () => {
     })
     expect(window.Yasr.defaults.plugins.Geo).toBe(false)
     expect(matgui.options.endpointCatalogueOptions.getData()).toEqual([{ endpoint }])
-
-    await wrapper.get("#sparql-example").setValue("0")
-    expect(tab.setQuery).toHaveBeenCalledWith(example.query)
-    expect(tab.query).not.toHaveBeenCalled()
 
     wrapper.unmount()
     expect(matgui.destroy).toHaveBeenCalledOnce()
@@ -88,7 +83,6 @@ describe("SparqlPage", () => {
       timeStyle: "short",
     }).format(new Date(`${timestamp}Z`)))
     expect(fetchMock.mock.calls[0][0].searchParams.get("query")).toContain("dct:modified")
-    expect(wrapper.find(".example-query").exists()).toBe(false)
 
     wrapper.unmount()
   })

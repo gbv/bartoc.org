@@ -1,9 +1,6 @@
 import defaultsDeep from "lodash.defaultsdeep"
 import { cdk } from "cocoda-sdk"
-import {
-  normalizeSparqlExamples,
-  validateSparqlEndpoint,
-} from "./utils.js"
+import { validateSparqlEndpoint } from "./utils.js"
 
 // to load local JSON files
 import { createRequire } from "module"
@@ -35,12 +32,7 @@ try {
 
 const config = defaultsDeep({ env }, configEnv, configUser, configDefault)
 
-config.sparqlExamples = normalizeSparqlExamples(
-  configEnv.sparqlExamples ??
-  configUser.sparqlExamples ??
-  configDefault.sparqlExamples,
-)
-
+config.sparqlExamples = configEnv.sparqlExamples ?? configUser.sparqlExamples ?? configDefault.sparqlExamples
 config.sparql = validateSparqlEndpoint(config.sparql)
 
 // Logging functions

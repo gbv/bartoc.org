@@ -66,25 +66,18 @@ To be able to log in, add, and edit vocabularies, you need to setup and configur
 ```
 
 The optional SPARQL query page is enabled by setting `sparql` to an absolute
-HTTP(S) endpoint URL. Its example selector can be customized with
-`sparqlExamples`:
+HTTP(S) endpoint URL. A set of example queries can be provided as MatGUI
+[Web workspace](https://github.com/Matdata-eu/MatGUI/blob/main/docs/user-guide.md#web-workspaces)
+with `sparqlExamples`:
 
 ```json
 {
   "sparql": "https://example.org/sparql",
-  "sparqlExamples": [
-    {
-      "label": "Check whether the dataset contains triples",
-      "query": "ASK { ?s ?p ?o }"
-    }
-  ]
+  "sparqlExamples": "https://gbv.github.io/bartoc-queries/workspace.json"
 }
 ```
 
-Each example requires a non-empty `label` and `query`. A configured array
-replaces the default examples completely; use an empty array to hide the
-example selector. The query page is available at `/graph/` when `sparql` is
-configured.
+The query page is available at `/graph/` when `sparql` is configured.
 
 The page also displays the latest knowledge graph update when the endpoint
 provides `<https://bartoc.org/graph/terminology/> dct:modified ?updated` in the

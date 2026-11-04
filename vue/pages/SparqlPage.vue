@@ -9,38 +9,12 @@
       <time :datetime="updatedAt">{{ formatTimestamp(updatedAt) }}</time>.
     </span>
   </p>
-
-
-  <div
-    v-if="examples.length"
-    class="example-query">
-    <label for="sparql-example">Example queries</label>
-    <select
-      id="sparql-example"
-      class="cc-form-control"
-      value=""
-      @change="loadExample">
-      <option
-        value=""
-        disabled>
-        Select an example
-      </option>
-      <option
-        v-for="(example, index) in examples"
-        :key="index"
-        :value="String(index)">
-        {{ example.label }}
-      </option>
-    </select>
-  </div>
-
   <p
     v-if="editorFailed"
     class="cc-message cc-message--danger"
     role="alert">
     The SPARQL query editor could not be loaded. Reload the page to try again.
   </p>
-
   <div
     v-else
     ref="matguiElement"
@@ -56,8 +30,8 @@ const props = defineProps({
     required: true,
   },
   examples: {
-    type: Array,
-    default: () => [],
+    type: String,
+    default: () => undefined,
   },
 })
 
@@ -104,13 +78,6 @@ async function loadUpdatedAt() {
   }
 }
 
-function loadExample(event) {
-  const example = props.examples[event.target.value]
-  if (example) {
-    matgui?.getTab()?.setQuery(example.query)
-  }
-}
-
 function disableGeoPlugin() {
   if (window.Yasr?.defaults?.plugins) {
     window.Yasr.defaults.plugins.Geo = false
@@ -136,9 +103,17 @@ onMounted(() => {
         getData: () => [{ endpoint: props.endpoint }],
       },
       yasqe: {
-        value: "ASK {}",
+        value: "ASK {}", // TODO: get from URL or use first example
       },
     })
+    if (props.examples) {
+      matgui.persistentConfig.addOrUpdateWorkspace({
+        id: props.examples,
+        type: "http",
+        label: "Examples",
+        manifestUrl: props.examples,
+      })
+    }
   } catch (error) {
     console.error("Could not load the SPARQL query editor.", error)
     editorFailed.value = true
