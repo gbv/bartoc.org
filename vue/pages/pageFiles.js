@@ -1,0 +1,20 @@
+// Keep the browser page names aligned with the server-rendered page names.
+export const pageFiles = {
+  about: "AboutPage.vue",
+  concept: "ConceptPage.vue",
+  contact: "ContactPage.vue",
+  contributing: "ContributingPage.vue",
+  download: "DownloadPage.vue",
+  edit: "EditPage.vue",
+  error: "ErrorPage.vue",
+  home: "HomePage.vue",
+  missingSearch: "MissingSearchPage.vue",
+  registries: "RegistriesPage.vue",
+  registry: "RegistryPage.vue",
+  software: "SoftwarePage.vue",
+  sparql: "SparqlPage.vue",
+  stats: "StatsPage.vue",
+  terminology: "TerminologyPage.vue",
+  topRatedPoints: "TopRatedPointsPage.vue",
+  notFound: "NotFoundPage.vue",
+}

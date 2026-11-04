@@ -51,6 +51,11 @@ describe("Vue document", () => {
               imports: ["_shared.js"],
             },
             "_shared.js": { file: "assets/shared.js", css: ["assets/shared.css"] },
+            "vue/pages/SparqlPage.vue": {
+              file: "assets/sparql.js",
+              css: ["assets/sparql.css"],
+              imports: ["_shared.js"],
+            },
           },
         },
       },
@@ -65,7 +70,9 @@ describe("Vue document", () => {
     expect(document.querySelector("script[src='/dist/assets/main.js']")).not.toBeNull()
     expect(document.querySelector("link[href='/dist/assets/main.css']")).not.toBeNull()
     expect(document.querySelector("link[href='/dist/assets/shared.css']")).not.toBeNull()
+    expect(document.querySelector("link[href='/dist/assets/sparql.css']")).not.toBeNull()
     expect(document.querySelector("link[rel='modulepreload'][href='/dist/assets/shared.js']")).not.toBeNull()
+    expect(document.querySelector("link[rel='modulepreload'][href='/dist/assets/sparql.js']")).not.toBeNull()
     expect(html.indexOf("assets/main.css")).toBeLessThan(html.indexOf("assets/main.js"))
     expect(html.indexOf("assets/shared.css")).toBeLessThan(html.indexOf("assets/main.js"))
     expect(document.querySelector("link[href='/vendor/yasgui/yasgui.min.css']")).not.toBeNull()

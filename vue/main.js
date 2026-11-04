@@ -1,7 +1,7 @@
 import { computed, ref, toRefs, watch } from "vue"
 
 import { createBartocApp } from "./appFactory.js"
-import { pages } from "./pages/index.js"
+import { loadClientPage } from "./pages/client.js"
 import { parseJson } from "./utils.js"
 import { Login } from "gbv-login-client-vue"
 
@@ -47,26 +47,31 @@ watch(token, async currentToken => {
   }
 }, { immediate: true })
 
-// Recreate the server app with its page, props, and shared shell data.
-const app = createBartocApp({
-  pageComponent: pages[serverState.page],
-  pageProps: serverState.pageProps || {},
-  footer: serverState.footer || {},
-  header: {
-    activePath: serverState.header?.activePath || "",
-    userCanAdd,
-    loginReady,
-    addReady,
-  },
-})
+async function hydrate() {
+  // Load only this page in the browser, using the same component as SSR.
+  const pageComponent = await loadClientPage(serverState.page)
+  const app = createBartocApp({
+    pageComponent,
+    pageProps: serverState.pageProps || {},
+    footer: serverState.footer || {},
+    header: {
+      activePath: serverState.header?.activePath || "",
+      userCanAdd,
+      loginReady,
+      addReady,
+    },
+  })
 
-// Keep the SSR login state anonymous until Vue has hydrated the header.
-app.mount("#app")
-Login.connect(serverState.login.api, { ssl: serverState.login.ssl })
+  // Keep the SSR login state anonymous until Vue has hydrated the header.
+  app.mount("#app")
+  Login.connect(serverState.login.api, { ssl: serverState.login.ssl })
 
-// Plain JavaScript is sufficient for relative timestamps.
-// See https://github.com/hustcc/timeago.js/issues/230
-const timeagoNodes = document.querySelectorAll(".timeago")
-if (timeagoNodes.length) {
-  render(timeagoNodes)
+  // Plain JavaScript is sufficient for relative timestamps.
+  // See https://github.com/hustcc/timeago.js/issues/230
+  const timeagoNodes = document.querySelectorAll(".timeago")
+  if (timeagoNodes.length) {
+    render(timeagoNodes)
+  }
 }
+
+hydrate().catch(error => console.error("Could not hydrate the page.", error))
