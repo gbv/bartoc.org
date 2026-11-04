@@ -10,37 +10,13 @@ import {
 } from "./src/rdf.js"
 import { canonicalItemCopy } from "./src/itemSerialization.js"
 import { deriveEditionRecord, hasValidVersionOf } from "./src/editions.js"
-import child_process from "child_process"
+import { createServer as createHttpServer } from "node:http"
 import portfinder from "portfinder"
 import { getConceptsInBatches } from "./src/backend.js"
 import { ReportsDirectory } from "./src/dvrf.js"
 import { renderVueDocument } from "./src/vueDocument.js"
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
-
-// Build the browser assets and the server renderer on first run.
-let vueBuildPromise = Promise.resolve(true)
-if (config.env !== "development") {
-  console.log("Building Vue project in background... (old Vue files might be served in the meantime)")
-  vueBuildPromise = new Promise(resolve => {
-    child_process.exec("npm run build", { env: process.env }, (error) => {
-      if (error) {
-        console.warn("Vue build failed!", error)
-        resolve(false)
-      } else {
-        console.log("Vue project built successfully.")
-        // Add manifest to config
-        const file = "dist/.vite/manifest.json"
-        try {
-          config.vue.manifest = utils.readJson(__dirname, file)
-        } catch(error) {
-          console.warn(`Could not read Vite manifest in ${file}, there might be issues with the front end build.`)
-        }
-        resolve(true)
-      }
-    })
-  })
-}
 
 const backend = config.registry
 
@@ -54,7 +30,28 @@ const formats = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-form
 // Initialize express with settings
 import express from "express"
 const app = express()
+const httpServer = createHttpServer(app)
 app.set("json spaces", 2)
+
+let vueRenderer
+if (config.env === "development") {
+  // One Vite instance serves browser modules and renders Vue on the server.
+  const { createServer } = await import("vite")
+  const vite = await createServer({
+    server: { middlewareMode: true, hmr: { server: httpServer } },
+    appType: "custom",
+  })
+  app.use(vite.middlewares)
+  vueRenderer = () => vite.ssrLoadModule("/vue/entry-server.js")
+} else {
+  // Production needs both builds before it can accept requests.
+  config.vue.manifest = utils.readJson(__dirname, "dist/.vite/manifest.json")
+  if (!config.vue.manifest["vue/main.js"]?.file) {
+    throw new Error("Vite manifest is missing the vue/main.js entry")
+  }
+  const renderer = await import("./dist/server/entry-server.js")
+  vueRenderer = () => renderer
+}
 
 // static assets
 app.use(express.static("static"))
@@ -132,7 +129,7 @@ app.get(["/", "/index"], async (req, res, next) => {
 // Render the Vue page and send the complete HTML response.
 async function sendVuePage(req, res, locals) {
   const { query, path } = req
-  const renderer = await loadVueRenderer()
+  const renderer = await vueRenderer()
   // Render and hydrate the same JSON-safe values.
   const pageProps = JSON.parse(utils.serializeJsonForHtml(locals.vuePageProps || {}))
   const footer = {
@@ -143,7 +140,14 @@ async function sendVuePage(req, res, locals) {
     query,
   }
   const header = { activePath: locals.path || path, userCanAdd: false }
-  const state = { page: locals.vuePage, pageProps, footer, header: { activePath: header.activePath } }
+  // Public login settings come from the running server, not the browser build.
+  const state = {
+    page: locals.vuePage,
+    pageProps,
+    footer,
+    header: { activePath: header.activePath },
+    login: { api: config.login.api, ssl: config.login.ssl },
+  }
   const html = await renderer.renderVuePage({
     page: state.page,
     pageProps,
@@ -159,23 +163,6 @@ async function sendVuePage(req, res, locals) {
     state,
     html,
   }))
-}
-
-let viteSsrPromise
-async function loadVueRenderer() {
-  if (config.env === "development") {
-    viteSsrPromise ||= import("vite").then(({ createServer }) => createServer({
-      server: { middlewareMode: true },
-      appType: "custom",
-    }))
-    const vite = await viteSsrPromise
-    return vite.ssrLoadModule("/vue/entry-server.js")
-  }
-
-  if (!await vueBuildPromise) {
-    throw new Error("Vue build failed")
-  }
-  return import("./dist/server/entry-server.js")
 }
 
 // edit form
@@ -636,7 +623,7 @@ async function start() {
     port = await portfinder.getPortPromise()
   }
 
-  app.listen(port, () => config.log(`Now listening on port ${port}`))
+  httpServer.listen(port, () => config.log(`Now listening on port ${port}`))
 }
 
 start()

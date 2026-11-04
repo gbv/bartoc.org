@@ -45,7 +45,12 @@ describe("Vue document", () => {
         vue: {
           assetPrefix: "/dist/",
           manifest: {
-            "vue/main.js": { file: "assets/main.js", css: ["assets/main.css"] },
+            "vue/main.js": {
+              file: "assets/main.js",
+              css: ["assets/main.css"],
+              imports: ["_shared.js"],
+            },
+            "_shared.js": { file: "assets/shared.js", css: ["assets/shared.css"] },
           },
         },
       },
@@ -59,7 +64,19 @@ describe("Vue document", () => {
     const document = new JSDOM(html).window.document
     expect(document.querySelector("script[src='/dist/assets/main.js']")).not.toBeNull()
     expect(document.querySelector("link[href='/dist/assets/main.css']")).not.toBeNull()
+    expect(document.querySelector("link[href='/dist/assets/shared.css']")).not.toBeNull()
+    expect(document.querySelector("link[rel='modulepreload'][href='/dist/assets/shared.js']")).not.toBeNull()
+    expect(html.indexOf("assets/main.css")).toBeLessThan(html.indexOf("assets/main.js"))
+    expect(html.indexOf("assets/shared.css")).toBeLessThan(html.indexOf("assets/main.js"))
     expect(document.querySelector("link[href='/vendor/yasgui/yasgui.min.css']")).not.toBeNull()
     expect(document.querySelector("script[src='/vendor/yasgui/yasgui.min.js']")).not.toBeNull()
+  })
+
+  it("fails when the production manifest has no browser entry", () => {
+    expect(() => renderVueDocument({
+      config: { name: "BARTOC.org", env: "production", vue: { assetPrefix: "/dist/", manifest: {} } },
+      state: { page: "about" },
+      html: pageHtml,
+    })).toThrow("Vite manifest is missing the vue/main.js entry")
   })
 })

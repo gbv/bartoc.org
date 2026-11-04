@@ -1,9 +1,7 @@
 {
   "verbosity": true,
   "port": 3883,
-  "vue": {
-    "port": 8122
-  },
+  "vue": {},
   "login": {
     "api": "coli-conc.gbv.de/login/",
     "ssl": true

@@ -16,6 +16,7 @@ RUN apk add perl
 RUN mkdir ./bartoc
 COPY . ./bartoc
 RUN cd bartoc && npm ci
+RUN cd bartoc && npm run build
 
 COPY docker/ecosystem.config.json .
 

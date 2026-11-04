@@ -153,6 +153,7 @@ npm run dev
 ~~~
 
 The application is made available at <http://localhost:3883/>.
+Express also serves Vite's development assets on this port.
 
 ### CSS approach
 
@@ -177,10 +178,11 @@ Update an existing installation:
 ~~~sh
 git pull
 npm install
+npm run build
 pm2 restart bartoc.org
 ~~~
 
-Note that `NODE_ENV` has to be set to `production`, otherwise Vue files will be requested from the dev server. This is given when using `npm run start`.
+Build the Vue assets before starting or restarting the production server. Docker builds them in the image. `NODE_ENV` must be set to `production` when starting the server; `npm run start` sets it automatically.
 
 ## Database dumps and statistics
 

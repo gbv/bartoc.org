@@ -1,14 +1,9 @@
-import { ref, toRefs, watch } from "vue"
+import { computed, ref, toRefs, watch } from "vue"
 
 import { createBartocApp } from "./appFactory.js"
 import { pages } from "./pages/index.js"
 import { parseJson } from "./utils.js"
 import { Login } from "gbv-login-client-vue"
-
-// Note: Using the JSON files directly because Lodash is used in config/index.js
-import configDefault from "../config/config.default.json"
-import configUser from "../config/config.json"
-const login = Object.assign({}, configDefault.login, configUser.login || {})
 
 // Read the data used for server rendering so Vue can hydrate the same page.
 const serverState = parseJson(document.getElementById("page-state")?.textContent)
@@ -18,11 +13,20 @@ import "jskos-vue/dist/style.css"
 
 const { token } = toRefs(Login)
 const userCanAdd = ref(false)
+const permissionChecked = ref(false)
+
+// The user status is actionable only after the login client connects.
+const loginReady = computed(() => Login.connected)
+// Keep Add's place until its permission check has finished.
+const addReady = computed(() => loginReady.value &&
+  (!Login.loggedIn || (Boolean(token.value) && permissionChecked.value)))
 
 watch(token, async currentToken => {
   // Clear the previous login's permission while checking the new token.
   userCanAdd.value = false
+  permissionChecked.value = false
   if (!currentToken) {
+    permissionChecked.value = true
     return
   }
 
@@ -35,8 +39,10 @@ watch(token, async currentToken => {
       userCanAdd.value = response.ok
     }
   } catch {
+    // The permission stays false if the request fails.
+  } finally {
     if (token.value === currentToken) {
-      userCanAdd.value = false
+      permissionChecked.value = true
     }
   }
 }, { immediate: true })
@@ -49,12 +55,14 @@ const app = createBartocApp({
   header: {
     activePath: serverState.header?.activePath || "",
     userCanAdd,
+    loginReady,
+    addReady,
   },
 })
 
 // Keep the SSR login state anonymous until Vue has hydrated the header.
 app.mount("#app")
-Login.connect(login.api, { ssl: login.ssl })
+Login.connect(serverState.login.api, { ssl: serverState.login.ssl })
 
 // Plain JavaScript is sufficient for relative timestamps.
 // See https://github.com/hustcc/timeago.js/issues/230

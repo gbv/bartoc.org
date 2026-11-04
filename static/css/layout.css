@@ -144,6 +144,17 @@ a[href*="orcid.org"]:before {
   }
 }
 
+/* Reserve space for the account name while login state loads. */
+.bartoc-header__user-status {
+  min-width: calc(var(--cc-space-xxl) * 3);
+}
+
+.header-user-status__loading {
+  display: inline-block;
+  padding: var(--cc-space-xs) var(--cc-space-sm);
+  font-size: var(--cc-font-size-sm);
+}
+
 /* Keep the login dropdown above the page content. */
 .bartoc-header__user-status .user-status-dropdown {
   z-index: 1000;
@@ -154,6 +165,10 @@ a[href*="orcid.org"]:before {
 }
 
 @media (max-width: 75rem) {
+  .bartoc-header__user-status {
+    min-width: 0;
+  }
+
   .bartoc-header__user-status .user-status .user-status-dropdown {
     /* Keep account links inside the mobile menu's scrollable area. */
     position: static;

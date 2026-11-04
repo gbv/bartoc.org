@@ -17,6 +17,7 @@ describe("Vue SSR hydration", () => {
     expect(html).toContain("144")
     expect(html).toContain("href=\"/vocabularies\"")
     expect(html).toContain("href=\"/registries\"")
+    expect(html).toContain("Loading account…")
   })
 
   it("renders the about sections, logos, and publications on the server", async () => {

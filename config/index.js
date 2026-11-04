@@ -68,13 +68,7 @@ if (!config.baseUrl.endsWith("/")) {
   config.baseUrl += "/"
 }
 
-config.vue.assetPrefix = env === "development" ? `http://localhost:${config.vue.port}/` : "/dist/"
-try {
-  config.vue.manifest = readJSON("../dist/.vite/manifest.json")
-} catch (error) {
-  // Will be filled after Vue build is complete
-  config.vue.manifest = {}
-}
+config.vue.assetPrefix = env === "development" ? "/" : "/dist/"
 
 // Initalize cocoda-sdk registry to access jskos-server backend
 config.registry = cdk.initializeRegistry(config.backend)

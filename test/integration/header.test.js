@@ -14,6 +14,8 @@ describe("shared header integration", () => {
           header: {
             activePath: "/stats",
             userCanAdd,
+            loginReady: true,
+            addReady: true,
           },
           login: {
             connected: false,
@@ -66,6 +68,34 @@ describe("shared header integration", () => {
     expect(wrapper.get("a[href='/stats']").attributes("aria-current")).toBe("page")
     await wrapper.setProps({ activePath: "/" })
     expect(wrapper.findAll("a[aria-current='page']")).toHaveLength(0)
+    wrapper.unmount()
+  })
+
+  it("shows a neutral account placeholder until login is ready", async () => {
+    const loginReady = ref(false)
+    const addReady = ref(false)
+    const wrapper = mount(TheHeader, {
+      global: {
+        provide: { header: { loginReady, addReady, userCanAdd: true } },
+        stubs: { UserStatus: true },
+      },
+    })
+
+    expect(wrapper.get(".header-user-status__loading").text()).toBe("Loading account…")
+    expect(wrapper.find("user-status-stub").exists()).toBe(false)
+    expect(wrapper.find("a[href='/edit']").exists()).toBe(false)
+    expect(wrapper.get(".bartoc-header__add-link").attributes("aria-hidden")).toBe("true")
+
+    loginReady.value = true
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find(".header-user-status__loading").exists()).toBe(false)
+    expect(wrapper.find("user-status-stub").exists()).toBe(true)
+    expect(wrapper.find("a[href='/edit']").exists()).toBe(false)
+
+    addReady.value = true
+    await wrapper.vm.$nextTick()
+    expect(wrapper.get("a[href='/edit']").text()).toBe("Add")
+    expect(wrapper.find(".bartoc-header__add-link[aria-hidden]").exists()).toBe(false)
     wrapper.unmount()
   })
 })

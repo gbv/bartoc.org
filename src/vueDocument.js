@@ -11,13 +11,25 @@ function assetTags(config) {
     <script type="module" src="${escapeHtml(prefix)}vue/main.js"></script>`
   }
 
-  const manifest = config.vue.manifest || {}
-  const entry = manifest["vue/main.js"] || {}
-  const chunks = [entry, ...(entry.imports || []).map(name => manifest[name] || {})]
-  return chunks.flatMap(chunk => [
-    ...(chunk.file ? [`<script type="module" src="${escapeHtml(prefix + chunk.file)}"></script>`] : []),
-    ...(chunk.css || []).map(file => `<link rel="stylesheet" href="${escapeHtml(prefix + file)}">`),
-  ]).join("\n")
+  const manifest = config.vue.manifest
+  const entry = manifest?.["vue/main.js"]
+  if (!entry?.file) {
+    throw new Error("Vite manifest is missing the vue/main.js entry")
+  }
+  const imports = (entry.imports || []).map(name => {
+    const chunk = manifest[name]
+    if (!chunk?.file) {
+      throw new Error(`Vite manifest is missing the ${name} chunk`)
+    }
+    return chunk
+  })
+
+  const styles = [...new Set([entry, ...imports].flatMap(chunk => chunk.css || []))]
+  return [
+    ...styles.map(file => `<link rel="stylesheet" href="${escapeHtml(prefix + file)}">`),
+    `<script type="module" src="${escapeHtml(prefix + entry.file)}"></script>`,
+    ...imports.map(chunk => `<link rel="modulepreload" href="${escapeHtml(prefix + chunk.file)}">`),
+  ].join("\n")
 }
 
 // Wrap the server-rendered Vue page with the shared document shell.
