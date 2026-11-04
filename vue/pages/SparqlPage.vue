@@ -48,7 +48,7 @@
 </template>
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from "vue"
-import { formatTimestamp } from "../utils.js"
+import { formatTimestamp } from "../utils/formatTimestamp.js"
 
 const props = defineProps({
   endpoint: {

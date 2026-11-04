@@ -19,7 +19,7 @@
 
 <script setup>
 import { computed } from "vue"
-import { formatTimestamp } from "../utils.js"
+import { formatTimestamp } from "../utils/formatTimestamp.js"
 
 defineOptions({ name: "ItemDates" })
 
