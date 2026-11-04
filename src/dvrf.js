@@ -103,6 +103,14 @@ export class ReportsDirectory {
     return this.reports
   }
 
+  // The statistics page only needs report metadata, not every finding.
+  getSummaries() {
+    return Object.fromEntries(Object.entries(this.getReports()).map(([id, report]) => {
+      const { title, description, types, level, totalErrors, formats } = report
+      return [id, { title, description, types, level, totalErrors, formats }]
+    }))
+  }
+
   _add(id, report) {
     report.issued = this._issued(id)
     report.formats = ["json"]

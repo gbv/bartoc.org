@@ -87,6 +87,22 @@ describe("Vue SSR hydration", () => {
   it.each([
     { page: "notFound", pageProps: {} },
     { page: "home", pageProps: { schemesCount: 144 } },
+    {
+      page: "stats",
+      pageProps: {
+        schemesCount: 144,
+        reports: {
+          "no-abstract": {
+            title: "Missing abstract",
+            description: "Main records without an abstract",
+            types: ["no-abstract"],
+            level: "warning",
+            totalErrors: 42,
+            formats: ["json", "csv"],
+          },
+        },
+      },
+    },
     { page: "about", pageProps: {} },
     { page: "contact", pageProps: {} },
     { page: "software", pageProps: {} },

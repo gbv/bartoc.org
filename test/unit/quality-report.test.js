@@ -5,6 +5,7 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 import { validateItem } from "../../src/validation.js"
+import { ReportsDirectory } from "../../src/dvrf.js"
 
 const script = fileURLToPath(new URL("../../bin/reports.js", import.meta.url))
 const baseType = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
@@ -76,6 +77,15 @@ describe("quality reports", () => {
         }],
       }])
       expect(missingExtent.errors.map(e => e.position.id)).toEqual([bad.uri])
+      const summary = new ReportsDirectory(reports).getSummaries()["no-extent"]
+      expect(summary).toEqual({
+        title: missingExtent.title,
+        description: missingExtent.description,
+        types: missingExtent.types,
+        level: missingExtent.level,
+        totalErrors: missingExtent.totalErrors,
+        formats: ["json", "csv"],
+      })
       expect(readFileSync(join(reports, "no-license.csv"), "utf8")).toContain("\"Good, title\"")
       expect(readFileSync(join(reports, "no-extent.csv"), "utf8")).toContain(JSON.stringify(bad.uri) + ",")
     } finally {

@@ -418,7 +418,7 @@ app.get("/stats", async (req, res, next) => {
         vuePage: "stats",
         stylesheets: ["/css/stats.css"],
         vuePageProps: {
-          reports: reports.getReports(),
+          reports: reports.getSummaries(),
           schemesCount: schemes._totalCount,
         },
       })
