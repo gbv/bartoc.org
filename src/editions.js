@@ -1,6 +1,5 @@
 import { isBartocUri, normalizeUri } from "./uri.js"
-
-export const CONCEPT_SCHEME_TYPE = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+import { kosTypeUris } from "./terminology.js"
 
 /**
  * Fields that an edition may take from its main record.
@@ -16,15 +15,6 @@ export const DERIVED_EDITION_FIELDS = Object.freeze([
   "notationExamples",
   "type",
 ])
-
-/**
- * Get the KOS types without the required SKOS ConceptScheme type.
- */
-export function kosTypeUris(item) {
-  return Array.isArray(item?.type)
-    ? item.type.filter(type => type !== CONCEPT_SCHEME_TYPE)
-    : []
-}
 
 /**
  * Get the main record URI from `versionOf`.

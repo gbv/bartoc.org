@@ -202,7 +202,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue"
-import { kosTypeUris } from "../../src/editions.js"
+import { kosTypeUris } from "../../src/terminology.js"
 import ExternalLink from "./ExternalLink.vue"
 import ItemLink from "./ItemLink.vue"
 import LocalizedAbstract from "./LocalizedAbstract.vue"

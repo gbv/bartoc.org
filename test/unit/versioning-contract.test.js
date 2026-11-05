@@ -3,11 +3,11 @@ import {
   DERIVED_EDITION_FIELDS,
   deriveEditionRecord,
   hasMeaningfulValue,
-  kosTypeUris,
   sortEditionRecordsByStartDate,
   versionNumber,
   versionRole,
 } from "../../src/editions.js"
+import { kosTypeUris } from "../../src/terminology.js"
 import {
   THE_SOZ_MAIN_URI,
   storedTheSozMain,

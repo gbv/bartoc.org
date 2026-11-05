@@ -9,7 +9,11 @@ import {
   rdfSerialize,
 } from "./src/rdf.js"
 import { canonicalItemCopy } from "./src/itemSerialization.js"
-import { deriveEditionRecord, hasValidVersionOf } from "./src/editions.js"
+import {
+  deriveEditionRecord,
+  hasValidVersionOf,
+} from "./src/editions.js"
+import { CONCEPT_SCHEME_TYPE, kosTypeUris } from "./src/terminology.js"
 import { createServer as createHttpServer } from "node:http"
 import portfinder from "portfinder"
 import { getConceptsInBatches } from "./src/backend.js"
@@ -21,9 +25,6 @@ const __dirname = new URL(".", import.meta.url).pathname
 const backend = config.registry
 
 config.log(`Running in ${config.env} mode.`)
-
-// TODO: this should come from database as well
-const nkostypes = utils.indexByUri((utils.readNdjson(__dirname,"./data/nkostype.concepts.ndjson")))
 
 // Initialize express with settings
 import express from "express"
@@ -339,11 +340,16 @@ async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
 
   const subjects = item && item.subject || []
   const conceptFields = ["ACCESS", "FORMAT"]
+  const kosTypes = item.type?.[0] === CONCEPT_SCHEME_TYPE
+    ? kosTypeUris(item)
+    : []
 
-  // Resolve all concept references in one backend request. KOS types are kept
-  // separate because item.type must remain an array of URI strings.
+  // Resolve all concept references in one backend request. KOS types are
+  // included in the lookup but kept separate from item.type, which must remain
+  // an array of URI strings.
   const conceptReferences = [
     ...subjects,
+    ...kosTypes.map(uri => ({ uri })),
     ...conceptFields.flatMap(field => item[field] || []),
   ]
     .filter(reference => reference?.uri)
@@ -382,6 +388,14 @@ async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
     }
   }
 
+  // Vue needs full KOS type concepts for their labels while the item keeps the
+  // original URI strings. Missing concepts fall back to their URI in ItemAbout.
+  const nkosTypes = Object.fromEntries(
+    kosTypes
+      .map(uri => [uri, foundByUri.get(uri)])
+      .filter(([, concept]) => concept),
+  )
+
   // Direct relations are saved as URI references. Load their labels for display.
   if (resolvedVersionOf !== undefined) {
     // The main record was already loaded to derive this edition.
@@ -411,7 +425,7 @@ async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
     }
   }
 
-  return item
+  return { item, nkosTypes }
 }
 
 async function buildPresentationView(storedItem) {
@@ -429,9 +443,13 @@ async function buildPresentationView(storedItem) {
     derivedFields = derivation.derivedFields
   }
 
-  // Enrichment runs after derivation so inherited subjects receive labels too.
-  const presentationItem = await enrichItem(effectiveItem, { resolvedVersionOf })
-  return { presentationItem, derivedFields }
+  // Enrichment runs after derivation so inherited concept references receive
+  // labels too.
+  const { item: presentationItem, nkosTypes } = await enrichItem(
+    effectiveItem,
+    { resolvedVersionOf },
+  )
+  return { presentationItem, derivedFields, nkosTypes }
 }
 
 // Statistics
@@ -541,7 +559,12 @@ async function sendItem (
   req,
   res,
   storedItem,
-  { presentationItem = storedItem, derivedFields = {}, ...vars } = {},
+  {
+    presentationItem = storedItem,
+    derivedFields = {},
+    nkosTypes = {},
+    ...vars
+  } = {},
 ) {
   const { format } = req.query
   if (format === "json" || format === "jsonld") {
@@ -573,7 +596,7 @@ async function sendItem (
             item,
             title,
             ...(vuePage === "terminology" && {
-              nkosTypes: nkostypes,
+              nkosTypes,
               derivedFields,
             }),
           },

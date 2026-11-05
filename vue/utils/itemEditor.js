@@ -3,12 +3,11 @@ import {
   withMediaThumbnail,
 } from "../utils.js"
 import {
-  CONCEPT_SCHEME_TYPE,
   hasMeaningfulValue,
   hasValidVersionOf,
-  kosTypeUris,
   versionNumber,
 } from "../../src/editions.js"
+import { CONCEPT_SCHEME_TYPE, kosTypeUris } from "../../src/terminology.js"
 import { validateItem } from "../../src/validation.js"
 
 export {
