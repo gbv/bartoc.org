@@ -43,10 +43,6 @@ export default {
 
   escapeXML: s => String(s).replace(/[<>&"']/g, c => "&#" + c.charCodeAt(0) + ";"),
 
-  indexByUri: array => array.reduce((obj, item) => {
-    obj[item.uri] = item; return obj
-  }, {}),
-
   // TODO: move utility function to jskos-tools
   label (labels, language, fallback = "") {
     let value = fallback, code = language || "en"
