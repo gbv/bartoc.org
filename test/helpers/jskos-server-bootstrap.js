@@ -61,7 +61,7 @@ export async function startJskosServer({
   mongoHost = "mongo",
   db = "bartoc-test",
   image = process.env.JSKOS_IMAGE || "ghcr.io/gbv/jskos-server:latest",
-  dataDir, // optional: copy BARTOC ./data to /bartoc-data
+  fixtureDir,
 } = {}) {
   const jskosConfig = {
     mongo: { host: mongoHost, db },
@@ -76,8 +76,8 @@ export async function startJskosServer({
   }
 
   const copyDirs = []
-  if (dataDir) {
-    copyDirs.push({ source: path.resolve(dataDir), target: "/bartoc-data" })
+  if (fixtureDir) {
+    copyDirs.push({ source: path.resolve(fixtureDir), target: "/test-data" })
   }
 
   const jskos = await new GenericContainer(image)
@@ -109,10 +109,10 @@ export async function startJskosServer({
 /**
  * Convenience: start network + mongo + jskos-server and return a single handle.
  */
-export async function startJskosStack({ dataDir, db } = {}) {
+export async function startJskosStack({ fixtureDir, db } = {}) {
   const network = await new Network().start()
   const mongo = await startMongo({ network })
-  const { jskos, baseUrl } = await startJskosServer({ network, dataDir, db })
+  const { jskos, baseUrl } = await startJskosServer({ network, fixtureDir, db })
 
   return {
     network,
@@ -128,40 +128,21 @@ export async function startJskosStack({ dataDir, db } = {}) {
 }
 
 /**
- * Import internal vocabs (like bin/setup.sh) with two exec calls.
+ * Import the small vocabulary used by this integration test.
  */
-export async function importInternalVocs(jskosContainer) {
-  // 1) schemes (all in one go)
-  const schemes = [
-    "/bartoc-data/bartoc-formats.scheme.ndjson",
-    "/bartoc-data/bartoc-access.scheme.ndjson",
-    "/bartoc-data/ddc.scheme.ndjson",
-    "/bartoc-data/languages.scheme.ndjson",
-    "/bartoc-data/nkostype.scheme.ndjson",
-    "/bartoc-data/bartoc-api-types.scheme.ndjson",
-    "/bartoc-data/eurovoc.scheme.ndjson",
-    "/bartoc-data/ilc.scheme.ndjson",
-  ]
-
-  // 2) concepts (all in one go)
-  const concepts = [
-    "/bartoc-data/bartoc-formats.concepts.ndjson",
-    "/bartoc-data/bartoc-access.concepts.ndjson",
-    "/bartoc-data/ddc100.concepts.ndjson",
-    "/bartoc-data/languages.concepts.ndjson",
-    "/bartoc-data/nkostype.concepts.ndjson",
-    "/bartoc-data/bartoc-api-types.concepts.ndjson",
-  ]
-
-  // Prefer calling the import script directly instead of npm run import
-  const res1 = await jskosContainer.exec(["node", "./bin/import.js", "schemes", ...schemes, "-n"])
-  if (res1.exitCode !== 0) {
-    throw new Error(`Import schemes failed:\n${res1.output}`)
+export async function importTestVocabulary(jskosContainer) {
+  const scheme = await jskosContainer.exec([
+    "node", "./bin/import.js", "schemes", "/test-data/test-vocabulary.scheme.ndjson", "-n",
+  ])
+  if (scheme.exitCode !== 0) {
+    throw new Error(`Import scheme failed:\n${scheme.output}`)
   }
 
-  const res2 = await jskosContainer.exec(["node", "./bin/import.js", "concepts", ...concepts])
-  if (res2.exitCode !== 0) {
-    throw new Error(`Import concepts failed:\n${res2.output}`)
+  const concepts = await jskosContainer.exec([
+    "node", "./bin/import.js", "concepts", "/test-data/test-vocabulary.concepts.ndjson",
+  ])
+  if (concepts.exitCode !== 0) {
+    throw new Error(`Import concepts failed:\n${concepts.output}`)
   }
 }
 
