@@ -198,8 +198,8 @@ const tabs = computed(() => isRegistry.value
 const registryTerminologyCount = ref(null)
 const registryTerminologiesTitle = computed(() =>
   registryTerminologyCount.value === null
-    ? "Terminologies in BARTOC"
-    : `Terminologies in BARTOC (${registryTerminologyCount.value})`,
+    ? "Terminologies"
+    : `Terminologies (${registryTerminologyCount.value} in BARTOC)`,
 )
 const activeTab = ref(0)
 const ready = ref(false)
