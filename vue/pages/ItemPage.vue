@@ -8,15 +8,14 @@
   <h1>{{ title }}</h1>
   <p v-if="isRegistry">
     <template v-if="isFullRepository">
-      This is a terminology {{ item.API?.length ? "service" : "repository" }}.
-      It includes other terminologies.
+      A {{ item.API?.length ? "service" : "repository" }} that stores terminologies.
     </template>
     <template v-else>
-      This is a metadata registry. It describes terminologies.
+      A collection that references terminologies.
     </template>
   </p>
   <p
-    v-if="!isRegistry && versionOfReference"
+    v-else-if="versionOfReference"
     data-testid="version-context">
     <template v-if="currentVersionNumber">
       This is edition <strong>{{ currentVersionNumber }}</strong> of
