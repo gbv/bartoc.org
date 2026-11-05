@@ -26,6 +26,9 @@ COPY docker/*.sh .
 ## Get latest JSKOS Server and install dependencies
 RUN git clone https://github.com/gbv/jskos-server.git && cd jskos-server && npm ci
 
+## Include the auxiliary vocabulary sources for the manual setup script
+RUN git clone https://github.com/gbv/bartoc-vocabularies.git
+
 ## Folder for configuration files (to be mapped as volume)
 RUN mkdir /config
 

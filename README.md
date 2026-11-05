@@ -36,11 +36,14 @@ npm ci
 You can also set up BARTOC via Docker. Please refer to our [Docker docs](./docker/README.md).
 
 ### Setup
-A setup script is provided in `./bin/setup.sh`. It must be called with the path to your jskos-server installation, e.g.:
+Clone the auxiliary vocabulary sources beside this repository. The setup script needs both their path and the path to your jskos-server installation:
 
 ```bash
-./bin/setup.sh ../jskos-server
+git clone https://github.com/gbv/bartoc-vocabularies.git ../bartoc-vocabularies
+./bin/setup.sh ../jskos-server ../bartoc-vocabularies
 ```
+
+To update only the six auxiliary vocabularies later, run `./bin/import-vocabularies.sh ../jskos-server ../bartoc-vocabularies`. This adds or updates their schemes and concepts and sets their `API` field to the target JSKOS Server URL. It does not reset registries or import BARTOC records.
 
 ## Configuration
 
