@@ -24,8 +24,6 @@ config.log(`Running in ${config.env} mode.`)
 
 // TODO: this should come from database as well
 const nkostypes = utils.indexByUri((utils.readNdjson(__dirname,"./data/nkostype.concepts.ndjson")))
-const accesstypes = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-access.concepts.ndjson"))
-const formats = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-formats.concepts.ndjson"))
 
 // Initialize express with settings
 import express from "express"
@@ -339,21 +337,49 @@ async function resolveIncomingSchemeReferences(item, relation) {
 async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
   const item = clone(storedItem)
 
-  // Load subject labels and notation. Keep each original reference if lookup fails.
   const subjects = item && item.subject || []
-  if (subjects.length) {
-    let found = []
-    try {
-      found = (await getConceptsInBatches(backend, subjects)).filter(Boolean)
-    } catch (error) {
-      config.warn("Could not resolve subject metadata from backend. Keeping unresolved subject references.", error)
-    }
+  const conceptFields = ["ACCESS", "FORMAT"]
 
-    const foundByUri = new Map(found.map(concept => [concept.uri, concept]))
+  // Resolve all concept references in one backend request. KOS types are kept
+  // separate because item.type must remain an array of URI strings.
+  const conceptReferences = [
+    ...subjects,
+    ...conceptFields.flatMap(field => item[field] || []),
+  ]
+    .filter(reference => reference?.uri)
+
+  // Load labels from JSKOS Server for every concept reference displayed by
+  // the page. Each original reference remains available as fallback.
+  let foundByUri = new Map()
+  if (conceptReferences.length) {
+    try {
+      const found = (await getConceptsInBatches(backend, conceptReferences)).filter(Boolean)
+      foundByUri = new Map(found.map(concept => [concept.uri, concept]))
+    } catch (error) {
+      config.warn(
+        "Could not resolve concept metadata from backend. Keeping unresolved references.",
+        error,
+      )
+    }
+  }
+
+  if (subjects.length) {
+    // Subject references may contain record-specific metadata such as MAPPING,
+    // so add the resolved labels without replacing the original reference.
     item.subject = subjects.map(subject => {
       const resolved = foundByUri.get(subject.uri)
       return resolved ? mergeSubjectMetadata(subject, resolved) : subject
     })
+  }
+
+  // Access and format references need no record-specific metadata merge. Use
+  // the resolved concept when available and otherwise keep the original.
+  for (const field of conceptFields) {
+    if (Array.isArray(item[field])) {
+      item[field] = item[field].map(reference => (
+        foundByUri.get(reference.uri) || reference
+      ))
+    }
   }
 
   // Direct relations are saved as URI references. Load their labels for display.
@@ -548,8 +574,6 @@ async function sendItem (
             title,
             ...(vuePage === "terminology" && {
               nkosTypes: nkostypes,
-              accessTypes: accesstypes,
-              formats,
               derivedFields,
             }),
           },

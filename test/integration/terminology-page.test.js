@@ -59,8 +59,14 @@ const item = {
     uri: "http://bartoc.org/en/node/400",
     prefLabel: { en: "Derived Terminology" },
   }],
-  ACCESS: [{ uri: "http://bartoc.org/en/Access/Free" }],
-  FORMAT: [{ uri: "http://bartoc.org/en/Format/Online" }],
+  ACCESS: [{
+    uri: "http://bartoc.org/en/Access/Free",
+    prefLabel: { en: "freely available" },
+  }],
+  FORMAT: [{
+    uri: "http://bartoc.org/en/Format/Online",
+    prefLabel: { en: "Online" },
+  }],
   license: [{
     uri: "https://example.org/license",
     prefLabel: { en: "Example License" },
@@ -82,18 +88,6 @@ function mountPage(itemOverrides = {}, derivedFields = {}) {
       derivedFields,
       nkosTypes: {
         [typeUri]: { uri: typeUri, prefLabel: { en: "Thesaurus" } },
-      },
-      accessTypes: {
-        "http://bartoc.org/en/Access/Free": {
-          uri: "http://bartoc.org/en/Access/Free",
-          prefLabel: { en: "freely available" },
-        },
-      },
-      formats: {
-        "http://bartoc.org/en/Format/Online": {
-          uri: "http://bartoc.org/en/Format/Online",
-          prefLabel: { en: "Online" },
-        },
       },
     },
     global: {

@@ -23,7 +23,7 @@
       :items="item.ACCESS"
       list-style="inline">
       <template #item="{ item: access }">
-        <ItemLink :item="accessTypes[access.uri] || access" />
+        <ItemLink :item="access" />
       </template>
     </MetadataListRow>
 
@@ -65,7 +65,7 @@
       :items="item.FORMAT"
       list-style="inline">
       <template #item="{ item: format }">
-        <ItemLink :item="formats[format.uri] || format" />
+        <ItemLink :item="format" />
       </template>
     </MetadataListRow>
 
@@ -103,8 +103,6 @@ defineOptions({ name: "ItemAccess" })
 const props = defineProps({
   item: { type: Object, required: true },
   isRegistry: { type: Boolean, default: false },
-  accessTypes: { type: Object, default: () => ({}) },
-  formats: { type: Object, default: () => ({}) },
 })
 
 const address = computed(() => [

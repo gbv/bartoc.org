@@ -62,9 +62,7 @@
       title="Access">
       <ItemAccess
         :item="item"
-        :is-registry="isRegistry"
-        :access-types="accessTypes"
-        :formats="formats" />
+        :is-registry="isRegistry" />
     </Tab>
 
     <Tab
@@ -142,14 +140,6 @@ const props = defineProps({
     default: () => ({}),
   },
   nkosTypes: {
-    type: Object,
-    default: () => ({}),
-  },
-  accessTypes: {
-    type: Object,
-    default: () => ({}),
-  },
-  formats: {
     type: Object,
     default: () => ({}),
   },
