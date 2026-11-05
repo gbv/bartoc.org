@@ -9,7 +9,7 @@
       aria-hidden="true" />
     <div class="cc-abstract-content">
       <div
-        v-if="mediaThumbnails.length"
+        v-if="!isRegistry && mediaThumbnails.length"
         class="cc-terminology-media">
         <img
           v-for="(thumbnail, index) in mediaThumbnails"
@@ -22,27 +22,33 @@
           referrerpolicy="no-referrer">
       </div>
       <LocalizedAbstract :abstract="item.definition" />
+      <LocalizedAbstract
+        v-if="isRegistry"
+        :abstract="item.scopeNote" />
     </div>
   </div>
   <table class="cc-table">
     <MetadataListRow
+      v-if="!isRegistry"
       :source-field="['prefLabel', 'altLabel']"
       label="Titles"
       :items="titles" />
 
     <MetadataRow
-      v-if="currentVersionNumber"
+      v-if="!isRegistry && currentVersionNumber"
       source-field="version"
       label="Version">
       {{ currentVersionNumber }}
     </MetadataRow>
 
     <MetadataListRow
+      v-if="!isRegistry"
       source-field="notation"
       label="Abbreviation"
       :items="item.notation" />
 
     <MetadataListRow
+      v-if="!isRegistry"
       source-field="type"
       label="KOS Type"
       :items="displayedKosTypeUris"
@@ -55,6 +61,7 @@
     </MetadataListRow>
 
     <MetadataListRow
+      v-if="!isRegistry"
       source-field="subjectOf"
       label="Links"
       :items="item.subjectOf">
@@ -68,17 +75,18 @@
     <MetadataListRow
       source-field="subject"
       label="Subject"
-      :items="manualSubjects"
-      list-style="inline">
+      :items="isRegistry ? item.subject : manualSubjects"
+      :list-style="isRegistry ? 'unstyled' : 'inline'">
       <template #item="{ item: subject }">
         <ItemLink
           :item="subject"
-          base="/vocabularies?subject="
-          with-notation />
+          :base="isRegistry ? '' : '/vocabularies?subject='"
+          :with-notation="!isRegistry" />
       </template>
     </MetadataListRow>
 
     <MetadataListRow
+      v-if="!isRegistry"
       source-field="subject"
       label="Mapped Subjects"
       :items="mappedSubjects"
@@ -86,47 +94,59 @@
       <template #item="{ item: subject }">
         <ItemLink
           :item="subject"
-          base="/vocabularies?subject="
+          :base="isRegistry ? '' : '/vocabularies?subject='"
           with-notation />
       </template>
     </MetadataListRow>
 
     <MetadataListRow
       source-field="languages"
-      icon="language"
+      :icon="isRegistry ? 'id' : 'language'"
       label="Languages"
       :items="displayedLanguages"
-      list-style="inline">
+      :list-style="isRegistry ? 'unstyled' : 'inline'">
       <template #item="{ item: language }">
-        <a :href="`/vocabularies/?filter=language:${language.code}`">
+        <a
+          v-if="!isRegistry"
+          :href="`/vocabularies/?filter=language:${language.code}`">
           {{ language.label }}
         </a>
+        <template v-else>
+          {{ language.code }}
+        </template>
       </template>
     </MetadataListRow>
 
     <MetadataRow
-      v-if="item.extent"
+      v-if="!isRegistry && item.extent"
       label="Size">
       {{ item.extent }}
     </MetadataRow>
 
     <MetadataRow
-      v-if="item.startDate || item.endDate"
+      v-if="isRegistry && item.startDate"
+      icon="calendar"
+      label="Created">
+      {{ item.startDate }}
+    </MetadataRow>
+
+    <MetadataRow
+      v-if="isRegistry && item.endDate"
+      icon="calendar"
+      label="Dissolved">
+      {{ item.endDate }}
+    </MetadataRow>
+
+    <MetadataRow
+      v-if="!isRegistry && (item.startDate || item.endDate)"
       source-field="[startDate, endDate]"
       icon="calendar"
       label="Existence">
       {{ item.startDate }}–{{ item.endDate }}
     </MetadataRow>
 
-    <MetadataRow
-      v-if="item.uri"
-      source-field="uri"
-      icon="link"
-      label="URI">
-      <ExternalLink :url="item.uri" />
-    </MetadataRow>
-
     <MetadataListRow
+      v-if="!isRegistry"
       label="Wikipedia"
       :items="wikipediaLinks"
       list-style="inline"
@@ -139,6 +159,7 @@
     </MetadataListRow>
 
     <MetadataListRow
+      v-if="!isRegistry"
       source-field="basedOn"
       label="Based on"
       :items="item.basedOn">
@@ -148,6 +169,7 @@
     </MetadataListRow>
 
     <MetadataListRow
+      v-if="!isRegistry"
       source-field="_basedOnBacklink"
       label="Derived terminologies"
       :items="item._basedOnBacklink">
@@ -157,6 +179,7 @@
     </MetadataListRow>
 
     <MetadataListRow
+      v-if="!isRegistry"
       source-field="replacedBy"
       label="Replaced by"
       :items="item.replacedBy">
@@ -166,6 +189,7 @@
     </MetadataListRow>
 
     <MetadataListRow
+      v-if="!isRegistry"
       source-field="_replacedByBacklink"
       label="Successor of"
       :items="item._replacedByBacklink">
@@ -192,6 +216,7 @@ defineOptions({ name: "ItemAbout" })
 
 const props = defineProps({
   item: { type: Object, required: true },
+  isRegistry: { type: Boolean, default: false },
   nkosTypes: { type: Object, default: () => ({}) },
   currentVersionNumber: { type: [String, Number], default: null },
   definitionInherited: { type: Boolean, default: false },
@@ -227,6 +252,10 @@ function isWebUrl(value) {
 }
 
 onMounted(async () => {
+  if (props.isRegistry) {
+    return
+  }
+
   const languageCodes = props.item.languages || []
   const languageNames = await loadLanguageNames(languageCodes)
   displayedLanguages.value = languageCodes.map(code => ({

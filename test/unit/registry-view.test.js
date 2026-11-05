@@ -29,7 +29,10 @@ describe("registry page", () => {
     expect(document.querySelector("h1").textContent).toBe("agINFRA Linked Data Vocabularies")
     expect(document.body.textContent).toContain("A repository that stores terminologies")
     expect(document.querySelector("p[lang='en']").textContent).toBe("A registry of vocabularies.")
-    expect(document.querySelector(".metadata-list").textContent).toContain("https://example.org/registry")
+    const identifiersRow = [...document.querySelectorAll("tr")].find(row =>
+      row.querySelector(".metadata-row-label")?.textContent.trim() === "Identifiers",
+    )
+    expect(identifiersRow.textContent).toContain("https://example.org/registry")
     expect(document.querySelector("a[href='http://example.org/subject']").textContent).toBe("Agriculture")
     expect(document.querySelector("a[href^='/vocabularies?partOf=']").getAttribute("href"))
       .toContain(encodeURIComponent(uri))

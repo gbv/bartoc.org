@@ -49,12 +49,9 @@
       {{ tab.title }}
     </template>
     <Tab title="About">
-      <RegistryMetadata
-        v-if="isRegistry"
-        :item="item" />
       <ItemAbout
-        v-else
         :item="item"
+        :is-registry="isRegistry"
         :nkos-types="nkosTypes"
         :current-version-number="currentVersionNumber"
         :definition-inherited="definitionInherited"
@@ -62,18 +59,19 @@
     </Tab>
 
     <Tab
-      v-if="!isRegistry"
       title="Access">
       <ItemAccess
         :item="item"
+        :is-registry="isRegistry"
         :access-types="accessTypes"
         :formats="formats" />
     </Tab>
 
     <Tab
-      v-if="!isRegistry"
       title="Identifiers">
-      <ItemIdentifiers :item="item" />
+      <ItemIdentifiers
+        :item="item"
+        :is-registry="isRegistry" />
     </Tab>
 
     <Tab
@@ -123,7 +121,6 @@ import ItemAccess from "../components/ItemAccess.vue"
 import ItemDates from "../components/ItemDates.vue"
 import ItemIdentifiers from "../components/ItemIdentifiers.vue"
 import ItemLink from "../components/ItemLink.vue"
-import RegistryMetadata from "../components/RegistryMetadata.vue"
 import RegistryVocabularies from "../components/RegistryVocabularies.vue"
 
 defineOptions({ name: "ItemPage" })
@@ -187,7 +184,7 @@ const editionRecords = computed(() => (
 ))
 const hasEditions = computed(() => Boolean(editionRecords.value.length))
 const tabs = computed(() => isRegistry.value
-  ? ["about", "terminologies"]
+  ? ["about", "access", "identifiers", "terminologies"]
   : [
     "about",
     "access",
