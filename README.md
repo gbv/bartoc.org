@@ -14,8 +14,10 @@ The application is currently being reconstructed funded by DFG.
 ## Table of Contents
 
 - [Install](#install)
+- [Configuration](#configuration)
 - [Data flow](#data-flow)
-- ...
+- [Scripts](#scripts)
+- [Development](#development)
 
 ## Install
 
@@ -59,6 +61,7 @@ Basic configuration is located in `config/config.default.json`. Selected fields 
 ~~~
 
 To be able to log in, add, and edit vocabularies, you need to setup and configure an instance of [Login Server](https://github.com/gbv/login-server) as well (example for local installation):
+
 ```json
 {
   "login": {
@@ -68,27 +71,8 @@ To be able to log in, add, and edit vocabularies, you need to setup and configur
 }
 ```
 
-The optional SPARQL query page is enabled by setting `sparql` to an absolute
-HTTP(S) endpoint URL. A set of example queries can be provided as MatGUI
-[Web workspace](https://github.com/Matdata-eu/MatGUI/blob/main/docs/user-guide.md#web-workspaces)
-with `sparqlExamples`:
+### jskos-server
 
-```json
-{
-  "sparql": "https://example.org/sparql",
-  "sparqlExamples": "https://gbv.github.io/bartoc-queries/workspace.json"
-}
-```
-
-The query page is available at `/graph/` when `sparql` is configured.
-
-The page also displays the latest knowledge graph update when the endpoint
-provides `<https://bartoc.org/graph/terminology/> dct:modified ?updated` in the
-named graph `<https://bartoc.org/graph/terminology/>`. This metadata is
-optional: if it is missing or cannot be retrieved, the query editor remains
-available without the timestamp.
-
-### jskos-server Configuration
 To be able to use the full functionality of BARTOC, your jskos-server installation must allow concept schemes to be written via the API, e.g.:
 
 ```json
@@ -109,6 +93,23 @@ To be able to use the full functionality of BARTOC, your jskos-server installati
 ```
 
 Via an array `identities` under `schemes`, you can limit which identity URIs can write vocabulary data.
+
+### Knowledge Graph
+
+BARTOC Knowledge Graph query page is enabled at `/graph/` when `sparql` is configured with an absolute SPARQL endpoint URL.
+
+The page displays the latest update timestamp retrieved via SPARQL query `<https://bartoc.org/graph/terminology/> dct:modified ?updated` in the named graph `<https://bartoc.org/graph/terminology/>`.
+
+A set of example queries can be provided with `sparqlExamples` as URL of a
+[MatGUI Web workspace](https://github.com/Matdata-eu/MatGUI/blob/main/docs/user-guide.md#web-workspaces).
+The default value points to a HTTP release of repository <https://github.com/gbv/bartoc-queries>:
+
+```json
+{
+  "sparql": "https://bartoc.org/api/sparql",
+  "sparqlExamples": "https://gbv.github.io/bartoc-queries/workspace.json"
+}
+```
 
 ## Data flow
 
@@ -142,6 +143,12 @@ graph TD
     reports -.-> applications
 ```
 
+## Scripts
+
+To regularly update dumps, add a cronjob with command `npm run dump`. Dumps are placed in `data/dumps` and reports in `data/reports`. To compare dump files, run `node bin/dump.js diff FILE1 [FILE2]`.
+
+The dump command also creates quality reports as JSON and CSV files. `validation-errors.json` lists records with validation errors, and `summary.json` groups validation errors and quality warnings by record.
+
 ## Development
 
 ~~~sh
@@ -153,10 +160,11 @@ Express also serves Vite's development assets on this port.
 
 ### CSS approach
 
-Shared design tokens and component-level CSS are provided by `@gbv/bartoc-components`.
+Shared design tokens and component-level CSS are provided by `@gbv/bartoc-components` (<https://github.com/gbv/bartoc-components>).
 Application-specific layout rules live in `static/css/layout.css` and should consume the shared `--cc-*` tokens instead of redefining them.
 
 ### Publish
+
 **For maintainers only**
 
 Never work on the main branch directly. Always make changes on `dev` and then run the release script:
@@ -180,8 +188,3 @@ pm2 restart bartoc.org
 
 Build the Vue assets before starting or restarting the production server. Docker builds them in the image. `NODE_ENV` must be set to `production` when starting the server; `npm run start` sets it automatically.
 
-## Database dumps and statistics
-
-To regularly update dumps, add a cronjob with command `npm run dump`. Dumps are placed in `data/dumps` and reports in `data/reports`. To compare dump files, run `node bin/dump.js diff FILE1 [FILE2]`.
-
-The dump command also creates quality reports as JSON and CSV files. `validation-errors.json` lists records with validation errors, and `summary.json` groups validation errors and quality warnings by record.
