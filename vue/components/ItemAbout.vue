@@ -28,175 +28,177 @@
     </div>
   </div>
   <table class="cc-table">
-    <MetadataListRow
-      v-if="!isRegistry"
-      :source-field="['prefLabel', 'altLabel']"
-      label="Titles"
-      :items="titles" />
+    <tbody>
+      <MetadataListRow
+        v-if="!isRegistry"
+        :source-field="['prefLabel', 'altLabel']"
+        label="Titles"
+        :items="titles" />
 
-    <MetadataRow
-      v-if="!isRegistry && currentVersionNumber"
-      source-field="version"
-      label="Version">
-      {{ currentVersionNumber }}
-    </MetadataRow>
+      <MetadataRow
+        v-if="!isRegistry && currentVersionNumber"
+        source-field="version"
+        label="Version">
+        {{ currentVersionNumber }}
+      </MetadataRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      source-field="notation"
-      label="Abbreviation"
-      :items="item.notation" />
+      <MetadataListRow
+        v-if="!isRegistry"
+        source-field="notation"
+        label="Abbreviation"
+        :items="item.notation" />
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      source-field="type"
-      label="KOS Type"
-      :items="displayedKosTypeUris"
-      list-style="inline">
-      <template #item="{ item: uri }">
-        <ItemLink
-          :item="nkosTypes[uri] || { uri }"
-          base="/vocabularies?type=" />
-      </template>
-    </MetadataListRow>
-
-    <MetadataListRow
-      v-if="!isRegistry"
-      source-field="subjectOf"
-      label="Links"
-      :items="item.subjectOf">
-      <template #item="{ item: link }">
-        <ExternalLink
-          :url="link.url"
-          :label="link.label" />
-      </template>
-    </MetadataListRow>
-
-    <MetadataListRow
-      source-field="subject"
-      label="Subject"
-      :items="isRegistry ? item.subject : manualSubjects"
-      :list-style="isRegistry ? 'unstyled' : 'inline'">
-      <template #item="{ item: subject }">
-        <ItemLink
-          :item="subject"
-          :base="isRegistry ? '' : '/vocabularies?subject='"
-          :with-notation="!isRegistry" />
-      </template>
-    </MetadataListRow>
-
-    <MetadataListRow
-      v-if="!isRegistry"
-      source-field="subject"
-      label="Mapped Subjects"
-      :items="mappedSubjects"
-      list-style="inline">
-      <template #item="{ item: subject }">
-        <ItemLink
-          :item="subject"
-          :base="isRegistry ? '' : '/vocabularies?subject='"
-          with-notation />
-      </template>
-    </MetadataListRow>
-
-    <MetadataListRow
-      source-field="languages"
-      :icon="isRegistry ? 'id' : 'language'"
-      label="Languages"
-      :items="displayedLanguages"
-      :list-style="isRegistry ? 'unstyled' : 'inline'">
-      <template #item="{ item: language }">
-        <a
-          v-if="!isRegistry"
-          :href="`/vocabularies/?filter=language:${language.code}`">
-          {{ language.label }}
-        </a>
-        <template v-else>
-          {{ language.code }}
+      <MetadataListRow
+        v-if="!isRegistry"
+        source-field="type"
+        label="KOS Type"
+        :items="displayedKosTypeUris"
+        list-style="inline">
+        <template #item="{ item: uri }">
+          <ItemLink
+            :item="nkosTypes[uri] || { uri }"
+            base="/vocabularies?type=" />
         </template>
-      </template>
-    </MetadataListRow>
+      </MetadataListRow>
 
-    <MetadataRow
-      v-if="!isRegistry && item.extent"
-      label="Size">
-      {{ item.extent }}
-    </MetadataRow>
+      <MetadataListRow
+        v-if="!isRegistry"
+        source-field="subjectOf"
+        label="Links"
+        :items="item.subjectOf">
+        <template #item="{ item: link }">
+          <ExternalLink
+            :url="link.url"
+            :label="link.label" />
+        </template>
+      </MetadataListRow>
 
-    <MetadataRow
-      v-if="isRegistry && item.startDate"
-      icon="calendar"
-      label="Created">
-      {{ item.startDate }}
-    </MetadataRow>
+      <MetadataListRow
+        source-field="subject"
+        label="Subject"
+        :items="isRegistry ? item.subject : manualSubjects"
+        :list-style="isRegistry ? 'unstyled' : 'inline'">
+        <template #item="{ item: subject }">
+          <ItemLink
+            :item="subject"
+            :base="isRegistry ? '' : '/vocabularies?subject='"
+            :with-notation="!isRegistry" />
+        </template>
+      </MetadataListRow>
 
-    <MetadataRow
-      v-if="isRegistry && item.endDate"
-      icon="calendar"
-      label="Dissolved">
-      {{ item.endDate }}
-    </MetadataRow>
+      <MetadataListRow
+        v-if="!isRegistry"
+        source-field="subject"
+        label="Mapped Subjects"
+        :items="mappedSubjects"
+        list-style="inline">
+        <template #item="{ item: subject }">
+          <ItemLink
+            :item="subject"
+            :base="isRegistry ? '' : '/vocabularies?subject='"
+            with-notation />
+        </template>
+      </MetadataListRow>
 
-    <MetadataRow
-      v-if="!isRegistry && (item.startDate || item.endDate)"
-      source-field="[startDate, endDate]"
-      icon="calendar"
-      label="Existence">
-      {{ item.startDate }}–{{ item.endDate }}
-    </MetadataRow>
+      <MetadataListRow
+        source-field="languages"
+        :icon="isRegistry ? 'id' : 'language'"
+        label="Languages"
+        :items="displayedLanguages"
+        :list-style="isRegistry ? 'unstyled' : 'inline'">
+        <template #item="{ item: language }">
+          <a
+            v-if="!isRegistry"
+            :href="`/vocabularies/?filter=language:${language.code}`">
+            {{ language.label }}
+          </a>
+          <template v-else>
+            {{ language.code }}
+          </template>
+        </template>
+      </MetadataListRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      label="Wikipedia"
-      :items="wikipediaLinks"
-      list-style="inline"
-      :preview-limit="10">
-      <template #item="{ item: wikipediaPage }">
-        <ExternalLink
-          :url="wikipediaPage.url"
-          :label="wikipediaPage.languageName" />
-      </template>
-    </MetadataListRow>
+      <MetadataRow
+        v-if="!isRegistry && item.extent"
+        label="Size">
+        {{ item.extent }}
+      </MetadataRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      source-field="basedOn"
-      label="Based on"
-      :items="item.basedOn">
-      <template #item="{ item: terminology }">
-        <ItemLink :item="terminology" />
-      </template>
-    </MetadataListRow>
+      <MetadataRow
+        v-if="isRegistry && item.startDate"
+        icon="calendar"
+        label="Created">
+        {{ item.startDate }}
+      </MetadataRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      source-field="_basedOnBacklink"
-      label="Derived terminologies"
-      :items="item._basedOnBacklink">
-      <template #item="{ item: terminology }">
-        <ItemLink :item="terminology" />
-      </template>
-    </MetadataListRow>
+      <MetadataRow
+        v-if="isRegistry && item.endDate"
+        icon="calendar"
+        label="Dissolved">
+        {{ item.endDate }}
+      </MetadataRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      source-field="replacedBy"
-      label="Replaced by"
-      :items="item.replacedBy">
-      <template #item="{ item: terminology }">
-        <ItemLink :item="terminology" />
-      </template>
-    </MetadataListRow>
+      <MetadataRow
+        v-if="!isRegistry && (item.startDate || item.endDate)"
+        source-field="[startDate, endDate]"
+        icon="calendar"
+        label="Existence">
+        {{ item.startDate }}–{{ item.endDate }}
+      </MetadataRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      source-field="_replacedByBacklink"
-      label="Successor of"
-      :items="item._replacedByBacklink">
-      <template #item="{ item: terminology }">
-        <ItemLink :item="terminology" />
-      </template>
-    </MetadataListRow>
+      <MetadataListRow
+        v-if="!isRegistry"
+        label="Wikipedia"
+        :items="wikipediaLinks"
+        list-style="inline"
+        :preview-limit="10">
+        <template #item="{ item: wikipediaPage }">
+          <ExternalLink
+            :url="wikipediaPage.url"
+            :label="wikipediaPage.languageName" />
+        </template>
+      </MetadataListRow>
+
+      <MetadataListRow
+        v-if="!isRegistry"
+        source-field="basedOn"
+        label="Based on"
+        :items="item.basedOn">
+        <template #item="{ item: terminology }">
+          <ItemLink :item="terminology" />
+        </template>
+      </MetadataListRow>
+
+      <MetadataListRow
+        v-if="!isRegistry"
+        source-field="_basedOnBacklink"
+        label="Derived terminologies"
+        :items="item._basedOnBacklink">
+        <template #item="{ item: terminology }">
+          <ItemLink :item="terminology" />
+        </template>
+      </MetadataListRow>
+
+      <MetadataListRow
+        v-if="!isRegistry"
+        source-field="replacedBy"
+        label="Replaced by"
+        :items="item.replacedBy">
+        <template #item="{ item: terminology }">
+          <ItemLink :item="terminology" />
+        </template>
+      </MetadataListRow>
+
+      <MetadataListRow
+        v-if="!isRegistry"
+        source-field="_replacedByBacklink"
+        label="Successor of"
+        :items="item._replacedByBacklink">
+        <template #item="{ item: terminology }">
+          <ItemLink :item="terminology" />
+        </template>
+      </MetadataListRow>
+    </tbody>
   </table>
 </template>
 

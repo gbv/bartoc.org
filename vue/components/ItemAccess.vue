@@ -1,92 +1,94 @@
 <template>
   <table class="cc-table">
-    <MetadataRow
-      v-if="item.url"
-      source-field="url"
-      icon="home"
-      label="Homepage">
-      <ExternalLink :url="item.url" />
-    </MetadataRow>
+    <tbody>
+      <MetadataRow
+        v-if="item.url"
+        source-field="url"
+        icon="home"
+        label="Homepage">
+        <ExternalLink :url="item.url" />
+      </MetadataRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      label="Issue tracker"
-      :items="item.issueTracker">
-      <template #item="{ item: tracker }">
-        <ExternalLink :url="tracker.uri" />
-      </template>
-    </MetadataListRow>
+      <MetadataListRow
+        v-if="!isRegistry"
+        label="Issue tracker"
+        :items="item.issueTracker">
+        <template #item="{ item: tracker }">
+          <ExternalLink :url="tracker.uri" />
+        </template>
+      </MetadataListRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      label="Access"
-      :items="item.ACCESS"
-      list-style="inline">
-      <template #item="{ item: access }">
-        <ItemLink :item="access" />
-      </template>
-    </MetadataListRow>
+      <MetadataListRow
+        v-if="!isRegistry"
+        label="Access"
+        :items="item.ACCESS"
+        list-style="inline">
+        <template #item="{ item: access }">
+          <ItemLink :item="access" />
+        </template>
+      </MetadataListRow>
 
-    <MetadataListRow
-      label="License"
-      :items="item.license"
-      :list-style="isRegistry ? 'unstyled' : 'inline'">
-      <template #item="{ item: license }">
-        <ItemLink
-          :item="license"
-          :base="isRegistry ? '' : '/vocabularies?license='" />
-      </template>
-    </MetadataListRow>
+      <MetadataListRow
+        label="License"
+        :items="item.license"
+        :list-style="isRegistry ? 'unstyled' : 'inline'">
+        <template #item="{ item: license }">
+          <ItemLink
+            :item="license"
+            :base="isRegistry ? '' : '/vocabularies?license='" />
+        </template>
+      </MetadataListRow>
 
-    <MetadataListRow
-      label="Publisher"
-      :items="item.publisher">
-      <template #item="{ item: publisher }">
-        <ItemLink
-          :item="publisher"
-          :base="isRegistry ? '' : '/vocabularies/?field=publisher_en&search='" />
-      </template>
-    </MetadataListRow>
+      <MetadataListRow
+        label="Publisher"
+        :items="item.publisher">
+        <template #item="{ item: publisher }">
+          <ItemLink
+            :item="publisher"
+            :base="isRegistry ? '' : '/vocabularies/?field=publisher_en&search='" />
+        </template>
+      </MetadataListRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      label="Address"
-      :items="address" />
+      <MetadataListRow
+        v-if="!isRegistry"
+        label="Address"
+        :items="address" />
 
-    <MetadataRow
-      v-if="!isRegistry && item.CONTACT"
-      label="Contact">
-      {{ item.CONTACT }}
-    </MetadataRow>
+      <MetadataRow
+        v-if="!isRegistry && item.CONTACT"
+        label="Contact">
+        {{ item.CONTACT }}
+      </MetadataRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      label="Format"
-      :items="item.FORMAT"
-      list-style="inline">
-      <template #item="{ item: format }">
-        <ItemLink :item="format" />
-      </template>
-    </MetadataListRow>
+      <MetadataListRow
+        v-if="!isRegistry"
+        label="Format"
+        :items="item.FORMAT"
+        list-style="inline">
+        <template #item="{ item: format }">
+          <ItemLink :item="format" />
+        </template>
+      </MetadataListRow>
 
-    <MetadataListRow
-      :label="isRegistry ? 'Services (API)' : 'Data sources'"
-      :items="item.API">
-      <template #item="{ item: endpoint }">
-        <ServiceLink
-          :scheme="{ uri: item.uri }"
-          :endpoint="endpoint" />
-      </template>
-    </MetadataListRow>
+      <MetadataListRow
+        :label="isRegistry ? 'Services (API)' : 'Data sources'"
+        :items="item.API">
+        <template #item="{ item: endpoint }">
+          <ServiceLink
+            :scheme="{ uri: item.uri }"
+            :endpoint="endpoint" />
+        </template>
+      </MetadataListRow>
 
-    <MetadataListRow
-      v-if="!isRegistry"
-      label="Part of"
-      :items="item.partOf">
-      <template #item="{ item: terminology }">
-        <ItemLink :item="terminology" />
-      </template>
-    </MetadataListRow>
+      <MetadataListRow
+        v-if="!isRegistry"
+        label="Part of"
+        :items="item.partOf">
+        <template #item="{ item: terminology }">
+          <ItemLink :item="terminology" />
+        </template>
+      </MetadataListRow>
+    </tbody>
   </table>
 </template>
 

@@ -2,64 +2,66 @@
   <h1>{{ title }}</h1>
 
   <table class="cc-table cc-table--divided">
-    <MetadataRow
-      v-if="scheme"
-      label="Vocabulary">
-      <ItemLink
-        :item="scheme"
-        base="/vocabularies" />
-    </MetadataRow>
-
-    <MetadataRow
-      v-if="item.uri"
-      icon="link"
-      label="URI">
-      <ExternalLink :url="item.uri" />
-    </MetadataRow>
-
-    <MetadataListRow
-      label="Notation"
-      :items="item.notation" />
-
-    <MetadataListRow
-      icon="star"
-      label="Identifiers"
-      :items="item.identifier" />
-
-    <MetadataRow
-      v-if="item.url"
-      icon="home"
-      label="Homepage">
-      <ExternalLink :url="item.url" />
-    </MetadataRow>
-
-    <MetadataRow
-      v-if="item.startDate || item.endDate"
-      source-field="[startDate, endDate]"
-      icon="calendar"
-      label="Existence">
-      {{ item.startDate }}–{{ item.endDate }}
-    </MetadataRow>
-
-    <MetadataListRow
-      label="Publisher"
-      :items="item.publisher">
-      <template #item="{ item: publisher }">
+    <tbody>
+      <MetadataRow
+        v-if="scheme"
+        label="Vocabulary">
         <ItemLink
-          :item="publisher"
-          base="/publisher" />
-      </template>
-    </MetadataListRow>
+          :item="scheme"
+          base="/vocabularies" />
+      </MetadataRow>
 
-    <MetadataListRow
-      label="License"
-      :items="item.license">
-      <template #item="{ item: license }">
-        <ItemLink
-          :item="license"
-          base="/vocabularies?license=" />
-      </template>
-    </MetadataListRow>
+      <MetadataRow
+        v-if="item.uri"
+        icon="link"
+        label="URI">
+        <ExternalLink :url="item.uri" />
+      </MetadataRow>
+
+      <MetadataListRow
+        label="Notation"
+        :items="item.notation" />
+
+      <MetadataListRow
+        icon="star"
+        label="Identifiers"
+        :items="item.identifier" />
+
+      <MetadataRow
+        v-if="item.url"
+        icon="home"
+        label="Homepage">
+        <ExternalLink :url="item.url" />
+      </MetadataRow>
+
+      <MetadataRow
+        v-if="item.startDate || item.endDate"
+        source-field="[startDate, endDate]"
+        icon="calendar"
+        label="Existence">
+        {{ item.startDate }}–{{ item.endDate }}
+      </MetadataRow>
+
+      <MetadataListRow
+        label="Publisher"
+        :items="item.publisher">
+        <template #item="{ item: publisher }">
+          <ItemLink
+            :item="publisher"
+            base="/publisher" />
+        </template>
+      </MetadataListRow>
+
+      <MetadataListRow
+        label="License"
+        :items="item.license">
+        <template #item="{ item: license }">
+          <ItemLink
+            :item="license"
+            base="/vocabularies?license=" />
+        </template>
+      </MetadataListRow>
+    </tbody>
   </table>
 
   <a
