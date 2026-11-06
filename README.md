@@ -17,6 +17,7 @@ The application is currently being reconstructed funded by DFG.
 - [Configuration](#configuration)
 - [Data flow](#data-flow)
 - [Scripts](#scripts)
+- [Quality API](#quality-api)
 - [Development](#development)
 
 ## Install
@@ -155,7 +156,7 @@ graph TD
     database[**database**: jskos-server]
     terminologies(terminology services)
     terminologies -- JSKOS API, Skosmos, ... --> client
-    server -- RDF & JSKOS --> applications(applications)
+    server -- RDF, JSKOS & Quality API --> applications(applications)
     client <-- browser --> user(user)
     subgraph app [**bartoc.org**]
         database <-- JSKOS API --> client
@@ -166,12 +167,11 @@ graph TD
         database -.-> search
         reports[**reports**]
         database -.-> reports
+        reports --> server
     end
-    server -.-> applications
     database -- JSKOS API --> applications
     login --> client
     reports -.-> client
-    reports -.-> applications
 ```
 
 ## Scripts
@@ -179,6 +179,21 @@ graph TD
 To regularly update dumps, add a cronjob with command `npm run dump`. Dumps are placed in `data/dumps` and reports in `data/reports`. To compare dump files, run `node bin/dump.js diff FILE1 [FILE2]`.
 
 The dump command also creates quality reports as JSON and CSV files. `validation-errors.json` lists records with validation errors, and `summary.json` groups validation errors and quality warnings by record.
+
+## Quality API
+
+BARTOC exposes generated quality reports through a read-only API at
+`/quality/`.
+
+Reports are generated asynchronously by `npm run dump`. API requests read the
+files in `data/reports`; they do not validate records or regenerate reports.
+
+- `/quality/` — human-readable API documentation
+- `/quality/openapi.json` — OpenAPI 3.1 description
+- `/data/reports/` — existing JSON and CSV downloads
+
+For a local development instance, open
+<http://localhost:3883/quality/>.
 
 ## Development
 
