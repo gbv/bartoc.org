@@ -91,6 +91,9 @@ onMounted(() => {
     disableGeoPlugin()
 
     matgui = new window.Yasgui(matguiElement.value, {
+      ai: {
+        enabled: false,
+      },
       autofocus: false,
       persistenceId: null,
       populateFromUrl: false,
