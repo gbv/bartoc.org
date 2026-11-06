@@ -35,5 +35,10 @@ export default function createQualityRoute({ reports }) {
     res.json(reports.getErrors({ id: value }))
   })
 
+  // Return aggregate quality counts and report freshness.
+  router.get("/stats", (req, res) => {
+    res.json(reports.getStats())
+  })
+
   return router
 }

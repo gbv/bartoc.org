@@ -87,6 +87,14 @@ describe("quality reports", () => {
         created: missingExtent.created,
         formats: ["json", "csv"],
       })
+      const summaryReport = JSON.parse(readFileSync(join(reports, "summary.json")))
+      const stats = new ReportsDirectory(reports).getStats()
+      expect(stats).toEqual({
+        reports: 12,
+        recordsWithFindings: summaryReport.errors.length,
+        findings: summaryReport.errors.reduce((count, record) => count + record.errors.length, 0),
+        created: summaryReport.created,
+      })
       expect(readFileSync(join(reports, "no-license.csv"), "utf8")).toContain("\"Good, title\"")
       expect(readFileSync(join(reports, "no-extent.csv"), "utf8")).toContain(JSON.stringify(bad.uri) + ",")
     } finally {

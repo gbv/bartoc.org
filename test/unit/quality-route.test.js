@@ -8,6 +8,7 @@ function createApp() {
     getSummaries: vi.fn(() => ({ "no-abstract": { totalErrors: 2 } })),
     getReport: vi.fn(id => id === "no-abstract" ? { id, errors: [] } : undefined),
     getErrors: vi.fn(() => [{ position: { id: "http://bartoc.org/en/node/14" } }]),
+    getStats: vi.fn(() => ({ reports: 2, recordsWithFindings: 1, findings: 2 })),
   }
   const app = express()
   app.use("/quality", createQualityRoute({ reports }))
@@ -67,5 +68,13 @@ describe("quality route", () => {
       .get("/quality/errors")
       .query({ position: "jsonpointer:/extent" })
       .expect(400, error)
+  })
+
+  it("returns aggregate quality statistics", async () => {
+    const { app } = createApp()
+
+    await request(app)
+      .get("/quality/stats")
+      .expect(200, { reports: 2, recordsWithFindings: 1, findings: 2 })
   })
 })

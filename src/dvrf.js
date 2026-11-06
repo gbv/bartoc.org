@@ -124,6 +124,19 @@ export class ReportsDirectory {
     }))
   }
 
+  // Summarize the current aggregate report and its freshness.
+  getStats() {
+    const reports = this.getReports()
+    const summary = reports.summary
+    const records = summary?.errors || []
+    return {
+      reports: Object.keys(reports).length,
+      recordsWithFindings: records.length,
+      findings: records.reduce((count, record) => count + (record.errors?.length || 0), 0),
+      created: summary?.created,
+    }
+  }
+
   _add(id, report) {
     report.issued = this._issued(id)
     report.formats = ["json"]
