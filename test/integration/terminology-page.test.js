@@ -92,7 +92,7 @@ function mountPage(itemOverrides = {}, derivedFields = {}) {
     },
     global: {
       provide: {
-        header: { userCanAdd: ref(true) },
+        header: { userCanEdit: ref(true) },
       },
       stubs: {
         ConceptBrowser: ConceptBrowserStub,

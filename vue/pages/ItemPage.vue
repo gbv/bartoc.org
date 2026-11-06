@@ -1,6 +1,6 @@
 <template>
   <a
-    v-if="!isRegistry && userCanAdd"
+    v-if="!isRegistry && userCanEdit"
     class="cc-button cc-button-primary page-action"
     :href="`/edit?uri=${encodeURIComponent(item.uri)}`">
     edit
@@ -191,7 +191,7 @@ const registryTerminologiesTitle = computed(() =>
 const activeTab = ref(0)
 const ready = ref(false)
 const header = inject("header", {})
-const userCanAdd = computed(() => unref(header.userCanAdd) || false)
+const userCanEdit = computed(() => unref(header.userCanEdit) || false)
 
 // Version number shown on the page.
 const currentVersionNumber = computed(() => versionNumber(props.item))

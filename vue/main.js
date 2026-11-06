@@ -13,7 +13,9 @@ import "jskos-vue/dist/style.css"
 
 const { token } = toRefs(Login)
 const userCanAdd = ref(false)
+const userCanEdit = ref(false)
 const permissionChecked = ref(false)
+const editPermissionChecked = ref(false)
 
 // The user status is actionable only after the login client connects.
 const loginReady = computed(() => Login.connected)
@@ -21,30 +23,57 @@ const loginReady = computed(() => Login.connected)
 const addReady = computed(() => loginReady.value &&
   (!Login.loggedIn || (Boolean(token.value) && permissionChecked.value)))
 
-watch(token, async currentToken => {
+// Keep Edit's place until its permission check has finished.
+const editReady = computed(() => loginReady.value &&
+  (!Login.loggedIn || (Boolean(token.value) && editPermissionChecked.value)))
+
+async function checkPermission(action, currentToken) {
+  try {
+    const response = await fetch(
+      `/api/checkAuth?type=schemes&action=${action}`,
+      {
+        headers: {
+          Authorization: `Bearer ${currentToken}`,
+        },
+      },
+    )
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+watch(token, currentToken => {
   // Clear the previous login's permission while checking the new token.
   userCanAdd.value = false
   permissionChecked.value = false
+  userCanEdit.value = false
+  editPermissionChecked.value = false
+
   if (!currentToken) {
     permissionChecked.value = true
+    editPermissionChecked.value = true
     return
   }
 
-  const url = "/api/checkAuth?type=schemes&action=create"
-  const headers = { Authorization: `Bearer ${currentToken}` }
-  try {
-    const response = await fetch(url, { headers })
-    // Ignore a response if the user has logged out or changed tokens.
-    if (token.value === currentToken) {
-      userCanAdd.value = response.ok
+  checkPermission("create", currentToken).then(allowed => {
+    if (token.value !== currentToken) {
+      return
     }
-  } catch {
-    // The permission stays false if the request fails.
-  } finally {
-    if (token.value === currentToken) {
-      permissionChecked.value = true
+
+    userCanAdd.value = allowed
+    permissionChecked.value = true
+  })
+
+  checkPermission("update", currentToken).then(allowed => {
+    if (token.value !== currentToken) {
+      return
     }
-  }
+
+    userCanEdit.value = allowed
+    editPermissionChecked.value = true
+  })
+
 }, { immediate: true })
 
 async function hydrate() {
@@ -57,8 +86,10 @@ async function hydrate() {
     header: {
       activePath: serverState.header?.activePath || "",
       userCanAdd,
+      userCanEdit,
       loginReady,
       addReady,
+      editReady,
     },
   })
 
