@@ -17,7 +17,13 @@ export default function createQualityRoute({ reports }) {
 
   // List metadata and available formats for every report.
   router.get("/reports", (req, res) => {
-    res.json(reports.getSummaries())
+    const summaries = Object.fromEntries(
+      Object.entries(reports.getSummaries()).map(([id, summary]) => {
+        const { formats, ...metadata } = summary
+        return [id, { ...metadata, _formats: formats }]
+      }),
+    )
+    res.json(summaries)
   })
 
   // Return one complete report including its findings.
@@ -43,7 +49,8 @@ export default function createQualityRoute({ reports }) {
       return res.status(400).json({ error: "Expected position=id:<URI>" })
     }
 
-    res.json(reports.getErrors({ id: value }))
+    const records = reports.getErrors({ id: value })
+    res.json(records.flatMap(record => record.errors || []))
   })
 
   // Return aggregate quality counts and report freshness.

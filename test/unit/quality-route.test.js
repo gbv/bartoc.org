@@ -5,9 +5,14 @@ import createQualityRoute from "../../routes/quality.js"
 
 function createApp() {
   const reports = {
-    getSummaries: vi.fn(() => ({ "no-abstract": { totalErrors: 2 } })),
+    getSummaries: vi.fn(() => ({
+      "no-abstract": { totalErrors: 2, formats: ["json", "csv"] },
+    })),
     getReport: vi.fn(id => id === "no-abstract" ? { id, errors: [] } : undefined),
-    getErrors: vi.fn(() => [{ position: { id: "http://bartoc.org/en/node/14" } }]),
+    getErrors: vi.fn(() => [{
+      position: { id: "http://bartoc.org/en/node/14" },
+      errors: [{ type: ["no-abstract"], position: { jsonpointer: "/definition" } }],
+    }]),
     getStats: vi.fn(() => ({ reports: 2, recordsWithFindings: 1, findings: 2 })),
   }
   const app = express()
@@ -47,6 +52,8 @@ describe("quality route", () => {
       "/errors",
       "/stats",
     ])
+    expect(response.body.components.schemas.ReportSummary.properties).toHaveProperty("_formats")
+    expect(response.body.components.schemas.ReportSummary.properties).not.toHaveProperty("formats")
   })
 
   it("lists report summaries", async () => {
@@ -56,7 +63,9 @@ describe("quality route", () => {
       .get("/quality/reports")
       .expect(200)
 
-    expect(response.body).toEqual({ "no-abstract": { totalErrors: 2 } })
+    expect(response.body).toEqual({
+      "no-abstract": { totalErrors: 2, _formats: ["json", "csv"] },
+    })
   })
 
   it("returns a complete report", async () => {
@@ -82,11 +91,15 @@ describe("quality route", () => {
     const { app, reports } = createApp()
     const id = "http://bartoc.org/en/node/14"
 
-    await request(app)
+    const response = await request(app)
       .get("/quality/errors")
       .query({ position: `id:${id}` })
       .expect(200)
 
+    expect(response.body).toEqual([{
+      type: ["no-abstract"],
+      position: { jsonpointer: "/definition" },
+    }])
     expect(reports.getErrors).toHaveBeenCalledWith({ id })
   })
 

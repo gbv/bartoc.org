@@ -93,7 +93,7 @@ export const qualityOpenApi = {
           level: { type: "string" },
           totalErrors: { type: "integer" },
           created: { type: "string", format: "date-time" },
-          formats: { type: "array", items: { type: "string" } },
+          _formats: { type: "array", items: { type: "string" } },
         },
       },
       QualityStats: {
