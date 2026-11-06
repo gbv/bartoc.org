@@ -1,9 +1,14 @@
 import express from "express"
-import { qualityOpenApi } from "../src/qualityApi.js"
+import { qualityOpenApi, renderQualityApiPage } from "../src/qualityApi.js"
 
 // Create the read-only API backed by generated quality reports.
 export default function createQualityRoute({ reports }) {
   const router = express.Router()
+
+  // Show a human-readable summary generated from the OpenAPI description.
+  router.get("/", (req, res) => {
+    res.type("html").send(renderQualityApiPage())
+  })
 
   // Publish the machine-readable contract used by the documentation page.
   router.get("/openapi.json", (req, res) => {
