@@ -27,7 +27,6 @@ describe("quality route", () => {
     expect(response.text).toContain("BARTOC Quality API")
     expect(response.text).toContain("/quality/openapi.json")
     expect(response.text).toContain("/quality/reports/{id}.json")
-    expect(response.text).toContain("DVRF position in the form id:&#60;URI&#62;.")
     expect(response.text).toContain(
       "position=id%3Ahttp%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F14\"><code>/quality/errors</code></a><code>?position=id:&#60;BARTOC_URI&#62;</code>",
     )

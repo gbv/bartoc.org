@@ -10,7 +10,7 @@ export const qualityOpenApi = {
   paths: {
     "/openapi.json": {
       get: {
-        summary: "Return the API specification",
+        summary: "Get the API specification",
         responses: { 200: { description: "OpenAPI description" } },
       },
     },
@@ -34,7 +34,7 @@ export const qualityOpenApi = {
     },
     "/reports/{id}.json": {
       get: {
-        summary: "Return one complete quality report",
+        summary: "Get a quality report for an error type",
         parameters: [{
           name: "id",
           in: "path",
@@ -50,18 +50,18 @@ export const qualityOpenApi = {
     },
     "/errors": {
       get: {
-        summary: "Find quality findings for a BARTOC record",
+        summary: "Get errors for a BARTOC record",
         parameters: [{
           name: "position",
           in: "query",
           required: true,
-          description: "DVRF position in the form id:<URI>.",
+          description: "Error position. Currently limited to BARTOC URI preceeded by 'id:'",
           schema: { type: "string", pattern: "^id:.+$" },
           example: "id:http://bartoc.org/en/node/14",
           "x-displayValue": "id:<BARTOC_URI>",
         }],
         responses: {
-          200: { description: "Matching DVRF findings" },
+          200: { description: "Matching errors as array of DVRF locators" },
           400: { description: "Invalid position parameter" },
         },
       },
@@ -174,7 +174,7 @@ export function renderQualityApiPage(api = qualityOpenApi) {
     <main class="quality-api">
       <h1>${escapeHtml(api.info.title)}</h1>
       <p class="quality-api__description">${escapeHtml(api.info.description)}</p>
-      <p>Reports are generated asynchronously. This API does not validate records on request.</p>
+      <p>Reports are generated asynchronously. This API is experimental and it does not validate records on request.</p>
       <h2>Available Endpoints</h2>
       <ul class="quality-api__endpoints">
         ${endpoints}
