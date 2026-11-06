@@ -73,6 +73,7 @@ app.use(
 import redirectsRoute from "./routes/redirects.js"
 import apiRoute from "./routes/api.js"
 import uriRoute from "./routes/uri.js"
+import createQualityRoute from "./routes/quality.js"
 import createSparqlRoute from "./routes/sparql.js"
 
 app.use(redirectsRoute)
@@ -452,8 +453,10 @@ async function buildPresentationView(storedItem) {
   return { presentationItem, derivedFields, nkosTypes }
 }
 
-// Statistics
+// Quality reports and statistics
 const reports = new ReportsDirectory(`${__dirname}data/reports`)
+app.use("/quality", createQualityRoute({ reports }))
+
 app.get("/stats", async (req, res, next) => {
   backend.getSchemes({ params: { limit: 1 } })
     .then(schemes => {

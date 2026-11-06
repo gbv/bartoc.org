@@ -103,11 +103,24 @@ export class ReportsDirectory {
     return this.reports
   }
 
-  // The statistics page only needs report metadata, not every finding.
+  // Return one generated report by its filename identifier.
+  getReport(id) {
+    this._sync()
+    return this.reports[id]
+  }
+
+  // Find summary entries matching all supplied position fields.
+  getErrors(position) {
+    const errors = this.getReport("summary")?.errors || []
+    return errors.filter(error => Object.entries(position).every(([key, value]) =>
+      error.position?.[key] === value))
+  }
+
+  // Return report metadata without including every finding in the response.
   getSummaries() {
     return Object.fromEntries(Object.entries(this.getReports()).map(([id, report]) => {
-      const { title, description, types, level, totalErrors, formats } = report
-      return [id, { title, description, types, level, totalErrors, formats }]
+      const { title, description, types, level, totalErrors, created, formats } = report
+      return [id, { title, description, types, level, totalErrors, created, formats }]
     }))
   }
 

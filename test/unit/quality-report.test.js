@@ -84,6 +84,7 @@ describe("quality reports", () => {
         types: missingExtent.types,
         level: missingExtent.level,
         totalErrors: missingExtent.totalErrors,
+        created: missingExtent.created,
         formats: ["json", "csv"],
       })
       expect(readFileSync(join(reports, "no-license.csv"), "utf8")).toContain("\"Good, title\"")
