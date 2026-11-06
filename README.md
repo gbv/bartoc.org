@@ -182,18 +182,15 @@ The dump command also creates quality reports as JSON and CSV files. `validation
 
 ## Quality API
 
-BARTOC exposes generated quality reports through a read-only API at
-`/quality/`.
+BARTOC exposes generated quality reports through an **experimental** read-only API at `/quality/`.
 
-Reports are generated asynchronously by `npm run dump`. API requests read the
-files in `data/reports`; they do not validate records or regenerate reports.
+Reports are generated asynchronously by `npm run dump`. API requests read the files in `data/reports`; they do not validate records or regenerate reports.
 
 - `/quality/` — human-readable API documentation
 - `/quality/openapi.json` — OpenAPI 3.1 description
 - `/data/reports/` — existing JSON and CSV downloads
 
-For a local development instance, open
-<http://localhost:3883/quality/>.
+For a local development instance, open <http://localhost:3883/quality/>.
 
 ## Development
 

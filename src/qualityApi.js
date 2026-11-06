@@ -4,7 +4,7 @@ export const qualityOpenApi = {
   info: {
     title: "BARTOC Quality API",
     version: "1.0.0",
-    description: "Read-only access to asynchronously generated BARTOC quality reports.",
+    description: "Experimental read-only access to asynchronously generated BARTOC quality reports.",
   },
   servers: [{ url: "/quality" }],
   paths: {
