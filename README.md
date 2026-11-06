@@ -45,7 +45,38 @@ git clone https://github.com/gbv/bartoc-vocabularies.git ../bartoc-vocabularies
 ./bin/setup.sh ../jskos-server ../bartoc-vocabularies
 ```
 
-To update only the six auxiliary vocabularies later, run `./bin/import-vocabularies.sh ../jskos-server ../bartoc-vocabularies`. This adds or updates their schemes and concepts and sets their `API` field to the target JSKOS Server URL. It does not reset registries or import BARTOC records.
+#### Updating auxiliary vocabularies
+
+Changes in `bartoc-vocabularies` are not imported automatically.
+
+For a local installation, pull the changes and run the import:
+
+```bash
+git -C ../bartoc-vocabularies pull --ff-only
+./bin/import-vocabularies.sh ../jskos-server ../bartoc-vocabularies
+```
+
+This updates the six auxiliary vocabularies without resetting other data.
+
+The Docker image includes the current `bartoc-vocabularies/main` at build time.
+After updating the image, import the files into its persistent database:
+
+```bash
+docker compose exec -it bartoc bash -lc \
+  'cd /usr/src/app/bartoc && ./bin/import-vocabularies.sh ../jskos-server ../bartoc-vocabularies'
+```
+
+- **dev.bartoc.org:** rebuild and deploy the `dev` image, then run the import
+  command in the development container.
+- **bartoc.org:** build and deploy a release image, then run the import command
+  in the production container.
+
+The Docker workflow only publishes images. It does not deploy them or import
+the vocabularies.
+
+> **Work in progress:** this update process is still manual and should be
+> automated. Until then, building the image, deploying it, and importing the
+> vocabularies are separate required steps.
 
 ## Configuration
 
