@@ -16,6 +16,23 @@ function createApp() {
 }
 
 describe("quality route", () => {
+  it("returns the OpenAPI description", async () => {
+    const { app } = createApp()
+
+    const response = await request(app)
+      .get("/quality/openapi.json")
+      .expect(200)
+
+    expect(response.body.openapi).toBe("3.1.0")
+    expect(Object.keys(response.body.paths)).toEqual([
+      "/openapi.json",
+      "/reports",
+      "/reports/{id}.json",
+      "/errors",
+      "/stats",
+    ])
+  })
+
   it("lists report summaries", async () => {
     const { app } = createApp()
 
