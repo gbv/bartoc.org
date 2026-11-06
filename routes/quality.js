@@ -18,5 +18,22 @@ export default function createQualityRoute({ reports }) {
     res.json(report)
   })
 
+  // Find quality findings for one BARTOC record URI.
+  router.get("/errors", (req, res) => {
+    const position = req.query.position
+    if (typeof position !== "string") {
+      return res.status(400).json({ error: "Expected position=id:<URI>" })
+    }
+
+    const separator = position.indexOf(":")
+    const field = position.slice(0, separator)
+    const value = position.slice(separator + 1)
+    if (field !== "id" || !value) {
+      return res.status(400).json({ error: "Expected position=id:<URI>" })
+    }
+
+    res.json(reports.getErrors({ id: value }))
+  })
+
   return router
 }
