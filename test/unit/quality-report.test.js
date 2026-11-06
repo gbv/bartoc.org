@@ -77,7 +77,8 @@ describe("quality reports", () => {
         }],
       }])
       expect(missingExtent.errors.map(e => e.position.id)).toEqual([bad.uri])
-      const summary = new ReportsDirectory(reports).getSummaries()["no-extent"]
+      const reportDirectory = new ReportsDirectory(reports)
+      const summary = reportDirectory.getSummaries()["no-extent"]
       expect(summary).toEqual({
         title: missingExtent.title,
         description: missingExtent.description,
@@ -87,8 +88,11 @@ describe("quality reports", () => {
         created: missingExtent.created,
         formats: ["json", "csv"],
       })
+      expect(reportDirectory.getReport("no-extent").errors).toEqual(missingExtent.errors)
       const summaryReport = JSON.parse(readFileSync(join(reports, "summary.json")))
-      const stats = new ReportsDirectory(reports).getStats()
+      const recordErrors = summaryReport.errors.find(error => error.position.id === bad.uri)
+      expect(reportDirectory.getErrors({ id: bad.uri })).toEqual([recordErrors])
+      const stats = reportDirectory.getStats()
       expect(stats).toEqual({
         reports: 12,
         recordsWithFindings: summaryReport.errors.length,
