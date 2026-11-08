@@ -42,7 +42,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@gbv/bartoc-components": "github:gbv/bartoc-components#v0.5.0",
-    "@matdata/yasgui": "^6.13.0",
+    "@matdata/yasgui": "^6.14.0",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vueform/multiselect": "^2.6.10",
     "axios": "^1.7.7",
