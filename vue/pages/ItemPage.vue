@@ -94,7 +94,7 @@
     </Tab>
     <Tab
       v-if="!isRegistry && qualityAccessGranted"
-      title="Quality"
+      title="Metadata Quality"
       :hidden="!hasQualityFindings">
       <ItemQuality
         :item="item"

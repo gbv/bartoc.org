@@ -1,5 +1,10 @@
 <template>
   <section class="item-quality">
+    <p class="item-quality__introduction">
+      The following issues were found in the metadata record about the terminology.
+      See <a href="/stats">statistics</a> for daily reports.
+    </p>
+
     <p
       v-if="status === 'loading'"
       class="item-quality__feedback"
@@ -23,18 +28,28 @@
         class="item-quality__finding"
         :class="`item-quality__finding--${finding.status}`">
         <div class="item-quality__header">
-          <h2 class="item-quality__title">
-            {{ findingTitle(finding) }}
-          </h2>
-          <span
-            class="item-quality__indicator"
-            :class="`item-quality__indicator--${indicatorKind(finding)}`">
-            <i
-              class="fas"
-              :class="indicatorIcon(finding)"
-              aria-hidden="true" />
-            {{ indicatorLabel(finding) }}
-          </span>
+          <div class="item-quality__heading">
+            <span
+              class="item-quality__indicator"
+              :class="`item-quality__indicator--${indicatorKind(finding)}`"
+              role="img"
+              :aria-label="indicatorLabel(finding)"
+              :title="indicatorLabel(finding)">
+              <i
+                class="fas"
+                :class="indicatorIcon(finding)"
+                aria-hidden="true" />
+            </span>
+            <h2 class="item-quality__title">
+              {{ findingTitle(finding) }}
+            </h2>
+          </div>
+          <a
+            v-if="finding.level === 'warning' && editFieldUrl(finding.jsonpointer, finding.status)"
+            class="item-quality__edit-link"
+            :href="editFieldUrl(finding.jsonpointer, finding.status)">
+            Edit field
+          </a>
         </div>
 
         <p
@@ -61,22 +76,17 @@
           <li
             v-for="(message, index) in finding.messages"
             :key="`${message.position?.jsonpointer || 'message'}-${index}`">
-            <span>{{ message.message }}</span>
-            <a
-              v-if="editFieldUrl(message.position?.jsonpointer, finding.status)"
-              class="item-quality__edit-link"
-              :href="editFieldUrl(message.position?.jsonpointer, finding.status)">
-              Edit field
-            </a>
+            <div class="item-quality__message-row">
+              <span>{{ message.message }}</span>
+              <a
+                v-if="editFieldUrl(message.position?.jsonpointer, finding.status)"
+                class="item-quality__edit-link"
+                :href="editFieldUrl(message.position?.jsonpointer, finding.status)">
+                Edit field
+              </a>
+            </div>
           </li>
         </ul>
-
-        <a
-          v-if="finding.level === 'warning' && editFieldUrl(finding.jsonpointer, finding.status)"
-          class="item-quality__edit-link"
-          :href="editFieldUrl(finding.jsonpointer, finding.status)">
-          Edit field
-        </a>
       </li>
     </ul>
   </section>
@@ -153,8 +163,8 @@ function indicatorIcon(finding) {
   return "fa-info-circle"
 }
 
-// Keep the visible indicator concise: severity for current findings and
-// current/historical state only for findings from an older snapshot.
+// The label is exposed as a tooltip and to assistive technology while the
+// corresponding icon remains the only visible status indicator.
 function indicatorLabel(finding) {
   if (finding.status === "fixed") {
     return "Fixed"
@@ -233,7 +243,14 @@ onMounted(loadQuality)
 </script>
 
 <style scoped>
+.item-quality__introduction {
+  margin: 0 0 var(--cc-space-md);
+}
+
 .item-quality__list {
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  min-inline-size: 40%;
   margin: 0;
   padding-inline-start: 0;
   list-style: none;
@@ -246,8 +263,8 @@ onMounted(loadQuality)
 }
 
 .item-quality__finding {
-  padding-block: var(--cc-space-md);
-  border-bottom: var(--cc-border-width) solid var(--cc-border-color);
+  inline-size: 100%;
+  padding-block: var(--cc-space-sm);
 }
 
 .item-quality__finding:first-child {
@@ -262,25 +279,32 @@ onMounted(loadQuality)
 }
 
 .item-quality__header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
   align-items: flex-start;
-  gap: var(--cc-space-sm);
+  gap: var(--cc-space-xl);
+}
+
+.item-quality__heading {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: baseline;
+  gap: var(--cc-space-xs);
 }
 
 .item-quality__title {
+  min-width: 0;
   margin: 0;
-  font-size: var(--cc-font-size-lg);
-  font-weight: var(--cc-font-weight-regular);
+  overflow-wrap: anywhere;
+  font-size: var(--cc-font-size-base);
+  font-weight: var(--cc-font-weight-light);
 }
 
 .item-quality__indicator {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: var(--cc-space-xs);
-  white-space: nowrap;
   font-size: var(--cc-font-size-sm);
-  font-weight: var(--cc-font-weight-bold);
 }
 
 .item-quality__indicator--error {
@@ -310,18 +334,29 @@ onMounted(loadQuality)
   overflow-wrap: anywhere;
 }
 
+.item-quality__message,
+.item-quality__message-row {
+  display: flex;
+  gap: var(--cc-space-xl);
+}
+
 .item-quality__message {
   max-width: 100%;
 }
 
-.item-quality__message .item-quality__edit-link,
-.item-quality__messages .item-quality__edit-link {
-  display: block;
+.item-quality__message > span,
+.item-quality__message-row > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .item-quality__edit-link {
   display: inline-block;
-  margin-block-start: var(--cc-space-xs);
+  flex: 0 0 auto;
+  align-self: start;
+  margin-inline-start: auto;
+  white-space: nowrap;
   font-size: var(--cc-font-size-sm);
 }
 </style>

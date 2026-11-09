@@ -574,7 +574,7 @@ describe("ItemPage (terminology)", () => {
     expect(wrapper.find(".terminology-editions").exists()).toBe(false)
   })
 
-  it("keeps Quality selected while edit permission is refreshed", async () => {
+  it("keeps Metadata Quality selected while edit permission is refreshed", async () => {
     const header = {
       userCanEdit: ref(true),
       editReady: ref(true),
@@ -586,7 +586,7 @@ describe("ItemPage (terminology)", () => {
     await nextTick()
 
     const qualityHeader = visibleTabHeaders(wrapper)
-      .find(tab => tab.text() === "Quality")
+      .find(tab => tab.text() === "Metadata Quality")
     await qualityHeader.trigger("click")
 
     header.editReady.value = false
@@ -594,24 +594,24 @@ describe("ItemPage (terminology)", () => {
     await nextTick()
 
     const refreshedQualityHeader = visibleTabHeaders(wrapper)
-      .find(tab => tab.text() === "Quality")
+      .find(tab => tab.text() === "Metadata Quality")
     expect(refreshedQualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
 
     header.userCanEdit.value = true
     header.editReady.value = true
     await nextTick()
 
-    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Quality").classes())
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality").classes())
       .toContain("jskos-vue-tabs-header-item-active")
   })
 
-  it("keeps Quality visible when all reported findings are historical", async () => {
+  it("keeps Metadata Quality visible when all reported findings are historical", async () => {
     const wrapper = mountPage({}, {}, {
       itemQuality: ItemQualityWithHistoricalFindingStub,
     })
     await nextTick()
 
-    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Quality")).toBeDefined()
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality")).toBeDefined()
   })
 
   it("does not mount the concept browser for an empty API list", async () => {

@@ -31,6 +31,14 @@ function findingByTitle(wrapper, title) {
     .find(finding => finding.get(".item-quality__title").text() === title)
 }
 
+function expectIndicator(finding, label, iconClass) {
+  const indicator = finding.get(".item-quality__indicator")
+  expect(indicator.text()).toBe("")
+  expect(indicator.attributes("aria-label")).toBe(label)
+  expect(indicator.attributes("title")).toBe(label)
+  expect(indicator.get("i").classes()).toContain(iconClass)
+}
+
 async function mountQuality(itemOverrides = {}, reportedErrors = []) {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
     ok: true,
@@ -64,11 +72,13 @@ describe("ItemQuality", () => {
     ])
 
     const warning = findingByTitle(wrapper, "Missing license")
-    expect(warning.get(".item-quality__indicator").text()).toBe("Warning")
+    expectIndicator(warning, "Warning", "fa-exclamation-triangle")
     expect(warning.find(".item-quality__description").exists()).toBe(false)
+    expect(warning.get(".item-quality__header > .item-quality__edit-link").text())
+      .toBe("Edit field")
 
     const validation = findingByTitle(wrapper, "Validation errors")
-    expect(validation.get(".item-quality__indicator").text()).toBe("Error")
+    expectIndicator(validation, "Error", "fa-exclamation-circle")
     expect(validation.get(".item-quality__message span").text()).toBe(
       "Publisher URI must be a valid HTTP(S) URL!",
     )
@@ -79,11 +89,18 @@ describe("ItemQuality", () => {
 
     const historical = findingByTitle(wrapper, "Missing format")
     expect(historical.classes()).toContain("item-quality__finding--fixed")
-    expect(historical.get(".item-quality__indicator").text()).toBe("Fixed")
+    expectIndicator(historical, "Fixed", "fa-check")
     expect(historical.find(".item-quality__edit-link").exists()).toBe(false)
     expect(wrapper.text()).not.toContain("Current issue")
     expect(wrapper.text()).not.toContain("no-license")
     expect(wrapper.text()).not.toContain("no-format")
+
+    const introduction = wrapper.get(".item-quality__introduction")
+    expect(introduction.text()).toBe(
+      "The following issues were found in the metadata record about the terminology. "
+      + "See statistics for daily reports.",
+    )
+    expect(introduction.get("a").attributes("href")).toBe("/stats")
 
     expect(wrapper.emitted("count")).toEqual([
       [{ current: 2, total: 2 }],
@@ -102,8 +119,8 @@ describe("ItemQuality", () => {
     const findings = wrapper.findAll(".item-quality__finding")
     expect(findings).toHaveLength(1)
     expect(findings[0].get(".item-quality__title").text()).toBe("Validation errors (3)")
-    expect(findings[0].get(".item-quality__indicator").text()).toBe("Error")
-    expect(findings[0].findAll(".item-quality__messages li > span")
+    expectIndicator(findings[0], "Error", "fa-exclamation-circle")
+    expect(findings[0].findAll(".item-quality__message-row > span")
       .map(message => message.text()))
       .toEqual([
         "item must have at least a title!",
@@ -126,7 +143,7 @@ describe("ItemQuality", () => {
     })
     const validation = findingByTitle(wrapper, "Validation errors (2)")
 
-    expect(validation.findAll(".item-quality__messages li > span").map(message => message.text()))
+    expect(validation.findAll(".item-quality__message-row > span").map(message => message.text()))
       .toEqual([
         "Enter a complete URL starting with http:// or https://.",
         "Enter a complete URL starting with http:// or https://.",
@@ -156,7 +173,7 @@ describe("ItemQuality", () => {
     const wrapper = await mountQuality({}, [{ type: ["validation-errors"] }])
     const validation = findingByTitle(wrapper, "Validation errors")
 
-    expect(validation.get(".item-quality__indicator").text()).toBe("Fixed")
+    expectIndicator(validation, "Fixed", "fa-check")
     expect(validation.find(".item-quality__edit-link").exists()).toBe(false)
   })
 
@@ -174,7 +191,8 @@ describe("ItemQuality", () => {
       "Missing abstract",
       "Missing publisher",
     ])
-    expect(wrapper.findAll(".item-quality__indicator").map(indicator => indicator.text()))
+    expect(wrapper.findAll(".item-quality__indicator")
+      .map(indicator => indicator.attributes("aria-label")))
       .toEqual(["Warning", "Warning", "Warning", "Warning"])
     expect(findingByTitle(wrapper, "Missing extent").find(".item-quality__description").exists())
       .toBe(false)
@@ -199,8 +217,7 @@ describe("ItemQuality", () => {
     await flushPromises()
 
     expect(wrapper.get("[role='status']").text()).toBe("Loading daily quality report…")
-    expect(findingByTitle(wrapper, "Missing license").get(".item-quality__indicator").text())
-      .toBe("Warning")
+    expectIndicator(findingByTitle(wrapper, "Missing license"), "Warning", "fa-exclamation-triangle")
     expect(wrapper.emitted("count")).toEqual([[{ current: 1, total: 1 }]])
   })
 
@@ -214,8 +231,7 @@ describe("ItemQuality", () => {
     expect(wrapper.get("[role='status']").text()).toBe(
       "Daily report unavailable. Showing current checks only.",
     )
-    expect(findingByTitle(wrapper, "Missing license").get(".item-quality__indicator").text())
-      .toBe("Warning")
+    expectIndicator(findingByTitle(wrapper, "Missing license"), "Warning", "fa-exclamation-triangle")
     expect(wrapper.emitted("count")).toEqual([[{ current: 1, total: 1 }]])
   })
 })
