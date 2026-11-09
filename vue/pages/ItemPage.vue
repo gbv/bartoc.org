@@ -93,6 +93,14 @@
       </ul>
     </Tab>
     <Tab
+      v-if="!isRegistry && qualityAccessGranted"
+      title="Quality"
+      :hidden="!hasQualityFindings">
+      <ItemQuality
+        :item="item"
+        @count="qualitySummary = $event" />
+    </Tab>
+    <Tab
       v-if="isRegistry"
       :title="registryTerminologiesTitle">
       <RegistryVocabularies
@@ -104,7 +112,7 @@
 </template>
 
 <script setup>
-import { computed, inject, onBeforeUnmount, onMounted, provide, ref, unref } from "vue"
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, unref, watch } from "vue"
 import { Tab, Tabs } from "jskos-vue-tabs"
 import "jskos-vue-tabs/dist/style.css"
 import {
@@ -119,6 +127,7 @@ import ItemAccess from "../components/ItemAccess.vue"
 import ItemDates from "../components/ItemDates.vue"
 import ItemIdentifiers from "../components/ItemIdentifiers.vue"
 import ItemLink from "../components/ItemLink.vue"
+import ItemQuality from "../components/ItemQuality.vue"
 import RegistryVocabularies from "../components/RegistryVocabularies.vue"
 
 defineOptions({ name: "ItemPage" })
@@ -173,6 +182,13 @@ const editionRecords = computed(() => (
   sortEditionRecordsByStartDate(props.item._versionOfBacklink)
 ))
 const hasEditions = computed(() => Boolean(editionRecords.value.length))
+const header = inject("header", {})
+const userCanEdit = computed(() => unref(header.userCanEdit) || false)
+const editReady = computed(() => unref(header.editReady) ?? true)
+const qualitySummary = ref(null)
+const hasQualityFindings = computed(() => (qualitySummary.value?.total || 0) > 0)
+const qualityAccessGranted = ref(false)
+const showQualityTab = computed(() => qualityAccessGranted.value && hasQualityFindings.value)
 const tabs = computed(() => isRegistry.value
   ? ["about", "access", "identifiers", "terminologies"]
   : [
@@ -181,6 +197,7 @@ const tabs = computed(() => isRegistry.value
     "identifiers",
     ...(props.item.API?.length ? ["content"] : []),
     ...(hasEditions.value ? ["editions"] : []),
+    ...(showQualityTab.value ? ["quality"] : []),
   ])
 const registryTerminologyCount = ref(null)
 const registryTerminologiesTitle = computed(() =>
@@ -190,8 +207,22 @@ const registryTerminologiesTitle = computed(() =>
 )
 const activeTab = ref(0)
 const ready = ref(false)
-const header = inject("header", {})
-const userCanEdit = computed(() => unref(header.userCanEdit) || false)
+
+// Keep the last completed permission while the account is being refreshed.
+// This prevents the Quality tab from disappearing and changing the active tab.
+watch([userCanEdit, editReady], ([allowed, checked]) => {
+  if (!checked) {
+    return
+  }
+
+  qualityAccessGranted.value = allowed
+
+  // Remove findings when the completed check denies access, so they cannot
+  // briefly reappear if authorization is checked again later.
+  if (!allowed) {
+    qualitySummary.value = null
+  }
+}, { immediate: true })
 
 // Version number shown on the page.
 const currentVersionNumber = computed(() => versionNumber(props.item))
