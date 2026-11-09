@@ -96,7 +96,7 @@ onMounted(() => {
       },
       autofocus: false,
       persistenceId: null,
-      populateFromUrl: false,
+      populateFromUrl: true,
       quickStartOnFirstVisit: false,
       requestConfig: {
         endpoint: props.endpoint,

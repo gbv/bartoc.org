@@ -52,7 +52,7 @@ describe("SparqlPage", () => {
     expect(matgui.options).toMatchObject({
       autofocus: false,
       persistenceId: null,
-      populateFromUrl: false,
+      populateFromUrl: true,
       quickStartOnFirstVisit: false,
       requestConfig: { endpoint, method: "POST" },
       yasqe: { value: "ASK {}" },
