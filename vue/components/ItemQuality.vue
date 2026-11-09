@@ -157,7 +157,7 @@ function indicatorIcon(finding) {
 // current/historical state only for findings from an older snapshot.
 function indicatorLabel(finding) {
   if (finding.status === "fixed") {
-    return "No longer detected"
+    return "Fixed"
   }
   if (finding.level === "error") {
     return "Error"
@@ -291,9 +291,12 @@ onMounted(loadQuality)
   color: var(--cc-color-warning);
 }
 
-.item-quality__indicator--unknown,
-.item-quality__indicator--fixed {
+.item-quality__indicator--unknown {
   color: var(--cc-color-muted);
+}
+
+.item-quality__indicator--fixed {
+  color: var(--cc-color-success, #198754);
 }
 
 .item-quality__description {

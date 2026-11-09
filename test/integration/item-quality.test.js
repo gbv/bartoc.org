@@ -79,7 +79,7 @@ describe("ItemQuality", () => {
 
     const historical = findingByTitle(wrapper, "Missing format")
     expect(historical.classes()).toContain("item-quality__finding--fixed")
-    expect(historical.get(".item-quality__indicator").text()).toBe("No longer detected")
+    expect(historical.get(".item-quality__indicator").text()).toBe("Fixed")
     expect(historical.find(".item-quality__edit-link").exists()).toBe(false)
     expect(wrapper.text()).not.toContain("Current issue")
     expect(wrapper.text()).not.toContain("no-license")
@@ -156,7 +156,7 @@ describe("ItemQuality", () => {
     const wrapper = await mountQuality({}, [{ type: ["validation-errors"] }])
     const validation = findingByTitle(wrapper, "Validation errors")
 
-    expect(validation.get(".item-quality__indicator").text()).toBe("No longer detected")
+    expect(validation.get(".item-quality__indicator").text()).toBe("Fixed")
     expect(validation.find(".item-quality__edit-link").exists()).toBe(false)
   })
 
