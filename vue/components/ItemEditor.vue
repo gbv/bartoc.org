@@ -7,7 +7,9 @@
     :label="'URI'">
     <a :href="item.uri">{{ item.uri }}</a>
   </form-row>
-  <form-row :label="'Title'">
+  <form-row
+    id="field-pref-label"
+    :label="'Title'">
     <InheritableTitleEditor
       ref="inheritableTitleEditor"
       v-model="item.prefLabel"
@@ -47,7 +49,9 @@
     </div>
   </form-row>
   <!-- Media values are objects, so they need their own editor. -->
-  <form-row :label="'Media'">
+  <form-row
+    id="field-media"
+    :label="'Media'">
     <media-editor v-model="item.media" />
     URLs of logos or other images representing the terminology.
   </form-row>
@@ -94,19 +98,24 @@
   </form-row>
   <form-row
     v-if="showVersionOfEditor"
+    id="field-version-of"
     :label="'Version of'">
     <terminology-relation-editor
       v-model="item.versionOf"
       :multiple="false"
       placeholder="Select another terminology from BARTOC" />
   </form-row>
-  <form-row :label="'Based on'">
+  <form-row
+    id="field-based-on"
+    :label="'Based on'">
     <terminology-relation-editor
       v-model="item.basedOn"
       :multiple="true"
       placeholder="Select another terminology from BARTOC" />
   </form-row>
-  <form-row :label="'Replaced by'">
+  <form-row
+    id="field-replaced-by"
+    :label="'Replaced by'">
     <terminology-relation-editor
       v-model="item.replacedBy"
       :multiple="true"
@@ -190,7 +199,9 @@
       :show-tree="false" />
     Which <a href="/registries">terminology registries</a> list the vocabulary?
   </form-row>
-  <form-row :label="'Vocabulary services'">
+  <form-row
+    id="field-api"
+    :label="'Vocabulary services'">
     <endpoints-editor v-model="item.API" />
   </form-row>
   <form-row label="Display options">

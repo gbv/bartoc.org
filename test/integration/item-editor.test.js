@@ -152,6 +152,15 @@ describe("ItemEditor", () => {
     expect(size.get("label").text()).toBe("Size")
     expect(wrapper.get("#field-license").get("label").text()).toBe("License")
     expect(wrapper.get("#field-publisher").get("label").text()).toBe("Publisher")
+    expect([
+      "field-pref-label",
+      "field-definition",
+      "field-version-of",
+      "field-based-on",
+      "field-replaced-by",
+      "field-api",
+      "field-media",
+    ].every(id => wrapper.find(`#${id}`).exists())).toBe(true)
     expect(scrollIntoView).toHaveBeenCalledWith({ block: "center" })
     expect(document.activeElement).toBe(size.get("input").element)
 

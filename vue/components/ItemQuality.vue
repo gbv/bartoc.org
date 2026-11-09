@@ -43,26 +43,38 @@
           {{ finding.description }}
         </p>
 
-        <p
+        <div
           v-if="finding.messages?.length === 1"
           class="item-quality__message">
-          {{ finding.messages[0] }}
-        </p>
+          <span>{{ finding.messages[0].message }}</span>
+          <a
+            v-if="editFieldUrl(finding.messages[0].position?.jsonpointer, finding.status)"
+            class="item-quality__edit-link"
+            :href="editFieldUrl(finding.messages[0].position?.jsonpointer, finding.status)">
+            Edit field
+          </a>
+        </div>
 
         <ul
           v-if="finding.messages?.length > 1"
           class="item-quality__messages">
           <li
-            v-for="message in finding.messages"
-            :key="message">
-            {{ message }}
+            v-for="(message, index) in finding.messages"
+            :key="`${message.position?.jsonpointer || 'message'}-${index}`">
+            <span>{{ message.message }}</span>
+            <a
+              v-if="editFieldUrl(message.position?.jsonpointer, finding.status)"
+              class="item-quality__edit-link"
+              :href="editFieldUrl(message.position?.jsonpointer, finding.status)">
+              Edit field
+            </a>
           </li>
         </ul>
 
         <a
-          v-if="editFieldUrl(finding)"
+          v-if="finding.level === 'warning' && editFieldUrl(finding.jsonpointer, finding.status)"
           class="item-quality__edit-link"
-          :href="editFieldUrl(finding)">
+          :href="editFieldUrl(finding.jsonpointer, finding.status)">
           Edit field
         </a>
       </li>
@@ -175,13 +187,10 @@ function descriptionAddsInformation(finding) {
   )
 }
 
-// Link current quality warnings to editor rows identified by their JSON field.
-function editorFieldId(finding) {
-  if (finding.status !== "issue" || finding.level !== "warning") {
-    return null
-  }
-
-  const field = finding.jsonpointer?.match(/^\/([A-Za-z][A-Za-z0-9]*)$/)?.[1]
+// Use the first JSON Pointer segment because nested validation errors belong
+// to their main editor row, such as /API/0/url belonging to the API editor.
+function editorFieldId(jsonpointer) {
+  const field = jsonpointer?.match(/^\/([A-Za-z][A-Za-z0-9]*)(?:\/|$)/)?.[1]
   if (!field) {
     return null
   }
@@ -189,9 +198,9 @@ function editorFieldId(finding) {
   return `field-${field.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()}`
 }
 
-function editFieldUrl(finding) {
-  const fieldId = editorFieldId(finding)
-  return fieldId
+function editFieldUrl(jsonpointer, findingStatus) {
+  const fieldId = editorFieldId(jsonpointer)
+  return findingStatus === "issue" && fieldId
     ? `/edit?uri=${encodeURIComponent(props.item.uri)}#${fieldId}`
     : null
 }
@@ -300,6 +309,11 @@ onMounted(loadQuality)
 
 .item-quality__message {
   max-width: 100%;
+}
+
+.item-quality__message .item-quality__edit-link,
+.item-quality__messages .item-quality__edit-link {
+  display: block;
 }
 
 .item-quality__edit-link {

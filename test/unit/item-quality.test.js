@@ -43,8 +43,28 @@ describe("item quality findings", () => {
     expect(findingByCode(findings, "validation-errors")).toMatchObject({
       level: "error",
       status: "issue",
-      messages: ["Publisher URI must be a valid HTTP(S) URL!"],
+      messages: [{
+        message: "Publisher URI must be a valid HTTP(S) URL!",
+        position: { jsonpointer: "/publisher/0" },
+      }],
     })
+  })
+
+  it("preserves positions for repeated validation messages", () => {
+    const findings = getLiveItemFindings(validItem({
+      API: [{ url: "invalid" }, { url: "also-invalid" }],
+    }))
+
+    expect(findingByCode(findings, "validation-errors").messages).toEqual([
+      {
+        message: "Enter a complete URL starting with http:// or https://.",
+        position: { jsonpointer: "/API/0/url" },
+      },
+      {
+        message: "Enter a complete URL starting with http:// or https://.",
+        position: { jsonpointer: "/API/1/url" },
+      },
+    ])
   })
 
   it("keeps a reported problem as an issue when it is still detected live", () => {

@@ -69,11 +69,13 @@ describe("ItemQuality", () => {
 
     const validation = findingByTitle(wrapper, "Validation errors")
     expect(validation.get(".item-quality__indicator").text()).toBe("Error")
-    expect(validation.get(".item-quality__message").text()).toBe(
+    expect(validation.get(".item-quality__message span").text()).toBe(
       "Publisher URI must be a valid HTTP(S) URL!",
     )
     expect(validation.find(".item-quality__messages").exists()).toBe(false)
-    expect(validation.find(".item-quality__edit-link").exists()).toBe(false)
+    expect(validation.get(".item-quality__edit-link").attributes("href")).toBe(
+      "/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123#field-publisher",
+    )
 
     const historical = findingByTitle(wrapper, "Missing format")
     expect(historical.classes()).toContain("item-quality__finding--fixed")
@@ -101,14 +103,61 @@ describe("ItemQuality", () => {
     expect(findings).toHaveLength(1)
     expect(findings[0].get(".item-quality__title").text()).toBe("Validation errors (3)")
     expect(findings[0].get(".item-quality__indicator").text()).toBe("Error")
-    expect(findings[0].findAll(".item-quality__messages li").map(message => message.text()))
+    expect(findings[0].findAll(".item-quality__messages li > span")
+      .map(message => message.text()))
       .toEqual([
         "item must have at least a title!",
         "A terminology cannot be based on itself.",
         "Enter a complete URL starting with http:// or https://.",
       ])
+    expect(findings[0].findAll(".item-quality__edit-link").map(link => link.attributes("href")))
+      .toEqual([
+        "/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123#field-pref-label",
+        "/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123#field-based-on",
+        "/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123#field-api",
+      ])
     expect(findings[0].find(".item-quality__message").exists()).toBe(false)
     expect(wrapper.emitted("count").at(-1)).toEqual([{ current: 1, total: 1 }])
+  })
+
+  it("keeps repeated validation messages visible and linked", async () => {
+    const wrapper = await mountQuality({
+      API: [{ url: "invalid" }, { url: "also-invalid" }],
+    })
+    const validation = findingByTitle(wrapper, "Validation errors (2)")
+
+    expect(validation.findAll(".item-quality__messages li > span").map(message => message.text()))
+      .toEqual([
+        "Enter a complete URL starting with http:// or https://.",
+        "Enter a complete URL starting with http:// or https://.",
+      ])
+    expect(validation.findAll(".item-quality__edit-link").map(link => link.attributes("href")))
+      .toEqual([
+        "/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123#field-api",
+        "/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123#field-api",
+      ])
+  })
+
+  it("links the English title or abstract error to Abstracts", async () => {
+    const wrapper = await mountQuality({
+      prefLabel: { de: "Deutscher Titel" },
+      definition: {},
+    })
+    const validation = findingByTitle(wrapper, "Validation errors")
+
+    expect(validation.get(".item-quality__message span").text()).toBe(
+      "Please provide at least an English title or abstract.",
+    )
+    expect(validation.get(".item-quality__edit-link").attributes("href"))
+      .toBe("/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123#field-definition")
+  })
+
+  it("does not link a fixed validation finding", async () => {
+    const wrapper = await mountQuality({}, [{ type: ["validation-errors"] }])
+    const validation = findingByTitle(wrapper, "Validation errors")
+
+    expect(validation.get(".item-quality__indicator").text()).toBe("No longer detected")
+    expect(validation.find(".item-quality__edit-link").exists()).toBe(false)
   })
 
   it("shows warning-only findings with useful descriptions only", async () => {

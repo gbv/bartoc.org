@@ -45,7 +45,7 @@ export function getLiveItemFindings(item = {}) {
   if (validationErrors.length) {
     findings.push({
       ...createFinding(validationRule.id),
-      messages: validationErrors.map(error => error.message).filter(Boolean),
+      messages: validationErrors.filter(error => error.message),
     })
   }
 
