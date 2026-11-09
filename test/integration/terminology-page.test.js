@@ -19,6 +19,19 @@ const ServiceLinkStub = {
   props: ["endpoint"],
   template: "<a :href=\"endpoint.url\">{{ endpoint.url }}</a>",
 }
+function itemQualityStub(summary) {
+  return {
+    name: "ItemQuality",
+    emits: ["count"],
+    setup(_, { emit }) {
+      emit("count", summary)
+      return () => h("div", { "data-testid": "item-quality" })
+    },
+  }
+}
+
+const ItemQualityWithFindingStub = itemQualityStub({ current: 1, total: 1 })
+const ItemQualityWithHistoricalFindingStub = itemQualityStub({ current: 0, total: 1 })
 
 const typeUri = "http://w3id.org/nkos/nkostype#thesaurus"
 const item = {
@@ -80,7 +93,9 @@ const item = {
   notationPattern: "[A-Z]+",
 }
 
-function mountPage(itemOverrides = {}, derivedFields = {}) {
+function mountPage(itemOverrides = {}, derivedFields = {}, options = {}) {
+  const header = options.header || { userCanEdit: ref(true), editReady: ref(true) }
+
   return mount(ItemPage, {
     props: {
       title: "Test Vocabulary",
@@ -92,10 +107,11 @@ function mountPage(itemOverrides = {}, derivedFields = {}) {
     },
     global: {
       provide: {
-        header: { userCanEdit: ref(true) },
+        header,
       },
       stubs: {
         ConceptBrowser: ConceptBrowserStub,
+        ItemQuality: options.itemQuality ?? true,
         ServiceLink: ServiceLinkStub,
       },
     },
@@ -104,6 +120,11 @@ function mountPage(itemOverrides = {}, derivedFields = {}) {
 
 function rowByLabel(wrapper, label) {
   return wrapper.findAll("tr").find(row => row.findAll("td")[0]?.text().trim() === label)
+}
+
+function visibleTabHeaders(wrapper) {
+  return wrapper.findAll(".jskos-vue-tabs-header-item")
+    .filter(header => header.isVisible())
 }
 
 function jsonResponse(data) {
@@ -484,7 +505,7 @@ describe("ItemPage (terminology)", () => {
     const wrapper = mountPage()
     await nextTick()
 
-    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
+    const headers = visibleTabHeaders(wrapper)
     expect(headers[2].classes()).toContain("jskos-vue-tabs-header-item-active")
 
     await headers[1].trigger("click")
@@ -516,7 +537,7 @@ describe("ItemPage (terminology)", () => {
     const wrapper = mountPage()
     await nextTick()
 
-    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
+    const headers = visibleTabHeaders(wrapper)
     expect(headers[3].classes()).toContain("jskos-vue-tabs-header-item-active")
 
     selectConcept.mockClear()
@@ -534,7 +555,7 @@ describe("ItemPage (terminology)", () => {
     const wrapper = mountPage()
     await nextTick()
 
-    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
+    const headers = visibleTabHeaders(wrapper)
     expect(headers).toHaveLength(5)
     expect(headers[4].text()).toBe("Editions")
     expect(headers[4].find(".fa-code-branch[aria-hidden='true']").exists()).toBe(true)
@@ -546,11 +567,51 @@ describe("ItemPage (terminology)", () => {
     const wrapper = mountPage({ _versionOfBacklink: [] })
     await nextTick()
 
-    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
+    const headers = visibleTabHeaders(wrapper)
     expect(headers).toHaveLength(4)
     expect(headers.some(header => header.text() === "Editions")).toBe(false)
     expect(headers[0].classes()).toContain("jskos-vue-tabs-header-item-active")
     expect(wrapper.find(".terminology-editions").exists()).toBe(false)
+  })
+
+  it("keeps Quality selected while edit permission is refreshed", async () => {
+    const header = {
+      userCanEdit: ref(true),
+      editReady: ref(true),
+    }
+    const wrapper = mountPage({}, {}, {
+      header,
+      itemQuality: ItemQualityWithFindingStub,
+    })
+    await nextTick()
+
+    const qualityHeader = visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Quality")
+    await qualityHeader.trigger("click")
+
+    header.editReady.value = false
+    header.userCanEdit.value = false
+    await nextTick()
+
+    const refreshedQualityHeader = visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Quality")
+    expect(refreshedQualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
+
+    header.userCanEdit.value = true
+    header.editReady.value = true
+    await nextTick()
+
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Quality").classes())
+      .toContain("jskos-vue-tabs-header-item-active")
+  })
+
+  it("keeps Quality visible when all reported findings are historical", async () => {
+    const wrapper = mountPage({}, {}, {
+      itemQuality: ItemQualityWithHistoricalFindingStub,
+    })
+    await nextTick()
+
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Quality")).toBeDefined()
   })
 
   it("does not mount the concept browser for an empty API list", async () => {
