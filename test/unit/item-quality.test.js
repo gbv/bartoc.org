@@ -36,6 +36,7 @@ describe("item quality findings", () => {
     }))
 
     expect(findingByCode(findings, "no-license")).toMatchObject({
+      jsonpointer: "/license",
       level: "warning",
       status: "issue",
     })

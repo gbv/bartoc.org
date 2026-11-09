@@ -58,6 +58,13 @@
             {{ message }}
           </li>
         </ul>
+
+        <a
+          v-if="editFieldUrl(finding)"
+          class="item-quality__edit-link"
+          :href="editFieldUrl(finding)">
+          Edit field
+        </a>
       </li>
     </ul>
   </section>
@@ -168,6 +175,27 @@ function descriptionAddsInformation(finding) {
   )
 }
 
+// Link current quality warnings to editor rows identified by their JSON field.
+function editorFieldId(finding) {
+  if (finding.status !== "issue" || finding.level !== "warning") {
+    return null
+  }
+
+  const field = finding.jsonpointer?.match(/^\/([A-Za-z][A-Za-z0-9]*)$/)?.[1]
+  if (!field) {
+    return null
+  }
+
+  return `field-${field.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()}`
+}
+
+function editFieldUrl(finding) {
+  const fieldId = editorFieldId(finding)
+  return fieldId
+    ? `/edit?uri=${encodeURIComponent(props.item.uri)}#${fieldId}`
+    : null
+}
+
 // Live findings are available immediately. The daily snapshot is loaded in
 // the browser and adds fixed findings or confirms current issues.
 async function loadQuality() {
@@ -272,5 +300,11 @@ onMounted(loadQuality)
 
 .item-quality__message {
   max-width: 100%;
+}
+
+.item-quality__edit-link {
+  display: inline-block;
+  margin-block-start: var(--cc-space-xs);
+  font-size: var(--cc-font-size-sm);
 }
 </style>

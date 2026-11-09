@@ -25,6 +25,7 @@ function createFinding(code) {
     code,
     title: rule?.title || code,
     description: rule?.description,
+    jsonpointer: rule?.jsonpointer,
     level: rule?.level || (rule ? "warning" : undefined),
     // Findings produced by the current checks are issues until merging with
     // the daily snapshot proves that they are historical only.

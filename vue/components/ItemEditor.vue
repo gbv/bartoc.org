@@ -32,7 +32,9 @@
     <list-editor v-model="item.identifier" />
     Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
-  <form-row :label="'Abstracts'">
+  <form-row
+    id="field-definition"
+    :label="'Abstracts'">
     <InheritableAbstractsEditor
       ref="inheritableAbstractsEditor"
       v-model="item.definition"
@@ -49,13 +51,17 @@
     <media-editor v-model="item.media" />
     URLs of logos or other images representing the terminology.
   </form-row>
-  <form-row :label="'Languages'">
+  <form-row
+    id="field-languages"
+    :label="'Languages'">
     <InheritableLanguagesEditor
       ref="inheritableLanguagesEditor"
       v-model="item.languages"
       :source="versionMainSource" />
   </form-row>
-  <form-row :label="'Size'">
+  <form-row
+    id="field-extent"
+    :label="'Size'">
     <input
       v-model="item.extent"
       type="text"
@@ -63,14 +69,18 @@
     Number of classes, subclasses, taxa, terms, concepts etc. Please add date in
     parenthesis (YYYY-MM).
   </form-row>
-  <form-row :label="'KOS Types'">
+  <form-row
+    id="field-type"
+    :label="'KOS Types'">
     <InheritableKosTypesEditor
       ref="inheritableKosTypesEditor"
       v-model="selectedKosTypes"
       :source="versionMainSource"
       :provider="kosTypeProvider" />
   </form-row>
-  <form-row :label="'Subjects'">
+  <form-row
+    id="field-subject"
+    :label="'Subjects'">
     <InheritableSubjectsEditor
       ref="inheritableSubjectsEditor"
       v-model="item.subject"
@@ -114,13 +124,17 @@
       maxlength="4">
     The year when the KOS was first created (YYYY).
   </form-row>
-  <form-row :label="'License'">
+  <form-row
+    id="field-license"
+    :label="'License'">
     <jskos-item-picker
       v-model="item.license"
       :provider="licenseProvider"
       placeholder="Search licenses…" />
   </form-row>
-  <form-row :label="'URL'">
+  <form-row
+    id="field-url"
+    :label="'URL'">
     <input
       v-model="item.url"
       type="text"
@@ -137,7 +151,9 @@
       @update:modelValue="item.issueTracker = $event.map((uri) => ({ uri }))" />
     Where issues about this terminology are managed.
   </form-row>
-  <form-row :label="'Formats'">
+  <form-row
+    id="field-format"
+    :label="'Formats'">
     <jskos-item-picker
       v-model="item.FORMAT"
       :provider="formatProvider"
@@ -150,7 +166,9 @@
     Do you have to register to view the KOS, is it 'hidden' in a licensed
     database or is it free online?
   </form-row>
-  <form-row :label="'Publisher'">
+  <form-row
+    id="field-publisher"
+    :label="'Publisher'">
     <publisher-editor v-model="item.publisher" />
     Try to use an institution rather than a person.
   </form-row>
@@ -218,7 +236,9 @@
       type="text"
       class="cc-form-control">
   </form-row>
-  <form-row :label="'example notations'">
+  <form-row
+    id="field-notation-examples"
+    :label="'example notations'">
     <InheritableNotationExamplesEditor
       ref="inheritableNotationExamplesEditor"
       v-model="item.notationExamples"
@@ -275,7 +295,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, toRaw } from "vue"
+import { computed, nextTick, onMounted, reactive, ref, toRaw } from "vue"
 import {
   loadConcepts,
   trimItemIdentifiers,
@@ -420,6 +440,27 @@ const jskosPreview = computed(() => {
   return JSON.stringify(cleaned, null, 2)
 })
 
+// EditPage mounts the editor after hydration, when the browser's normal
+// fragment scroll has already run. Repeat it once the target row exists.
+onMounted(async () => {
+  await nextTick()
+
+  const targetId = window.location.hash.slice(1)
+  const target = document.getElementById(targetId)
+  if (!targetId.startsWith("field-") || !target) {
+    return
+  }
+
+  target.scrollIntoView?.({ block: "center" })
+
+  // Focus ordinary controls when available. Complex editors still receive
+  // the scroll and highlight without requiring changes to their components.
+  const control = target.querySelector(
+    "input:not([type='hidden']):not([disabled]), textarea:not([disabled]), select:not([disabled])",
+  )
+  control?.focus({ preventScroll: true })
+})
+
 loadConcepts(
   "https://api.dante.gbv.de/voc/top",
   "http://uri.gbv.de/terminology/license/",
@@ -496,6 +537,14 @@ defineExpose({
   display: block;
   margin-top: var(--cc-space-xs);
   color: var(--cc-color-muted);
+}
+
+[id^="field-"] {
+  scroll-margin-block-start: var(--cc-space-lg);
+}
+
+[id^="field-"]:target {
+  background-color: var(--cc-color-accent);
 }
 
 .editor-display-option {

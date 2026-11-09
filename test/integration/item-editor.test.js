@@ -80,8 +80,9 @@ const thesaurusType = "http://w3id.org/nkos/nkostype#thesaurus"
 const optionalEnglishMessage =
   "An English abstract is optional because this terminology is an edition of another BARTOC terminology."
 
-function mountEditor(current = {}, props = {}) {
+function mountEditor(current = {}, props = {}, options = {}) {
   return mount(ItemEditor, {
+    ...options,
     props: {
       current,
       user: null,
@@ -118,8 +119,18 @@ function stubFailedSave() {
   })))
 }
 
+function stubScrollIntoView() {
+  const scrollIntoView = vi.fn()
+  Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+    configurable: true,
+    value: scrollIntoView,
+  })
+  return scrollIntoView
+}
+
 describe("ItemEditor", () => {
   beforeEach(() => {
+    window.history.replaceState({}, "", "/edit")
     utilsMocks.loadConcepts.mockClear()
     utilsMocks.trimItemIdentifiers.mockClear()
     utilsMocks.createConceptApiProvider.mockClear()
@@ -127,6 +138,35 @@ describe("ItemEditor", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    delete HTMLElement.prototype.scrollIntoView
+  })
+
+  it("scrolls to and focuses a quality field target", async () => {
+    const scrollIntoView = stubScrollIntoView()
+    window.history.replaceState({}, "", "/edit?uri=record#field-extent")
+
+    const wrapper = mountEditor({}, {}, { attachTo: document.body })
+    await flushPromises()
+
+    const size = wrapper.get("#field-extent")
+    expect(size.get("label").text()).toBe("Size")
+    expect(wrapper.get("#field-license").get("label").text()).toBe("License")
+    expect(wrapper.get("#field-publisher").get("label").text()).toBe("Publisher")
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: "center" })
+    expect(document.activeElement).toBe(size.get("input").element)
+
+    wrapper.unmount()
+  })
+
+  it("does not scroll without a field fragment", async () => {
+    const scrollIntoView = stubScrollIntoView()
+
+    const wrapper = mountEditor({}, {}, { attachTo: document.body })
+    await flushPromises()
+
+    expect(scrollIntoView).not.toHaveBeenCalled()
+
+    wrapper.unmount()
   })
 
   it("initializes fields and passes media to its editor", () => {

@@ -73,10 +73,12 @@ describe("ItemQuality", () => {
       "Publisher URI must be a valid HTTP(S) URL!",
     )
     expect(validation.find(".item-quality__messages").exists()).toBe(false)
+    expect(validation.find(".item-quality__edit-link").exists()).toBe(false)
 
     const historical = findingByTitle(wrapper, "Missing format")
     expect(historical.classes()).toContain("item-quality__finding--fixed")
     expect(historical.get(".item-quality__indicator").text()).toBe("No longer detected")
+    expect(historical.find(".item-quality__edit-link").exists()).toBe(false)
     expect(wrapper.text()).not.toContain("Current issue")
     expect(wrapper.text()).not.toContain("no-license")
     expect(wrapper.text()).not.toContain("no-format")
@@ -129,6 +131,14 @@ describe("ItemQuality", () => {
       .toBe(false)
     expect(findingByTitle(wrapper, "Missing abstract").get(".item-quality__description").text())
       .toBe("Main records without an abstract")
+    const editUrl = "/edit?uri=http%3A%2F%2Fbartoc.org%2Fen%2Fnode%2F123#field-"
+    expect(wrapper.findAll(".item-quality__edit-link").map(link => link.attributes("href")))
+      .toEqual([
+        `${editUrl}extent`,
+        `${editUrl}license`,
+        `${editUrl}definition`,
+        `${editUrl}publisher`,
+      ])
     expect(wrapper.emitted("count").at(-1)).toEqual([{ current: 4, total: 4 }])
   })
 
