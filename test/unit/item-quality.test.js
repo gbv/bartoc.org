@@ -24,6 +24,10 @@ function validItem(overrides = {}) {
   }
 }
 
+function findingByCode(findings, code) {
+  return findings.find(finding => finding.code === code)
+}
+
 describe("item quality findings", () => {
   it("marks live quality checks as warnings and validation findings as errors", () => {
     const findings = getLiveItemFindings(validItem({
@@ -31,36 +35,51 @@ describe("item quality findings", () => {
       publisher: [{ uri: "invalid", prefLabel: { en: "Example publisher" } }],
     }))
 
-    expect(findings.find(finding => finding.code === "no-license")).toMatchObject({
+    expect(findingByCode(findings, "no-license")).toMatchObject({
       level: "warning",
       status: "issue",
     })
-    expect(findings.find(finding => finding.code === "validation-errors")).toMatchObject({
+    expect(findingByCode(findings, "validation-errors")).toMatchObject({
       level: "error",
       status: "issue",
       messages: ["Publisher URI must be a valid HTTP(S) URL!"],
     })
   })
 
-  it("marks snapshot-only findings as fixed without changing live issues", () => {
+  it("keeps a reported problem as an issue when it is still detected live", () => {
     const live = getLiveItemFindings(validItem({ license: undefined }))
-    const findings = mergeItemFindings([
-      { type: ["no-license"] },
-      { type: ["no-format"] },
-      { type: ["validation-errors"] },
-    ], live)
+    const findings = mergeItemFindings([{ type: ["no-license"] }], live)
 
-    expect(findings.find(finding => finding.code === "no-license")).toMatchObject({
+    expect(findingByCode(findings, "no-license")).toMatchObject({
       level: "warning",
       status: "issue",
     })
-    expect(findings.find(finding => finding.code === "no-format")).toMatchObject({
+  })
+
+  it("marks a reported problem as fixed when its live check now passes", () => {
+    const findings = mergeItemFindings([
+      { type: ["no-format"] },
+      { type: ["validation-errors"] },
+    ], getLiveItemFindings(validItem()))
+
+    expect(findingByCode(findings, "no-format")).toMatchObject({
       level: "warning",
       status: "fixed",
     })
-    expect(findings.find(finding => finding.code === "validation-errors")).toMatchObject({
+    expect(findingByCode(findings, "validation-errors")).toMatchObject({
       level: "error",
       status: "fixed",
+    })
+  })
+
+  it("keeps a reported problem as an issue when no live check exists", () => {
+    const findings = mergeItemFindings([
+      { type: ["external-quality-rule"] },
+    ], getLiveItemFindings(validItem()))
+
+    expect(findingByCode(findings, "external-quality-rule")).toMatchObject({
+      title: "external-quality-rule",
+      status: "issue",
     })
   })
 })

@@ -62,8 +62,8 @@ export function mergeItemFindings(reportedErrors = [], liveFindings = []) {
     const live = liveByCode.get(code)
     return {
       ...(live || createFinding(code)),
-      // A live failure is current; a snapshot-only failure has since been fixed.
-      status: live ? "issue" : "fixed",
+      // Only a known live rule can confirm that a reported problem is fixed.
+      status: live || !rules.has(code) ? "issue" : "fixed",
     }
   })
 }
