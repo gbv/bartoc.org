@@ -201,10 +201,9 @@ const hasQualityFindings = computed(() => (qualitySummary.value?.total || 0) > 0
 // Remember an explicit #quality request independently from access and results,
 // so login restoration cannot silently replace the requested URL fragment.
 const qualityRequested = ref(false)
-// Direct links show a placeholder until both access and findings are known.
+// Direct links show a placeholder until access is known.
 const qualityTabLoading = computed(() => (
-  qualityRequested.value
-  && (editAccess.value === "pending" || qualitySummary.value === null)
+  qualityRequested.value && editAccess.value === "pending"
 ))
 // Normal navigation shows Metadata Quality only when an editor has findings.
 // A direct link also keeps it available while access is pending or allowed.
@@ -239,8 +238,8 @@ const ready = ref(false)
 // A pending login never changes #quality. Once access permits the dynamic Tab,
 // select it after registration. Only a final denial returns the page to About.
 watch(
-  [editAccess, qualityRequested, qualityTabAvailable],
-  async ([access, requested, available]) => {
+  [editAccess, qualityRequested],
+  async ([access, requested]) => {
     if (access === "denied") {
       qualitySummary.value = null
       if (requested) {
@@ -252,8 +251,7 @@ watch(
           `${window.location.pathname}${window.location.search}#about`,
         )
       }
-    } else if (requested && available) {
-      // jskos-vue-tabs cannot select a Tab before registering its component.
+    } else if (requested) {
       await nextTick()
       syncTabFromHash()
     }

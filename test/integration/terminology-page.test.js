@@ -659,7 +659,7 @@ describe("ItemPage (terminology)", () => {
       .find(tab => tab.text() === "Metadata Quality")
       .classes()).toContain("jskos-vue-tabs-header-item-active")
     expect(wrapper.find("[data-testid='item-quality']").exists()).toBe(true)
-    expect(wrapper.get("[role='status']").text()).toBe("Loading metadata quality…")
+    expect(wrapper.find("[role='status']").exists()).toBe(false)
 
     publishFindings()
     await flushPromises()
