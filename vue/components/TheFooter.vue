@@ -2,8 +2,7 @@
   <BartocFooter
     :site-name="siteName"
     :external-links="externalLinks"
-    :internal-links="internalLinks"
-    :resource-format-links="resourceFormatLinks" />
+    :internal-links="internalLinks" />
 </template>
 
 <script setup>
@@ -21,29 +20,9 @@ const props = defineProps({
     type: String,
     default: "",
   },
-  itemUri: {
-    type: String,
-    default: "",
-  },
-  resourcePath: {
-    type: String,
-    default: "",
-  },
-  api: {
-    type: String,
-    default: "",
-  },
-  query: {
-    type: Object,
-    default: null,
-  },
 })
 
 const siteName = computed(() => props.siteName || providedFooter.siteName || "BARTOC.org")
-const itemUri = computed(() => props.itemUri || providedFooter.itemUri || "")
-const resourcePath = computed(() => props.resourcePath || providedFooter.resourcePath || "")
-const api = computed(() => props.api || providedFooter.api || "")
-const queryParams = computed(() => props.query || providedFooter.query || {})
 
 const externalLinks = [
   { label: "Imprint", href: "https://www.gbv.de/impressum" },
@@ -59,43 +38,4 @@ const internalLinks = [
   { href: "/graph/", label: "SPARQL" },
 ]
 
-const resourceFormatLinks = computed(() => {
-  // Item pages expose all resource formats; list/API pages expose JSON only.
-  if (itemUri.value) {
-    return [
-      { label: "JSON", href: withQuery("/api/data", { uri: itemUri.value }) },
-      { label: "RDF", href: withQuery(resourcePath.value, { format: "nt", inline: 1 }) },
-      { label: "XML", href: withQuery(resourcePath.value, { format: "rdfxml" }) },
-    ]
-  }
-
-  if (api.value) {
-    return [
-      { label: "JSON", href: withQuery(`/api/${api.value}`, queryParams.value) },
-    ]
-  }
-
-  return []
-})
-
-function withQuery(path, params) {
-  const query = new URLSearchParams()
-
-  // Build footer URLs with proper query escaping. Empty values are omitted,
-  // while arrays stay repeatable, e.g. ?tag=a&tag=b.
-  for (let [key, value] of Object.entries(params)) {
-    if (value === null || value === undefined || value === "") {
-      continue
-    }
-
-    if (Array.isArray(value)) {
-      value.forEach(entry => query.append(key, entry))
-    } else {
-      query.set(key, value)
-    }
-  }
-
-  const queryString = query.toString()
-  return queryString ? `${path}?${queryString}` : path
-}
 </script>

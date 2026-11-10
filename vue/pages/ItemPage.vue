@@ -115,7 +115,9 @@
         @count="registryTerminologyCount = $event" />
     </Tab>
   </Tabs>
-  <ItemDates :item="item" />
+  <ItemDates
+    :item="item"
+    :resource-path="resourcePath" />
 </template>
 
 <script setup>
@@ -158,6 +160,10 @@ const props = defineProps({
   nkosTypes: {
     type: Object,
     default: () => ({}),
+  },
+  resourcePath: {
+    type: String,
+    default: "",
   },
 })
 

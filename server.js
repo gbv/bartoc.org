@@ -128,16 +128,12 @@ app.get(["/", "/index"], async (req, res, next) => {
 
 // Render the Vue page and send the complete HTML response.
 async function sendVuePage(req, res, locals) {
-  const { query, path } = req
+  const { path } = req
   const renderer = await vueRenderer()
   // Render and hydrate the same JSON-safe values.
   const pageProps = JSON.parse(utils.serializeJsonForHtml(locals.vuePageProps || {}))
   const footer = {
     siteName: config.name,
-    itemUri: locals.item?.uri || "",
-    resourcePath: locals.resourcePath || path,
-    api: locals.api || "",
-    query,
   }
   const header = { activePath: locals.path || path, userCanAdd: false }
   // Public login settings come from the running server, not the browser build.
@@ -598,6 +594,7 @@ async function sendItem (
           vuePageProps: {
             item,
             title,
+            resourcePath: vars.resourcePath || req.path,
             ...(vuePage === "terminology" && {
               nkosTypes,
               derivedFields,

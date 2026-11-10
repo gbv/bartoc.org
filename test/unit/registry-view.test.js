@@ -38,6 +38,5 @@ describe("registry page", () => {
       .toContain(encodeURIComponent(uri))
     expect(document.querySelector(".item-dates time").getAttribute("datetime")).toBe("2024-01-02")
     expect(document.querySelector("header").textContent).toContain("BARTOC")
-    expect(document.querySelector("footer").textContent).toContain("RDF")
   })
 })
