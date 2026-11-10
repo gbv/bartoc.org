@@ -93,10 +93,17 @@
       </ul>
     </Tab>
     <Tab
-      v-if="!isRegistry && qualityAccessGranted"
+      v-if="!isRegistry && renderQualityTab"
       title="Metadata Quality"
-      :hidden="!hasQualityFindings">
+      :hidden="!qualityTabAvailable">
+      <p
+        v-if="qualityTabLoading"
+        class="metadata-quality-loading"
+        role="status">
+        Loading metadata quality…
+      </p>
       <ItemQuality
+        v-if="userCanEdit"
         :item="item"
         @count="qualitySummary = $event" />
     </Tab>
@@ -112,7 +119,7 @@
 </template>
 
 <script setup>
-import { computed, inject, onBeforeUnmount, onMounted, provide, ref, unref, watch } from "vue"
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, unref, watch } from "vue"
 import { Tab, Tabs } from "jskos-vue-tabs"
 import "jskos-vue-tabs/dist/style.css"
 import {
@@ -183,12 +190,33 @@ const editionRecords = computed(() => (
 ))
 const hasEditions = computed(() => Boolean(editionRecords.value.length))
 const header = inject("header", {})
-const userCanEdit = computed(() => unref(header.userCanEdit) || false)
-const editReady = computed(() => unref(header.editReady) ?? true)
+// Edit access stays pending until login restoration and the update permission
+// check have both finished. Only allowed editors may load quality findings.
+const editAccess = computed(() => unref(header.editAccess) || "denied")
+const userCanEdit = computed(() => editAccess.value === "allowed")
+// ItemQuality reports its finding count after its live checks and daily report
+// have loaded. A null summary means that this work has not completed yet.
 const qualitySummary = ref(null)
 const hasQualityFindings = computed(() => (qualitySummary.value?.total || 0) > 0)
-const qualityAccessGranted = ref(false)
-const showQualityTab = computed(() => qualityAccessGranted.value && hasQualityFindings.value)
+// Remember an explicit #quality request independently from access and results,
+// so login restoration cannot silently replace the requested URL fragment.
+const qualityRequested = ref(false)
+// Direct links show a placeholder until both access and findings are known.
+const qualityTabLoading = computed(() => (
+  qualityRequested.value
+  && (editAccess.value === "pending" || qualitySummary.value === null)
+))
+// Normal navigation shows Metadata Quality only when an editor has findings.
+// A direct link also keeps it available while access is pending or allowed.
+const qualityTabAvailable = computed(() => (
+  (userCanEdit.value && hasQualityFindings.value)
+  || (qualityRequested.value && editAccess.value !== "denied")
+))
+// Authorized editors must mount ItemQuality even while its Tab is hidden:
+// the emitted summary determines whether the Tab should become visible.
+const renderQualityTab = computed(() => userCanEdit.value || qualityTabAvailable.value)
+// This list mirrors the order of visible Tab components and maps URL fragments
+// to the numeric index required by jskos-vue-tabs.
 const tabs = computed(() => isRegistry.value
   ? ["about", "access", "identifiers", "terminologies"]
   : [
@@ -197,7 +225,7 @@ const tabs = computed(() => isRegistry.value
     "identifiers",
     ...(props.item.API?.length ? ["content"] : []),
     ...(hasEditions.value ? ["editions"] : []),
-    ...(showQualityTab.value ? ["quality"] : []),
+    ...(qualityTabAvailable.value ? ["quality"] : []),
   ])
 const registryTerminologyCount = ref(null)
 const registryTerminologiesTitle = computed(() =>
@@ -208,21 +236,29 @@ const registryTerminologiesTitle = computed(() =>
 const activeTab = ref(0)
 const ready = ref(false)
 
-// Keep the last completed permission while the account is being refreshed.
-// This prevents the Quality tab from disappearing and changing the active tab.
-watch([userCanEdit, editReady], ([allowed, checked]) => {
-  if (!checked) {
-    return
-  }
-
-  qualityAccessGranted.value = allowed
-
-  // Remove findings when the completed check denies access, so they cannot
-  // briefly reappear if authorization is checked again later.
-  if (!allowed) {
-    qualitySummary.value = null
-  }
-}, { immediate: true })
+// A pending login never changes #quality. Once access permits the dynamic Tab,
+// select it after registration. Only a final denial returns the page to About.
+watch(
+  [editAccess, qualityRequested, qualityTabAvailable],
+  async ([access, requested, available]) => {
+    if (access === "denied") {
+      qualitySummary.value = null
+      if (requested) {
+        qualityRequested.value = false
+        activeTab.value = 0
+        window.history.replaceState(
+          {},
+          "",
+          `${window.location.pathname}${window.location.search}#about`,
+        )
+      }
+    } else if (requested && available) {
+      // jskos-vue-tabs cannot select a Tab before registering its component.
+      await nextTick()
+      syncTabFromHash()
+    }
+  },
+)
 
 // Version number shown on the page.
 const currentVersionNumber = computed(() => versionNumber(props.item))
@@ -247,13 +283,12 @@ const conceptScheme = computed(() => ({
   notationPattern: props.item.notationPattern,
 }))
 
-function tabIndexFromHash() {
-  const index = tabs.value.indexOf(window.location.hash.slice(1))
-  return index === -1 ? 0 : index
-}
-
 function syncTabFromHash() {
-  activeTab.value = tabIndexFromHash()
+  const requestedTab = window.location.hash.slice(1)
+  // Set this first so #quality is added to tabs before its index is resolved.
+  qualityRequested.value = requestedTab === "quality"
+  const index = tabs.value.indexOf(requestedTab)
+  activeTab.value = index === -1 ? 0 : index
 }
 
 function changeTab({ index }) {
@@ -262,16 +297,22 @@ function changeTab({ index }) {
     return
   }
 
-  const hash = `#${tabs.value[index]}`
+  const selectedTab = tabs.value[index]
+  // A user-selected Quality tab must also survive a temporary login refresh.
+  qualityRequested.value = selectedTab === "quality"
+  const hash = `#${selectedTab}`
   if (window.location.hash !== hash) {
     window.history.replaceState({}, "", `${window.location.pathname}${window.location.search}${hash}`)
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   syncTabFromHash()
-  ready.value = true
   window.addEventListener("hashchange", syncTabFromHash)
+  // Registration emits change events. Ignore them until the initial URL tab,
+  // including the pending Quality placeholder, has mounted.
+  await nextTick()
+  ready.value = true
 })
 
 onBeforeUnmount(() => {
@@ -295,5 +336,11 @@ onBeforeUnmount(() => {
 
 .terminology-editions > li + li {
   margin-block-start: var(--cc-row-gap);
+}
+
+.metadata-quality-loading {
+  margin: 0;
+  color: var(--cc-color-muted);
+  font-size: var(--cc-font-size-sm);
 }
 </style>

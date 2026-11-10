@@ -94,7 +94,7 @@ const item = {
 }
 
 function mountPage(itemOverrides = {}, derivedFields = {}, options = {}) {
-  const header = options.header || { userCanEdit: ref(true), editReady: ref(true) }
+  const header = options.header || { editAccess: ref("allowed") }
 
   return mount(ItemPage, {
     props: {
@@ -576,8 +576,7 @@ describe("ItemPage (terminology)", () => {
 
   it("keeps Metadata Quality selected while edit permission is refreshed", async () => {
     const header = {
-      userCanEdit: ref(true),
-      editReady: ref(true),
+      editAccess: ref("allowed"),
     }
     const wrapper = mountPage({}, {}, {
       header,
@@ -589,16 +588,16 @@ describe("ItemPage (terminology)", () => {
       .find(tab => tab.text() === "Metadata Quality")
     await qualityHeader.trigger("click")
 
-    header.editReady.value = false
-    header.userCanEdit.value = false
+    header.editAccess.value = "pending"
     await nextTick()
 
     const refreshedQualityHeader = visibleTabHeaders(wrapper)
       .find(tab => tab.text() === "Metadata Quality")
     expect(refreshedQualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(window.location.hash).toBe("#quality")
+    expect(wrapper.get("[role='status']").text()).toBe("Loading metadata quality…")
 
-    header.userCanEdit.value = true
-    header.editReady.value = true
+    header.editAccess.value = "allowed"
     await nextTick()
 
     expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality").classes())
@@ -612,6 +611,83 @@ describe("ItemPage (terminology)", () => {
     await nextTick()
 
     expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality")).toBeDefined()
+  })
+
+  it("keeps About selected during normal navigation when quality findings exist", async () => {
+    const wrapper = mountPage({}, {}, {
+      itemQuality: ItemQualityWithFindingStub,
+    })
+    await nextTick()
+
+    const headers = visibleTabHeaders(wrapper)
+    expect(headers.find(tab => tab.text() === "Metadata Quality")).toBeDefined()
+    expect(headers[0].classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(window.location.hash).toBe("")
+  })
+
+  it("opens Metadata Quality from the hash while permission and findings load", async () => {
+    window.history.replaceState({}, "", "/en/node/123#quality")
+    const header = {
+      editAccess: ref("pending"),
+    }
+    let publishFindings
+    const wrapper = mountPage({}, {}, {
+      header,
+      itemQuality: {
+        name: "DelayedItemQuality",
+        emits: ["count"],
+        setup(_, { emit }) {
+          publishFindings = () => emit("count", { current: 1, total: 1 })
+          return () => h("div", { "data-testid": "item-quality" })
+        },
+      },
+    })
+    await nextTick()
+    await flushPromises()
+
+    const loadingQualityHeader = visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Metadata Quality")
+    expect(loadingQualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(wrapper.get("[role='status']").text()).toBe("Loading metadata quality…")
+    expect(wrapper.find("[data-testid='item-quality']").exists()).toBe(false)
+
+    header.editAccess.value = "allowed"
+    await nextTick()
+
+    expect(window.location.hash).toBe("#quality")
+    expect(visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Metadata Quality")
+      .classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(wrapper.find("[data-testid='item-quality']").exists()).toBe(true)
+    expect(wrapper.get("[role='status']").text()).toBe("Loading metadata quality…")
+
+    publishFindings()
+    await flushPromises()
+
+    const qualityHeader = visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Metadata Quality")
+    expect(qualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(window.location.hash).toBe("#quality")
+  })
+
+  it("returns to About when a direct Metadata Quality request is denied", async () => {
+    window.history.replaceState({}, "", "/en/node/123#quality")
+    const header = {
+      editAccess: ref("pending"),
+    }
+    const wrapper = mountPage({}, {}, { header })
+    await flushPromises()
+
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality"))
+      .toBeDefined()
+
+    header.editAccess.value = "denied"
+    await flushPromises()
+
+    const headers = visibleTabHeaders(wrapper)
+    expect(headers.find(tab => tab.text() === "Metadata Quality")).toBeUndefined()
+    expect(headers[0].classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(window.location.hash).toBe("#about")
   })
 
   it("does not mount the concept browser for an empty API list", async () => {

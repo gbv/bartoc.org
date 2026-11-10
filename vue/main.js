@@ -1,6 +1,7 @@
 import { computed, ref, toRefs, watch } from "vue"
 
 import { createBartocApp } from "./appFactory.js"
+import { createEditAccess } from "./editAccess.js"
 import { loadClientPage } from "./pages/client.js"
 import { parseJson } from "./utils/parseJson.js"
 import { Login } from "gbv-login-client-vue"
@@ -12,22 +13,24 @@ import { render } from "../node_modules/timeago.js/"
 import "jskos-vue/dist/style.css"
 
 const { token } = toRefs(Login)
-const userCanAdd = ref(false)
-const userCanEdit = ref(false)
-const permissionChecked = ref(false)
-const editPermissionChecked = ref(false)
 
-// The user status is actionable only after the login client connects.
+// BARTOC permissions are checked separately from the login state. The Add
+// action keeps its result and completion flag because the header reserves the
+// button's space while the request is pending.
+const userCanAdd = ref(false)
+const permissionChecked = ref(false)
+
+// Components may replace their account placeholders after the login client
+// has established its connection.
 const loginReady = computed(() => Login.connected)
-// Keep Add's place until its permission check has finished.
+
+// Once the account state is known, anonymous users are ready immediately.
+// Authenticated users wait for the permission check for their current token.
 const addReady = computed(() => loginReady.value &&
   (!Login.loggedIn || (Boolean(token.value) && permissionChecked.value)))
 
-// Keep Edit's place until its permission check has finished.
-const editReady = computed(() => loginReady.value &&
-  (!Login.loggedIn || (Boolean(token.value) && editPermissionChecked.value)))
-
-async function checkPermission(action, currentToken) {
+// Ask the local JSKOS API whether the current token permits one action.
+async function requestPermission(action, currentToken) {
   try {
     const response = await fetch(
       `/api/checkAuth?type=schemes&action=${action}`,
@@ -43,35 +46,32 @@ async function checkPermission(action, currentToken) {
   }
 }
 
+// Edit access remains pending until the restored account is known. This is
+// separate from Add because the header keeps its existing loading behavior.
+const {
+  editAccess,
+  start: startEditAccess,
+} = createEditAccess(Login, currentToken => requestPermission("update", currentToken))
+const userCanEdit = computed(() => editAccess.value === "allowed")
+
 watch(token, currentToken => {
-  // Clear the previous login's permission while checking the new token.
+  // Clear the previous Add permission before checking the new token.
   userCanAdd.value = false
   permissionChecked.value = false
-  userCanEdit.value = false
-  editPermissionChecked.value = false
-
+  // Without a token there are no permissions to request.
   if (!currentToken) {
     permissionChecked.value = true
-    editPermissionChecked.value = true
     return
   }
 
-  checkPermission("create", currentToken).then(allowed => {
+  requestPermission("create", currentToken).then(allowed => {
+    // Ignore a response belonging to a token that was replaced meanwhile.
     if (token.value !== currentToken) {
       return
     }
 
     userCanAdd.value = allowed
     permissionChecked.value = true
-  })
-
-  checkPermission("update", currentToken).then(allowed => {
-    if (token.value !== currentToken) {
-      return
-    }
-
-    userCanEdit.value = allowed
-    editPermissionChecked.value = true
   })
 
 }, { immediate: true })
@@ -87,15 +87,19 @@ async function hydrate() {
       activePath: serverState.header?.activePath || "",
       userCanAdd,
       userCanEdit,
+      editAccess,
       loginReady,
       addReady,
-      editReady,
     },
   })
 
   // Keep the SSR login state anonymous until Vue has hydrated the header.
   app.mount("#app")
+
+  // connect() restores the account asynchronously. The reactive Login values
+  // above update the header and permission-dependent content as events arrive.
   Login.connect(serverState.login.api, { ssl: serverState.login.ssl })
+  startEditAccess()
 
   // Plain JavaScript is sufficient for relative timestamps.
   // See https://github.com/hustcc/timeago.js/issues/230
