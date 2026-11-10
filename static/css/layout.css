@@ -90,6 +90,7 @@ a[href*="orcid.org"]:before {
 
 .item-dates {
   text-align: right;
+  font-size: var(--cc-font-size-sm);
 }
 
 .action-group {

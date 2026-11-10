@@ -78,7 +78,7 @@ describe("ItemDates", () => {
       },
     ])
 
-    expect(wrapper.findAll("li")).toHaveLength(3)
+    expect(wrapper.findAll("li")).toHaveLength(6)
   })
 
   it("shows resource format links even when dates are missing", () => {

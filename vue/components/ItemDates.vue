@@ -4,28 +4,29 @@
     class="item-dates separated-list">
     <li
       v-if="created">
-      <small>created <time :datetime="created">{{ formatTimestamp(created) }}</time></small>
+      created <time :datetime="created">{{ formatTimestamp(created) }}</time>
     </li>
     <li
       v-if="issued">
-      <small>issued <time :datetime="issued">{{ formatTimestamp(issued) }}</time></small>
+      issued <time :datetime="issued">{{ formatTimestamp(issued) }}</time>
     </li>
     <li
       v-if="showModified">
-      <small>modified <time :datetime="modified">{{ formatTimestamp(modified) }}</time></small>
+      modified <time :datetime="modified">{{ formatTimestamp(modified) }}</time>
     </li>
     <li v-if="resourceFormatLinks.length">
-      <small aria-label="Resource formats">
-        <i
-          class="fas fa-code"
-          aria-hidden="true" />
-        <template
+      <ul class="separated-list">
+        <li
           v-for="(link, index) in resourceFormatLinks"
           :key="link.label">
-          <span v-if="index"> / </span>
+          <i
+            v-if="!index"
+            class="fas fa-code"
+            style="padding-right: 0.3em"
+            aria-hidden="true" />
           <a :href="link.href">{{ link.label }}</a>
-        </template>
-      </small>
+        </li>
+      </ul>
     </li>
   </ul>
 </template>
@@ -78,6 +79,4 @@ const resourceFormatLinks = computed(() => {
     },
   ]
 })
-
-
 </script>
