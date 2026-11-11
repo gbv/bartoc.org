@@ -585,14 +585,14 @@ describe("ItemPage (terminology)", () => {
     await nextTick()
 
     const qualityHeader = visibleTabHeaders(wrapper)
-      .find(tab => tab.text() === "Metadata Quality")
+      .find(tab => tab.text() === "Metadata Quality (1)")
     await qualityHeader.trigger("click")
 
     header.editAccess.value = "pending"
     await nextTick()
 
     const refreshedQualityHeader = visibleTabHeaders(wrapper)
-      .find(tab => tab.text() === "Metadata Quality")
+      .find(tab => tab.text() === "Metadata Quality (1)")
     expect(refreshedQualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
     expect(window.location.hash).toBe("#quality")
     expect(wrapper.get("[role='status']").text()).toBe("Loading metadata quality…")
@@ -600,7 +600,7 @@ describe("ItemPage (terminology)", () => {
     header.editAccess.value = "allowed"
     await nextTick()
 
-    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality").classes())
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality (1)").classes())
       .toContain("jskos-vue-tabs-header-item-active")
   })
 
@@ -610,7 +610,7 @@ describe("ItemPage (terminology)", () => {
     })
     await nextTick()
 
-    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality")).toBeDefined()
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality (0)")).toBeDefined()
   })
 
   it("keeps About selected during normal navigation when quality findings exist", async () => {
@@ -620,7 +620,7 @@ describe("ItemPage (terminology)", () => {
     await nextTick()
 
     const headers = visibleTabHeaders(wrapper)
-    expect(headers.find(tab => tab.text() === "Metadata Quality")).toBeDefined()
+    expect(headers.find(tab => tab.text() === "Metadata Quality (1)")).toBeDefined()
     expect(headers[0].classes()).toContain("jskos-vue-tabs-header-item-active")
     expect(window.location.hash).toBe("")
   })
@@ -665,7 +665,7 @@ describe("ItemPage (terminology)", () => {
     await flushPromises()
 
     const qualityHeader = visibleTabHeaders(wrapper)
-      .find(tab => tab.text() === "Metadata Quality")
+      .find(tab => tab.text() === "Metadata Quality (1)")
     expect(qualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
     expect(window.location.hash).toBe("#quality")
   })

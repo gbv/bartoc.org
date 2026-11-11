@@ -94,7 +94,7 @@
     </Tab>
     <Tab
       v-if="!isRegistry && renderQualityTab"
-      title="Metadata Quality"
+      :title="qualityTabTitle"
       :hidden="!qualityTabAvailable">
       <p
         v-if="qualityTabLoading"
@@ -204,6 +204,10 @@ const userCanEdit = computed(() => editAccess.value === "allowed")
 // have loaded. A null summary means that this work has not completed yet.
 const qualitySummary = ref(null)
 const hasQualityFindings = computed(() => (qualitySummary.value?.total || 0) > 0)
+// The tab counts current issues; fixed snapshot findings remain excluded.
+const qualityTabTitle = computed(() => qualitySummary.value === null
+  ? "Metadata Quality"
+  : `Metadata Quality (${qualitySummary.value.current})`)
 // Remember an explicit #quality request independently from access and results,
 // so login restoration cannot silently replace the requested URL fragment.
 const qualityRequested = ref(false)
