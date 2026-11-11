@@ -7,7 +7,9 @@
     :label="'URI'">
     <a :href="item.uri">{{ item.uri }}</a>
   </form-row>
-  <form-row :label="'Title'">
+  <form-row
+    id="field-pref-label"
+    :label="'Title'">
     <InheritableTitleEditor
       ref="inheritableTitleEditor"
       v-model="item.prefLabel"
@@ -32,7 +34,9 @@
     <list-editor v-model="item.identifier" />
     Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
-  <form-row :label="'Abstracts'">
+  <form-row
+    id="field-definition"
+    :label="'Abstracts'">
     <InheritableAbstractsEditor
       ref="inheritableAbstractsEditor"
       v-model="item.definition"
@@ -41,16 +45,27 @@
     <div
       v-if="!requireEnglish"
       class="editor-help-text">
-      An English abstract is optional because this terminology is a version of another BARTOC terminology.
+      An English abstract is optional because this terminology is an edition of another BARTOC terminology.
     </div>
   </form-row>
-  <form-row :label="'Languages'">
+  <!-- Media values are objects, so they need their own editor. -->
+  <form-row
+    id="field-media"
+    :label="'Media'">
+    <media-editor v-model="item.media" />
+    URLs of logos or other images representing the terminology.
+  </form-row>
+  <form-row
+    id="field-languages"
+    :label="'Languages'">
     <InheritableLanguagesEditor
       ref="inheritableLanguagesEditor"
       v-model="item.languages"
       :source="versionMainSource" />
   </form-row>
-  <form-row :label="'Size'">
+  <form-row
+    id="field-extent"
+    :label="'Size'">
     <input
       v-model="item.extent"
       type="text"
@@ -58,14 +73,18 @@
     Number of classes, subclasses, taxa, terms, concepts etc. Please add date in
     parenthesis (YYYY-MM).
   </form-row>
-  <form-row :label="'KOS Types'">
+  <form-row
+    id="field-type"
+    :label="'KOS Types'">
     <InheritableKosTypesEditor
       ref="inheritableKosTypesEditor"
       v-model="selectedKosTypes"
       :source="versionMainSource"
       :provider="kosTypeProvider" />
   </form-row>
-  <form-row :label="'Subjects'">
+  <form-row
+    id="field-subject"
+    :label="'Subjects'">
     <InheritableSubjectsEditor
       ref="inheritableSubjectsEditor"
       v-model="item.subject"
@@ -79,18 +98,31 @@
   </form-row>
   <form-row
     v-if="showVersionOfEditor"
+    id="field-version-of"
     :label="'Version of'">
     <terminology-relation-editor
       v-model="item.versionOf"
       :multiple="false"
       placeholder="Select another terminology from BARTOC" />
   </form-row>
-  <form-row :label="'Based on'">
+  <form-row
+    id="field-based-on"
+    :label="'Based on'">
     <terminology-relation-editor
       v-model="item.basedOn"
       :multiple="true"
       placeholder="Select another terminology from BARTOC" />
   </form-row>
+  <form-row
+    id="field-replaced-by"
+    :label="'Replaced by'">
+    <terminology-relation-editor
+      v-model="item.replacedBy"
+      :multiple="true"
+      placeholder="Select another terminology from BARTOC" />
+    Select the terminology that replaces this one. Its page will link back here.
+  </form-row>
+
   <hr>
   <p>How the vocabulary is made available:</p>
   <form-row :label="'Created'">
@@ -101,13 +133,17 @@
       maxlength="4">
     The year when the KOS was first created (YYYY).
   </form-row>
-  <form-row :label="'License'">
+  <form-row
+    id="field-license"
+    :label="'License'">
     <jskos-item-picker
       v-model="item.license"
       :provider="licenseProvider"
       placeholder="Search licenses…" />
   </form-row>
-  <form-row :label="'URL'">
+  <form-row
+    id="field-url"
+    :label="'URL'">
     <input
       v-model="item.url"
       type="text"
@@ -118,7 +154,15 @@
       :model-value="item.subjectOf.map((s) => s.url)"
       @update:modelValue="item.subjectOf = $event.map((url) => ({ url }))" />
   </form-row>
-  <form-row :label="'Formats'">
+  <form-row :label="'Issue tracker'">
+    <list-editor
+      :model-value="item.issueTracker.map((tracker) => tracker.uri)"
+      @update:modelValue="item.issueTracker = $event.map((uri) => ({ uri }))" />
+    Where issues about this terminology are managed.
+  </form-row>
+  <form-row
+    id="field-format"
+    :label="'Formats'">
     <jskos-item-picker
       v-model="item.FORMAT"
       :provider="formatProvider"
@@ -131,7 +175,9 @@
     Do you have to register to view the KOS, is it 'hidden' in a licensed
     database or is it free online?
   </form-row>
-  <form-row :label="'Publisher'">
+  <form-row
+    id="field-publisher"
+    :label="'Publisher'">
     <publisher-editor v-model="item.publisher" />
     Try to use an institution rather than a person.
   </form-row>
@@ -153,7 +199,15 @@
       :show-tree="false" />
     Which <a href="/registries">terminology registries</a> list the vocabulary?
   </form-row>
-  <form-row :label="'Vocabulary services'">
+  <form-row
+    id="field-distributions"
+    label="Distributions">
+    <DistributionsEditor v-model="item.distributions" />
+    Manage direct download and publication URLs. Other distribution metadata is preserved.
+  </form-row>
+  <form-row
+    id="field-api"
+    :label="'Vocabulary services'">
     <endpoints-editor v-model="item.API" />
   </form-row>
   <form-row label="Display options">
@@ -199,7 +253,9 @@
       type="text"
       class="cc-form-control">
   </form-row>
-  <form-row :label="'example notations'">
+  <form-row
+    id="field-notation-examples"
+    :label="'example notations'">
     <InheritableNotationExamplesEditor
       ref="inheritableNotationExamplesEditor"
       v-model="item.notationExamples"
@@ -256,7 +312,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, toRaw } from "vue"
+import { computed, nextTick, onMounted, reactive, ref, toRaw } from "vue"
 import {
   loadConcepts,
   trimItemIdentifiers,
@@ -282,6 +338,7 @@ import InheritableNotationExamplesEditor from "./InheritableNotationExamplesEdit
 import InheritableSubjectsEditor from "./InheritableSubjectsEditor.vue"
 import InheritableTitleEditor from "./InheritableTitleEditor.vue"
 import ListEditor from "./ListEditor.vue"
+import MediaEditor from "./MediaEditor.vue"
 import AddressEditor from "./AddressEditor.vue"
 import EndpointsEditor from "./EndpointsEditor.vue"
 import JskosItemPicker from "./JskosItemPicker.vue"
@@ -289,6 +346,7 @@ import PublisherEditor from "./PublisherEditor.vue"
 import SetSelect from "./SetSelect.vue"
 import TerminologyRelationEditor from "./TerminologyRelationEditor.vue"
 import AbbreviationEditor from "./AbbreviationEditor.vue"
+import DistributionsEditor from "./DistributionsEditor.vue"
 
 const props = defineProps({
   user: {
@@ -400,6 +458,27 @@ const jskosPreview = computed(() => {
   return JSON.stringify(cleaned, null, 2)
 })
 
+// EditPage mounts the editor after hydration, when the browser's normal
+// fragment scroll has already run. Repeat it once the target row exists.
+onMounted(async () => {
+  await nextTick()
+
+  const targetId = window.location.hash.slice(1)
+  const target = document.getElementById(targetId)
+  if (!targetId.startsWith("field-") || !target) {
+    return
+  }
+
+  target.scrollIntoView?.({ block: "center" })
+
+  // Focus ordinary controls when available. Complex editors still receive
+  // the scroll and highlight without requiring changes to their components.
+  const control = target.querySelector(
+    "input:not([type='hidden']):not([disabled]), textarea:not([disabled]), select:not([disabled])",
+  )
+  control?.focus({ preventScroll: true })
+})
+
 loadConcepts(
   "https://api.dante.gbv.de/voc/top",
   "http://uri.gbv.de/terminology/license/",
@@ -476,6 +555,14 @@ defineExpose({
   display: block;
   margin-top: var(--cc-space-xs);
   color: var(--cc-color-muted);
+}
+
+[id^="field-"] {
+  scroll-margin-block-start: var(--cc-space-lg);
+}
+
+[id^="field-"]:target {
+  background-color: var(--cc-color-accent);
 }
 
 .editor-display-option {

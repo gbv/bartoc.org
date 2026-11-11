@@ -7,11 +7,24 @@
     :nav-links="navLinks"
     :utility-links="utilityLinks"
     :active-path="activePath"
-    :user-can-add="userCanAdd"
+    :user-can-add="addReady && userCanAdd"
     edit-url="/edit"
-    add-label="add">
+    add-label="Add">
     <template #user-status>
-      <UserStatus redirect />
+      <UserStatus
+        v-if="loginReady"
+        redirect />
+      <span
+        v-else
+        class="header-user-status__loading"
+        role="status">Loading account…</span>
+    </template>
+    <template #actions>
+      <span
+        v-if="!addReady"
+        class="cc-button cc-button-on-primary cc-button-sm bartoc-header__add-link"
+        style="visibility: hidden"
+        aria-hidden="true">Add</span>
     </template>
   </BartocHeader>
 </template>
@@ -46,10 +59,14 @@ const navLinks = configuredMenu.map(item => ({
 const utilityLinks = [
   { href: "/contact", label: "Contact & Editors" },
 ]
-const activePath = computed(() => (
-  props.activePath || providedHeader.activePath || window.location.pathname
-))
+const activePath = computed(() => {
+  const path = props.activePath || providedHeader.activePath ||
+    (typeof window === "undefined" ? "/" : window.location.pathname)
+  return path.replace(/\/+$/, "") || "/"
+})
 const userCanAdd = computed(() => (
   props.userCanAdd ?? unref(providedHeader.userCanAdd) ?? false
 ))
+const loginReady = computed(() => unref(providedHeader.loginReady) ?? false)
+const addReady = computed(() => unref(providedHeader.addReady) ?? false)
 </script>

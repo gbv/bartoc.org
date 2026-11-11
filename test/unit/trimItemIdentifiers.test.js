@@ -20,8 +20,10 @@ describe("trimItemIdentifiers", () => {
       url: "  https://example.org  ",
       identifier: ["  a  ", "   ", "b"],
       languages: [" en ", ""],
+      issueTracker: [{ uri: "  https://example.org/issues  " }, { uri: "   " }],
       subjectOf: [{ url: "  https://x  " }, { url: "   " }],
       partOf: [{ uri: "  http://r  " }, { uri: "   " }],
+      replacedBy: [{ uri: "  http://successor  " }, { uri: "   " }],
       API: [{ url: "  /api  ", type: "  t  " }, { url: "   ", type: "x" }],
       subject: [
         { uri: "  http://c  ", notation: [" 01 ", "  "], inScheme: [{ uri: "  http://s  " }, { uri: " " }] },
@@ -34,9 +36,11 @@ describe("trimItemIdentifiers", () => {
     expect(out.url).toBe("https://example.org")
     expect(out.identifier).toEqual(["a", "b"])
     expect(out.languages).toEqual(["en"])
+    expect(out.issueTracker).toEqual([{ uri: "https://example.org/issues" }])
 
     expect(out.subjectOf).toEqual([{ url: "https://x" }])
     expect(out.partOf).toEqual([{ uri: "http://r" }])
+    expect(out.replacedBy).toEqual([{ uri: "http://successor" }])
 
     expect(out.API).toEqual([{ url: "/api", type: "t" }])
 

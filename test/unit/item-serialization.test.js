@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 import { canonicalItemCopy } from "../../src/itemSerialization.js"
 import { rdfResponseContentType, rdfSerialize } from "../../src/rdf.js"
-import { deriveVersionRecord } from "../../src/versioning.js"
-import { storedTheSoz2004, storedTheSozMain } from "../fixtures/versioning.js"
+import { deriveEditionRecord } from "../../src/editions.js"
+import { storedTheSoz2004, storedTheSozMain } from "../fixtures/editions.js"
 
 const context = "https://gbv.github.io/jskos/context.json"
 
@@ -51,7 +51,7 @@ describe("canonical item serialization", () => {
 
   it("keeps inherited values out of saved data", () => {
     const stored = structuredClone(storedTheSoz2004)
-    const { effectiveItem } = deriveVersionRecord(stored, storedTheSozMain)
+    const { effectiveItem } = deriveEditionRecord(stored, storedTheSozMain)
     const serialized = canonicalItemCopy(stored, context)
 
     expect(effectiveItem.prefLabel.en).toBe("Thesaurus for the Social Sciences 3.0")

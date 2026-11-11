@@ -2,8 +2,9 @@
 import { defineComponent, h, nextTick, ref } from "vue"
 import { flushPromises, mount } from "@vue/test-utils"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import TerminologyPage from "../../vue/pages/TerminologyPage.vue"
+import ItemPage from "../../vue/pages/ItemPage.vue"
 import { loadWikipediaLinks } from "../../vue/utils/wikipedia.js"
+import { imageMedia } from "../helpers/media.js"
 
 const selectConcept = vi.fn()
 const ConceptBrowserStub = defineComponent({
@@ -18,6 +19,19 @@ const ServiceLinkStub = {
   props: ["endpoint"],
   template: "<a :href=\"endpoint.url\">{{ endpoint.url }}</a>",
 }
+function itemQualityStub(summary) {
+  return {
+    name: "ItemQuality",
+    emits: ["count"],
+    setup(_, { emit }) {
+      emit("count", summary)
+      return () => h("div", { "data-testid": "item-quality" })
+    },
+  }
+}
+
+const ItemQualityWithFindingStub = itemQualityStub({ current: 1, total: 1 })
+const ItemQualityWithHistoricalFindingStub = itemQualityStub({ current: 0, total: 1 })
 
 const typeUri = "http://w3id.org/nkos/nkostype#thesaurus"
 const item = {
@@ -58,8 +72,14 @@ const item = {
     uri: "http://bartoc.org/en/node/400",
     prefLabel: { en: "Derived Terminology" },
   }],
-  ACCESS: [{ uri: "http://bartoc.org/en/Access/Free" }],
-  FORMAT: [{ uri: "http://bartoc.org/en/Format/Online" }],
+  ACCESS: [{
+    uri: "http://bartoc.org/en/Access/Free",
+    prefLabel: { en: "freely available" },
+  }],
+  FORMAT: [{
+    uri: "http://bartoc.org/en/Format/Online",
+    prefLabel: { en: "Online" },
+  }],
   license: [{
     uri: "https://example.org/license",
     prefLabel: { en: "Example License" },
@@ -73,8 +93,10 @@ const item = {
   notationPattern: "[A-Z]+",
 }
 
-function mountPage(itemOverrides = {}, derivedFields = {}) {
-  return mount(TerminologyPage, {
+function mountPage(itemOverrides = {}, derivedFields = {}, options = {}) {
+  const header = options.header || { editAccess: ref("allowed") }
+
+  return mount(ItemPage, {
     props: {
       title: "Test Vocabulary",
       item: { ...item, ...itemOverrides },
@@ -82,25 +104,14 @@ function mountPage(itemOverrides = {}, derivedFields = {}) {
       nkosTypes: {
         [typeUri]: { uri: typeUri, prefLabel: { en: "Thesaurus" } },
       },
-      accessTypes: {
-        "http://bartoc.org/en/Access/Free": {
-          uri: "http://bartoc.org/en/Access/Free",
-          prefLabel: { en: "freely available" },
-        },
-      },
-      formats: {
-        "http://bartoc.org/en/Format/Online": {
-          uri: "http://bartoc.org/en/Format/Online",
-          prefLabel: { en: "Online" },
-        },
-      },
     },
     global: {
       provide: {
-        header: { userCanAdd: ref(true) },
+        header,
       },
       stubs: {
         ConceptBrowser: ConceptBrowserStub,
+        ItemQuality: options.itemQuality ?? true,
         ServiceLink: ServiceLinkStub,
       },
     },
@@ -109,6 +120,11 @@ function mountPage(itemOverrides = {}, derivedFields = {}) {
 
 function rowByLabel(wrapper, label) {
   return wrapper.findAll("tr").find(row => row.findAll("td")[0]?.text().trim() === label)
+}
+
+function visibleTabHeaders(wrapper) {
+  return wrapper.findAll(".jskos-vue-tabs-header-item")
+    .filter(header => header.isVisible())
 }
 
 function jsonResponse(data) {
@@ -126,11 +142,12 @@ function wikipediaPage(url, languageCode) {
   }
 }
 
-describe("TerminologyPage", () => {
+describe("ItemPage (terminology)", () => {
   beforeEach(() => {
     window.history.replaceState({}, "", "/en/node/123")
     window.sessionStorage.clear()
     selectConcept.mockClear()
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }))
   })
 
   afterEach(() => {
@@ -147,7 +164,7 @@ describe("TerminologyPage", () => {
     expect(editAction.text()).toBe("edit")
     expect(editAction.classes()).toContain("page-action")
     expect(wrapper.findAll("p").map(paragraph => paragraph.text())).toEqual([
-      "This is a version of Earlier Version.",
+      "This is an edition of Earlier Version.",
       "First paragraph",
       "Second paragraph",
     ])
@@ -160,13 +177,118 @@ describe("TerminologyPage", () => {
     expect(rowByLabel(wrapper, "Subject").get("ul").classes()).toContain("separated-list")
     expect(rowByLabel(wrapper, "Identifiers").get("ul").classes()).toEqual(["metadata-list"])
     expect(rowByLabel(wrapper, "Mapped Subjects").text()).toContain("Mapped Subject (200)")
-    expect(rowByLabel(wrapper, "Version of")).toBeUndefined()
-    expect(rowByLabel(wrapper, "Versions")).toBeUndefined()
-    expect(wrapper.get(".terminology-versions").text()).toContain(
+    expect(rowByLabel(wrapper, "Edition of")).toBeUndefined()
+    expect(rowByLabel(wrapper, "Editions")).toBeUndefined()
+    expect(wrapper.get(".terminology-editions").text()).toContain(
       "Later Version BARTOC ID 124",
     )
     expect(rowByLabel(wrapper, "Based on").text()).toContain("Base Terminology")
     expect(rowByLabel(wrapper, "Derived terminologies").text()).toContain("Derived Terminology")
+  })
+
+  it("shows replaced-by relations in both directions", () => {
+    const wrapper = mountPage({
+      replacedBy: [{
+        uri: "http://bartoc.org/en/node/500",
+        prefLabel: { en: "New Terminology" },
+      }],
+      _replacedByBacklink: [{
+        uri: "http://bartoc.org/en/node/600",
+        prefLabel: { en: "Old Terminology" },
+      }],
+    })
+
+    expect(rowByLabel(wrapper, "Replaced by").get("a").attributes("href")).toBe("/en/node/500")
+    expect(rowByLabel(wrapper, "Replaced by").text()).toContain("New Terminology")
+    expect(rowByLabel(wrapper, "Successor of").get("a").attributes("href")).toBe("/en/node/600")
+    expect(rowByLabel(wrapper, "Successor of").text()).toContain("Old Terminology")
+  })
+
+  it("shows media thumbnails next to the abstract", () => {
+    const wrapper = mountPage({
+      media: [
+        imageMedia("https://example.org/logo.png"),
+        imageMedia("https://example.org/banner.png"),
+        imageMedia("not-a-url"),
+      ],
+    })
+
+    const images = wrapper.findAll(".cc-terminology-media-image")
+    expect(images).toHaveLength(2)
+    expect(images[0].attributes()).toMatchObject({
+      src: "https://example.org/logo.png",
+      alt: "",
+      loading: "lazy",
+      decoding: "async",
+      referrerpolicy: "no-referrer",
+    })
+    expect(images[1].attributes("src")).toBe("https://example.org/banner.png")
+  })
+
+  it("shows registry titles in Part of", () => {
+    const wrapper = mountPage({
+      partOf: [
+        {
+          uri: "http://bartoc.org/en/node/18942",
+          prefLabel: { en: "GESIS Controlled Vocabulary Browser" },
+        },
+        {
+          uri: "http://bartoc.org/en/node/missing",
+        },
+      ],
+    })
+
+    const links = rowByLabel(wrapper, "Part of").findAll("a")
+
+    expect(links.map(link => link.text())).toEqual([
+      "GESIS Controlled Vocabulary Browser",
+      "http://bartoc.org/en/node/missing",
+    ])
+  })
+
+  it("shows issue tracker links in Access", () => {
+    const wrapper = mountPage({
+      issueTracker: [
+        { uri: "https://github.com/example/project/issues" },
+      ],
+    })
+    const link = rowByLabel(wrapper, "Issue tracker").get("a")
+
+    expect(link.text()).toBe("https://github.com/example/project/issues")
+    expect(link.attributes()).toMatchObject({
+      href: "https://github.com/example/project/issues",
+      target: "_blank",
+      rel: "noopener noreferrer",
+    })
+  })
+
+  it("links a publisher to matching vocabularies", () => {
+    const uri = "http://viaf.org/viaf/156706556"
+    const wrapper = mountPage({
+      publisher: [{ uri, prefLabel: { en: "Example publisher" } }],
+    })
+    const link = rowByLabel(wrapper, "Publisher").get("a")
+
+    expect(link.text()).toBe("Example publisher")
+    expect(link.attributes("href")).toBe(
+      `/vocabularies/?field=publisher_en&search=${encodeURIComponent(uri)}`,
+    )
+  })
+
+  it("links full language names to vocabulary searches", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([
+      { notation: ["en"], prefLabel: { en: "English" } },
+      { notation: ["de"], prefLabel: { en: "German" } },
+    ])))
+
+    const wrapper = mountPage()
+    await flushPromises()
+
+    const links = rowByLabel(wrapper, "Languages").findAll("a")
+    expect(links.map(link => [link.text(), link.attributes("href")])).toEqual([
+      ["English", "/vocabularies/?filter=language:en"],
+      ["German", "/vocabularies/?filter=language:de"],
+    ])
   })
 
   it("shows Wikipedia links below the homepage", async () => {
@@ -179,8 +301,8 @@ describe("TerminologyPage", () => {
       { notation: ["en", "eng"], prefLabel: { en: "English" } },
     ]
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(wikidataResponse(wikipediaPages))
       .mockResolvedValueOnce(jsonResponse(languageConcepts))
+      .mockResolvedValueOnce(wikidataResponse(wikipediaPages))
     vi.stubGlobal("fetch", fetchMock)
     const identifier = "http://www.wikidata.org/entity/Q123"
     const wrapper = mountPage({
@@ -190,20 +312,19 @@ describe("TerminologyPage", () => {
 
     await flushPromises()
 
-    const wikidataRequestUrl = fetchMock.mock.calls[0][0]
+    const languageRequestUrl = fetchMock.mock.calls[0][0]
+    expect(languageRequestUrl.pathname).toBe("/api/concepts")
+    expect(languageRequestUrl.searchParams.get("notation")).toBe("en|de")
+    expect(languageRequestUrl.searchParams.get("voc")).toBe(
+      "http://bartoc.org/en/node/20287",
+    )
+    const wikidataRequestUrl = fetchMock.mock.calls[1][0]
     expect(wikidataRequestUrl.origin + wikidataRequestUrl.pathname).toBe(
       "https://query.wikidata.org/sparql",
     )
     expect(wikidataRequestUrl.searchParams.get("query")).toContain(`<${identifier}>`)
-    const languageRequestUrl = fetchMock.mock.calls[1][0]
-    expect(languageRequestUrl.pathname).toBe("/api/concepts")
-    expect(languageRequestUrl.searchParams.get("notation")).toBe("de|en")
-    expect(languageRequestUrl.searchParams.get("voc")).toBe(
-      "http://bartoc.org/en/node/20287",
-    )
     const labels = wrapper.findAll("tr").map(row => row.find("td").text())
-    const homepageIndex = labels.indexOf("Homepage")
-    expect(labels[homepageIndex + 1]).toBe("Wikipedia")
+    expect(labels.indexOf("Wikipedia")).toBeTruthy()
     expect(rowByLabel(wrapper, "Wikipedia").findAll("a").map(link => ({
       text: link.text(),
       href: link.attributes("href"),
@@ -277,6 +398,7 @@ describe("TerminologyPage", () => {
 
     const wrapper = mountPage({
       identifier: ["https://www.wikidata.org/entity/Q123"],
+      languages: [],
     })
 
     expect(fetchMock).not.toHaveBeenCalled()
@@ -294,7 +416,7 @@ describe("TerminologyPage", () => {
   it("shows the version number next to the main record", () => {
     const context = mountPage({ version: "3.0" }).get("[data-testid='version-context']")
 
-    expect(context.text()).toBe("This is version 3.0 of Earlier Version.")
+    expect(context.text()).toBe("This is edition 3.0 of Earlier Version.")
     expect(context.get("a").attributes("href")).toBe("/en/node/122")
   })
 
@@ -309,7 +431,7 @@ describe("TerminologyPage", () => {
     expect(titlesRow.find(".inherited-field-marker").exists()).toBe(true)
   })
 
-  it("shows linked versions", () => {
+  it("shows linked editions", () => {
     const versionOf = [{ uri: item.uri }]
     const wrapper = mountPage({
       versionOf: [],
@@ -336,7 +458,7 @@ describe("TerminologyPage", () => {
         },
       ],
     })
-    const entries = wrapper.findAll(".terminology-versions > li")
+    const entries = wrapper.findAll(".terminology-editions > li")
 
     expect(entries.map(entry => entry.text())).toEqual([
       "Test Vocabulary 3.0 since 2004 · 8223 classes (2022-09) · BARTOC ID 294",
@@ -383,49 +505,189 @@ describe("TerminologyPage", () => {
     const wrapper = mountPage()
     await nextTick()
 
-    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
-    expect(headers[3].classes()).toContain("jskos-vue-tabs-header-item-active")
-    expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
+    const headers = visibleTabHeaders(wrapper)
+    expect(headers[2].classes()).toContain("jskos-vue-tabs-header-item-active")
 
     await headers[1].trigger("click")
     expect(window.location.hash).toBe("#access")
-    expect(rowByLabel(wrapper, "Access").text()).toContain("freely available")
-    expect(selectConcept).not.toHaveBeenCalled()
 
     await headers[2].trigger("click")
+    expect(window.location.hash).toBe("#identifiers")
+
+    await headers[3].trigger("click")
     expect(window.location.hash).toBe("#content")
     expect(wrapper.get("[data-testid='concept-browser']").exists()).toBe(true)
 
+    selectConcept.mockClear()
     await headers[4].trigger("click")
-    expect(window.location.hash).toBe("#versions")
+    expect(window.location.hash).toBe("#editions")
+    expect(selectConcept).not.toHaveBeenCalled()
 
     await headers[0].trigger("click")
-    expect(selectConcept).toHaveBeenCalledWith(null)
-    expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
+    expect(window.location.hash).toBe("#about")
   })
 
-  it("opens the conditional Versions tab from the URL hash", async () => {
-    window.history.replaceState({}, "", "/en/node/123#versions")
+  it("keeps the selected concept when switching away from Content", async () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/en/node/123?uri=concept%3Aselected#content",
+    )
+
     const wrapper = mountPage()
     await nextTick()
 
-    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
+    const headers = visibleTabHeaders(wrapper)
+    expect(headers[3].classes()).toContain("jskos-vue-tabs-header-item-active")
+
+    selectConcept.mockClear()
+
+    await headers[0].trigger("click")
+
+    expect(window.location.hash).toBe("#about")
+    expect(selectConcept).not.toHaveBeenCalled()
+    expect(new URL(window.location.href).searchParams.get("uri"))
+      .toBe("concept:selected")
+  })
+
+  it("opens the conditional Editions tab from the URL hash", async () => {
+    window.history.replaceState({}, "", "/en/node/123#editions")
+    const wrapper = mountPage()
+    await nextTick()
+
+    const headers = visibleTabHeaders(wrapper)
     expect(headers).toHaveLength(5)
-    expect(headers[4].text()).toBe("Versions")
+    expect(headers[4].text()).toBe("Editions")
     expect(headers[4].find(".fa-code-branch[aria-hidden='true']").exists()).toBe(true)
     expect(headers[4].classes()).toContain("jskos-vue-tabs-header-item-active")
   })
 
-  it("omits the Versions tab when there are no incoming versions", async () => {
-    window.history.replaceState({}, "", "/en/node/123#versions")
+  it("omits the Editions tab when there are no incoming editions", async () => {
+    window.history.replaceState({}, "", "/en/node/123#editions")
     const wrapper = mountPage({ _versionOfBacklink: [] })
     await nextTick()
 
-    const headers = wrapper.findAll(".jskos-vue-tabs-header-item")
+    const headers = visibleTabHeaders(wrapper)
     expect(headers).toHaveLength(4)
-    expect(headers.some(header => header.text() === "Versions")).toBe(false)
+    expect(headers.some(header => header.text() === "Editions")).toBe(false)
     expect(headers[0].classes()).toContain("jskos-vue-tabs-header-item-active")
-    expect(wrapper.find(".terminology-versions").exists()).toBe(false)
+    expect(wrapper.find(".terminology-editions").exists()).toBe(false)
+  })
+
+  it("keeps Metadata Quality selected while edit permission is refreshed", async () => {
+    const header = {
+      editAccess: ref("allowed"),
+    }
+    const wrapper = mountPage({}, {}, {
+      header,
+      itemQuality: ItemQualityWithFindingStub,
+    })
+    await nextTick()
+
+    const qualityHeader = visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Metadata Quality (1)")
+    await qualityHeader.trigger("click")
+
+    header.editAccess.value = "pending"
+    await nextTick()
+
+    const refreshedQualityHeader = visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Metadata Quality (1)")
+    expect(refreshedQualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(window.location.hash).toBe("#quality")
+    expect(wrapper.get("[role='status']").text()).toBe("Loading metadata quality…")
+
+    header.editAccess.value = "allowed"
+    await nextTick()
+
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality (1)").classes())
+      .toContain("jskos-vue-tabs-header-item-active")
+  })
+
+  it("keeps Metadata Quality visible when all reported findings are historical", async () => {
+    const wrapper = mountPage({}, {}, {
+      itemQuality: ItemQualityWithHistoricalFindingStub,
+    })
+    await nextTick()
+
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality (0)")).toBeDefined()
+  })
+
+  it("keeps About selected during normal navigation when quality findings exist", async () => {
+    const wrapper = mountPage({}, {}, {
+      itemQuality: ItemQualityWithFindingStub,
+    })
+    await nextTick()
+
+    const headers = visibleTabHeaders(wrapper)
+    expect(headers.find(tab => tab.text() === "Metadata Quality (1)")).toBeDefined()
+    expect(headers[0].classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(window.location.hash).toBe("")
+  })
+
+  it("opens Metadata Quality from the hash while permission and findings load", async () => {
+    window.history.replaceState({}, "", "/en/node/123#quality")
+    const header = {
+      editAccess: ref("pending"),
+    }
+    let publishFindings
+    const wrapper = mountPage({}, {}, {
+      header,
+      itemQuality: {
+        name: "DelayedItemQuality",
+        emits: ["count"],
+        setup(_, { emit }) {
+          publishFindings = () => emit("count", { current: 1, total: 1 })
+          return () => h("div", { "data-testid": "item-quality" })
+        },
+      },
+    })
+    await nextTick()
+    await flushPromises()
+
+    const loadingQualityHeader = visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Metadata Quality")
+    expect(loadingQualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(wrapper.get("[role='status']").text()).toBe("Loading metadata quality…")
+    expect(wrapper.find("[data-testid='item-quality']").exists()).toBe(false)
+
+    header.editAccess.value = "allowed"
+    await nextTick()
+
+    expect(window.location.hash).toBe("#quality")
+    expect(visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Metadata Quality")
+      .classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(wrapper.find("[data-testid='item-quality']").exists()).toBe(true)
+    expect(wrapper.find("[role='status']").exists()).toBe(false)
+
+    publishFindings()
+    await flushPromises()
+
+    const qualityHeader = visibleTabHeaders(wrapper)
+      .find(tab => tab.text() === "Metadata Quality (1)")
+    expect(qualityHeader.classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(window.location.hash).toBe("#quality")
+  })
+
+  it("returns to About when a direct Metadata Quality request is denied", async () => {
+    window.history.replaceState({}, "", "/en/node/123#quality")
+    const header = {
+      editAccess: ref("pending"),
+    }
+    const wrapper = mountPage({}, {}, { header })
+    await flushPromises()
+
+    expect(visibleTabHeaders(wrapper).find(tab => tab.text() === "Metadata Quality"))
+      .toBeDefined()
+
+    header.editAccess.value = "denied"
+    await flushPromises()
+
+    const headers = visibleTabHeaders(wrapper)
+    expect(headers.find(tab => tab.text() === "Metadata Quality")).toBeUndefined()
+    expect(headers[0].classes()).toContain("jskos-vue-tabs-header-item-active")
+    expect(window.location.hash).toBe("#about")
   })
 
   it("does not mount the concept browser for an empty API list", async () => {
@@ -434,5 +696,32 @@ describe("TerminologyPage", () => {
     await nextTick()
 
     expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
+  })
+
+  it("shows download and publication distributions", () => {
+    const url = "https://example.org/voc/concepts?download=ndjson"
+
+    const wrapper = mountPage({
+      distributions: [
+        {
+          download: url,
+          format: "http://format.gbv.de/jskos",
+          mimetype: "application/x-ndjson; charset=utf-8",
+        },
+        { download: url },
+        { accessURL: "https://example.org/vocabulary" },
+      ],
+    })
+
+    const links = rowByLabel(wrapper, "Downloads").findAll("a")
+
+    expect(links.map(link => link.text())).toEqual([
+      "example.org · JSKOS (NDJSON)",
+      "example.org · NDJSON",
+    ])
+    expect(links.map(link => link.attributes("href"))).toEqual([url, url])
+
+    const publication = rowByLabel(wrapper, "Publication URLs").get("a")
+    expect(publication.attributes("href")).toBe("https://example.org/vocabulary")
   })
 })

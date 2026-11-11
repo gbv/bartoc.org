@@ -24,32 +24,3 @@ export function validateSparqlEndpoint(endpoint) {
 
   return url.href
 }
-
-export function normalizeSparqlExamples(examples) {
-  const invalidConfiguration = () => new TypeError(
-    "Invalid \"sparqlExamples\" configuration: expected an array of objects with non-empty \"label\" and \"query\" strings",
-  )
-
-  if (!Array.isArray(examples)) {
-    throw invalidConfiguration()
-  }
-
-  return examples.map(example => {
-    if (
-      !example ||
-      Array.isArray(example) ||
-      typeof example !== "object" ||
-      typeof example.label !== "string" ||
-      !example.label.trim() ||
-      typeof example.query !== "string" ||
-      !example.query.trim()
-    ) {
-      throw invalidConfiguration()
-    }
-
-    return {
-      label: example.label.trim(),
-      query: example.query.trim(),
-    }
-  })
-}

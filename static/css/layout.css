@@ -4,36 +4,19 @@ body {
   flex-direction: column;
 }
 
-#header-app,
-#footer-app {
-  flex-shrink: 0;
-}
-
-#header-app {
-  display: flow-root;
-}
-
-#header-app:empty {
-  min-height: calc(
-    var(--cc-header-logo-height) +
-    var(--cc-space-sm) +
-    var(--cc-space-sm) +
-    var(--cc-space-lg)
-  );
-  background: linear-gradient(
-    to bottom,
-    var(--cc-header-background) 0,
-    var(--cc-header-background) calc(
-      var(--cc-header-logo-height) + var(--cc-space-sm) + var(--cc-space-sm)
-    ),
-    transparent calc(
-      var(--cc-header-logo-height) + var(--cc-space-sm) + var(--cc-space-sm)
-    )
-  );
-}
-
 #app {
   flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#app > main {
+  flex: 1 0 auto;
+}
+
+#app > header,
+#app > footer {
+  flex-shrink: 0;
 }
 
 .separated-list {
@@ -50,10 +33,6 @@ body {
   color: var(--cc-border-color);
 }
 
-.registry-metadata-list {
-  padding-left: 0;
-  list-style: none;
-}
 td > ul {
   margin-bottom: 0;
 }
@@ -111,6 +90,7 @@ a[href*="orcid.org"]:before {
 
 .item-dates {
   text-align: right;
+  font-size: var(--cc-font-size-sm);
 }
 
 .action-group {
@@ -148,18 +128,8 @@ a[href*="orcid.org"]:before {
   padding: var(--cc-space-xl);
   background: var(--cc-color-surface-muted);
   border-radius: var(--cc-radius-lg);
-  width: 70%;
-  max-width: 100%;
-  --bartoc-search-bar-input-width: 20rem;
-  --bartoc-search-bar-input-min-width: min(15rem, 100%);
-  --bartoc-search-bar-field-width: 11rem;
-  --bartoc-search-bar-field-min-width: min(10rem, 100%);
-}
-.vocabulary-search .bartoc-search-bar {
   width: 100%;
-}
-.vocabulary-search .bartoc-search-bar__controls {
-  width: 100%;
+  max-width: 55rem;
 }
 .vocabulary-search .bartoc-search-bar__summary {
   padding-bottom: var(--cc-space-sm);
@@ -168,16 +138,43 @@ a[href*="orcid.org"]:before {
   font-weight: var(--cc-font-weight-bold);
 }
 
-/* Temporary compatibility shim for gbv-login-client-vue. */
-.bartoc-header__user-status > .user-status > a {
-  color: inherit;
-  font-size: var(--cc-font-size-base);
-  font-weight: var(--cc-font-weight-light);
+@media (max-width: 30rem) {
+  .vocabulary-search {
+    /* Keep the field selector and Search button on the same row. */
+    padding-inline: var(--cc-space-sm);
+  }
 }
 
+/* Reserve space for the account name while login state loads. */
+.bartoc-header__user-status {
+  min-width: calc(var(--cc-space-xxl) * 3);
+}
+
+.header-user-status__loading {
+  display: inline-block;
+  padding: var(--cc-space-xs) var(--cc-space-sm);
+  font-size: var(--cc-font-size-sm);
+}
+
+/* Keep the login dropdown above the page content. */
 .bartoc-header__user-status .user-status-dropdown {
-  color: var(--cc-color-text);
   z-index: 1000;
+}
+
+.bartoc-header__user-status .user-status:focus-within .user-status-dropdown {
+  display: block;
+}
+
+@media (max-width: 75rem) {
+  .bartoc-header__user-status {
+    min-width: 0;
+  }
+
+  .bartoc-header__user-status .user-status .user-status-dropdown {
+    /* Keep account links inside the mobile menu's scrollable area. */
+    position: static;
+    width: 100%;
+  }
 }
 
 /* About page */

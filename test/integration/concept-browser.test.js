@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { mount, flushPromises } from "@vue/test-utils"
+import { defineComponent, h } from "vue"
 import ConceptBrowser from "../../vue/components/ConceptBrowser.vue"
 
 const utilsMocks = vi.hoisted(() => ({
@@ -9,7 +10,7 @@ const utilsMocks = vi.hoisted(() => ({
 }))
 
 vi.mock("../../vue/utils.js", () => ({
-  apiTypesScheme: { uri: "api-types" },
+  apiTypesScheme: { uri: "http://bartoc.org/en/node/20002", API: [{ url: "/api/" }] },
   registryForScheme: utilsMocks.registryForScheme,
   sortConcepts: utilsMocks.sortConcepts,
 }))
@@ -34,42 +35,53 @@ const topConcepts = [
   },
 ]
 
+const endpoints = [
+  { url: "/first/", type: "http://bartoc.org/api-type/jskos" },
+  { url: "/second/", type: "http://bartoc.org/api-type/jskos" },
+]
+
+const apiTypesSchemeUri = "http://bartoc.org/en/node/20002"
+
 const ConceptDetailsStub = {
-  props: ["concept", "scheme", "display", "registry"],
-  emits: ["update:concept"],
+  props: ["concept", "registry"],
   template: `
     <section data-testid="concept-details">
       <span data-testid="details-uri">{{ concept.uri }}</span>
-      <span data-testid="details-scheme">{{ scheme.VOCID }}</span>
-      <span data-testid="details-display">{{ display.hideNotation }}</span>
       <span data-testid="details-registry">{{ registry.id }}</span>
     </section>
   `,
 }
 
-const IconStub = {
-  props: ["name"],
-  template: "<span data-testid=\"icon\">{{ name }}</span>",
-}
-
-const ItemNameStub = {
-  props: ["item", "notation"],
-  template: `
-    <span data-testid="item-name">
-      {{ item.prefLabel?.en || item.uri }}:{{ notation }}
-    </span>
-  `,
-}
+const navigateToUri = vi.fn(async () => true)
+const ConceptTreeStub = defineComponent({
+  name: "ConceptTree",
+  props: {
+    modelValue: { type: Object, default: null },
+    concepts: { type: Array, default: () => [] },
+    registry: { type: Object, default: null },
+    scheme: { type: Object, default: null },
+    itemListOptions: { type: Object, default: () => ({}) },
+  },
+  emits: ["update:modelValue"],
+  setup(props, { emit, expose }) {
+    expose({ navigateToUri })
+    return () => h("div", { "data-testid": "concept-tree" },
+      props.concepts.map(concept => h("button", {
+        "data-testid": "tree-concept",
+        onClick: () => emit("update:modelValue", concept),
+      }, concept.prefLabel?.en || concept.uri)),
+    )
+  },
+})
 
 const ItemSelectStub = {
-  props: ["scheme", "extractValue"],
-  emits: ["change"],
+  props: ["search"],
+  emits: ["select"],
   template: `
     <div data-testid="item-select">
-      <span data-testid="item-select-scheme">{{ scheme.VOCID }}</span>
       <button
         data-testid="select-search-result"
-        @click="$emit('change', extractValue({ uri: 'concept:from-search' }))">
+        @click="$emit('select', { uri: 'concept:from-search' })">
         select search result
       </button>
     </div>
@@ -81,13 +93,21 @@ const ServiceLinkStub = {
   template: "<span data-testid=\"service-link\">{{ endpoint.url }}</span>",
 }
 
-function makeRegistry(concepts = topConcepts) {
+function makeRegistry(concepts = topConcepts, id = "registry") {
   return {
-    id: "registry",
+    id,
+    has: {
+      concepts: true,
+      suggest: true,
+      top: true,
+    },
     _jskos: {
       schemes: [{ VOCID: "voc-id" }],
     },
+    init: vi.fn(async () => {}),
     getTop: vi.fn(async () => concepts),
+    getConcepts: vi.fn(async ({ concepts }) => concepts),
+    suggest: vi.fn(async ({ search }) => [search, [], [], []]),
   }
 }
 
@@ -99,9 +119,8 @@ function mountBrowser(props = {}) {
     },
     global: {
       stubs: {
+        ConceptTree: ConceptTreeStub,
         ConceptDetails: ConceptDetailsStub,
-        Icon: IconStub,
-        ItemName: ItemNameStub,
         ItemSelect: ItemSelectStub,
         ServiceLink: ServiceLinkStub,
       },
@@ -112,42 +131,89 @@ function mountBrowser(props = {}) {
 describe("ConceptBrowser", () => {
   beforeEach(() => {
     window.history.replaceState({}, "", "/vocabulary")
-    vi.spyOn(console, "debug").mockImplementation(() => {})
-    vi.spyOn(console, "info").mockImplementation(() => {})
-    vi.spyOn(console, "error").mockImplementation(() => {})
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     utilsMocks.registryForScheme.mockReset()
     utilsMocks.sortConcepts.mockReset()
-    vi.restoreAllMocks()
+    navigateToUri.mockClear()
   })
 
-  it("shows API links when no registry can browse the scheme", async () => {
+  it("shows registered APIs when browsing is not supported", async () => {
     utilsMocks.registryForScheme.mockReturnValue(null)
 
     const wrapper = mountBrowser()
     await flushPromises()
 
-    expect(wrapper.text()).toContain("Access to this repository is possible via APIs")
+    expect(wrapper.text()).toContain("Search")
+    expect(wrapper.text()).toContain("Terminology search not supported")
+    expect(wrapper.text()).toContain("Data source")
     expect(wrapper.get("[data-testid='service-link']").text()).toBe("/api/")
     expect(utilsMocks.registryForScheme).toHaveBeenCalledWith(expect.objectContaining({
       uri: "scheme:primary",
     }))
   })
 
-  it("falls back to API links when the registry rejects every scheme URI", async () => {
+  it("times out and retries source loading", async () => {
+    vi.useFakeTimers()
     const registry = makeRegistry()
-    registry.getTop.mockRejectedValue(new Error("Unsupported scheme"))
+    registry.getTop.mockImplementation(() => new Promise(() => {}))
     utilsMocks.registryForScheme.mockReturnValue(registry)
 
     const wrapper = mountBrowser()
     await flushPromises()
 
-    expect(registry.getTop).toHaveBeenCalledTimes(2)
-    expect(wrapper.text()).toContain("Access to this repository is possible via APIs")
-    expect(wrapper.find("[data-testid='item-select']").exists()).toBe(false)
-    expect(console.error).not.toHaveBeenCalled()
+    expect(wrapper.get("[role='status']").text()).toContain("Loading data source")
+
+    await vi.advanceTimersByTimeAsync(30000)
+    await flushPromises()
+
+    expect(wrapper.get("[role='alert']").text()).toContain("Failed to load vocabulary!   Retry")
+
+    registry.getTop.mockResolvedValue(topConcepts)
+    await wrapper.get("button").trigger("click")
+    await flushPromises()
+
+    expect(wrapper.find("[role='alert']").exists()).toBe(false)
+    expect(wrapper.get("[data-testid='concept-tree']").exists()).toBe(true)
+  })
+
+  it("keeps source selection available when all sources fail", async () => {
+    const registry = makeRegistry()
+    registry.getTop.mockRejectedValue(new Error("Unavailable"))
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser({ scheme: { ...scheme, API: endpoints } })
+    await flushPromises()
+
+    const select = wrapper.get("select")
+    await select.setValue("1")
+    await flushPromises()
+
+    expect(select.element.value).toBe("1")
+    expect(wrapper.get(".cc-concept-field--source [role=alert]").text()).toContain("Failed to load vocabulary!   Retry")
+  })
+
+  it("shows loading while a source loads", async () => {
+    let finishLoading
+    const registry = makeRegistry()
+    registry.getTop.mockImplementation(() => new Promise(resolve => {
+      finishLoading = resolve
+    }))
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser()
+    await Promise.resolve()
+
+    expect(wrapper.get("[role='status']").text()).toContain("Loading data source")
+    expect(wrapper.text()).not.toContain("Terminology search not supported")
+
+    await Promise.resolve()
+    finishLoading(topConcepts)
+    await flushPromises()
+
+    expect(wrapper.get("[data-testid='concept-tree']").exists()).toBe(true)
   })
 
   it("loads top concepts and updates the URL when a concept is selected", async () => {
@@ -157,31 +223,185 @@ describe("ConceptBrowser", () => {
     const wrapper = mountBrowser()
     await flushPromises()
 
+    expect(wrapper.text()).toContain("Data source")
+    expect(wrapper.text()).toContain("/api")
+    expect(wrapper.find("select").exists()).toBe(false)
     expect(registry.getTop).toHaveBeenCalledWith({
       scheme: expect.objectContaining({
         uri: "scheme:primary",
         VOCID: "voc-id",
       }),
+      params: { properties: "" },
     })
     expect(utilsMocks.sortConcepts).toHaveBeenCalledWith(topConcepts, scheme)
-    expect(wrapper.get("[data-testid='item-select-scheme']").text()).toBe("voc-id")
-    expect(wrapper.findAll("[data-testid='item-name']").map(item => item.text())).toEqual([
-      "Alpha:false",
-      "Beta:false",
-    ])
+    const tree = wrapper.getComponent(ConceptTreeStub)
+    expect(tree.props()).toMatchObject({
+      concepts: topConcepts,
+      registry,
+      scheme: expect.objectContaining({ uri: "scheme:primary" }),
+      itemListOptions: {
+        draggable: false,
+        itemNameOptions: {
+          draggable: false,
+          showNotation: false,
+        },
+      },
+    })
 
-    await wrapper.findAll("li")[0].trigger("click")
+    await wrapper.findAll("[data-testid='tree-concept']")[0].trigger("click")
     await flushPromises()
 
     expect(wrapper.get("[data-testid='concept-details']").exists()).toBe(true)
     expect(wrapper.get("[data-testid='details-uri']").text()).toBe("concept:alpha")
     expect(new URL(window.location.href).searchParams.get("uri")).toBe("concept:alpha")
 
-    await wrapper.get("h4.clickable").trigger("click")
+  })
+
+  it("uses search when an API has no top concepts", async () => {
+    const registry = makeRegistry()
+    registry.has.top = false
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser()
     await flushPromises()
 
+    expect(wrapper.get("[data-testid='item-select']").exists()).toBe(true)
+    expect(wrapper.find("[data-testid='concept-tree']").exists()).toBe(false)
+    expect(registry.getTop).not.toHaveBeenCalled()
+  })
+
+  it("shows when an API does not support search", async () => {
+    const registry = makeRegistry()
+    registry.has.suggest = false
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain("Search")
+    expect(wrapper.text()).toContain("Terminology search not supported")
+    expect(wrapper.find("[data-testid='item-select']").exists()).toBe(false)
+  })
+
+  it("switches the API used by the browser", async () => {
+    const first = makeRegistry(topConcepts, "first")
+    const secondConcepts = [{ uri: "concept:gamma", prefLabel: { en: "Gamma" } }]
+    const second = makeRegistry(secondConcepts, "second")
+    utilsMocks.registryForScheme.mockImplementation(currentScheme =>
+      currentScheme.API[0].url === "/second/" ? second : first,
+    )
+
+    const wrapper = mountBrowser({ scheme: { ...scheme, API: endpoints } })
+    await flushPromises()
+
+    const select = wrapper.get("select")
+    expect(select.element.value).toBe("0")
+
+    await wrapper.findAll("[data-testid='tree-concept']")[0].trigger("click")
+    await flushPromises()
+
+    await select.setValue("1")
+    await flushPromises()
+
+    const tree = wrapper.getComponent(ConceptTreeStub)
+    expect(tree.props("registry").id).toBe("second")
+    expect(tree.props("concepts")).toEqual(secondConcepts)
+    expect(tree.props("scheme").API).toEqual([endpoints[1]])
+
+    const details = wrapper.getComponent(ConceptDetailsStub)
+    expect(details.props("registry").id).toBe("second")
+    expect(details.props("concept")).toEqual({
+      uri: "concept:alpha",
+      inScheme: [tree.props("scheme")],
+    })
+    expect(new URL(window.location.href).searchParams.get("endpoint")).toBe("/second/")
+  })
+
+  it("hides old details when changing the source fails", async () => {
+    const first = makeRegistry()
+    const second = makeRegistry()
+    second.getTop.mockRejectedValue(new Error("Unavailable"))
+    utilsMocks.registryForScheme.mockImplementation(currentScheme =>
+      currentScheme.API[0].url === "/second/" ? second : first,
+    )
+
+    const wrapper = mountBrowser({ scheme: { ...scheme, API: endpoints } })
+    await flushPromises()
+    await wrapper.findAll("[data-testid='tree-concept']")[0].trigger("click")
+    const select = wrapper.get("select")
+    await select.setValue("1")
+    await flushPromises()
+
+    expect(select.element.value).toBe("1")
+    expect(wrapper.text()).toContain("Failed to load")
     expect(wrapper.find("[data-testid='concept-details']").exists()).toBe(false)
-    expect(new URL(window.location.href).searchParams.has("uri")).toBe(false)
+    expect(new URL(window.location.href).searchParams.get("endpoint")).toBe("/second/")
+
+    await select.setValue("0")
+    await flushPromises()
+
+    expect(wrapper.find("[role='alert']").exists()).toBe(false)
+    expect(wrapper.find("[data-testid='concept-details']").exists()).toBe(true)
+    expect(new URL(window.location.href).searchParams.get("endpoint")).toBe("/first/")
+  })
+
+  it("shows registered API types and disables unsupported sources", async () => {
+    const registry = makeRegistry()
+    const sru = { url: "/sru/", type: "http://bartoc.org/api-type/sru" }
+    const apiTypes = {
+      getConcepts: vi.fn(async () => [
+        { uri: endpoints[0].type, prefLabel: { en: "JSKOS API" } },
+        { uri: sru.type, prefLabel: { en: "SRU" } },
+      ]),
+    }
+
+    utilsMocks.registryForScheme.mockImplementation(currentScheme => {
+      if (currentScheme.uri === apiTypesSchemeUri) {
+        return apiTypes
+      }
+      return currentScheme.API[0].type === sru.type ? null : registry
+    })
+
+    const wrapper = mountBrowser({
+      scheme: {
+        ...scheme,
+        API: [sru, endpoints[0]],
+      },
+    })
+    await flushPromises()
+
+    const options = wrapper.findAll("option")
+    expect(options[0].text()).toBe("/first (JSKOS API)")
+    expect(options[1].text()).toBe("/sru (SRU)")
+    expect(options[1].element.disabled).toBe(true)
+  })
+
+  it("opens search results in the concept tree", async () => {
+    const registry = makeRegistry()
+    registry.suggest.mockResolvedValue([
+      "alpha",
+      ["Alpha", "Beta"],
+      ["First result"],
+      ["concept:alpha", "concept:beta"],
+    ])
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+    const wrapper = mountBrowser()
+    await flushPromises()
+
+    const itemSelect = wrapper.getComponent(ItemSelectStub)
+    const result = await itemSelect.props("search")("alpha")
+    expect(result).toEqual([
+      "alpha",
+      ["Alpha", "Beta"],
+      ["First result", ""],
+      ["concept:alpha", "concept:beta"],
+    ])
+
+    await wrapper.get("[data-testid='select-search-result']").trigger("click")
+    await flushPromises()
+
+    expect(navigateToUri).toHaveBeenCalledWith({ uri: "concept:from-search" })
+    expect(wrapper.get("[data-testid='details-uri']").text()).toBe("concept:from-search")
   })
 
   it("opens a concept from the URL and exposes concept selection", async () => {
@@ -193,14 +413,47 @@ describe("ConceptBrowser", () => {
     await flushPromises()
 
     expect(wrapper.get("[data-testid='details-uri']").text()).toBe("concept:from-url")
-    expect(wrapper.get("[data-testid='details-scheme']").text()).toBe("voc-id")
+    expect(navigateToUri).toHaveBeenCalledWith(expect.objectContaining({
+      uri: "concept:from-url",
+    }))
     expect(window.location.hash).toBe("#browse")
 
     wrapper.vm.selectConcept({ uri: "concept:from-page" })
     await flushPromises()
 
     expect(wrapper.get("[data-testid='details-uri']").text()).toBe("concept:from-page")
+    expect(navigateToUri).toHaveBeenLastCalledWith({ uri: "concept:from-page" })
     expect(new URL(window.location.href).searchParams.get("uri")).toBe("concept:from-page")
     expect(window.location.hash).toBe("#browse")
+
+    wrapper.vm.selectConcept(null)
+    await flushPromises()
+
+    expect(wrapper.find("[data-testid='concept-details']").exists()).toBe(false)
+    expect(new URL(window.location.href).searchParams.has("uri")).toBe(false)
+  })
+
+  it("shows an error for an unknown concept from the URL", async () => {
+    window.history.replaceState({}, "", "/vocabulary?uri=concept:missing")
+    const registry = makeRegistry()
+    registry.getConcepts.mockResolvedValue([])
+    utilsMocks.registryForScheme.mockReturnValue(registry)
+
+    const wrapper = mountBrowser()
+    await flushPromises()
+
+    expect(wrapper.get("[role='alert']").text()).toBe(
+      "The concept concept:missing was not found in the selected data source.",
+    )
+  })
+
+  it("opens the data source from the URL", async () => {
+    window.history.replaceState({}, "", "/vocabulary?endpoint=%2Fsecond%2F")
+    utilsMocks.registryForScheme.mockReturnValue(makeRegistry())
+
+    const wrapper = mountBrowser({ scheme: { ...scheme, API: endpoints } })
+    await flushPromises()
+
+    expect(wrapper.get("select").element.value).toBe("1")
   })
 })

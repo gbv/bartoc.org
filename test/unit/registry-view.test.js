@@ -1,68 +1,42 @@
 import { describe, it, expect } from "vitest"
-import ejs from "ejs"
-import path from "path"
-import querystring from "querystring"
 import { JSDOM } from "jsdom"
-import { fileURLToPath } from "url"
+import { renderVuePage } from "../../vue/entry-server.js"
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
-const template = path.join(rootDir, "views/registry.ejs")
-
-const viewLocals = {
-  config: {
-    name: "BARTOC",
-    env: "development",
-    baseUrl: "https://bartoc.org",
-    menu: [],
-    vue: {
-      assetPrefix: "/",
-    },
-  },
-  query: {},
-  path: "/registries",
-  querystring,
-  page: "en/node/18605",
-  utils: {
-    escapeXML: value => String(value).replace(/[<>&"']/g, char => `&#${char.charCodeAt(0)};`),
-    isBartocUri: uri => /^http:\/\/bartoc.org\/en\/node\/[1-9][0-9]+$/.test(uri),
-    label(labels, language, fallback = "") {
-      const code = language || "en"
-      return {
-        code,
-        value: labels?.[code] || fallback,
-      }
-    },
-  },
-}
-
-function renderRegistry(item) {
-  return ejs.renderFile(template, {
-    ...viewLocals,
-    item,
-    title: item.prefLabel.en,
-  })
-}
-
-describe("registry view", () => {
-  it("mounts the frontend vocabulary list for the registry", async () => {
-    const html = await renderRegistry({
-      uri: "http://bartoc.org/en/node/18605",
-      prefLabel: { en: "agINFRA Linked Data Vocabularies" },
-      type: [
-        "http://www.w3.org/ns/dcat#Catalog",
-        "http://bartoc.org/full-repository",
-      ],
-      identifier: ["https://example.org/registry"],
-      created: "2024-01-02",
+describe("registry page", () => {
+  it("renders the registry metadata and vocabulary search link on the server", async () => {
+    const uri = "http://bartoc.org/en/node/18605"
+    const html = await renderVuePage({
+      page: "registry",
+      pageProps: {
+        title: "agINFRA Linked Data Vocabularies",
+        item: {
+          uri,
+          type: [
+            "http://www.w3.org/ns/dcat#Catalog",
+            "http://bartoc.org/full-repository",
+          ],
+          definition: { en: ["A registry of vocabularies."] },
+          identifier: ["https://example.org/registry"],
+          subject: [{ uri: "http://example.org/subject", prefLabel: { en: "Agriculture" } }],
+          created: "2024-01-02",
+        },
+      },
+      header: { activePath: "/registries", userCanAdd: false },
+      footer: { siteName: "BARTOC.org", itemUri: uri, resourcePath: "/en/node/18605" },
     })
 
     const document = new JSDOM(html).window.document
-    const component = document.querySelector("registry-vocabularies")
-    const identifierList = document.querySelector(".registry-metadata-list")
-    const dateList = document.querySelector(".item-dates")
-
-    expect(component.getAttribute("registry-uri")).toBe("http://bartoc.org/en/node/18605")
-    expect(identifierList.textContent).toContain("https://example.org/registry")
-    expect(dateList.classList.contains("separated-list")).toBe(true)
+    expect(document.querySelector("h1").textContent).toBe("agINFRA Linked Data Vocabularies")
+    expect(document.body.textContent).toContain("A repository that stores terminologies")
+    expect(document.querySelector("p[lang='en']").textContent).toBe("A registry of vocabularies.")
+    const identifiersRow = [...document.querySelectorAll("tr")].find(row =>
+      row.querySelector(".metadata-row-label")?.textContent.trim() === "Identifiers",
+    )
+    expect(identifiersRow.textContent).toContain("https://example.org/registry")
+    expect(document.querySelector("a[href='http://example.org/subject']").textContent).toBe("Agriculture")
+    expect(document.querySelector("a[href^='/vocabularies?partOf=']").getAttribute("href"))
+      .toContain(encodeURIComponent(uri))
+    expect(document.querySelector(".item-dates time").getAttribute("datetime")).toBe("2024-01-02")
+    expect(document.querySelector("header").textContent).toContain("BARTOC")
   })
 })

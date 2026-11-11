@@ -1,8 +1,7 @@
 import config from "./config/index.js"
 import utils from "./src/utils.js"
-import path from "path"
+import { clone } from "./src/utils.js"
 import jskos from "jskos-tools"
-import fs from "fs"
 import querystring from "querystring"
 import {
   rdfContentType,
@@ -10,50 +9,48 @@ import {
   rdfSerialize,
 } from "./src/rdf.js"
 import { canonicalItemCopy } from "./src/itemSerialization.js"
-import { deriveVersionRecord, hasValidVersionOf } from "./src/versioning.js"
-import child_process from "child_process"
+import {
+  deriveEditionRecord,
+  hasValidVersionOf,
+} from "./src/editions.js"
+import { CONCEPT_SCHEME_TYPE, kosTypeUris } from "./src/terminology.js"
+import { createServer as createHttpServer } from "node:http"
 import portfinder from "portfinder"
 import { getConceptsInBatches } from "./src/backend.js"
+import { ReportsDirectory } from "./src/dvrf.js"
+import { renderVueDocument } from "./src/vueDocument.js"
 import { URL } from "url"
 const __dirname = new URL(".", import.meta.url).pathname
-
-// build our vue project on first run if report.json can't be found
-// TODO: We could create a Promise and make the first request(s) wait for that Promise to be fulfilled.
-if (config.env !== "development") {
-  console.log("Building Vue project in background... (old Vue files might be served in the meantime)")
-  child_process.exec("npm run build", { env: process.env }, (error) => {
-    if (error) {
-      console.warn("Vue build failed!", error)
-    } else {
-      console.log("Vue project built successfully.")
-      // Add manifest to config
-      const file = "dist/.vite/manifest.json"
-      try {
-        config.vue.manifest = utils.readJson(__dirname, file)
-      } catch(error) {
-        console.warn(`Could not read Vite manifest in ${file}, there might be issues with the front end build.`)
-      }
-    }
-  })
-}
 
 const backend = config.registry
 
 config.log(`Running in ${config.env} mode.`)
 
-// TODO: this should come from database as well
-const nkostypes = utils.indexByUri((utils.readNdjson(__dirname,"./data/nkostype.concepts.ndjson")))
-const accesstypes = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-access.concepts.ndjson"))
-const formats = utils.indexByUri(utils.readNdjson(__dirname, "./data/bartoc-formats.concepts.ndjson"))
-
 // Initialize express with settings
 import express from "express"
 const app = express()
+const httpServer = createHttpServer(app)
 app.set("json spaces", 2)
 
-// Configure view engine to render EJS templates.
-app.set("views", path.join(__dirname, "/views"))
-app.set("view engine", "ejs")
+let vueRenderer
+if (config.env === "development") {
+  // One Vite instance serves browser modules and renders Vue on the server.
+  const { createServer } = await import("vite")
+  const vite = await createServer({
+    server: { middlewareMode: true, hmr: { server: httpServer } },
+    appType: "custom",
+  })
+  app.use(vite.middlewares)
+  vueRenderer = () => vite.ssrLoadModule("/vue/entry-server.js")
+} else {
+  // Production needs both builds before it can accept requests.
+  config.vue.manifest = utils.readJson(__dirname, "dist/.vite/manifest.json")
+  if (!config.vue.manifest["vue/main.js"]?.file) {
+    throw new Error("Vite manifest is missing the vue/main.js entry")
+  }
+  const renderer = await import("./dist/server/entry-server.js")
+  vueRenderer = () => renderer
+}
 
 // static assets
 app.use(express.static("static"))
@@ -72,16 +69,11 @@ app.use(
   "/vendor/yasgui/",
   express.static("node_modules/@matdata/yasgui/build"),
 )
-app.use(
-  "/vendor/fontawesome/",
-  express.static("node_modules/@fortawesome/fontawesome-free"),
-)
-
 
 import redirectsRoute from "./routes/redirects.js"
 import apiRoute from "./routes/api.js"
 import uriRoute from "./routes/uri.js"
-import pageRoute from "./routes/page.js"
+import createQualityRoute from "./routes/quality.js"
 import createSparqlRoute from "./routes/sparql.js"
 
 app.use(redirectsRoute)
@@ -91,32 +83,82 @@ app.use(uriRoute)
 app.use(createSparqlRoute({
   endpoint: config.sparql,
   examples: config.sparqlExamples,
-  render,
+  render: sendVuePage,
 }))
 
-app.use(pageRoute)
+app.get("/software", (req, res, next) => sendVuePage(req, res, {
+  title: "Software",
+  vuePage: "software",
+}).catch(next))
 
-// render HTML page with EJS
-function render (req, res, view, locals) {
-  const { query, path } = req
-  const vuePagePropsJson = locals.vuePageProps === undefined
-    ? ""
-    : utils.serializeJsonForHtml(locals.vuePageProps)
-  // pass environment
-  const vars = {
-    config,
-    query,
-    path,
-    // Keep the requested resource path separate from the active navigation path.
-    resourcePath: path,
-    utils,
-    querystring,
-    nkostypes,
-    accesstypes,
-    formats,
-    page: path.replace(/^\/|\/$/g, ""),
+app.get("/download", (req, res, next) => sendVuePage(req, res, {
+  title: "Download",
+  vuePage: "download",
+}).catch(next))
+
+app.get("/contributing", (req, res, next) => sendVuePage(req, res, {
+  title: "Contributing",
+  vuePage: "contributing",
+}).catch(next))
+
+app.get("/about", (req, res, next) => sendVuePage(req, res, {
+  title: "About",
+  vuePage: "about",
+}).catch(next))
+
+app.get("/contact", (req, res, next) => sendVuePage(req, res, {
+  vuePage: "contact",
+}).catch(next))
+
+app.get("/top-rated-points", (req, res, next) => sendVuePage(req, res, {
+  vuePage: "topRatedPoints",
+}).catch(next))
+
+app.get(["/", "/index"], async (req, res, next) => {
+  try {
+    const schemes = await backend.getSchemes({ params: { limit: 1 } })
+    await sendVuePage(req, res, {
+      vuePage: "home",
+      vuePageProps: { schemesCount: schemes?._totalCount ?? 0 },
+    })
+  } catch (error) {
+    next(error)
   }
-  return res.render(view, { ...vars, ...locals, vuePagePropsJson })
+})
+
+// Render the Vue page and send the complete HTML response.
+async function sendVuePage(req, res, locals) {
+  const { path } = req
+  const renderer = await vueRenderer()
+  // Render and hydrate the same JSON-safe values.
+  const pageProps = JSON.parse(utils.serializeJsonForHtml(locals.vuePageProps || {}))
+  const footer = {
+    siteName: config.name,
+  }
+  const header = { activePath: locals.path || path, userCanAdd: false }
+  // Public login settings come from the running server, not the browser build.
+  const state = {
+    page: locals.vuePage,
+    pageProps,
+    footer,
+    header: { activePath: header.activePath },
+    login: { api: config.login.api, ssl: config.login.ssl },
+  }
+  const html = await renderer.renderVuePage({
+    page: state.page,
+    pageProps,
+    footer,
+    header,
+  })
+  return res.type("html").send(renderVueDocument({
+    config,
+    title: locals.title,
+    item: locals.item,
+    stylesheets: locals.stylesheets,
+    scripts: locals.scripts,
+    state,
+    html,
+  }))
 }
 
 // edit form
@@ -145,7 +187,7 @@ app.get("/edit", async (req, res, next) => {
     }
   }
 
-  render(req, res, "vue-page", {
+  return sendVuePage(req, res, {
     title,
     vuePage: "edit",
     vuePageProps: {
@@ -155,14 +197,14 @@ app.get("/edit", async (req, res, next) => {
       cancelUrl: item ? utils.uriLink(item.uri) : "/",
       hasIncomingVersions,
     },
-  })
+  }).catch(next)
 })
 
 // vocabulary search should be delivered by bartoc-search instead
-app.get("/vocabularies", (req, res) => render(req, res, "vue-page", {
+app.get("/vocabularies", (req, res, next) => sendVuePage(req, res, {
   title: "Missing bartoc-search",
   vuePage: "missingSearch",
-}))
+}).catch(next))
 
 function mergeSubjectMetadata(subject, resolved) {
   const cleaned = jskos.clean({
@@ -206,6 +248,34 @@ async function resolveSchemeReferences(references) {
     ...resolved,
     ...refs.filter(ref => !resolvedUris.has(ref.uri)),
   ]
+}
+
+// Add registry titles to references shown on the terminology page.
+// Keep the original URI references when they cannot be resolved.
+async function resolveRegistryReferences(references) {
+  const refs = (references || []).filter(reference => reference?.uri)
+  if (!refs.length) {
+    return []
+  }
+
+  try {
+    // The data endpoint can resolve several JSKOS item types in one request.
+    const api = `${config.backend.api}data?${querystring.stringify({
+      uri: refs.map(reference => reference.uri).join("|"),
+    })}`
+    const records = await fetch(api).then(response => response.json())
+
+    return refs.map(reference => {
+      const registry = records.find(record => record.uri === reference.uri)
+      return registry ? jskos.clean(registry) : reference
+    })
+  } catch (error) {
+    config.warn(
+      "Could not resolve registry references. Keeping URI references.",
+      error,
+    )
+    return refs
+  }
 }
 
 /**
@@ -259,28 +329,73 @@ async function resolveIncomingSchemeReferences(item, relation) {
   }
 }
 
+/**
+ * Add labels and incoming links needed by the page without changing stored data.
+ */
 async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
-  // Presentation enrichment must never consume the only canonical copy.
-  const item = structuredClone(storedItem)
-  const subjects = item && item.subject || []
-  if (subjects.length) {
-    let found = []
-    try {
-      found = (await getConceptsInBatches(backend, subjects)).filter(Boolean)
-    } catch (error) {
-      config.warn("Could not resolve subject metadata from backend. Keeping unresolved subject references.", error)
-    }
+  const item = clone(storedItem)
 
-    const foundByUri = new Map(found.map(concept => [concept.uri, concept]))
+  const subjects = item && item.subject || []
+  const conceptFields = ["ACCESS", "FORMAT"]
+  const kosTypes = item.type?.[0] === CONCEPT_SCHEME_TYPE
+    ? kosTypeUris(item)
+    : []
+
+  // Resolve all concept references in one backend request. KOS types are
+  // included in the lookup but kept separate from item.type, which must remain
+  // an array of URI strings.
+  const conceptReferences = [
+    ...subjects,
+    ...kosTypes.map(uri => ({ uri })),
+    ...conceptFields.flatMap(field => item[field] || []),
+  ]
+    .filter(reference => reference?.uri)
+
+  // Load labels from JSKOS Server for every concept reference displayed by
+  // the page. Each original reference remains available as fallback.
+  let foundByUri = new Map()
+  if (conceptReferences.length) {
+    try {
+      const found = (await getConceptsInBatches(backend, conceptReferences)).filter(Boolean)
+      foundByUri = new Map(found.map(concept => [concept.uri, concept]))
+    } catch (error) {
+      config.warn(
+        "Could not resolve concept metadata from backend. Keeping unresolved references.",
+        error,
+      )
+    }
+  }
+
+  if (subjects.length) {
+    // Subject references may contain record-specific metadata such as MAPPING,
+    // so add the resolved labels without replacing the original reference.
     item.subject = subjects.map(subject => {
       const resolved = foundByUri.get(subject.uri)
       return resolved ? mergeSubjectMetadata(subject, resolved) : subject
     })
   }
 
-  // Direct relations are stored on this item and can be edited there.
+  // Access and format references need no record-specific metadata merge. Use
+  // the resolved concept when available and otherwise keep the original.
+  for (const field of conceptFields) {
+    if (Array.isArray(item[field])) {
+      item[field] = item[field].map(reference => (
+        foundByUri.get(reference.uri) || reference
+      ))
+    }
+  }
+
+  // Vue needs full KOS type concepts for their labels while the item keeps the
+  // original URI strings. Missing concepts fall back to their URI in ItemAbout.
+  const nkosTypes = Object.fromEntries(
+    kosTypes
+      .map(uri => [uri, foundByUri.get(uri)])
+      .filter(([, concept]) => concept),
+  )
+
+  // Direct relations are saved as URI references. Load their labels for display.
   if (resolvedVersionOf !== undefined) {
-    // Reuse the main record loaded for derivation instead of fetching it twice.
+    // The main record was already loaded to derive this edition.
     item.versionOf = structuredClone(resolvedVersionOf)
   } else if (item?.versionOf?.length) {
     item.versionOf = await resolveSchemeReferences(item.versionOf)
@@ -290,15 +405,24 @@ async function enrichItem (storedItem, { resolvedVersionOf } = {}) {
     item.basedOn = await resolveSchemeReferences(item.basedOn)
   }
 
-  // Add backlinks for selected fields
-  for (let key of ["versionOf", "basedOn"]) {
+  if (item?.replacedBy?.length) {
+    item.replacedBy = await resolveSchemeReferences(item.replacedBy)
+  }
+
+  // partOf points to registries, which use a different lookup.
+  if (item?.partOf?.length) {
+    item.partOf = await resolveRegistryReferences(item.partOf)
+  }
+
+  // Find other schemes that point to this one. These links exist only on the page.
+  for (let key of ["versionOf", "basedOn", "replacedBy"]) {
     const backlinks = await resolveIncomingSchemeReferences(item, key)
     if (backlinks.length) {
       item[`_${key}Backlink`] = backlinks
     }
   }
 
-  return item
+  return { item, nkosTypes }
 }
 
 async function buildPresentationView(storedItem) {
@@ -311,29 +435,34 @@ async function buildPresentationView(storedItem) {
     // whether the loaded record is a usable inheritance source.
     resolvedVersionOf = await resolveSchemeReferences(storedItem.versionOf)
     const mainItem = resolvedVersionOf[0]
-    const derivation = deriveVersionRecord(storedItem, mainItem)
+    const derivation = deriveEditionRecord(storedItem, mainItem)
     effectiveItem = derivation.effectiveItem
     derivedFields = derivation.derivedFields
   }
 
-  // Enrichment runs after derivation so inherited subjects receive labels too.
-  const presentationItem = await enrichItem(effectiveItem, { resolvedVersionOf })
-  return { presentationItem, derivedFields }
+  // Enrichment runs after derivation so inherited concept references receive
+  // labels too.
+  const { item: presentationItem, nkosTypes } = await enrichItem(
+    effectiveItem,
+    { resolvedVersionOf },
+  )
+  return { presentationItem, derivedFields, nkosTypes }
 }
 
-// Statistics
+// Quality reports and statistics
+const reports = new ReportsDirectory(`${__dirname}data/reports`)
+app.use("/quality", createQualityRoute({ reports }))
+
 app.get("/stats", async (req, res, next) => {
   backend.getSchemes({ params: { limit: 1 } })
     .then(schemes => {
-      const schemesCount = schemes._totalCount
-      const reportsDir = `${__dirname}data/reports`
-      const reports = fs.existsSync(reportsDir) ? fs.readdirSync(reportsDir) : []
-      render(req, res, "vue-page", {
+      return sendVuePage(req, res, {
         title: "Statistics",
         vuePage: "stats",
+        stylesheets: ["/css/stats.css"],
         vuePageProps: {
-          reports,
-          schemesCount,
+          reports: reports.getSummaries(),
+          schemesCount: schemes._totalCount,
         },
       })
     })
@@ -356,14 +485,14 @@ function conceptPageHandler(prefix) {
 app.get("/ILC/1/:id([a-z0-9-]+)", conceptPageHandler("https://bartoc.org/ILC/1/") )
 
 // list of terminology registries
-app.get("/registries", (req, res) => {
+app.get("/registries", (req, res, next) => {
   if (req.query.format === "jskos") {
     return res.redirect("/api/registries?limit=1000")
   }
-  render(req, res, "vue-page", {
+  return sendVuePage(req, res, {
     title: "Terminology Registries",
     vuePage: "registries",
-  })
+  }).catch(next)
 })
 
 // BARTOC ID => registry or vocabulary (if found)
@@ -403,7 +532,11 @@ app.get("/en/node/:id([0-9]+)", async (req, res, next) => {
     path = storedItem.type?.[0] === "http://www.w3.org/ns/dcat#Catalog"
       ? "/registries"
       : "/vocabularies"
-    return sendItem(req, res, storedItem, { path, ...presentationView })
+    try {
+      return await sendItem(req, res, storedItem, { path, ...presentationView })
+    } catch (error) {
+      return next(error)
+    }
   } else {
     return next()
   }
@@ -415,20 +548,22 @@ async function backendDataByUri(uri) {
   return items.find(item => item.uri === uri)
 }
 
-const viewsByType = {
-  "http://www.w3.org/ns/dcat#Catalog": "registry",
-}
-
 const vuePagesByType = {
   "http://www.w3.org/2004/02/skos/core#Concept": "concept",
   "http://www.w3.org/2004/02/skos/core#ConceptScheme": "terminology",
+  "http://www.w3.org/ns/dcat#Catalog": "registry",
 }
 
 async function sendItem (
   req,
   res,
   storedItem,
-  { presentationItem = storedItem, derivedFields = {}, ...vars } = {},
+  {
+    presentationItem = storedItem,
+    derivedFields = {},
+    nkosTypes = {},
+    ...vars
+  } = {},
 ) {
   const { format } = req.query
   if (format === "json" || format === "jsonld") {
@@ -449,9 +584,8 @@ async function sendItem (
       const item = presentationItem
       const itemType = item.type[0]
       const vuePage = vuePagesByType[itemType]
-      const view = vuePage ? "vue-page" : viewsByType[itemType]
       const title = utils.label(item.prefLabel).value
-      render(req, res, view, {
+      await sendVuePage(req, res, {
         ...vars,
         item,
         title,
@@ -460,10 +594,9 @@ async function sendItem (
           vuePageProps: {
             item,
             title,
+            resourcePath: vars.resourcePath || req.path,
             ...(vuePage === "terminology" && {
-              nkosTypes: nkostypes,
-              accessTypes: accesstypes,
-              formats,
+              nkosTypes,
               derivedFields,
             }),
           },
@@ -484,7 +617,7 @@ const schemesWithBartocNamespacePromise = backend.getSchemes({})
   })
 
 // BARTOC namespace redirect + error handling
-app.use(async (req, res) => {
+app.use(async (req, res, next) => {
 
   // Try to find whether the URL belongs to one of the vocabularies that use the BARTOC namespace
   const schemesWithBartocNamespace = await schemesWithBartocNamespacePromise
@@ -503,10 +636,10 @@ app.use(async (req, res) => {
   } else if (req.query.format === "nt") {
     res.type("txt").send(title)
   } else {
-    render(req, res, "vue-page", {
+    return sendVuePage(req, res, {
       title: title,
       vuePage: "notFound",
-    })
+    }).catch(next)
 
   }
 })
@@ -518,14 +651,14 @@ app.use((err, req, res, next) => {
   }
   const title = err.message || "Technical problems"
   res.status(500)
-  render(req, res, "vue-page", {
+  sendVuePage(req, res, {
     title,
     vuePage: "error",
     vuePageProps: {
       title,
       message: String(err),
     },
-  })
+  }).catch(next)
 })
 
 // Start service
@@ -537,7 +670,7 @@ async function start() {
     port = await portfinder.getPortPromise()
   }
 
-  app.listen(port, () => config.log(`Now listening on port ${port}`))
+  httpServer.listen(port, () => config.log(`Now listening on port ${port}`))
 }
 
 start()

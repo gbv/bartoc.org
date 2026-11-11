@@ -1,8 +1,8 @@
 import config from "../config/index.js"
+import { clone } from "../src/utils.js"
 import fs from "fs"
 import path from "path"
 import { cdk } from "cocoda-sdk"
-import _ from "lodash"
 import * as diff from "jsondiffpatch"
 import * as consoleFormatter from "jsondiffpatch/formatters/console"
 import * as jsonpatchFormatter from "jsondiffpatch/formatters/jsonpatch"
@@ -35,32 +35,15 @@ function usage (syntax) {
   process.exit()
 }
 
-function normalize (item) {
-  return _.cloneDeepWith(item, value => {
-    // apply Unicode normalization to strings
-    if (_.isString(value)) {
-      return value.normalize()
-    }
-    // sort keys and remove keys starting with "_"
-    if (_.isPlainObject(item)) {
-      const keys = Object.keys(item).filter(key => key[0] !== "_").sort()
-      return keys.reduce((obj, key) => {
-        obj[key] = normalize(item[key])
-        return obj
-      }, {})
-    }
-  })
-}
+const normalize = value => clone(value, { normalize: true, removeUnderscore: true })
 
 function updateDump () {
   if (!fs.existsSync(dumpsDir)) {
     fs.mkdirSync(dumpsDir)
   }
 
-  const backend = cdk.initializeRegistry({
-    provider: "ConceptApi",
-    api: `http://localhost:${config.port}/api/`,
-  })
+  const api = `http://localhost:${config.port}/api/`
+  const backend = cdk.initializeRegistry({ provider: "ConceptApi", api })
 
   backend.getSchemes({ params: { limit: 9999 } }).then(schemes => {
     const latest = `${dumpsDir}/latest.ndjson`
@@ -70,10 +53,10 @@ function updateDump () {
     }
 
     const stream = fs.createWriteStream(latest)
-    _.sortBy(schemes, "uri").forEach(voc => {
+    schemes.sort((a,b) => a.uri.localeCompare(b.uri)).forEach(voc => {
       stream.write(JSON.stringify(normalize(voc)) + "\n")
     })
-    console.log(`${latest}: ${schemes.length} vocabularies`)
+    console.log(`${latest}: ${schemes.length} vocabularies from ${api}`)
   })
 }
 
@@ -99,7 +82,7 @@ function dumpDiff (fileA, fileB, showDelta) {
 
   let before = next(a), after = next(b)
 
-  while (before && after) {  
+  while (before && after) {
 
     while (after && after.uri < before.uri) {
       showDelta(addedDelta(after))

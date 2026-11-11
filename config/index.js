@@ -1,9 +1,6 @@
-import _ from "lodash"
+import defaultsDeep from "lodash.defaultsdeep"
 import { cdk } from "cocoda-sdk"
-import {
-  normalizeSparqlExamples,
-  validateSparqlEndpoint,
-} from "./utils.js"
+import { validateSparqlEndpoint } from "./utils.js"
 
 // to load local JSON files
 import { createRequire } from "module"
@@ -33,14 +30,9 @@ try {
   configUser = {}
 }
 
-const config = _.defaultsDeep({ env }, configEnv, configUser, configDefault)
+const config = defaultsDeep({ env }, configEnv, configUser, configDefault)
 
-config.sparqlExamples = normalizeSparqlExamples(
-  configEnv.sparqlExamples ??
-  configUser.sparqlExamples ??
-  configDefault.sparqlExamples,
-)
-
+config.sparqlExamples = configEnv.sparqlExamples ?? configUser.sparqlExamples ?? configDefault.sparqlExamples
 config.sparql = validateSparqlEndpoint(config.sparql)
 
 // Logging functions
@@ -68,13 +60,7 @@ if (!config.baseUrl.endsWith("/")) {
   config.baseUrl += "/"
 }
 
-config.vue.assetPrefix = env === "development" ? `http://localhost:${config.vue.port}/` : "/dist/"
-try {
-  config.vue.manifest = readJSON("../dist/.vite/manifest.json")
-} catch (error) {
-  // Will be filled after Vue build is complete
-  config.vue.manifest = {}
-}
+config.vue.assetPrefix = env === "development" ? "/" : "/dist/"
 
 // Initalize cocoda-sdk registry to access jskos-server backend
 config.registry = cdk.initializeRegistry(config.backend)

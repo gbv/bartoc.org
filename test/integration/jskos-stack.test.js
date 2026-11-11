@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest"
-import { startJskosStack, importInternalVocs } from "../helpers/jskos-server-bootstrap.js"
+import { startJskosStack, importTestVocabulary } from "../helpers/jskos-server-bootstrap.js"
+
+const schemeUri = "https://example.org/test/vocabulary"
 
 describe("integration: mongo + jskos-server", () => {
   it("serves /status and /voc", async () => {
-    const stack = await startJskosStack({ dataDir: "data" })
+    const stack = await startJskosStack({ fixtureDir: "test/fixtures/jskos-stack" })
 
     try {
       // 1) sanity check: status
@@ -14,22 +16,20 @@ describe("integration: mongo + jskos-server", () => {
         expect(body).toMatch(/ok|running|status/i)
       }
 
-      // 2) import internal vocs
-      await importInternalVocs(stack.jskos)
+      // 2) import the test vocabulary
+      await importTestVocabulary(stack.jskos)
 
       // 3) check voc endpoint
       {
         const url = new URL(`${stack.baseUrl}/voc`)
-        url.searchParams.set("limit", "1")
+        url.searchParams.set("uri", schemeUri)
 
         const res = await fetch(url.toString())
         expect(res.status).toBe(200)
 
         const data = await res.json()
-        // jskos-server returans an array of schemes
-        expect(Array.isArray(data)).toBe(true)
-        expect(data.length).toBeGreaterThan(0)
-        expect(data[0]).toHaveProperty("uri")
+        expect(data).toHaveLength(1)
+        expect(data[0].uri).toBe(schemeUri)
       }
     } finally {
       await stack.stop()

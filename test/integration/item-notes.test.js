@@ -36,4 +36,18 @@ describe("ItemNotes", () => {
     ])
     expect(wrapper.findAll(".item-note-list")).toHaveLength(2)
   })
+
+  it("renders only the requested properties", () => {
+    const wrapper = mount(ItemNotes, {
+      props: {
+        item: {
+          definition: { en: ["Definition"] },
+          hiddenLabel: { en: ["Hidden label"] },
+        },
+        properties: ["hiddenLabel"],
+      },
+    })
+
+    expect(wrapper.text()).toBe("Hidden label")
+  })
 })

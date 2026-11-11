@@ -16,6 +16,7 @@ RUN apk add perl
 RUN mkdir ./bartoc
 COPY . ./bartoc
 RUN cd bartoc && npm ci
+RUN cd bartoc && npm run build
 
 COPY docker/ecosystem.config.json .
 
@@ -24,6 +25,9 @@ COPY docker/*.sh .
 
 ## Get latest JSKOS Server and install dependencies
 RUN git clone https://github.com/gbv/jskos-server.git && cd jskos-server && npm ci
+
+## Include the auxiliary vocabulary sources for the manual setup script
+RUN git clone https://github.com/gbv/bartoc-vocabularies.git
 
 ## Folder for configuration files (to be mapped as volume)
 RUN mkdir /config

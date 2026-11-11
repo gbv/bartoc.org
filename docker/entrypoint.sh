@@ -16,8 +16,8 @@ if [ ! -f /config/jskos-server.json ]; then
   echo "
 {
   \"mongo\":{
-    \"host\":\"mongo\"
-    \"db\": \"bartoc\",
+    \"host\": \"mongo\",
+    \"db\": \"bartoc\"
   },
   \"baseUrl\": \"${BASE_URL}api/\",
   \"mappings\": false,

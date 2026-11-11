@@ -14,8 +14,11 @@ The application is currently being reconstructed funded by DFG.
 ## Table of Contents
 
 - [Install](#install)
+- [Configuration](#configuration)
 - [Data flow](#data-flow)
-- ...
+- [Scripts](#scripts)
+- [Quality API](#quality-api)
+- [Development](#development)
 
 ## Install
 
@@ -36,11 +39,45 @@ npm ci
 You can also set up BARTOC via Docker. Please refer to our [Docker docs](./docker/README.md).
 
 ### Setup
-A setup script is provided in `./bin/setup.sh`. It must be called with the path to your jskos-server installation, e.g.:
+Clone the auxiliary vocabulary sources beside this repository. The setup script needs both their path and the path to your jskos-server installation:
 
 ```bash
-./bin/setup.sh ../jskos-server
+git clone https://github.com/gbv/bartoc-vocabularies.git ../bartoc-vocabularies
+./bin/setup.sh ../jskos-server ../bartoc-vocabularies
 ```
+
+#### Updating auxiliary vocabularies
+
+Changes in `bartoc-vocabularies` are not imported automatically.
+
+For a local installation, pull the changes and run the import:
+
+```bash
+git -C ../bartoc-vocabularies pull --ff-only
+./bin/import-vocabularies.sh ../jskos-server ../bartoc-vocabularies
+```
+
+This updates the six auxiliary vocabularies without resetting other data.
+
+The Docker image includes the current `bartoc-vocabularies/main` at build time.
+After updating the image, import the files into its persistent database:
+
+```bash
+docker compose exec -it bartoc bash -lc \
+  'cd /usr/src/app/bartoc && ./bin/import-vocabularies.sh ../jskos-server ../bartoc-vocabularies'
+```
+
+- **dev.bartoc.org:** rebuild and deploy the `dev` image, then run the import
+  command in the development container.
+- **bartoc.org:** build and deploy a release image, then run the import command
+  in the production container.
+
+The Docker workflow only publishes images. It does not deploy them or import
+the vocabularies.
+
+> **Work in progress:** this update process is still manual and should be
+> automated. Until then, building the image, deploying it, and importing the
+> vocabularies are separate required steps.
 
 ## Configuration
 
@@ -56,6 +93,7 @@ Basic configuration is located in `config/config.default.json`. Selected fields 
 ~~~
 
 To be able to log in, add, and edit vocabularies, you need to setup and configure an instance of [Login Server](https://github.com/gbv/login-server) as well (example for local installation):
+
 ```json
 {
   "login": {
@@ -65,34 +103,8 @@ To be able to log in, add, and edit vocabularies, you need to setup and configur
 }
 ```
 
-The optional SPARQL query page is enabled by setting `sparql` to an absolute
-HTTP(S) endpoint URL. Its example selector can be customized with
-`sparqlExamples`:
+### jskos-server
 
-```json
-{
-  "sparql": "https://example.org/sparql",
-  "sparqlExamples": [
-    {
-      "label": "Check whether the dataset contains triples",
-      "query": "ASK { ?s ?p ?o }"
-    }
-  ]
-}
-```
-
-Each example requires a non-empty `label` and `query`. A configured array
-replaces the default examples completely; use an empty array to hide the
-example selector. The query page is available at `/graph/` when `sparql` is
-configured.
-
-The page also displays the latest knowledge graph update when the endpoint
-provides `<https://bartoc.org/graph/terminology/> dct:modified ?updated` in the
-named graph `<https://bartoc.org/graph/terminology/>`. This metadata is
-optional: if it is missing or cannot be retrieved, the query editor remains
-available without the timestamp.
-
-### jskos-server Configuration
 To be able to use the full functionality of BARTOC, your jskos-server installation must allow concept schemes to be written via the API, e.g.:
 
 ```json
@@ -114,6 +126,23 @@ To be able to use the full functionality of BARTOC, your jskos-server installati
 
 Via an array `identities` under `schemes`, you can limit which identity URIs can write vocabulary data.
 
+### Knowledge Graph
+
+BARTOC Knowledge Graph query page is enabled at `/graph/` when `sparql` is configured with an absolute SPARQL endpoint URL.
+
+The page displays the latest update timestamp retrieved via SPARQL query `<https://bartoc.org/graph/terminology/> dct:modified ?updated` in the named graph `<https://bartoc.org/graph/terminology/>`.
+
+A set of example queries can be provided with `sparqlExamples` as URL of a
+[MatGUI Web workspace](https://github.com/Matdata-eu/MatGUI/blob/main/docs/user-guide.md#web-workspaces).
+The default value points to a HTTP release of repository <https://github.com/gbv/bartoc-queries>:
+
+```json
+{
+  "sparql": "https://bartoc.org/api/sparql",
+  "sparqlExamples": "https://gbv.github.io/bartoc-queries/workspace.json"
+}
+```
+
 ## Data flow
 
 Dotted elements are not implemented yet.
@@ -127,7 +156,7 @@ graph TD
     database[**database**: jskos-server]
     terminologies(terminology services)
     terminologies -- JSKOS API, Skosmos, ... --> client
-    server -- RDF & JSKOS --> applications(applications)
+    server -- RDF, JSKOS & Quality API --> applications(applications)
     client <-- browser --> user(user)
     subgraph app [**bartoc.org**]
         database <-- JSKOS API --> client
@@ -138,13 +167,30 @@ graph TD
         database -.-> search
         reports[**reports**]
         database -.-> reports
+        reports --> server
     end
-    server -.-> applications
     database -- JSKOS API --> applications
     login --> client
     reports -.-> client
-    reports -.-> applications
 ```
+
+## Scripts
+
+To regularly update dumps, add a cronjob with command `npm run dump`. Dumps are placed in `data/dumps` and reports in `data/reports`. To compare dump files, run `node bin/dump.js diff FILE1 [FILE2]`.
+
+The dump command also creates quality reports as JSON and CSV files. `validation-errors.json` lists records with validation errors, and `summary.json` groups validation errors and quality warnings by record.
+
+## Quality API
+
+BARTOC exposes generated quality reports through an **experimental** read-only API at `/quality/`.
+
+Reports are generated asynchronously by `npm run dump`. API requests read the files in `data/reports`; they do not validate records or regenerate reports.
+
+- `/quality/` — human-readable API documentation
+- `/quality/openapi.json` — OpenAPI 3.1 description
+- `/data/reports/` — existing JSON and CSV downloads
+
+For a local development instance, open <http://localhost:3883/quality/>.
 
 ## Development
 
@@ -153,13 +199,15 @@ npm run dev
 ~~~
 
 The application is made available at <http://localhost:3883/>.
+Express also serves Vite's development assets on this port.
 
 ### CSS approach
 
-Shared design tokens and component-level CSS are provided by `@gbv/bartoc-components`.
+Shared design tokens and component-level CSS are provided by `@gbv/bartoc-components` (<https://github.com/gbv/bartoc-components>).
 Application-specific layout rules live in `static/css/layout.css` and should consume the shared `--cc-*` tokens instead of redefining them.
 
 ### Publish
+
 **For maintainers only**
 
 Never work on the main branch directly. Always make changes on `dev` and then run the release script:
@@ -177,11 +225,9 @@ Update an existing installation:
 ~~~sh
 git pull
 npm install
+npm run build
 pm2 restart bartoc.org
 ~~~
 
-Note that `NODE_ENV` has to be set to `production`, otherwise Vue files will be requested from the dev server. This is given when using `npm run start`.
+Build the Vue assets before starting or restarting the production server. Docker builds them in the image. `NODE_ENV` must be set to `production` when starting the server; `npm run start` sets it automatically.
 
-## Database dumps and statistics
-
-To regularly update dumps, add a cronjob with command `npm run dump update`. Dumps will be placed in directory `data/dumps` and statistics are placed in `data/reports`. To compare two dump files run `npm run dump diff`.

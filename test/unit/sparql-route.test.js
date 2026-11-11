@@ -3,24 +3,15 @@ import request from "supertest"
 import { describe, expect, it, vi } from "vitest"
 import createSparqlRoute from "../../routes/sparql.js"
 
-const examples = [
-  {
-    label: "Example query",
-    query: "ASK {}",
-  },
-]
+const examples = "http://example.org/workspace.json"
 
 function createApp(endpoint) {
   const app = express()
-  const render = vi.fn((_req, res, view, locals) => {
-    res.json({ view, locals })
+  const render = vi.fn(async (_req, res, locals) => {
+    res.json({ locals })
   })
 
-  app.use(createSparqlRoute({
-    endpoint,
-    examples,
-    render,
-  }))
+  app.use(createSparqlRoute({ endpoint, examples, render }))
   app.use((_req, res) => {
     res.sendStatus(404)
   })
@@ -36,17 +27,13 @@ describe("SPARQL route", () => {
       .expect(200)
 
     expect(response.body).toMatchObject({
-      view: "vue-page",
       locals: {
         vuePage: "sparql",
         vuePageProps: {
           endpoint: "https://example.org/sparql",
           examples,
         },
-        stylesheets: [
-          "/vendor/yasgui/yasgui.min.css",
-          "/vendor/fontawesome/css/all.min.css",
-        ],
+        stylesheets: ["/vendor/yasgui/yasgui.min.css"],
         scripts: ["/vendor/yasgui/yasgui.min.js"],
       },
     })

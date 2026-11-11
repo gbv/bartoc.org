@@ -15,13 +15,7 @@ const PageComponent = markRaw({
 })
 
 describe("App", () => {
-  it("keeps page content local and teleports the header and footer", () => {
-    const headerTarget = document.createElement("div")
-    const footerTarget = document.createElement("div")
-    headerTarget.id = "header-app"
-    footerTarget.id = "footer-app"
-    document.body.append(headerTarget, footerTarget)
-
+  it("renders the header, page, and footer together", () => {
     const wrapper = mount(App, {
       props: {
         pageComponent: PageComponent,
@@ -34,13 +28,11 @@ describe("App", () => {
       },
     })
 
-    expect(wrapper.get(".page-content").text()).toBe("Server-rendered page")
-    expect(headerTarget.querySelector("header")).not.toBeNull()
-    expect(footerTarget.querySelector("footer")).not.toBeNull()
+    expect(wrapper.get("main.app-container .page-content").text()).toBe("Server-rendered page")
+    expect(wrapper.get("header").element.nextElementSibling).toBe(wrapper.get("main").element)
+    expect(wrapper.get("main").element.nextElementSibling).toBe(wrapper.get("footer").element)
 
     wrapper.unmount()
-    headerTarget.remove()
-    footerTarget.remove()
   })
 
   it("passes initial page props to the selected component", () => {
@@ -53,7 +45,6 @@ describe("App", () => {
       },
       global: {
         stubs: {
-          Teleport: true,
           TheHeader: true,
           TheFooter: true,
         },

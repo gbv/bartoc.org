@@ -6,6 +6,7 @@ import {
   saveVocabularyItem,
 } from "../../vue/utils/itemEditorSave.js"
 import { CONCEPT_SCHEME_TYPE } from "../../vue/utils/itemEditor.js"
+import { imageMedia } from "../helpers/media.js"
 
 function makeItem(overrides = {}) {
   return {
@@ -45,7 +46,50 @@ describe("ItemEditor save service", () => {
     })
   })
 
-  it("prepares a version without an abstract", async () => {
+  it("preserves distributions in the save payload", async () => {
+    const result = await prepareItemForSave({
+      item: makeItem({
+        distributions: [
+          {
+            download: "  https://example.org/vocabulary.ttl  ",
+            accessURL: "  https://example.org/vocabulary  ",
+            format: "http://format.gbv.de/jskos",
+            mimetype: "text/turtle",
+            version: "1.0",
+            license: [{ uri: "https://creativecommons.org/publicdomain/zero/1.0/" }],
+          },
+        ],
+      }),
+    })
+
+    expect(JSON.parse(result.body).distributions).toEqual([
+      {
+        accessURL: "https://example.org/vocabulary",
+        download: "https://example.org/vocabulary.ttl",
+        format: "http://format.gbv.de/jskos",
+        mimetype: "text/turtle",
+        version: "1.0",
+        license: [{ uri: "https://creativecommons.org/publicdomain/zero/1.0/" }],
+      },
+    ])
+  })
+
+  it("keeps valid media and removes empty media when saving", async () => {
+    const result = await prepareItemForSave({
+      item: makeItem({
+        media: [
+          imageMedia(" https://example.org/logo.png "),
+          imageMedia(" "),
+        ],
+      }),
+    })
+
+    expect(JSON.parse(result.body).media).toEqual([
+      imageMedia("https://example.org/logo.png"),
+    ])
+  })
+
+  it("prepares an edition without an abstract", async () => {
     const result = await prepareItemForSave({
       item: makeItem({
         definition: { en: [""] },
@@ -72,7 +116,7 @@ describe("ItemEditor save service", () => {
     })
   })
 
-  it("saves a version number without a title", async () => {
+  it("saves an version number without a title", async () => {
     const result = await prepareItemForSave({
       item: makeItem({
         prefLabel: {},

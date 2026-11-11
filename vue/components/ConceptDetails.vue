@@ -1,96 +1,75 @@
 <template>
-  <div class="concept-details">
-    <ul class="ancestors">
-      <li
-        v-for="ancestor in ancestors.filter(Boolean).reverse()"
-        :key="ancestor.uri"
-        @click="selectConcept(ancestor)">
-        <icon name="levelUp" />
-        <item-name
-          :item="ancestor"
-          :notation="!display.hideNotation"
-          class="clickable" />
-      </li>
-    </ul>
-    <div v-if="selected">
-      <div class="concept-details-selected">
-        <item-name
-          :item="selected"
-          :notation="!display.hideNotation" />
-        <a
-          v-if="k10plus"
-          :href="k10plus"
-          class="concept-details-catalog-link"
-          title="search in K10plus library catalog"
-          target="k10plus">📚</a>
-      </div>
-      <div v-if="selected.uri || (selected.identifier||[]).length">
-        <ul
-          class="concept-details-identifiers separated-list">
-          <li
-            v-if="selected.uri">
-            <icon name="link" />
-            <a :href="selected.uri">{{ selected.uri }}</a>
-          </li>
-          <li
-            v-for="id in (selected.identifier||[])"
-            :key="id">
-            {{ id }}
-          </li>
-        </ul>
-      </div>
-      <item-labels :item="selected" />
-      <item-notes :item="selected" />
-      <ul class="concept-details-dates separated-list">
-        <li
-          v-if="selected.created"
-          title="created">
-          <icon
-            name="created"
-            padding="" />
-          {{ selected.created }}
-        </li>
-        <li
-          v-if="selected.issued"
-          title="issued">
-          <icon
-            name="modified"
-            padding="" />
-          {{ selected.issued }}
-        </li>
-        <li
-          v-if="selected.modified"
-          title="modified">
-          <icon
-            name="modified"
-            padding="" />
-          {{ selected.modified }}
-        </li>
-      </ul>
-    </div>
-
-    <div v-if="narrower">
-      <ul class="narrower">
-        <li
-          v-for="child in narrower"
-          :key="child.uri"
-          @click="selectConcept(child)">
-          <icon name="levelDown" />
-          <item-name
-            :item="child"
-            :notation="!display.hideNotation"
-            class="clickable" />
-        </li>
-      </ul>
-    </div>
-  </div>
+  <p
+    v-if="loading"
+    class="cc-concept-loading"
+    role="status">
+    <LoadingIndicator size="lg" />
+    Loading concept details…
+  </p>
+  <p
+    v-if="!loading && loadError"
+    class="cc-form-feedback--invalid"
+    role="alert">
+    {{ loadError }}
+    <button
+      type="button"
+      class="cc-button cc-button-secondary cc-button-sm"
+      @click="loadConcept(concept)">
+      Retry
+    </button>
+  </p>
+  <ItemDetails
+    v-if="!loading && item?.uri"
+    class="cc-concept-item-details"
+    :class="{ 'cc-concept-item-details--hide-notation': display.hideNotation }"
+    :item="item"
+    flat
+    :dropzone="false"
+    :draggable="false"
+    :fields="detailFields"
+    :item-list-options="itemListOptions"
+    :show-ancestors="false"
+    :show-broader="false"
+    :show-narrower="false"
+    @select="emit('update:concept', $event.item)">
+    <template #afterName>
+      <a
+        v-if="k10plus"
+        :href="k10plus"
+        class="cc-concept-catalog-link"
+        title="search in K10plus library catalog"
+        target="k10plus">📚</a>
+    </template>
+    <template #afterTabs>
+      <ItemNotes
+        :item="item"
+        :properties="additionalProperties" />
+      <!-- Show the hierarchy after the metadata with clear relation labels. -->
+      <section
+        v-if="broaderConcepts.length"
+        class="cc-concept-relations cc-concept-broader">
+        <h5>{{ broaderConcepts.length === 1 ? "Broader concept" : "Broader concepts" }}</h5>
+        <ItemList
+          v-bind="itemListOptions"
+          :items="broaderConcepts"
+          @select="emit('update:concept', $event.item)" />
+      </section>
+      <section
+        v-if="narrowerConcepts.length"
+        class="cc-concept-relations cc-concept-narrower">
+        <h5>Narrower concepts</h5>
+        <ItemList
+          v-bind="itemListOptions"
+          :items="narrowerConcepts"
+          @select="emit('update:concept', $event.item)" />
+      </section>
+    </template>
+  </ItemDetails>
 </template>
 
 <script setup>
 import { computed, ref, watch } from "vue"
-import Icon from "./Icon.vue"
-import ItemLabels from "./ItemLabels.vue"
-import ItemName from "./ItemName.vue"
+import { ItemDetails, ItemList, LoadingIndicator } from "jskos-vue"
 import ItemNotes from "./ItemNotes.vue"
 import { sortConcepts } from "../utils.js"
 import k10plusikt from "../../data/k10plus-ikt.json"
@@ -116,68 +95,178 @@ const props = defineProps({
 
 const emit = defineEmits(["update:concept"])
 
-const selected = ref({})
-const ancestors = ref([])
-const narrower = ref([])
+// Stop waiting before cocoda-sdk's longer network timeout.
+const detailsTimeout = 30000
 
-const k10plus = computed(() => {
-  if (!selected.value || !selected.value.notation) {
-    return
-  }
-  const ikt = k10plusikt[(props.scheme.CQLKEY || "").toUpperCase()]
-  const notation = selected.value.notation || []
-  return ikt ? `https://opac.k10plus.de/DB=2.299/CMD?ACT=SRCHA&IKT=${ikt}&TRM=${notation[0]}` : null
+const item = ref(null)
+const loading = ref(false)
+const loadError = ref("")
+
+// Each request gets an ID so late responses can be ignored.
+let loadId = 0
+
+// The preferred label is already shown as the details heading.
+const detailFields = { prefLabel: false }
+
+// ItemDetails does not render these JSKOS language maps.
+const additionalProperties = [
+  "hiddenLabel",
+  "note",
+  "historyNote",
+  "changeNote",
+  "example",
+]
+
+// Show the full path without repeating broader concepts returned separately.
+const broaderConcepts = computed(() => {
+  const ancestors = (item.value?.ancestors || []).filter(Boolean)
+  const broader = (item.value?.broader || [])
+    .filter(concept => (
+      concept && !ancestors.some(ancestor => ancestor.uri === concept.uri)
+    ))
+
+  return [...ancestors].reverse().concat(broader)
 })
 
+const narrowerConcepts = computed(() => item.value?.narrower || [])
+
+// Disable drag and drop and follow the terminology notation setting.
+const itemListOptions = computed(() => ({
+  draggable: false,
+  itemNameOptions: {
+    draggable: false,
+    showNotation: !props.display.hideNotation,
+  },
+}))
+
+// Build a catalog search link when the scheme supports it.
+const k10plus = computed(() => {
+  const notation = item.value?.notation?.[0]
+  const ikt = k10plusikt[(props.scheme.CQLKEY || "").toUpperCase()]
+
+  return ikt && notation
+    ? `https://opac.k10plus.de/DB=2.299/CMD?ACT=SRCHA&IKT=${ikt}&TRM=${notation}`
+    : null
+})
+
+// Load the complete concept and the relations supported by the API.
+async function requestConcept(concept) {
+  const registry = props.registry
+  const scheme = props.scheme
+
+  // Some providers need the active scheme to resolve and load the concept.
+  const reference = {
+    ...concept,
+    inScheme: [scheme],
+  }
+
+  const [details] = await registry.getConcepts({ concepts: [reference] })
+
+  // Ensure the concept has its scheme context before asking the provider for details.
+  const loaded = {
+    ...reference,
+    ...(details || {}),
+    inScheme: [scheme],
+  }
+
+  // Use embedded relations when an API has no hierarchy endpoints.
+  // Also keep them as a fallback when a hierarchy request fails.
+  const [ancestors, narrower] = await Promise.all([
+    registry.has?.ancestors === false
+      ? loaded.ancestors || []
+      : registry.getAncestors({ concept: loaded }).catch(() => loaded.ancestors || []),
+    registry.has?.narrower === false
+      ? loaded.narrower || []
+      : registry.getNarrower({ concept: loaded }).catch(() => loaded.narrower || []),
+  ])
+
+  return {
+    ...loaded,
+    ancestors,
+    narrower: sortConcepts(narrower, scheme),
+  }
+}
+
+// Stop updating the UI when a request takes too long.
+// The SDK request keeps running because cancelling it currently causes an error.
+function withTimeout(promise) {
+  let timeout
+
+  // Reject the promise after a timeout.
+  const expired = new Promise((_, reject) => {
+    timeout = setTimeout(reject, detailsTimeout)
+  })
+
+  // Use the first result: the API response or the timeout error.
+  // Promise.race does not cancel the request that is still running.
+  return Promise.race([promise, expired])
+    .finally(() => clearTimeout(timeout))
+}
+
+// Do not let an older response replace a newer selection.
+async function loadConcept(concept) {
+  const currentLoad = ++loadId
+
+  // Keep the small search result in case loading fails.
+  item.value = concept
+  loading.value = Boolean(concept?.uri)
+  loadError.value = ""
+
+  if (!concept?.uri) {
+    return
+  }
+
+  try {
+    const loaded = await withTimeout(requestConcept(concept))
+
+    // The user may have selected another concept while this request was running.
+    if (currentLoad === loadId) {
+      item.value = loaded
+    }
+  } catch {
+    if (currentLoad === loadId) {
+      loadError.value = "Concept details could not be loaded."
+    }
+  } finally {
+    if (currentLoad === loadId) {
+      loading.value = false
+    }
+  }
+}
+
+// Reload the item when the parent browser selects another concept.
 watch(
   () => props.concept,
-  async (concept) => {
-    selected.value = concept
-    ancestors.value = []
-    narrower.value = []
-
-    if (concept && concept.uri) {
-      // Load and merge details into the selected concept.
-      const details = (await props.registry.getConcepts({ concepts: [concept] }))[0]
-      selected.value = Object.assign(concept, details || {})
-
-      // Inject access scheme. Required to get VOCID. Should better be fixed in cocoda-sdk?
-      concept.inScheme = [props.scheme]
-
-      ancestors.value = await props.registry.getAncestors({ concept })
-      narrower.value = sortConcepts(
-        await props.registry.getNarrower({ concept }),
-        props.scheme,
-      )
-    }
-  },
+  loadConcept,
   { immediate: true },
 )
-
-function selectConcept(concept) {
-  emit("update:concept", concept)
-}
 </script>
 
 <style scoped>
-ul.narrower {
-  padding-top: var(--cc-space-md);
+.cc-concept-item-details {
+  --jskos-vue-fontSize-small: var(--cc-font-size-base);
 }
-ul.narrower, ul.ancestors {
+.cc-concept-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-xs);
+}
+.cc-concept-item-details :deep(.jskos-vue-itemDetails-list) {
+  padding-left: 0;
   list-style: none;
+}
+.cc-concept-catalog-link {
   padding-left: var(--cc-space-sm);
 }
-.clickable:hover {
-  text-decoration: underline;
-  cursor: pointer;
+.cc-concept-relations {
+  margin-top: var(--cc-space-md);
 }
-.concept-details-selected {
-  font-size: var(--cc-font-size-lg);
-}
-.concept-details-catalog-link {
-  padding-left: var(--cc-space-sm);
-}
-.concept-details-identifiers {
+.cc-concept-relations h5 {
   margin-bottom: var(--cc-space-xs);
+  font-size: var(--cc-font-size-base);
+  font-weight: var(--cc-font-weight-bold);
+}
+.cc-concept-item-details--hide-notation :deep(.jskos-vue-itemDetails-name .jskos-vue-itemName-notation) {
+  display: none;
 }
 </style>

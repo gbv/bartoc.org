@@ -58,15 +58,21 @@ const props = defineProps({
     required: true,
   },
 })
+const emit = defineEmits(["count"])
 
 const previewLimit = 10
-const status = ref("loading")
+const bartocRegistryUri = "http://bartoc.org/en/node/2054"
+const isBartocRegistry = computed(() => props.registryUri === bartocRegistryUri)
+// The server renders the search link before the browser starts the preview request.
+const status = ref("idle")
 const terminologies = ref([])
 const terminologyCount = ref(0)
 
 // Keep the existing search entry point available even when the preview cannot load.
 const searchUrl = computed(() =>
-  `/vocabularies?${new URLSearchParams({ partOf: props.registryUri }).toString()}`,
+  isBartocRegistry.value
+    ? "/vocabularies"
+    : `/vocabularies?${new URLSearchParams({ partOf: props.registryUri }).toString()}`,
 )
 
 function terminologyUrl(terminology) {
@@ -88,10 +94,12 @@ function responseTotalCount(response) {
 // the preview is complete or should link to the full BARTOC search result.
 async function loadTerminologies() {
   try {
-    const params = new URLSearchParams({
-      partOf: props.registryUri,
-      limit: String(previewLimit), // we ask only for a preview, so we can limit the number of results to reduce loading time
-    })
+    const params = new URLSearchParams()
+    // BARTOC itself lists all vocabularies, not only records with partOf=2054.
+    if (!isBartocRegistry.value) {
+      params.set("partOf", props.registryUri)
+    }
+    params.set("limit", String(previewLimit))
     const response = await fetch(`/api/voc?${params.toString()}`)
     const items = await response.json()
 
@@ -99,6 +107,7 @@ async function loadTerminologies() {
       ? items.filter(terminology => terminology?.uri)
       : []
     terminologyCount.value = responseTotalCount(response) ?? terminologies.value.length
+    emit("count", terminologyCount.value)
     status.value = "ready"
   } catch {
     // Fall back to the plain search link when the preview cannot be loaded.
@@ -106,7 +115,10 @@ async function loadTerminologies() {
   }
 }
 
-onMounted(loadTerminologies)
+onMounted(() => {
+  status.value = "loading"
+  loadTerminologies()
+})
 </script>
 
 <style scoped>

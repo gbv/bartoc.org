@@ -32,7 +32,7 @@ The generated title is copied only when the user starts an override.
 </template>
 
 <script setup>
-import { deriveVersionPrefLabel } from "../../src/versioning.js"
+import { deriveEditionPrefLabel } from "../../src/editions.js"
 import { useInheritableField } from "../composables/useInheritableField.js"
 import InheritedFieldControl from "./InheritedFieldControl.vue"
 import LabelEditor from "./LabelEditor.vue"
@@ -67,7 +67,7 @@ function getInheritedTitle(source) {
     version: props.version,
     versionOf: source?.uri ? [{ uri: source.uri }] : [],
   }
-  const title = deriveVersionPrefLabel(versionRecord, source)
+  const title = deriveEditionPrefLabel(versionRecord, source)
 
   return title.derived ? title.prefLabel : {}
 }

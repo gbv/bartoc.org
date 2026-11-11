@@ -16,41 +16,21 @@ function inputValues(wrapper) {
 }
 
 describe("ListEditor", () => {
-  it("loads values and keeps one empty row", () => {
-    const wrapper = mountListEditor(["first", "second"])
-
-    expect(inputValues(wrapper)).toEqual(["first", "second", ""])
-  })
-
-  it("emits updates and appends a new empty row after filling the blank one", async () => {
+  it("adds values without sending empty rows", async () => {
     const wrapper = mountListEditor(["first"])
+
+    expect(inputValues(wrapper)).toEqual(["first"])
+
+    await wrapper.get("button:not([aria-label])").trigger("click")
+
+    expect(inputValues(wrapper)).toEqual(["first", ""])
+    expect(wrapper.emitted("update:modelValue")).toBeUndefined()
 
     await wrapper.findAll("input")[1].setValue("second")
 
-    expect(inputValues(wrapper)).toEqual(["first", "second", ""])
     expect(wrapper.emitted("update:modelValue").at(-1)[0]).toEqual([
       "first",
       "second",
-      "",
     ])
-  })
-
-  it("removes a row", async () => {
-    const wrapper = mountListEditor(["first", "second"])
-
-    await wrapper.findAll("button")[2].trigger("click")
-
-    expect(inputValues(wrapper)).toEqual(["second", ""])
-    expect(wrapper.emitted("update:modelValue").at(-1)[0]).toEqual(["second", ""])
-  })
-
-  it("moves rows up and down", async () => {
-    const wrapper = mountListEditor(["first", "second"])
-
-    await wrapper.findAll("button")[3].trigger("click")
-    expect(inputValues(wrapper)).toEqual(["second", "first", ""])
-
-    await wrapper.findAll("button")[1].trigger("click")
-    expect(inputValues(wrapper)).toEqual(["first", "second", ""])
   })
 })

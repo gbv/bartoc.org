@@ -39,21 +39,42 @@
         and <a href="/data/reports/stats.json">this JSON file</a> for more detailed statistics.
       </p>
     </section>
-
-    <section
-      v-if="reports.length"
-      class="stats-panel">
+    <section class="stats-panel">
       <h4>
         Daily Data Quality Reports
       </h4>
-      <div class="action-group">
-        <a
-          v-for="file in reports"
-          :key="file"
-          :href="`/data/reports/${file}`"
-          class="cc-button cc-button-primary">
-          {{ file }}
-        </a>
+      <p class="reports-intro">
+        Review records that may need attention. Quality reports are available in
+        <a href="https://gbv.github.io/data-validation-report-format/">DVRF</a> (JSON)
+        for data processing or in CSV for spreadsheet.
+      </p>
+      <div class="report-list">
+        <article
+          v-for="(report, id) in reports"
+          :key="id"
+          class="report-item">
+          <h5 v-if="report.types?.[0]">
+            {{ report.title }} (<a :href="searchUrl(report.types[0])">{{ report.totalErrors }} {{ report.level || "error" }}s</a>)
+          </h5>
+          <h5 v-else-if="id === 'summary'">
+            {{ report.title }} ({{ report.totalErrors }} records with findings)
+          </h5>
+          <h5 v-else>
+            {{ report.title }} ({{ report.totalErrors }} {{ report.level || "error" }}s)
+          </h5>
+          <p>{{ report.description }}</p>
+          <div class="report-links">
+            <a
+              v-for="format in report.formats"
+              :key="format"
+              :href="`/data/reports/${id}.${format}`"
+              :aria-label="report.title + ' (' + format.toUpperCase() + ', opens in a new tab)'"
+              target="_blank"
+              rel="noopener noreferrer">
+              {{ format.toUpperCase() }}
+            </a>
+          </div>
+        </article>
       </div>
     </section>
   </div>
@@ -62,45 +83,16 @@
 <script setup>
 defineOptions({ name: "StatsPage" })
 
+const searchUrl = code => `/vocabularies/?filter=${encodeURIComponent(`error:${code}`)}`
+
 defineProps({
   schemesCount: {
     type: Number,
     required: true,
   },
   reports: {
-    type: Array,
-    default: () => [],
+    type: Object,
+    default: () => {},
   },
 })
 </script>
-
-<style scoped>
-.stats-layout {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cc-space-lg);
-  padding-block: var(--cc-space-lg);
-}
-
-.stats-panel {
-  flex: 0 0 100%;
-  padding: var(--cc-space-md);
-  border: 1px solid var(--cc-border-color);
-  border-radius: var(--cc-radius-sm);
-  background: var(--cc-color-surface);
-}
-
-.stats-panel > :first-child {
-  margin-top: 0;
-}
-
-.stats-panel > :last-child {
-  margin-bottom: 0;
-}
-
-@media (min-width: 48rem) {
-  .stats-panel--summary {
-    flex: 1 1 0;
-  }
-}
-</style>

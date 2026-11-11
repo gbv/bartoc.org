@@ -1,3 +1,7 @@
+import { isValidUrl, mediaThumbnailUrl, validatePublisher } from "../src/validation.js"
+export { isValidUrl, mediaThumbnailUrl, validatePublisher }
+export { parseJson } from "./utils/parseJson.js"
+export { formatTimestamp } from "./utils/formatTimestamp.js"
 import { cdk, addAllProviders } from "cocoda-sdk"
 import { franc } from "franc-min"
 import convert3To1 from "iso-639-3-to-1"
@@ -16,18 +20,6 @@ export async function cdkLoadConcepts(scheme, uri) {
 
   const result = await registry.getConcepts({ concepts: [{ uri, inScheme: [scheme] }] })
   return result
-}
-
-export function parseJson(value, fallback = {}) {
-  if (!value) {
-    return fallback
-  }
-
-  try {
-    return JSON.parse(value)
-  } catch {
-    return fallback
-  }
 }
 
 // Read JSON saved in the current browser tab.
@@ -63,22 +55,6 @@ export async function fetchJson(requestUrl, accept = "application/json") {
   } catch {
     return null
   }
-}
-
-// Format full timestamps in the user's locale and time zone. Date-only values
-// stay unchanged because converting them to Date would add time precision.
-const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
-  dateStyle: "medium",
-  timeStyle: "short",
-})
-
-export function formatTimestamp(value) {
-  if (typeof value !== "string" || !value.includes("T")) {
-    return value
-  }
-
-  const date = new Date(value)
-  return Number.isNaN(date.valueOf()) ? value : dateTimeFormatter.format(date)
 }
 
 export const indexingSchemes = [
@@ -146,6 +122,25 @@ function trimStringArray(value) {
     .filter(v => !(typeof v === "string" && v === ""))
 }
 
+
+// Keep the editor simple while storing a valid JSKOS/IIIF manifest.
+export function withMediaThumbnail(media = {}, url = "") {
+  const thumbnail = Array.isArray(media.thumbnail) && media.thumbnail[0]
+    ? media.thumbnail[0]
+    : {}
+
+  return {
+    ...media,
+    type: "Manifest",
+    items: Array.isArray(media.items) ? media.items : [],
+    thumbnail: [{
+      ...thumbnail,
+      type: "Image",
+      id: url,
+    }],
+  }
+}
+
 // Trim all relevant string fields in an item identifier object
 export function trimItemIdentifiers(item) {
   if (!item || typeof item !== "object") {
@@ -201,6 +196,15 @@ export function trimItemIdentifiers(item) {
       .filter(p => p.uri)
   }
 
+  if (Array.isArray(item.media)) {
+    item.media = item.media
+      .map(media => withMediaThumbnail(
+        media,
+        trimString(mediaThumbnailUrl(media)),
+      ))
+      .filter(media => media.thumbnail[0].id)
+  }
+
   if (Array.isArray(item.publisher)) {
     item.publisher = item.publisher.map(p => ({ ...p, uri: trimString(p.uri) }))
   }
@@ -235,6 +239,34 @@ export function trimItemIdentifiers(item) {
     item.basedOn = item.basedOn
       .map(v => ({ ...v, uri: trimString(v.uri) }))
       .filter(v => v.uri)
+  }
+
+  if (Array.isArray(item.replacedBy)) {
+    item.replacedBy = item.replacedBy
+      .map(v => ({ ...v, uri: trimString(v.uri) }))
+      .filter(v => v.uri)
+  }
+
+  if (Array.isArray(item.issueTracker)) {
+    item.issueTracker = item.issueTracker
+      .map(tracker => ({ ...tracker, uri: trimString(tracker.uri) }))
+      .filter(tracker => tracker.uri)
+  }
+
+  if (Array.isArray(item.distributions)) {
+    item.distributions = item.distributions.map(distribution => {
+      if (!distribution || typeof distribution !== "object") {
+        return distribution
+      }
+
+      const trimmed = { ...distribution }
+      for (const property of ["download", "accessURL"]) {
+        if (typeof distribution[property] === "string") {
+          trimmed[property] = trimString(distribution[property])
+        }
+      }
+      return trimmed
+    })
   }
 
   return item
@@ -574,28 +606,7 @@ export function createSubjectProvider(scheme) {
   }
 }
 
-// Check if a value is a valid HTTP(S) URL
-export function isValidUrl(value) {
-  try {
-    const url = new URL(value)
-    return url.protocol === "http:" || url.protocol === "https:"
-  } catch {
-    return false
-  }
-}
 
-// validate publisher object with fields `prefLabel.en` and `uri`
-export function validatePublisher(publisher) {
-  if (!publisher.prefLabel?.en?.trim()) {
-    return { message: "Publisher name is required!" }
-  }
-
-  if (!publisher.uri) {
-    return { message: "Publisher URI is required!" }
-  } else if (!isValidUrl(publisher.uri)) {
-    return { message: "Publisher URI must be a valid HTTP(S) URL!" }
-  }
-}
 
 /**
  * Compare two item lists by URI only.

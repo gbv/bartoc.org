@@ -1,6 +1,6 @@
 <template>
   <MetadataRow
-    :show="items.length > 0"
+    v-if="items.length > 0"
     :label="label"
     :icon="icon"
     :source-field="sourceField">

@@ -9,6 +9,7 @@ import {
   parseNotationExamples,
   hasValidVersionOf,
 } from "../../vue/utils/itemEditor.js"
+import { imageMedia } from "../helpers/media.js"
 
 describe("ItemEditor business logic", () => {
   it("normalizes missing object and array fields for editing", () => {
@@ -27,9 +28,23 @@ describe("ItemEditor business logic", () => {
     expect(item.DISPLAY).toEqual({})
     expect(item.notation).toEqual([])
     expect(item.identifier).toEqual([])
+    expect(item.issueTracker).toEqual([])
+    expect(item.media).toEqual([])
     expect(item.subjectOf).toEqual([])
     expect(item.versionOf).toEqual([])
     expect(item.basedOn).toEqual([])
+    expect(item.replacedBy).toEqual([])
+    expect(item.distributions).toEqual([])
+  })
+
+  it("converts the old media shape for editing", () => {
+    const item = normalizeEditableItem({
+      media: [{ thumbnail: "https://example.org/logo.png" }],
+    })
+
+    expect(item.media).toEqual([
+      imageMedia("https://example.org/logo.png"),
+    ])
   })
 
   it("parses notation examples from comma-separated input", () => {
@@ -55,10 +70,10 @@ describe("ItemEditor business logic", () => {
     })).toEqual({ message: "item must have at least a title!" })
 
     expect(itemError({
-      prefLabel: { en: ["Title"] },
+      prefLabel: { de: ["Titel"] },
       definition: { en: ["   "] },
       publisher: [],
-    })).toEqual({ message: "Please provide at least one English abstract." })
+    })).toEqual({ message: "Please provide at least an English title or abstract." })
 
     expect(itemError({
       prefLabel: { en: ["Title"] },
@@ -71,6 +86,17 @@ describe("ItemEditor business logic", () => {
       definition: { en: ["English abstract"] },
       publisher: [{ prefLabel: { en: "Publisher" }, uri: "https://example.org" }],
     })).toBeUndefined()
+  })
+
+  it("validates media thumbnail URLs", () => {
+    expect(itemError({
+      prefLabel: { en: ["Title"] },
+      definition: { en: ["English abstract"] },
+      publisher: [],
+      media: [imageMedia("logo.png")],
+    })).toEqual({
+      message: "Enter a complete media URL starting with http:// or https://.",
+    })
   })
 
   it("allows a version number and link instead of a title", () => {
@@ -100,12 +126,17 @@ describe("ItemEditor business logic", () => {
     expect(itemError({
       ...validItem,
       versionOf: [{ uri }],
-    })).toEqual({ message: "A vocabulary cannot be a version of itself." })
+    })).toEqual({ message: "A terminology cannot be an edition of itself." })
 
     expect(itemError({
       ...validItem,
       basedOn: [{ uri: ` ${uri} ` }],
-    })).toEqual({ message: "A vocabulary cannot be based on itself." })
+    })).toEqual({ message: "A terminology cannot be based on itself." })
+
+    expect(itemError({
+      ...validItem,
+      replacedBy: [{ uri }],
+    })).toEqual({ message: "A terminology cannot be replaced by itself." })
 
     expect(itemError({
       ...validItem,
@@ -114,7 +145,7 @@ describe("ItemEditor business logic", () => {
     })).toBeUndefined()
   })
 
-  it("allows a version record without an English abstract", () => {
+  it("allows an edition record without an English abstract", () => {
     expect(itemError({
       prefLabel: { en: ["Version title"] },
       definition: {},
@@ -131,13 +162,13 @@ describe("ItemEditor business logic", () => {
       { uri: "http://bartoc.org/en/node/21133" },
       { uri: "http://bartoc.org/en/node/20827" },
     ]],
-  ])("does not let %s bypass the English abstract requirement", (_, versionOf) => {
+  ])("does not let %s bypass the English title/abstract requirement", (_, versionOf) => {
     expect(itemError({
-      prefLabel: { en: ["Version title"] },
+      prefLabel: { de: ["Version"] },
       definition: {},
       versionOf,
       publisher: [],
-    })).toEqual({ message: "Please provide at least one English abstract." })
+    })).toEqual({ message: "Please provide at least an English title or abstract." })
   })
 
   it("reports a versionOf self-reference before a missing abstract", () => {
@@ -149,7 +180,7 @@ describe("ItemEditor business logic", () => {
       definition: {},
       versionOf: [{ uri }],
       publisher: [],
-    })).toEqual({ message: "A vocabulary cannot be a version of itself." })
+    })).toEqual({ message: "A terminology cannot be an edition of itself." })
   })
 
   it("cleans empty fields and normalizes relation-like values", () => {
@@ -179,6 +210,9 @@ describe("ItemEditor business logic", () => {
       basedOn: [
         { uri: "vocabulary:base", prefLabel: { en: "Base" } },
       ],
+      replacedBy: [
+        { uri: "vocabulary:new", prefLabel: { en: "New" } },
+      ],
       _private: "hidden",
     })
 
@@ -203,6 +237,9 @@ describe("ItemEditor business logic", () => {
       ],
       basedOn: [
         { uri: "vocabulary:base" },
+      ],
+      replacedBy: [
+        { uri: "vocabulary:new" },
       ],
     })
   })

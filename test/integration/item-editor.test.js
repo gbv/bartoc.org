@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { mount, flushPromises } from "@vue/test-utils"
 import { nextTick } from "vue"
 import ItemEditor from "../../vue/components/ItemEditor.vue"
+import { imageMedia } from "../helpers/media.js"
 
 const utilsMocks = vi.hoisted(() => ({
   loadConcepts: vi.fn(() => Promise.resolve([])),
@@ -77,10 +78,11 @@ const AbstractsEditorStub = {
 const conceptSchemeType = "http://www.w3.org/2004/02/skos/core#ConceptScheme"
 const thesaurusType = "http://w3id.org/nkos/nkostype#thesaurus"
 const optionalEnglishMessage =
-  "An English abstract is optional because this terminology is a version of another BARTOC terminology."
+  "An English abstract is optional because this terminology is an edition of another BARTOC terminology."
 
-function mountEditor(current = {}, props = {}) {
+function mountEditor(current = {}, props = {}, options = {}) {
   return mount(ItemEditor, {
+    ...options,
     props: {
       current,
       user: null,
@@ -100,6 +102,7 @@ function mountEditor(current = {}, props = {}) {
         TerminologyRelationEditor: true,
         ItemSelect: true,
         ItemSelected: true,
+        DistributionsEditor: true,
       },
     },
   })
@@ -117,8 +120,18 @@ function stubFailedSave() {
   })))
 }
 
+function stubScrollIntoView() {
+  const scrollIntoView = vi.fn()
+  Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+    configurable: true,
+    value: scrollIntoView,
+  })
+  return scrollIntoView
+}
+
 describe("ItemEditor", () => {
   beforeEach(() => {
+    window.history.replaceState({}, "", "/edit")
     utilsMocks.loadConcepts.mockClear()
     utilsMocks.trimItemIdentifiers.mockClear()
     utilsMocks.createConceptApiProvider.mockClear()
@@ -126,24 +139,85 @@ describe("ItemEditor", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    delete HTMLElement.prototype.scrollIntoView
   })
 
-  it("initializes missing object and array fields", () => {
+  it("scrolls to and focuses a quality field target", async () => {
+    const scrollIntoView = stubScrollIntoView()
+    window.history.replaceState({}, "", "/edit?uri=record#field-extent")
+
+    const wrapper = mountEditor({}, {}, { attachTo: document.body })
+    await flushPromises()
+
+    const size = wrapper.get("#field-extent")
+    expect(size.get("label").text()).toBe("Size")
+    expect(wrapper.get("#field-license").get("label").text()).toBe("License")
+    expect(wrapper.get("#field-publisher").get("label").text()).toBe("Publisher")
+    expect([
+      "field-pref-label",
+      "field-definition",
+      "field-version-of",
+      "field-based-on",
+      "field-replaced-by",
+      "field-api",
+      "field-media",
+      "field-distributions",
+    ].every(id => wrapper.find(`#${id}`).exists())).toBe(true)
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: "center" })
+    expect(document.activeElement).toBe(size.get("input").element)
+
+    wrapper.unmount()
+  })
+
+  it("does not scroll without a field fragment", async () => {
+    const scrollIntoView = stubScrollIntoView()
+
+    const wrapper = mountEditor({}, {}, { attachTo: document.body })
+    await flushPromises()
+
+    expect(scrollIntoView).not.toHaveBeenCalled()
+
+    wrapper.unmount()
+  })
+
+  it("initializes fields and passes media to its editor", () => {
+    const media = [imageMedia("https://example.org/logo.png")]
     const w = mountEditor({
       notationExamples: ["A", "B"],
       prefLabel: { en: ["x"] },
       definition: { en: ["English abstract"] },
       type: [conceptSchemeType],
+      media,
     })
 
     expect(w.vm.item.ADDRESS).toEqual({})
     expect(w.vm.item.DISPLAY).toEqual({})
     expect(w.vm.item.notation).toEqual([])
     expect(w.vm.item.identifier).toEqual([])
+    expect(w.vm.item.issueTracker).toEqual([])
     expect(w.vm.item.languages).toEqual([])
     expect(w.vm.item.subjectOf).toEqual([])
     expect(w.vm.item.versionOf).toEqual([])
     expect(w.get("[data-testid='notation-examples-editor']").element.value).toBe("A, B")
+    expect(w.getComponent({ name: "MediaEditor" }).props("modelValue")).toEqual(media)
+  })
+
+  it("maps issue tracker URLs to JSKOS items", async () => {
+    const w = mountEditor({
+      issueTracker: [{ uri: "https://example.org/issues" }],
+    })
+    const rows = w.findAll(".form-row")
+    const editor = rows[formLabels(w).indexOf("Issue tracker")]
+      .getComponent({ name: "ListEditor" })
+
+    expect(editor.props("modelValue")).toEqual(["https://example.org/issues"])
+
+    editor.vm.$emit("update:modelValue", ["https://example.org/bugs"])
+    await nextTick()
+
+    expect(w.vm.item.issueTracker).toEqual([
+      { uri: "https://example.org/bugs" },
+    ])
   })
 
   it("shows the access selector", () => {
@@ -353,7 +427,7 @@ describe("ItemEditor", () => {
 
     expect(fetch).not.toHaveBeenCalled()
     expect(w.vm.error).toEqual({
-      message: "A vocabulary cannot be a version of itself.",
+      message: "A terminology cannot be an edition of itself.",
     })
   })
 
@@ -373,7 +447,7 @@ describe("ItemEditor", () => {
 
     expect(fetch).not.toHaveBeenCalled()
     expect(w.vm.error).toEqual({
-      message: "A vocabulary cannot be based on itself.",
+      message: "A terminology cannot be based on itself.",
     })
   })
 
@@ -580,17 +654,17 @@ describe("ItemEditor", () => {
     })
   })
 
-  it("itemError requires at least one English abstract", async () => {
+  it("itemError requires at least an English title or abstract", async () => {
     const w = mountEditor({
       definition: {},
-      prefLabel: { en: ["x"] },
+      prefLabel: { de: ["x"] },
       type: [conceptSchemeType],
     })
 
     await w.get("[data-testid='emit-no-en']").trigger("click")
 
     expect(w.vm.itemError()).toEqual({
-      message: "Please provide at least one English abstract.",
+      message: "Please provide at least an English title or abstract.",
     })
   })
 
@@ -734,7 +808,7 @@ describe("ItemEditor", () => {
     expect(errorMessage.attributes("role")).toBe("alert")
   })
 
-  it("saves a version without a title", async () => {
+  it("saves an edition without a title", async () => {
     stubFailedSave()
     const w = mountEditor({
       uri: "http://bartoc.org/en/node/294",
@@ -752,4 +826,5 @@ describe("ItemEditor", () => {
     expect(body).not.toHaveProperty("prefLabel")
     expect(w.vm.item.prefLabel).toEqual({})
   })
+
 })

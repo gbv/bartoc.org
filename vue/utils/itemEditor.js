@@ -1,12 +1,14 @@
-import { isValidUrl, validatePublisher } from "../utils.js"
-import { normalizeUri } from "../../src/uri.js"
 import {
-  CONCEPT_SCHEME_TYPE,
+  mediaThumbnailUrl,
+  withMediaThumbnail,
+} from "../utils.js"
+import {
   hasMeaningfulValue,
   hasValidVersionOf,
-  kosTypeUris,
   versionNumber,
-} from "../../src/versioning.js"
+} from "../../src/editions.js"
+import { CONCEPT_SCHEME_TYPE, kosTypeUris } from "../../src/terminology.js"
+import { validateItem } from "../../src/validation.js"
 
 export {
   CONCEPT_SCHEME_TYPE,
@@ -15,22 +17,33 @@ export {
   kosTypeUris,
 }
 
-const objectFields = ["prefLabel", "altLabel", "definition", "ADDRESS", "DISPLAY"]
+const objectFields = [
+  "ADDRESS",
+  "DISPLAY",
+  "altLabel",
+  "definition",
+  "prefLabel",
+]
+
 const arrayFields = [
-  "notation",
+  "ACCESS",
+  "API",
+  "FORMAT",
+  "basedOn",
   "identifier",
+  "issueTracker",
   "languages",
   "license",
-  "type",
+  "media",
+  "notation",
+  "partOf",
+  "publisher",
+  "replacedBy",
   "subject",
   "subjectOf",
-  "partOf",
-  "FORMAT",
-  "API",
-  "ACCESS",
-  "publisher",
+  "type",
   "versionOf",
-  "basedOn",
+  "distributions",
 ]
 
 export function normalizeEditableItem(current = {}) {
@@ -47,6 +60,12 @@ export function normalizeEditableItem(current = {}) {
       item[key] = []
     }
   })
+
+  // Convert the old issue example to the current JSKOS media shape.
+  item.media = item.media.map(media => withMediaThumbnail(
+    media,
+    mediaThumbnailUrl(media),
+  ))
 
   return item
 }
@@ -75,55 +94,10 @@ export function githubIssueUrl(title, body) {
 }
 
 export function itemError(item) {
-  const canDeriveTitle = versionNumber(item) && hasValidVersionOf(item)
-  if (!hasMeaningfulValue(item?.prefLabel) && !canDeriveTitle) {
-    return { message: "item must have at least a title!" }
-  }
-
-  if (hasSelfReference(item, "versionOf")) {
-    return { message: "A vocabulary cannot be a version of itself." }
-  }
-
-  if (hasSelfReference(item, "basedOn")) {
-    return { message: "A vocabulary cannot be based on itself." }
-  }
-
-  const hasEnglishAbstract = item.definition?.en?.some(text => text?.trim())
-
-  if (!hasEnglishAbstract && !hasValidVersionOf(item)) {
-    return { message: "Please provide at least one English abstract." }
-  }
-
-  const hasInvalidEndpoint = item.API?.some((endpoint) => {
-    const url = endpoint?.url
-
-    if (url == null || (typeof url === "string" && !url.trim())) {
-      return false
-    }
-
-    return typeof url !== "string" || !isValidUrl(url)
-  })
-
-  if (hasInvalidEndpoint) {
-    return { message: "Enter a complete URL starting with http:// or https://." }
-  }
-
-  if (item.publisher?.length) {
-    const publisherError = validatePublisher(item.publisher[0])
-    if (publisherError) {
-      return publisherError
-    }
-  }
+  const error = validateItem(item)[0]
+  return error ? { message: error.message } : undefined
 }
 
-function hasSelfReference(item, field) {
-  const uri = normalizeUri(item?.uri)
-  return Boolean(
-    uri &&
-    Array.isArray(item?.[field]) &&
-    item[field].some(reference => normalizeUri(reference?.uri) === uri),
-  )
-}
 
 export function cleanupItem(item) {
   // Vocabulary record should always be a ConceptScheme.
@@ -160,6 +134,12 @@ export function cleanupItem(item) {
   // BasedOn
   if (item.basedOn) {
     item.basedOn = item.basedOn
+      .map(({ uri }) => ({ uri }))
+      .filter(value => value.uri)
+  }
+
+  if (item.replacedBy) {
+    item.replacedBy = item.replacedBy
       .map(({ uri }) => ({ uri }))
       .filter(value => value.uri)
   }

@@ -43,6 +43,7 @@ echo "Calculate monthly growth"
 echo "month,growth" > data/reports/growth.csv
 jq -s -r 'map(.created[:7])|sort|group_by(.)[]|[.[0],length]|@csv' $DUMP >> data/reports/growth.csv
 
-echo "DDC classes used in BARTOC"
-jq -c '.subject|select(.)[]|select(.inScheme[0].uri=="http://bartoc.org/en/node/241")|{inScheme,uri,notation:[.uri|split("/")[4]]}' \
-  $DUMP | sort -u | jq -s > data/reports/ddc-classes.json
+#echo "DDC classes used in BARTOC"
+#jq -c '.subject|select(.)[]|select(.inScheme[0].uri=="http://bartoc.org/en/node/241")|{inScheme,uri,notation:[.uri|split("/")[4]]}' \
+#  $DUMP | sort -u | jq -s > data/reports/stats/ddc-classes.json
+

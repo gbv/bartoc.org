@@ -1,4 +1,5 @@
 <template>
+  <h1>Not found</h1>
   <p>
     Sorry, the resource could not be found!
     Are you <a href="/vocabularies">looking for vocabularies</a>?

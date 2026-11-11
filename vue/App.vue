@@ -1,13 +1,11 @@
 <template>
-  <Teleport to="#header-app">
-    <TheHeader />
-  </Teleport>
-  <component
-    :is="pageComponent"
-    v-bind="pageProps" />
-  <Teleport to="#footer-app">
-    <TheFooter />
-  </Teleport>
+  <TheHeader />
+  <main class="app-container">
+    <component
+      :is="pageComponent"
+      v-bind="pageProps" />
+  </main>
+  <TheFooter />
 </template>
 
 <script setup>

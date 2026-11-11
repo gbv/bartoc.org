@@ -1,91 +1,112 @@
-import { computed, createApp, markRaw, ref, toRefs, watch } from "vue"
+import { computed, ref, toRefs, watch } from "vue"
 
-import App from "./App.vue"
-import VocabularySearch from "./components/VocabularySearch.vue"
-import ServiceLink from "./components/ServiceLink.vue"
-import RegistryList from "./components/RegistryList.vue"
-import RegistryVocabularies from "./components/RegistryVocabularies.vue"
-import { pages } from "./pages/index.js"
-import { library } from "@fortawesome/fontawesome-svg-core"
-import { faLanguage } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
-import { parseJson } from "./utils.js"
+import { createBartocApp } from "./appFactory.js"
+import { createEditAccess } from "./editAccess.js"
+import { loadClientPage } from "./pages/client.js"
+import { parseJson } from "./utils/parseJson.js"
 import { Login } from "gbv-login-client-vue"
 
-// Add icons to the library, in this case language
-library.add(faLanguage)
-
-// Note: Using the JSON files directly because Lodash is used in config/index.js
-import configDefault from "../config/config.default.json"
-import configUser from "../config/config.json"
-const login = Object.assign({}, configDefault.login, configUser.login || {})
-
-// Footer context comes from EJS-rendered data attributes on the app root.
-const rootElement = document.getElementById("app")
-const pageProps = parseJson(document.getElementById("page-props")?.textContent)
-const footer = {
-  siteName: rootElement?.dataset.siteName || "BARTOC.org",
-  itemUri: rootElement?.dataset.itemUri || "",
-  resourcePath: rootElement?.dataset.resourcePath || "",
-  api: rootElement?.dataset.api || "",
-  query: parseJson(rootElement?.dataset.query),
-}
+// Read the data used for server rendering so Vue can hydrate the same page.
+const serverState = parseJson(document.getElementById("page-state")?.textContent)
 
 import { render } from "../node_modules/timeago.js/"
 import "jskos-vue/dist/style.css"
 
-const { token, user } = toRefs(Login)
-const auth = computed(() => token.value ? { token: token.value } : null)
-const userCanAdd = ref(false)
+const { token } = toRefs(Login)
 
-watch(token, async currentToken => {
+// BARTOC permissions are checked separately from the login state. The Add
+// action keeps its result and completion flag because the header reserves the
+// button's space while the request is pending.
+const userCanAdd = ref(false)
+const permissionChecked = ref(false)
+
+// Components may replace their account placeholders after the login client
+// has established its connection.
+const loginReady = computed(() => Login.connected)
+
+// Once the account state is known, anonymous users are ready immediately.
+// Authenticated users wait for the permission check for their current token.
+const addReady = computed(() => loginReady.value &&
+  (!Login.loggedIn || (Boolean(token.value) && permissionChecked.value)))
+
+// Ask the local JSKOS API whether the current token permits one action.
+async function requestPermission(action, currentToken) {
+  try {
+    const response = await fetch(
+      `/api/checkAuth?type=schemes&action=${action}`,
+      {
+        headers: {
+          Authorization: `Bearer ${currentToken}`,
+        },
+      },
+    )
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+// Edit access remains pending until the restored account is known. This is
+// separate from Add because the header keeps its existing loading behavior.
+const {
+  editAccess,
+  start: startEditAccess,
+} = createEditAccess(Login, currentToken => requestPermission("update", currentToken))
+const userCanEdit = computed(() => editAccess.value === "allowed")
+
+watch(token, currentToken => {
+  // Clear the previous Add permission before checking the new token.
+  userCanAdd.value = false
+  permissionChecked.value = false
+  // Without a token there are no permissions to request.
   if (!currentToken) {
-    userCanAdd.value = false
+    permissionChecked.value = true
     return
   }
 
-  const url = "/api/checkAuth?type=schemes&action=create"
-  const headers = { Authorization: `Bearer ${currentToken}` }
-  try {
-    const response = await fetch(url, { headers })
-    userCanAdd.value = response.ok
-  } catch {
-    userCanAdd.value = false
-  }
+  requestPermission("create", currentToken).then(allowed => {
+    // Ignore a response belonging to a token that was replaced meanwhile.
+    if (token.value !== currentToken) {
+      return
+    }
+
+    userCanAdd.value = allowed
+    permissionChecked.value = true
+  })
+
 }, { immediate: true })
 
-// EJS still renders the route-specific page markup. App.vue owns the shell
-// and renders this component where bartoc-search would render RouterView.
-const EjsPageContent = markRaw({
-  name: "PageContent",
-  components: {
-    VocabularySearch,
-    ServiceLink,
-    RegistryList,
-    RegistryVocabularies,
-  },
-  setup() {
-    return { auth, user, userCanAdd }
-  },
-  template: rootElement?.innerHTML || "",
-})
+async function hydrate() {
+  // Load only this page in the browser, using the same component as SSR.
+  const pageComponent = await loadClientPage(serverState.page)
+  const app = createBartocApp({
+    pageComponent,
+    pageProps: serverState.pageProps || {},
+    footer: serverState.footer || {},
+    header: {
+      activePath: serverState.header?.activePath || "",
+      userCanAdd,
+      userCanEdit,
+      editAccess,
+      loginReady,
+      addReady,
+    },
+  })
 
-const pageComponent = markRaw(pages[rootElement?.dataset.page] || EjsPageContent)
-const app = createApp(App, { pageComponent, pageProps })
-app.provide("footer", footer)
-app.provide("header", {
-  activePath: rootElement?.dataset.pagePath || "",
-  userCanAdd,
-})
-app.use(Login)
-Login.connect(login.api, { ssl: login.ssl })
-app.component("FontAwesomeIcon", FontAwesomeIcon)
+  // Keep the SSR login state anonymous until Vue has hydrated the header.
+  app.mount("#app")
 
-app.mount("#app")
+  // connect() restores the account asynchronously. The reactive Login values
+  // above update the header and permission-dependent content as events arrive.
+  Login.connect(serverState.login.api, { ssl: serverState.login.ssl })
+  startEditAccess()
 
-// Plain JavaScript is sufficient for relative timestamps.
-// See https://github.com/hustcc/timeago.js/issues/230
-const timeagoNodes = document.querySelectorAll(".timeago")
-if (timeagoNodes.length) {
-  render(timeagoNodes)
+  // Plain JavaScript is sufficient for relative timestamps.
+  // See https://github.com/hustcc/timeago.js/issues/230
+  const timeagoNodes = document.querySelectorAll(".timeago")
+  if (timeagoNodes.length) {
+    render(timeagoNodes)
+  }
 }
+
+hydrate().catch(error => console.error("Could not hydrate the page.", error))

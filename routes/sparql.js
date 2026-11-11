@@ -10,20 +10,17 @@ export default function createSparqlRoute({ endpoint, examples, render }) {
       res.redirect(301, `/graph/${query}`)
     })
 
-    router.get("/graph/", (req, res) => {
-      render(req, res, "vue-page", {
+    router.get("/graph/", (req, res, next) => {
+      return render(req, res, {
         title: "SPARQL Query",
         vuePage: "sparql",
         vuePageProps: {
           endpoint,
           examples,
         },
-        stylesheets: [
-          "/vendor/yasgui/yasgui.min.css",
-          "/vendor/fontawesome/css/all.min.css",
-        ],
+        stylesheets: ["/vendor/yasgui/yasgui.min.css"],
         scripts: ["/vendor/yasgui/yasgui.min.js"],
-      })
+      }).catch(next)
     })
   }
 

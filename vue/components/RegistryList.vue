@@ -109,7 +109,7 @@
     </table>
 
     <p
-      v-if="!filteredRegistries.length"
+      v-if="registriesLoaded && !filteredRegistries.length"
       class="registry-list-empty">
       No registries found.
     </p>
@@ -127,7 +127,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue"
+import { computed, onMounted, reactive, ref } from "vue"
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
@@ -153,12 +153,16 @@ const apiTypeLabels = {
 }
 
 const registries = ref([])
+const registriesLoaded = ref(false)
 const pendingTerminologyCountUris = reactive(new Set())
 const terminologyCountBatchSize = 5
 
-fetch("/api/registries?limit=1000").then(res => res.json()).then(async res => {
-  registries.value = res
-  await loadTerminologyCounts()
+onMounted(() => {
+  fetch("/api/registries?limit=1000").then(res => res.json()).then(async res => {
+    registries.value = res
+    registriesLoaded.value = true
+    await loadTerminologyCounts()
+  })
 })
 
 // Show the registry list first. Then load terminology counts in small batches.
