@@ -1,0 +1,256 @@
+{
+   "headOffice": [
+      {
+         "name": "Uma Balakrishnan",
+         "role": "Project Lead",
+         "orcid": "https://orcid.org/0000-0002-6076-9853",
+         "email": "balakrishnan@gbv.de"
+      },
+      {
+         "name": "Jakob Voß",
+         "role": "Technical Lead",
+         "orcid": "https://orcid.org/0000-0002-7613-4123",
+         "email": "voss@gbv.de"
+      },
+      { 
+         "name": "Rodolfo Marraffa",
+         "role": "Software Developer",
+         "orcid": "https://orcid.org/0009-0006-6578-8443",
+         "email": "rodolfo.marraffa@gbv.de"
+      },
+      {
+         "name": "Mareike Röhl",
+         "role": "Data Librarian",
+         "orcid": "https://orcid.org/0000-0003-1763-3026",
+         "email": "mareike.roehl@gbv.de"
+      }
+   ],
+
+   "internationalEditors": [
+      {
+         "country": "Austria",
+         "members": [
+            {
+               "name": "Andreas Blumauer",
+               "role": "CEO",
+               "affiliation": "Semantic Web Company GmbH",
+               "email": "andreas.blumauer@semantic-web.com"
+            },
+            {
+               "name": "Rabea Rudigier",
+               "affiliation": "Österreichische Nationalbibliothek",
+               "email": "rabea.rudigier@onb.ac.at" 
+            }  
+         ]
+      },
+      {
+         "country": "France",
+         "members": [
+            {
+               "name": "Ghislain Atemezing, PhD",
+               "role": "Data Project Officer (Operational Data Unit)",
+               "affiliation": "European Union Agency for Law Enforcement Cooperation",
+               "website": "https://linkedvocabs.org/perso/index.html",
+               "orcid": "https://orcid.org/0000-0003-1562-6922",
+               "email": "ghislain.atemezing@era.europa.eu"
+            }
+         ]
+      },
+      {
+         "country": "Germany",
+         "project": "coli-conc",
+         "organization": "Head Office of the GBV Common Library Network",
+         "website": "https://coli-conc.gbv.de/",
+         "members": [
+             {
+               "name": "Jakob Voß",
+               "orcid": "https://orcid.org/0000-0002-7613-4123"
+             },
+             {
+               "name": "Uma Balakrishnan",
+               "orcid": "https://orcid.org/0000-0002-6076-9853"
+             },
+             {
+               "name": "Mareike Röhl",
+               "orcid": "https://orcid.org/0000-0003-1763-3026"
+             }
+         ]
+      },
+      {
+          "country": "Greece",
+          "members": [
+            {
+               "name": "Dr. Haralabos Papatheodorou",
+               "role": "English to Greek medical translator",
+               "orcid": "https://orcid.org/0000-0003-3935-4642",
+               "email": "info@greekmedicaltranslator.com"
+            }
+         ]
+      },
+      {
+         "country": "India",
+         "members": [
+            {
+               "name": "Dr. Biswanath Dutta",
+               "role": "Associate Professor",
+               "affiliation": "Indian Statistical Institute, Bangalore",
+               "website": "https://sites.google.com/view/bdutta",
+               "orcid": "https://orcid.org/0000-0003-3059-8202",
+               "email": "bisu@isibang.ac.in"
+            }
+         ]
+      },
+      {
+         "country": "Italy",
+         "members": [
+            {
+               "name": "Claudio Gnoli",
+               "affiliation": "Science and Technology Library, University of Pavia",
+               "website": "https://www.gnoli.eu/",
+               "orcid": "https://orcid.org/0000-0002-4721-7448",
+               "email": "claudio.gnoli@unipv.it"
+            },
+            {
+               "name": "Kristin Kolshus",
+               "affiliation": "Food and Agriculture Organization of the United Nations (FAO)",
+               "orcid": "https://orcid.org/0000-0003-4560-1478",
+               "email": "Kristin.Kolshus@fao.org"
+
+            }
+         ]
+      },
+      {
+         "country": "The Netherlands",
+         "members": [
+            {
+               "name": "Gerard Coen",
+               "affiliation": "Data Archiving and Networked Services (DANS)",
+               "orcid": "https://orcid.org/0000-0001-9915-9721",
+               "email": "gerard.coen@dans.knaw.nl"
+            }
+         ] 
+      },
+      {
+         "country": "Norway",
+         "members": [
+            {
+               "name": "Dan Michael O. Heggø",
+               "affiliation": "University of Oslo Library",
+               "orcid": "https://orcid.org/0000-0002-6189-5958",
+               "email": "d.m.heggo@ub.uio.no"
+            }
+         ] 
+      },
+      {
+         "country": "South Korea",
+         "members": [
+            {
+               "name": "Prof. Ziyoung Park",
+               "affiliation": "Department of Knowledge & Information, Hansung University",
+               "orcid": "https://orcid.org/0000-0002-8985-9991",
+               "email": "zgpark@hansung.ac.kr"
+            },
+            {
+               "name": "Dr. So Young Yoon",
+               "affiliation": "Department of Knowledge & Information, Hansung University",
+               "orcid": "https://orcid.org/0000-0001-7677-4158"
+            }
+         ]
+      },
+      {
+         "country": "Spain",
+         "members": [
+            {
+               "name": "Prof. Amadeu Pons",
+               "affiliation": "Facultat d'Informació i Mitjans Audiovisuals (UB), University of Barcelona",
+               "orcid": "https://orcid.org/0000-0002-2026-5570",
+               "email": "pons@ub.edu"
+            }
+         ] 
+      },
+      {
+         "country": "Luxembourg",
+         "members": [
+            {
+               "name": "Mihai Paunescu",
+               "role": "Semantic Data Consultant",
+               "affiliation": "Publications Office of the EU",
+               "orcid": "https://orcid.org/0000-0003-4093-3393",
+               "email": "mihai.paunescu@ext.publications.europa.eu"
+            }
+         ] 
+      },
+      {
+         "country": "United States",
+         "members": [
+            {
+               "name": "Heather Hedden",
+               "role": "Data & Knowledge Engineer",
+               "affiliation": "Semantic Web Company",
+               "website": "https://www.hedden-information.com/about/",
+               "orcid": "https://orcid.org/0000-0003-0034-7867",
+               "email": "heather@hedden.net"
+            }
+         ] 
+      },
+      {
+         "country": "United Kingdom",
+         "members": [
+            {
+               "name": "Jeannine Beeken",
+               "role": "Senior Metadata and Ontologies Officer",
+               "affiliation": "UK Data Service",
+               "orcid": "https://orcid.org/0000-0001-8796-3923",
+               "email": "jeannine.beeken@essex.ac.uk"
+            }
+         ] 
+      }
+   ],
+    
+   "additionalContributors": [
+      {
+         "name": "Anja Gerber",
+         "orcid": "https://orcid.org/0000-0003-2576-1511"
+      },
+      {
+         "name": "Anne Schuchardt",
+         "orcid": "https://orcid.org/0000-0002-5205-6669"
+      },
+      {
+         "name": "Christian Rüter",
+         "orcid": "https://orcid.org/0000-0003-2653-3799"
+      },
+      {
+         "name": "David-Benjamin Rohrer",
+         "orcid": "https://orcid.org/0000-0001-9377-6294"
+      },
+      {
+         "name": "Erik Stubkjaer",
+         "orcid": "https://orcid.org/0000-0001-5920-8672"
+      },
+      {
+         "name": "Jarmo Saarikko",
+         "orcid": "https://orcid.org/0000-0002-6801-6151"
+      },
+      {
+         "name": "Monty Bitto",
+         "orcid": "https://orcid.org/0009-0004-0865-257X"
+      },
+      {
+         "name": "Ralph Hafner",
+         "orcid": "https://orcid.org/0000-0001-5737-3906"
+      },
+      {
+         "name": "Sabrina Gaab",
+         "orcid": "https://orcid.org/0000-0002-5049-0808"
+      },
+      {
+         "name": "Susanne Arndt",
+         "orcid": "https://orcid.org/0000-0002-1019-9151"
+      },
+      {
+         "name": "Volkan Çağdaş",
+         "orcid": "https://orcid.org/0000-0002-5200-0075"
+      }  
+   ]
+}
