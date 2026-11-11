@@ -46,6 +46,34 @@ describe("ItemEditor save service", () => {
     })
   })
 
+  it("preserves distributions in the save payload", async () => {
+    const result = await prepareItemForSave({
+      item: makeItem({
+        distributions: [
+          {
+            download: "  https://example.org/vocabulary.ttl  ",
+            accessURL: "  https://example.org/vocabulary  ",
+            format: "http://format.gbv.de/jskos",
+            mimetype: "text/turtle",
+            version: "1.0",
+            license: [{ uri: "https://creativecommons.org/publicdomain/zero/1.0/" }],
+          },
+        ],
+      }),
+    })
+
+    expect(JSON.parse(result.body).distributions).toEqual([
+      {
+        accessURL: "https://example.org/vocabulary",
+        download: "https://example.org/vocabulary.ttl",
+        format: "http://format.gbv.de/jskos",
+        mimetype: "text/turtle",
+        version: "1.0",
+        license: [{ uri: "https://creativecommons.org/publicdomain/zero/1.0/" }],
+      },
+    ])
+  })
+
   it("keeps valid media and removes empty media when saving", async () => {
     const result = await prepareItemForSave({
       item: makeItem({

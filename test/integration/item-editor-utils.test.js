@@ -34,6 +34,7 @@ describe("ItemEditor business logic", () => {
     expect(item.versionOf).toEqual([])
     expect(item.basedOn).toEqual([])
     expect(item.replacedBy).toEqual([])
+    expect(item.distributions).toEqual([])
   })
 
   it("converts the old media shape for editing", () => {

@@ -71,6 +71,30 @@
       </MetadataListRow>
 
       <MetadataListRow
+        v-if="!isRegistry"
+        label="Downloads"
+        :items="downloadDistributions"
+        :preview-limit="5">
+        <template #item="{ item: distribution }">
+          <span :title="distribution.download">
+            <ExternalLink
+              :url="distribution.download"
+              :label="downloadLabel(distribution)" />
+          </span>
+        </template>
+      </MetadataListRow>
+
+      <MetadataListRow
+        v-if="!isRegistry"
+        label="Publication URLs"
+        :items="accessDistributions"
+        :preview-limit="5">
+        <template #item="{ item: distribution }">
+          <ExternalLink :url="distribution.accessURL" />
+        </template>
+      </MetadataListRow>
+
+      <MetadataListRow
         :label="isRegistry ? 'Services (API)' : 'Data sources'"
         :items="item.API">
         <template #item="{ item: endpoint }">
@@ -99,6 +123,7 @@ import ItemLink from "./ItemLink.vue"
 import MetadataListRow from "./MetadataListRow.vue"
 import MetadataRow from "./MetadataRow.vue"
 import ServiceLink from "./ServiceLink.vue"
+import { downloadLabel } from "../utils/downloadLabel.js"
 
 defineOptions({ name: "ItemAccess" })
 
@@ -106,6 +131,15 @@ const props = defineProps({
   item: { type: Object, required: true },
   isRegistry: { type: Boolean, default: false },
 })
+
+const downloadDistributions = computed(() =>
+  (props.item.distributions || [])
+    .filter(distribution => distribution?.download),
+)
+const accessDistributions = computed(() =>
+  (props.item.distributions || [])
+    .filter(distribution => distribution?.accessURL),
+)
 
 const address = computed(() => [
   "street",
@@ -115,4 +149,5 @@ const address = computed(() => [
   "code",
   "country",
 ].map(field => props.item.ADDRESS?.[field]).filter(Boolean))
+
 </script>

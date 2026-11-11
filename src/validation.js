@@ -63,6 +63,31 @@ export function validateItem(item = {}) {
     }
   })
 
+  // Validate download and publication URLs in JSKOS distributions.
+  item.distributions?.forEach((distribution, index) => {
+    const urls = [
+      ["download", "download"],
+      ["accessURL", "publication"],
+    ]
+
+    urls.forEach(([property, label]) => {
+      const url = distribution?.[property]
+
+      if (url == null || (typeof url === "string" && !url.trim())) {
+        return
+      }
+
+      if (typeof url !== "string" || !isValidUrl(url.trim())) {
+        errors.push({
+          message: `Enter a complete ${label} URL starting with http:// or https://.`,
+          position: {
+            jsonpointer: `/distributions/${index}/${property}`,
+          },
+        })
+      }
+    })
+  })
+
   // A filled thumbnail must have the expected manifest shape and a valid URL.
   item.media?.forEach((media, index) => {
     const thumbnail = mediaThumbnailUrl(media)

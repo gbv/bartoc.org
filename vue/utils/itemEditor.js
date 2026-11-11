@@ -43,6 +43,7 @@ const arrayFields = [
   "subjectOf",
   "type",
   "versionOf",
+  "distributions",
 ]
 
 export function normalizeEditableItem(current = {}) {

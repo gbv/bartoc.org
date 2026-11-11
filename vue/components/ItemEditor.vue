@@ -200,6 +200,12 @@
     Which <a href="/registries">terminology registries</a> list the vocabulary?
   </form-row>
   <form-row
+    id="field-distributions"
+    label="Distributions">
+    <DistributionsEditor v-model="item.distributions" />
+    Manage direct download and publication URLs. Other distribution metadata is preserved.
+  </form-row>
+  <form-row
     id="field-api"
     :label="'Vocabulary services'">
     <endpoints-editor v-model="item.API" />
@@ -340,6 +346,7 @@ import PublisherEditor from "./PublisherEditor.vue"
 import SetSelect from "./SetSelect.vue"
 import TerminologyRelationEditor from "./TerminologyRelationEditor.vue"
 import AbbreviationEditor from "./AbbreviationEditor.vue"
+import DistributionsEditor from "./DistributionsEditor.vue"
 
 const props = defineProps({
   user: {

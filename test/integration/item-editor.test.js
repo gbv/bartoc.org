@@ -102,6 +102,7 @@ function mountEditor(current = {}, props = {}, options = {}) {
         TerminologyRelationEditor: true,
         ItemSelect: true,
         ItemSelected: true,
+        DistributionsEditor: true,
       },
     },
   })
@@ -160,6 +161,7 @@ describe("ItemEditor", () => {
       "field-replaced-by",
       "field-api",
       "field-media",
+      "field-distributions",
     ].every(id => wrapper.find(`#${id}`).exists())).toBe(true)
     expect(scrollIntoView).toHaveBeenCalledWith({ block: "center" })
     expect(document.activeElement).toBe(size.get("input").element)
@@ -824,4 +826,5 @@ describe("ItemEditor", () => {
     expect(body).not.toHaveProperty("prefLabel")
     expect(w.vm.item.prefLabel).toEqual({})
   })
+
 })

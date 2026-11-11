@@ -697,4 +697,31 @@ describe("ItemPage (terminology)", () => {
 
     expect(wrapper.find("[data-testid='concept-browser']").exists()).toBe(false)
   })
+
+  it("shows download and publication distributions", () => {
+    const url = "https://example.org/voc/concepts?download=ndjson"
+
+    const wrapper = mountPage({
+      distributions: [
+        {
+          download: url,
+          format: "http://format.gbv.de/jskos",
+          mimetype: "application/x-ndjson; charset=utf-8",
+        },
+        { download: url },
+        { accessURL: "https://example.org/vocabulary" },
+      ],
+    })
+
+    const links = rowByLabel(wrapper, "Downloads").findAll("a")
+
+    expect(links.map(link => link.text())).toEqual([
+      "example.org · JSKOS (NDJSON)",
+      "example.org · NDJSON",
+    ])
+    expect(links.map(link => link.attributes("href"))).toEqual([url, url])
+
+    const publication = rowByLabel(wrapper, "Publication URLs").get("a")
+    expect(publication.attributes("href")).toBe("https://example.org/vocabulary")
+  })
 })

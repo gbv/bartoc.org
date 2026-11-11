@@ -253,6 +253,22 @@ export function trimItemIdentifiers(item) {
       .filter(tracker => tracker.uri)
   }
 
+  if (Array.isArray(item.distributions)) {
+    item.distributions = item.distributions.map(distribution => {
+      if (!distribution || typeof distribution !== "object") {
+        return distribution
+      }
+
+      const trimmed = { ...distribution }
+      for (const property of ["download", "accessURL"]) {
+        if (typeof distribution[property] === "string") {
+          trimmed[property] = trimString(distribution[property])
+        }
+      }
+      return trimmed
+    })
+  }
+
   return item
 }
 
