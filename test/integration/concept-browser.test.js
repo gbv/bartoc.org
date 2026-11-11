@@ -231,6 +231,7 @@ describe("ConceptBrowser", () => {
         uri: "scheme:primary",
         VOCID: "voc-id",
       }),
+      params: { properties: "" },
     })
     expect(utilsMocks.sortConcepts).toHaveBeenCalledWith(topConcepts, scheme)
     const tree = wrapper.getComponent(ConceptTreeStub)

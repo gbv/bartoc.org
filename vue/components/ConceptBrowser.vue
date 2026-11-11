@@ -333,8 +333,9 @@ async function resolveSource(sourceOption) {
     }
 
     // Search-only APIs do not provide top concepts for a tree.
+    // Basic concept data is enough here; details are loaded after selection.
     const concepts = registry.has.top
-      ? await registry.getTop({ scheme }).catch(() => null)
+      ? await registry.getTop({ scheme, params: { properties: "" } }).catch(() => null)
       : []
 
     // A failed URI may be known by another identifier.
