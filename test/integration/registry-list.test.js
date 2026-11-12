@@ -108,7 +108,7 @@ describe("RegistryList", () => {
 
     expect(fetch).toHaveBeenCalledWith(registriesUrl)
     expect(wrapper.findAll("button").map(button => button.text())).toEqual([
-      "Metadata Registries 1",
+      "Terminology Collections 1",
       "Terminology Services 1",
       "Terminology Repositories 1",
     ])
@@ -118,7 +118,7 @@ describe("RegistryList", () => {
       "Contain full terminologies.",
     ])
     expect(wrapper.findAll("button").map(button => button.attributes("aria-label"))).toEqual([
-      "Metadata Registries: List and describe terminologies.",
+      "Terminology Collections: List and describe terminologies.",
       "Terminology Services: Provide access to terminologies via an API.",
       "Terminology Repositories: Contain full terminologies.",
     ])
@@ -144,6 +144,13 @@ describe("RegistryList", () => {
       "Terminologies in BARTOC",
       "API",
     ])
+
+    expect(wrapper.findAll("tbody tr").map(row => row.findAll("td")[1].text()))
+      .toEqual([
+        "terminology collection",
+        "terminology repository",
+        "terminology service",
+      ])
 
     expect(wrapper.get("a[href='/en/node/2']").text()).toBe(
       "Terminology Service",
