@@ -1,98 +1,121 @@
-
 <template>
   <div class="cc-distributions-editor">
-    <section class="cc-distributions-editor__section cc-distributions-editor__section--downloads">
-      <strong>Download URLs</strong>
-      <OrderedList
-        :model-value="downloadRows"
-        :orderable="false"
-        @update:model-value="updateRows($event, 'download')">
-        <template #default="{ item: row, update }">
+    <div
+      v-for="(distribution, index) in modelValue"
+      :key="index"
+      class="cc-distributions-editor__entry">
+      <strong class="cc-distributions-editor__title">
+        Distribution {{ index + 1 }}
+      </strong>
+
+      <div class="cc-distributions-editor__url-row">
+        <label class="cc-distributions-editor__url">
+          <span>URL</span>
           <input
-            :value="row.distribution.download"
+            :value="distributionUrl(distribution)"
             type="url"
             class="cc-form-control"
-            :class="{
-              'cc-form-control--invalid': invalidUrl(row.distribution.download),
-            }"
-            :aria-label="`Download URL ${row.index + 1}`"
-            :aria-invalid="invalidUrl(row.distribution.download)"
-            @input="update({
-              ...row,
-              distribution: {
-                ...row.distribution,
-                download: $event.target.value,
-              },
-            })">
-        </template>
-      </OrderedList>
+            :aria-label="`Distribution URL ${index + 1}`"
+            :aria-invalid="invalidUrl(distributionUrl(distribution))"
+            @input="updateDistribution(
+              index,
+              withUrl(distribution, $event.target.value),
+            )">
+        </label>
 
-      <input
-        v-model="newUrls.download"
-        type="url"
-        class="cc-form-control"
-        :class="{ 'cc-form-control--invalid': invalidUrl(newUrls.download) }"
-        aria-label="New download URL"
-        placeholder="https://example.org/vocabulary.ttl">
+        <button
+          type="button"
+          class="cc-button cc-button-secondary cc-button-icon"
+          :aria-label="`Remove distribution ${index + 1}`"
+          @click="removeDistribution(index)">
+          &times;
+        </button>
+      </div>
+
+      <label class="cc-distributions-editor__direct-download">
+        <input
+          :checked="isDirectDownload(distribution)"
+          type="checkbox"
+          @change="updateDistribution(
+            index,
+            withDirectDownload(distribution, $event.target.checked),
+          )">
+        Direct download
+      </label>
+
+      <dl
+        v-if="hasMetadata(distribution)"
+        class="cc-distributions-editor__metadata">
+        <div
+          v-if="distribution.format"
+          class="cc-distributions-editor__metadata-item">
+          <dt>Format</dt>
+          <dd>{{ distribution.format }}</dd>
+        </div>
+        <div
+          v-if="distribution.mimetype"
+          class="cc-distributions-editor__metadata-item">
+          <dt>MIME type</dt>
+          <dd>{{ distribution.mimetype }}</dd>
+        </div>
+        <div
+          v-if="distribution.version"
+          class="cc-distributions-editor__metadata-item">
+          <dt>Version</dt>
+          <dd>{{ distribution.version }}</dd>
+        </div>
+        <div
+          v-if="distribution.license?.length"
+          class="cc-distributions-editor__metadata-item">
+          <dt>License</dt>
+          <dd>
+            <template
+              v-for="(license, licenseIndex) in distribution.license"
+              :key="license.uri || licenseIndex">
+              <span v-if="licenseIndex">; </span>
+              <ItemName :item="license" />
+            </template>
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="cc-distributions-editor__new">
+      <strong class="cc-distributions-editor__title">New distribution</strong>
+
+      <label class="cc-distributions-editor__url">
+        <span>URL</span>
+        <input
+          v-model="newDistribution.url"
+          type="url"
+          class="cc-form-control"
+          aria-label="New distribution URL"
+          :aria-invalid="invalidUrl(newDistribution.url)"
+          placeholder="https://example.org/vocabulary">
+      </label>
+
+      <label class="cc-distributions-editor__direct-download">
+        <input
+          v-model="newDistribution.directDownload"
+          type="checkbox">
+        Direct download
+      </label>
 
       <button
         type="button"
-        class="cc-button cc-button-secondary"
-        :disabled="!newUrls.download.trim() || invalidUrl(newUrls.download)"
-        @click="addUrl('download')">
-        add download
+        class="cc-button cc-button-secondary cc-distributions-editor__add"
+        :disabled="!newDistribution.url.trim() || invalidUrl(newDistribution.url)"
+        @click="addDistribution">
+        add distribution
       </button>
-    </section>
-
-    <section class="cc-distributions-editor__section cc-distributions-editor__section--publications">
-      <strong>Publication URLs</strong>
-      <OrderedList
-        :model-value="publicationRows"
-        :orderable="false"
-        @update:model-value="updateRows($event, 'accessURL')">
-        <template #default="{ item: row, update }">
-          <input
-            :value="row.distribution.accessURL"
-            type="url"
-            class="cc-form-control"
-            :class="{
-              'cc-form-control--invalid': invalidUrl(row.distribution.accessURL),
-            }"
-            :aria-label="`Publication URL ${row.index + 1}`"
-            :aria-invalid="invalidUrl(row.distribution.accessURL)"
-            @input="update({
-              ...row,
-              distribution: {
-                ...row.distribution,
-                accessURL: $event.target.value,
-              },
-            })">
-        </template>
-      </OrderedList>
-
-      <input
-        v-model="newUrls.accessURL"
-        type="url"
-        class="cc-form-control"
-        :class="{ 'cc-form-control--invalid': invalidUrl(newUrls.accessURL) }"
-        aria-label="New publication URL"
-        placeholder="https://example.org/vocabulary">
-
-      <button
-        type="button"
-        class="cc-button cc-button-secondary"
-        :disabled="!newUrls.accessURL.trim() || invalidUrl(newUrls.accessURL)"
-        @click="addUrl('accessURL')">
-        add publication
-      </button>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, reactive } from "vue"
+import { reactive } from "vue"
 import { isValidUrl } from "../utils.js"
-import OrderedList from "./OrderedList.vue"
+import ItemName from "./ItemName.vue"
 
 defineOptions({ name: "DistributionsEditor" })
 
@@ -104,58 +127,77 @@ const props = defineProps({
 })
 
 const emit = defineEmits(["update:modelValue"])
-const newUrls = reactive({ download: "", accessURL: "" })
+const newDistribution = reactive({ url: "", directDownload: false })
 
-const downloadRows = computed(() => rowsFor("download"))
-const publicationRows = computed(() => rowsFor("accessURL"))
+// Prefer the direct download when old data contains both URL properties.
+function isDirectDownload(distribution) {
+  return distribution.download !== undefined
+}
 
-// Show rows for one URL field and keep their original indexes.
-function rowsFor(property) {
-  return props.modelValue.flatMap((distribution, index) =>
-    distribution?.[property] ? [{ index, distribution }] : [],
+// The editor exposes one URL for each complete distribution object.
+function distributionUrl(distribution) {
+  return distribution.download || distribution.accessURL || ""
+}
+
+// Do not render empty metadata rows.
+function hasMetadata(distribution) {
+  return Boolean(
+    distribution.format
+    || distribution.mimetype
+    || distribution.version
+    || distribution.license?.length,
   )
 }
 
-// Apply changes to the full distribution list.
-function updateRows(rows, property) {
-  const updated = new Map(
-    rows.map(({ index, distribution }) => [index, distribution]),
+// Store the URL in the property selected by the checkbox.
+function withUrl(distribution, url) {
+  return withSelectedUrl(distribution, url, isDirectDownload(distribution))
+}
+
+// Move the current URL without changing the remaining metadata.
+function withDirectDownload(distribution, directDownload) {
+  return withSelectedUrl(
+    distribution,
+    distributionUrl(distribution),
+    directDownload,
   )
+}
 
-  const distributions = props.modelValue.flatMap((distribution, index) => {
-    if (!distribution?.[property]) {
-      return [distribution]
-    }
+function withSelectedUrl(distribution, url, directDownload) {
+  const updated = { ...distribution }
+  delete updated.download
+  delete updated.accessURL
+  updated[directDownload ? "download" : "accessURL"] = url
+  return updated
+}
 
-    const value = updated.get(index)
-
-    if (value?.[property]?.trim()) {
-      return [value]
-    }
-
-    // Keep the distribution if it still has another URL.
-    const remaining = { ...distribution }
-    delete remaining[property]
-    if (remaining.download || remaining.accessURL) {
-      return [remaining]
-    }
-
-    return []
-  })
-
+// Replace one distribution without mutating the parent array.
+function updateDistribution(index, distribution) {
+  const distributions = [...props.modelValue]
+  distributions[index] = distribution
   emit("update:modelValue", distributions)
 }
 
-// Add a distribution with this URL field.
-function addUrl(property) {
-  const url = newUrls[property].trim()
+// Remove the complete distribution, including its read-only metadata.
+function removeDistribution(index) {
+  emit(
+    "update:modelValue",
+    props.modelValue.filter((_, itemIndex) => itemIndex !== index),
+  )
+}
+
+// New entries use an access URL unless direct download is selected.
+function addDistribution() {
+  const url = newDistribution.url.trim()
 
   if (!url || !isValidUrl(url)) {
     return
   }
 
+  const property = newDistribution.directDownload ? "download" : "accessURL"
   emit("update:modelValue", [...props.modelValue, { [property]: url }])
-  newUrls[property] = ""
+  newDistribution.url = ""
+  newDistribution.directDownload = false
 }
 
 // Allow an empty value and validate entered URLs.
@@ -166,7 +208,94 @@ function invalidUrl(value) {
 </script>
 
 <style scoped>
-.cc-distributions-editor__section + .cc-distributions-editor__section {
-  margin-block-start: var(--cc-space-md);
+.cc-distributions-editor__entry,
+.cc-distributions-editor__new {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-row-gap);
+}
+
+.cc-distributions-editor__entry + .cc-distributions-editor__entry,
+.cc-distributions-editor__entry + .cc-distributions-editor__new {
+  padding-block-start: var(--cc-space-lg);
+  margin-block-start: var(--cc-space-sm);
+  border-block-start: var(--cc-border-width) solid var(--cc-border-color);
+}
+
+.cc-distributions-editor__title {
+  font-size: var(--cc-font-size-base);
+  font-weight: var(--cc-font-weight-regular);
+}
+
+.cc-distributions-editor__url {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-xs);
+  margin: 0;
+  color: var(--cc-color-muted);
+  font-size: var(--cc-font-size-sm);
+}
+
+.cc-distributions-editor__url-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--cc-space-sm);
+}
+
+.cc-distributions-editor__url-row .cc-distributions-editor__url {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cc-distributions-editor__url .cc-form-control {
+  font-weight: var(--cc-font-weight-light);
+}
+
+.cc-distributions-editor__url .cc-form-control[aria-invalid="true"] {
+  border-color: var(--cc-color-danger);
+}
+
+.cc-distributions-editor__direct-download {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-sm);
+}
+
+.cc-distributions-editor__metadata {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cc-space-sm) var(--cc-space-md);
+  padding-block-start: var(--cc-space-sm);
+  margin: var(--cc-space-xs) 0 0;
+}
+
+.cc-distributions-editor__metadata-item {
+  min-width: 0;
+}
+
+.cc-distributions-editor__metadata dt {
+  color: var(--cc-color-muted);
+  font-size: var(--cc-font-size-sm);
+}
+
+.cc-distributions-editor__metadata dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.cc-distributions-editor__add {
+  align-self: flex-start;
+}
+
+@media not (min-width: 48rem) {
+  .cc-distributions-editor__metadata {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 36rem) {
+  .cc-distributions-editor {
+    padding-block-start: var(--cc-space-sm);
+  }
 }
 </style>

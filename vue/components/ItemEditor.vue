@@ -154,6 +154,12 @@
       :model-value="item.subjectOf.map((s) => s.url)"
       @update:modelValue="item.subjectOf = $event.map((url) => ({ url }))" />
   </form-row>
+  <form-row
+    id="field-distributions"
+    label="Distributions">
+    <DistributionsEditor v-model="item.distributions" />
+    Files and publication locations where this terminology is available.
+  </form-row>
   <form-row :label="'Issue tracker'">
     <list-editor
       :model-value="item.issueTracker.map((tracker) => tracker.uri)"
@@ -198,12 +204,6 @@
       placeholder="Search registries…"
       :show-tree="false" />
     Which <a href="/registries">terminology registries</a> list the vocabulary?
-  </form-row>
-  <form-row
-    id="field-distributions"
-    label="Distributions">
-    <DistributionsEditor v-model="item.distributions" />
-    Manage direct download and publication URLs. Other distribution metadata is preserved.
   </form-row>
   <form-row
     id="field-api"
