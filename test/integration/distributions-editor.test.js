@@ -14,6 +14,12 @@ function updatedDistributions(wrapper) {
   return wrapper.emitted("update:modelValue").at(-1)[0]
 }
 
+function metadataLabels(wrapper) {
+  return wrapper.get(".cc-distributions-editor__metadata")
+    .findAll("dt")
+    .map(label => label.text())
+}
+
 describe("DistributionsEditor", () => {
   it("shows both URL roles and updates a complete distribution", async () => {
     const distributions = [
@@ -27,14 +33,26 @@ describe("DistributionsEditor", () => {
     const wrapper = mountEditor(distributions)
 
     const urls = wrapper.findAll("input[aria-label^=\"Distribution URL\"]")
-    const directDownloads = wrapper.findAll("input[type=\"checkbox\"]")
+    const directDownloads = wrapper.findAll("input[type=\"radio\"][value=\"download\"]")
+    const publicationUrls = wrapper.findAll("input[type=\"radio\"][value=\"accessURL\"]")
+    const firstType = wrapper.get(".cc-distributions-editor__type-group")
 
+    expect(firstType.element.nextElementSibling)
+      .toBe(wrapper.get(".cc-distributions-editor__url-row").element)
     expect(urls.map(input => input.element.value)).toEqual([
       "https://example.org/data.ndjson",
       "https://example.org/landing-page",
     ])
     expect(directDownloads.slice(0, 2).map(input => input.element.checked))
       .toEqual([true, false])
+    expect(publicationUrls.slice(0, 2).map(input => input.element.checked))
+      .toEqual([false, true])
+    expect(wrapper.findAll(".cc-distributions-editor__type-help").map(help => help.text()))
+      .toEqual([
+        "JSKOS property: download",
+        "JSKOS property: accessURL",
+        "JSKOS property: accessURL",
+      ])
 
     await urls[1].setValue("https://example.org/new-landing-page")
 
@@ -59,7 +77,9 @@ describe("DistributionsEditor", () => {
     const wrapper = mountEditor([distribution])
     const { accessURL, ...metadata } = distribution
 
-    await wrapper.get("input[type=\"checkbox\"]").setValue(true)
+    expect(metadataLabels(wrapper)).toEqual(["Version", "License"])
+
+    await wrapper.get("input[type=\"radio\"][value=\"download\"]").setValue()
 
     const directDownload = [{
       ...metadata,
@@ -68,7 +88,16 @@ describe("DistributionsEditor", () => {
     expect(updatedDistributions(wrapper)).toEqual(directDownload)
 
     await wrapper.setProps({ modelValue: directDownload })
-    await wrapper.get("input[type=\"checkbox\"]").setValue(false)
+    expect(wrapper.get(".cc-distributions-editor__type-help").text())
+      .toBe("JSKOS property: download")
+    expect(metadataLabels(wrapper)).toEqual([
+      "Format",
+      "MIME type",
+      "Version",
+      "License",
+    ])
+
+    await wrapper.get("input[type=\"radio\"][value=\"accessURL\"]").setValue()
 
     expect(updatedDistributions(wrapper)).toEqual([distribution])
   })
@@ -76,7 +105,7 @@ describe("DistributionsEditor", () => {
   it("shows available metadata as read-only labelled rows", () => {
     const wrapper = mountEditor([
       {
-        accessURL: "https://example.org/vocabulary",
+        download: "https://example.org/vocabulary",
         format: "http://format.gbv.de/jskos",
         mimetype: "application/x-ndjson",
         version: "2026-11",
@@ -104,6 +133,16 @@ describe("DistributionsEditor", () => {
       format: "http://format.gbv.de/jskos",
     }
     const wrapper = mountEditor([existing])
+
+    expect(
+      wrapper.get(".cc-distributions-editor__new input[value=\"accessURL\"]")
+        .element.checked,
+    ).toBe(true)
+    const newType = wrapper.get(
+      ".cc-distributions-editor__new .cc-distributions-editor__type-group",
+    )
+    expect(newType.element.nextElementSibling)
+      .toBe(wrapper.get(".cc-distributions-editor__new .cc-distributions-editor__url").element)
 
     await wrapper.get("input[aria-label=\"New distribution URL\"]")
       .setValue("https://example.org/vocabulary")

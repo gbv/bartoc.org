@@ -4,9 +4,34 @@
       v-for="(distribution, index) in modelValue"
       :key="index"
       class="cc-distributions-editor__entry">
-      <strong class="cc-distributions-editor__title">
-        Distribution {{ index + 1 }}
-      </strong>
+      <div class="cc-distributions-editor__type-group">
+        <fieldset class="cc-distributions-editor__type">
+          <legend class="cc-visually-hidden">
+            URL type
+          </legend>
+          <label
+            v-for="type in distributionTypes"
+            :key="type.property"
+            class="cc-distributions-editor__type-option">
+            <input
+              class="cc-visually-hidden"
+              type="radio"
+              :name="`${typeGroupId}-distribution-${index}`"
+              :value="type.property"
+              :checked="distributionType(distribution) === type.property"
+              @change="updateDistribution(
+                index,
+                withType(distribution, type.property),
+              )">
+            <span class="cc-distributions-editor__type-label">
+              {{ type.label }}
+            </span>
+          </label>
+        </fieldset>
+        <small class="cc-distributions-editor__type-help">
+          JSKOS property: {{ distributionType(distribution) }}
+        </small>
+      </div>
 
       <div class="cc-distributions-editor__url-row">
         <label class="cc-distributions-editor__url">
@@ -32,28 +57,17 @@
         </button>
       </div>
 
-      <label class="cc-distributions-editor__direct-download">
-        <input
-          :checked="isDirectDownload(distribution)"
-          type="checkbox"
-          @change="updateDistribution(
-            index,
-            withDirectDownload(distribution, $event.target.checked),
-          )">
-        Direct download
-      </label>
-
       <dl
-        v-if="hasMetadata(distribution)"
+        v-if="hasVisibleMetadata(distribution)"
         class="cc-distributions-editor__metadata">
         <div
-          v-if="distribution.format"
+          v-if="isDirectDownload(distribution) && distribution.format"
           class="cc-distributions-editor__metadata-item">
           <dt>Format</dt>
           <dd>{{ distribution.format }}</dd>
         </div>
         <div
-          v-if="distribution.mimetype"
+          v-if="isDirectDownload(distribution) && distribution.mimetype"
           class="cc-distributions-editor__metadata-item">
           <dt>MIME type</dt>
           <dd>{{ distribution.mimetype }}</dd>
@@ -83,6 +97,31 @@
     <div class="cc-distributions-editor__new">
       <strong class="cc-distributions-editor__title">New distribution</strong>
 
+      <div class="cc-distributions-editor__type-group">
+        <fieldset class="cc-distributions-editor__type">
+          <legend class="cc-visually-hidden">
+            URL type
+          </legend>
+          <label
+            v-for="type in distributionTypes"
+            :key="type.property"
+            class="cc-distributions-editor__type-option">
+            <input
+              v-model="newDistribution.type"
+              class="cc-visually-hidden"
+              type="radio"
+              :name="`${typeGroupId}-new-distribution`"
+              :value="type.property">
+            <span class="cc-distributions-editor__type-label">
+              {{ type.label }}
+            </span>
+          </label>
+        </fieldset>
+        <small class="cc-distributions-editor__type-help">
+          JSKOS property: {{ newDistribution.type }}
+        </small>
+      </div>
+
       <label class="cc-distributions-editor__url">
         <span>URL</span>
         <input
@@ -92,13 +131,6 @@
           aria-label="New distribution URL"
           :aria-invalid="invalidUrl(newDistribution.url)"
           placeholder="https://example.org/vocabulary">
-      </label>
-
-      <label class="cc-distributions-editor__direct-download">
-        <input
-          v-model="newDistribution.directDownload"
-          type="checkbox">
-        Direct download
       </label>
 
       <button
@@ -113,7 +145,7 @@
 </template>
 
 <script setup>
-import { reactive } from "vue"
+import { reactive, useId } from "vue"
 import { isValidUrl } from "../utils.js"
 import ItemName from "./ItemName.vue"
 
@@ -127,11 +159,21 @@ const props = defineProps({
 })
 
 const emit = defineEmits(["update:modelValue"])
-const newDistribution = reactive({ url: "", directDownload: false })
+const typeGroupId = useId()
+const distributionTypes = [
+  { property: "download", label: "Direct download" },
+  { property: "accessURL", label: "Publication URL" },
+]
+const newDistribution = reactive({ url: "", type: "accessURL" })
 
 // Prefer the direct download when old data contains both URL properties.
 function isDirectDownload(distribution) {
   return distribution.download !== undefined
+}
+
+// Map the stored URL property to the selected editor option.
+function distributionType(distribution) {
+  return isDirectDownload(distribution) ? "download" : "accessURL"
 }
 
 // The editor exposes one URL for each complete distribution object.
@@ -139,35 +181,35 @@ function distributionUrl(distribution) {
   return distribution.download || distribution.accessURL || ""
 }
 
-// Do not render empty metadata rows.
-function hasMetadata(distribution) {
+// Download details are contextual; version and license apply to both types.
+function hasVisibleMetadata(distribution) {
   return Boolean(
-    distribution.format
-    || distribution.mimetype
+    (isDirectDownload(distribution)
+      && (distribution.format || distribution.mimetype))
     || distribution.version
     || distribution.license?.length,
   )
 }
 
-// Store the URL in the property selected by the checkbox.
+// Store the URL in the property selected by the segmented control.
 function withUrl(distribution, url) {
-  return withSelectedUrl(distribution, url, isDirectDownload(distribution))
+  return withSelectedUrl(distribution, url, distributionType(distribution))
 }
 
 // Move the current URL without changing the remaining metadata.
-function withDirectDownload(distribution, directDownload) {
+function withType(distribution, type) {
   return withSelectedUrl(
     distribution,
     distributionUrl(distribution),
-    directDownload,
+    type,
   )
 }
 
-function withSelectedUrl(distribution, url, directDownload) {
+function withSelectedUrl(distribution, url, type) {
   const updated = { ...distribution }
   delete updated.download
   delete updated.accessURL
-  updated[directDownload ? "download" : "accessURL"] = url
+  updated[type] = url
   return updated
 }
 
@@ -186,7 +228,7 @@ function removeDistribution(index) {
   )
 }
 
-// New entries use an access URL unless direct download is selected.
+// New entries use a publication URL unless direct download is selected.
 function addDistribution() {
   const url = newDistribution.url.trim()
 
@@ -194,10 +236,12 @@ function addDistribution() {
     return
   }
 
-  const property = newDistribution.directDownload ? "download" : "accessURL"
-  emit("update:modelValue", [...props.modelValue, { [property]: url }])
+  emit("update:modelValue", [
+    ...props.modelValue,
+    { [newDistribution.type]: url },
+  ])
   newDistribution.url = ""
-  newDistribution.directDownload = false
+  newDistribution.type = "accessURL"
 }
 
 // Allow an empty value and validate entered URLs.
@@ -217,9 +261,7 @@ function invalidUrl(value) {
 
 .cc-distributions-editor__entry + .cc-distributions-editor__entry,
 .cc-distributions-editor__entry + .cc-distributions-editor__new {
-  padding-block-start: var(--cc-space-lg);
-  margin-block-start: var(--cc-space-sm);
-  border-block-start: var(--cc-border-width) solid var(--cc-border-color);
+  margin-block-start: var(--cc-space-xl);
 }
 
 .cc-distributions-editor__title {
@@ -255,10 +297,53 @@ function invalidUrl(value) {
   border-color: var(--cc-color-danger);
 }
 
-.cc-distributions-editor__direct-download {
+.cc-distributions-editor__type-group {
   display: flex;
-  align-items: center;
-  gap: var(--cc-space-sm);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--cc-space-xs);
+}
+
+.cc-distributions-editor__type {
+  display: inline-flex;
+  align-self: flex-start;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  border: var(--cc-border-width) solid var(--cc-border-color-control);
+  border-radius: var(--cc-radius-sm);
+}
+
+.cc-distributions-editor__type-option {
+  margin: 0;
+  cursor: pointer;
+}
+
+.cc-distributions-editor__type-option + .cc-distributions-editor__type-option {
+  border-inline-start: var(--cc-border-width) solid var(--cc-border-color-control);
+}
+
+.cc-distributions-editor__type-label {
+  display: block;
+  padding: var(--cc-space-xs) var(--cc-space-sm);
+  color: var(--cc-color-text);
+  font-size: var(--cc-font-size-sm);
+  font-weight: var(--cc-font-weight-regular);
+}
+
+.cc-distributions-editor__type-option input:checked + .cc-distributions-editor__type-label {
+  background: var(--cc-color-link);
+  color: var(--cc-color-on-primary);
+}
+
+.cc-distributions-editor__type-option input:focus-visible + .cc-distributions-editor__type-label {
+  box-shadow: inset 0 0 0 var(--cc-border-width-strong) var(--cc-color-primary);
+}
+
+.cc-distributions-editor__type-help {
+  color: var(--cc-color-muted);
+  font-size: var(--cc-font-size-sm);
 }
 
 .cc-distributions-editor__metadata {
