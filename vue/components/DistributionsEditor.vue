@@ -1,41 +1,14 @@
 <template>
   <div class="cc-distributions-editor">
+    <div class="cc-distributions-editor__help">
+      At which URLs is the terminology being made available (use <a href="#field-api">vocabulary services</a> below for APIs)?
+    </div>
     <div
       v-for="(distribution, index) in modelValue"
       :key="index"
       class="cc-distributions-editor__entry">
-      <div class="cc-distributions-editor__type-group">
-        <fieldset class="cc-distributions-editor__type">
-          <legend class="cc-visually-hidden">
-            URL type
-          </legend>
-          <label
-            v-for="type in distributionTypes"
-            :key="type.property"
-            class="cc-distributions-editor__type-option">
-            <input
-              class="cc-visually-hidden"
-              type="radio"
-              :name="`${typeGroupId}-distribution-${index}`"
-              :value="type.property"
-              :checked="distributionType(distribution) === type.property"
-              @change="updateDistribution(
-                index,
-                withType(distribution, type.property),
-              )">
-            <span class="cc-distributions-editor__type-label">
-              {{ type.label }}
-            </span>
-          </label>
-        </fieldset>
-        <small class="cc-distributions-editor__type-help">
-          JSKOS property: {{ distributionType(distribution) }}
-        </small>
-      </div>
-
       <div class="cc-distributions-editor__url-row">
         <label class="cc-distributions-editor__url">
-          <span>URL</span>
           <input
             :value="distributionUrl(distribution)"
             type="url"
@@ -55,6 +28,32 @@
           @click="removeDistribution(index)">
           &times;
         </button>
+      </div>
+
+      <div class="cc-distributions-editor__type-group">
+        <fieldset class="cc-distributions-editor__type">
+          <legend class="cc-visually-hidden">
+            URL type
+          </legend>
+          <label
+            v-for="type, property in distributionTypes"
+            :key="property"
+            class="cc-distributions-editor__type-option">
+            <input
+              class="cc-visually-hidden"
+              type="radio"
+              :name="`${typeGroupId}-distribution-${index}`"
+              :value="property"
+              :checked="distributionType(distribution) === property"
+              @change="updateDistribution(
+                index,
+                withType(distribution, property),
+              )">
+            <span class="cc-distributions-editor__type-label">
+              {{ type.label }}
+            </span>
+          </label>
+        </fieldset>
       </div>
 
       <dl
@@ -97,33 +96,7 @@
     <div class="cc-distributions-editor__new">
       <strong class="cc-distributions-editor__title">New distribution</strong>
 
-      <div class="cc-distributions-editor__type-group">
-        <fieldset class="cc-distributions-editor__type">
-          <legend class="cc-visually-hidden">
-            URL type
-          </legend>
-          <label
-            v-for="type in distributionTypes"
-            :key="type.property"
-            class="cc-distributions-editor__type-option">
-            <input
-              v-model="newDistribution.type"
-              class="cc-visually-hidden"
-              type="radio"
-              :name="`${typeGroupId}-new-distribution`"
-              :value="type.property">
-            <span class="cc-distributions-editor__type-label">
-              {{ type.label }}
-            </span>
-          </label>
-        </fieldset>
-        <small class="cc-distributions-editor__type-help">
-          JSKOS property: {{ newDistribution.type }}
-        </small>
-      </div>
-
       <label class="cc-distributions-editor__url">
-        <span>URL</span>
         <input
           v-model="newDistribution.url"
           type="url"
@@ -132,6 +105,31 @@
           :aria-invalid="invalidUrl(newDistribution.url)"
           placeholder="https://example.org/vocabulary">
       </label>
+
+      <div class="cc-distributions-editor__type-group">
+        <fieldset class="cc-distributions-editor__type">
+          <legend class="cc-visually-hidden">
+            URL type
+          </legend>
+          <label
+            v-for="type, property in distributionTypes"
+            :key="property"
+            class="cc-distributions-editor__type-option">
+            <input
+              v-model="newDistribution.type"
+              class="cc-visually-hidden"
+              type="radio"
+              :name="`${typeGroupId}-new-distribution`"
+              :value="property">
+            <span class="cc-distributions-editor__type-label">
+              {{ type.label }}
+            </span>
+          </label>
+        </fieldset>
+        <small class="cc-distributions-editor__type-help">
+          {{ distributionTypes[newDistribution.type]?.description }}
+        </small>
+      </div>
 
       <button
         type="button"
@@ -160,10 +158,10 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue"])
 const typeGroupId = useId()
-const distributionTypes = [
-  { property: "download", label: "Direct download" },
-  { property: "accessURL", label: "Publication URL" },
-]
+const distributionTypes = {
+  download: { label: "Direct download", description: "Terminology data can directly be downloaded from this URL" },
+  accessURL: { label: "Publication URL", description: "Landing page or similar, linking to the actual download" },
+}
 const newDistribution = reactive({ url: "", type: "accessURL" })
 
 // Prefer the direct download when old data contains both URL properties.
@@ -251,7 +249,16 @@ function invalidUrl(value) {
 }
 </script>
 
-<style scoped>
+<style>
+.cc-distributions-editor__help {
+  padding-bottom: var(--cc-space-md);
+}
+
+.cc-distributions-editor__entry {
+  border-bottom: 1px solid #CCC;
+  padding-bottom: var(--cc-space-md);
+}
+
 .cc-distributions-editor__entry,
 .cc-distributions-editor__new {
   display: flex;
@@ -261,7 +268,7 @@ function invalidUrl(value) {
 
 .cc-distributions-editor__entry + .cc-distributions-editor__entry,
 .cc-distributions-editor__entry + .cc-distributions-editor__new {
-  margin-block-start: var(--cc-space-xl);
+  margin-block-start: var(--cc-space-md);
 }
 
 .cc-distributions-editor__title {

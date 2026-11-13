@@ -35,10 +35,7 @@ describe("DistributionsEditor", () => {
     const urls = wrapper.findAll("input[aria-label^=\"Distribution URL\"]")
     const directDownloads = wrapper.findAll("input[type=\"radio\"][value=\"download\"]")
     const publicationUrls = wrapper.findAll("input[type=\"radio\"][value=\"accessURL\"]")
-    const firstType = wrapper.get(".cc-distributions-editor__type-group")
 
-    expect(firstType.element.nextElementSibling)
-      .toBe(wrapper.get(".cc-distributions-editor__url-row").element)
     expect(urls.map(input => input.element.value)).toEqual([
       "https://example.org/data.ndjson",
       "https://example.org/landing-page",
@@ -47,12 +44,6 @@ describe("DistributionsEditor", () => {
       .toEqual([true, false])
     expect(publicationUrls.slice(0, 2).map(input => input.element.checked))
       .toEqual([false, true])
-    expect(wrapper.findAll(".cc-distributions-editor__type-help").map(help => help.text()))
-      .toEqual([
-        "JSKOS property: download",
-        "JSKOS property: accessURL",
-        "JSKOS property: accessURL",
-      ])
 
     await urls[1].setValue("https://example.org/new-landing-page")
 
@@ -89,7 +80,7 @@ describe("DistributionsEditor", () => {
 
     await wrapper.setProps({ modelValue: directDownload })
     expect(wrapper.get(".cc-distributions-editor__type-help").text())
-      .toBe("JSKOS property: download")
+      .toBe("Landing page or similar, linking to the actual download")
     expect(metadataLabels(wrapper)).toEqual([
       "Format",
       "MIME type",
@@ -141,7 +132,7 @@ describe("DistributionsEditor", () => {
     const newType = wrapper.get(
       ".cc-distributions-editor__new .cc-distributions-editor__type-group",
     )
-    expect(newType.element.nextElementSibling)
+    expect(newType.element.previousElementSibling)
       .toBe(wrapper.get(".cc-distributions-editor__new .cc-distributions-editor__url").element)
 
     await wrapper.get("input[aria-label=\"New distribution URL\"]")

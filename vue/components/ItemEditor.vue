@@ -160,6 +160,11 @@
     <DistributionsEditor v-model="item.distributions" />
     Files and publication locations where this terminology is available.
   </form-row>
+  <form-row
+    id="field-api"
+    :label="'Vocabulary services'">
+    <endpoints-editor v-model="item.API" />
+  </form-row>
   <form-row :label="'Issue tracker'">
     <list-editor
       :model-value="item.issueTracker.map((tracker) => tracker.uri)"
@@ -204,11 +209,6 @@
       placeholder="Search registries…"
       :show-tree="false" />
     Which <a href="/registries">terminology registries</a> list the vocabulary?
-  </form-row>
-  <form-row
-    id="field-api"
-    :label="'Vocabulary services'">
-    <endpoints-editor v-model="item.API" />
   </form-row>
   <form-row label="Display options">
     <div class="editor-display-option">

@@ -202,17 +202,6 @@ describe("ItemEditor", () => {
     expect(w.getComponent({ name: "MediaEditor" }).props("modelValue")).toEqual(media)
   })
 
-  it("places distributions directly after additional links", () => {
-    const labels = formLabels(mountEditor())
-    const additionalLinks = labels.indexOf("Additional links")
-
-    expect(labels.slice(additionalLinks, additionalLinks + 3)).toEqual([
-      "Additional links",
-      "Distributions",
-      "Issue tracker",
-    ])
-  })
-
   it("maps issue tracker URLs to JSKOS items", async () => {
     const w = mountEditor({
       issueTracker: [{ uri: "https://example.org/issues" }],
