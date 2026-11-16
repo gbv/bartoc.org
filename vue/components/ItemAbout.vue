@@ -62,18 +62,6 @@
       </MetadataListRow>
 
       <MetadataListRow
-        v-if="!isRegistry"
-        source-field="subjectOf"
-        label="Links"
-        :items="item.subjectOf">
-        <template #item="{ item: link }">
-          <ExternalLink
-            :url="link.url"
-            :label="link.label" />
-        </template>
-      </MetadataListRow>
-
-      <MetadataListRow
         source-field="subject"
         label="Subject"
         :items="isRegistry ? item.subject : manualSubjects"

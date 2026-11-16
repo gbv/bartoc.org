@@ -10,6 +10,17 @@
       </MetadataRow>
 
       <MetadataListRow
+        source-field="subjectOf"
+        label="Links"
+        :items="item.subjectOf">
+        <template #item="{ item: link }">
+          <ExternalLink
+            :url="link.url"
+            :label="link.label" />
+        </template>
+      </MetadataListRow>
+
+      <MetadataListRow
         v-if="!isRegistry"
         label="Issue tracker"
         :items="item.issueTracker">
