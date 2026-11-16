@@ -306,8 +306,8 @@ const activeFilters = reactive({
 const functionFilters = computed(() => [
   {
     id: "metadata-registries",
-    title: "Terminology Collections",
-    label: "terminology collection",
+    title: "Metadata Registries",
+    label: "metadata registry",
     description: "List and describe terminologies.",
   },
   {
