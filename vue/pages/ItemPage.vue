@@ -65,11 +65,8 @@
         :is-registry="isRegistry" />
     </Tab>
 
-    <Tab
-      title="Identifiers">
-      <ItemIdentifiers
-        :item="item"
-        :is-registry="isRegistry" />
+    <Tab title="Identifiers">
+      <ItemIdentifiers :item="item" />
     </Tab>
 
     <Tab

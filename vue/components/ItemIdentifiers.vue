@@ -9,12 +9,11 @@
       </MetadataRow>
 
       <MetadataListRow
-        :icon="isRegistry ? 'star' : ''"
         label="Identifiers"
         :items="item.identifier">
         <template #item="{ item: identifier }">
           <ExternalLink
-            v-if="!isRegistry && isWebUrl(identifier)"
+            v-if="isWebUrl(identifier)"
             :url="identifier" />
           <template v-else>
             {{ identifier }}
@@ -23,25 +22,24 @@
       </MetadataListRow>
 
       <MetadataRow
-        v-if="!isRegistry && item.namespace"
+        v-if="item.namespace"
         label="Namespace">
         <ExternalLink :url="item.namespace" />
       </MetadataRow>
 
       <MetadataRow
-        v-if="!isRegistry && item.notationPattern"
+        v-if="item.notationPattern"
         label="Notation pattern">
         {{ item.notationPattern }}
       </MetadataRow>
 
       <MetadataRow
-        v-if="!isRegistry && item.uriPattern"
+        v-if="item.uriPattern"
         label="URI pattern">
         {{ item.uriPattern }}
       </MetadataRow>
 
       <MetadataListRow
-        v-if="!isRegistry"
         source-field="notationExamples"
         label="Examples"
         :items="item.notationExamples" />
@@ -58,7 +56,6 @@ defineOptions({ name: "ItemIdentifiers" })
 
 defineProps({
   item: { type: Object, required: true },
-  isRegistry: { type: Boolean, default: false },
 })
 
 function isWebUrl(value) {
