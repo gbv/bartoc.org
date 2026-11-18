@@ -464,8 +464,12 @@ onMounted(async () => {
   await nextTick()
 
   const targetId = window.location.hash.slice(1)
+  if (!targetId.startsWith("field-")) {
+    return
+  }
+
   const target = document.getElementById(targetId)
-  if (!targetId.startsWith("field-") || !target) {
+  if (!target) {
     return
   }
 
