@@ -9,6 +9,7 @@
   </form-row>
   <form-row
     id="field-pref-label"
+    field="title"
     :label="'Title'">
     <InheritableTitleEditor
       ref="inheritableTitleEditor"
@@ -16,27 +17,24 @@
       v-model:alt-label="item.altLabel"
       :source="versionMainSource"
       :version="item.version" />
-    The first of each language is used as preferred title, more as aliases,
-    translations... Please provide at least an English title, unless both
-    <code>Version</code> and <code>Version of</code> are set.
-    For other languages select always a value,
-    it could be also "undetermined" if you do not know the language.
   </form-row>
-  <form-row :label="'Abbreviation'">
+  <form-row
+    field="abbreviation"
+    label="Abbreviation">
     <AbbreviationEditor
       ref="abbreviationEditor"
       v-model="item.notation"
       :source="versionMainSource" />
-    Common, unique abbreviation, acronym, or notation the vocabulary is known
-    under.
   </form-row>
-  <form-row :label="'Identifier'">
+  <form-row
+    field="identifier"
+    label="Identifier">
     <list-editor v-model="item.identifier" />
-    Alternative URIs the vocabulary is identified by (e.g. Wikidata URI).
   </form-row>
   <form-row
     id="field-definition"
-    :label="'Abstracts'">
+    field="definition"
+    label="Abstracts">
     <InheritableAbstractsEditor
       ref="inheritableAbstractsEditor"
       v-model="item.definition"
@@ -51,12 +49,13 @@
   <!-- Media values are objects, so they need their own editor. -->
   <form-row
     id="field-media"
+    field="media"
     :label="'Media'">
     <media-editor v-model="item.media" />
-    URLs of logos or other images representing the terminology.
   </form-row>
   <form-row
     id="field-languages"
+    field="languages"
     :label="'Languages'">
     <InheritableLanguagesEditor
       ref="inheritableLanguagesEditor"
@@ -65,16 +64,16 @@
   </form-row>
   <form-row
     id="field-extent"
+    field="size"
     :label="'Size'">
     <input
       v-model="item.extent"
       type="text"
       class="cc-form-control">
-    Number of classes, subclasses, taxa, terms, concepts etc. Please add date in
-    parenthesis (YYYY-MM).
   </form-row>
   <form-row
     id="field-type"
+    field="kosTypes"
     :label="'KOS Types'">
     <InheritableKosTypesEditor
       ref="inheritableKosTypesEditor"
@@ -84,13 +83,16 @@
   </form-row>
   <form-row
     id="field-subject"
+    field="subjects"
     :label="'Subjects'">
     <InheritableSubjectsEditor
       ref="inheritableSubjectsEditor"
       v-model="item.subject"
       :source="versionMainSource" />
   </form-row>
-  <form-row :label="'Version'">
+  <form-row
+    field="version"
+    :label="'Version'">
     <input
       v-model.trim="item.version"
       type="text"
@@ -99,6 +101,7 @@
   <form-row
     v-if="showVersionOfEditor"
     id="field-version-of"
+    field="versionOf"
     :label="'Version of'">
     <terminology-relation-editor
       v-model="item.versionOf"
@@ -107,6 +110,7 @@
   </form-row>
   <form-row
     id="field-based-on"
+    field="basedOn"
     :label="'Based on'">
     <terminology-relation-editor
       v-model="item.basedOn"
@@ -115,26 +119,28 @@
   </form-row>
   <form-row
     id="field-replaced-by"
+    field="replacedBy"
     :label="'Replaced by'">
     <terminology-relation-editor
       v-model="item.replacedBy"
       :multiple="true"
       placeholder="Select another terminology from BARTOC" />
-    Select the terminology that replaces this one. Its page will link back here.
   </form-row>
 
   <hr>
   <p>How the vocabulary is made available:</p>
-  <form-row :label="'Created'">
+  <form-row
+    :label="'Created'"
+    field="created">
     <input
       v-model="item.startDate"
       type="text"
       class="cc-form-control"
       maxlength="4">
-    The year when the KOS was first created (YYYY).
   </form-row>
   <form-row
     id="field-license"
+    field="license"
     :label="'License'">
     <jskos-item-picker
       v-model="item.license"
@@ -143,74 +149,86 @@
   </form-row>
   <form-row
     id="field-url"
+    field="url"
     :label="'URL'">
     <input
       v-model="item.url"
       type="text"
       class="cc-form-control">
   </form-row>
-  <form-row :label="'Additional links'">
+  <form-row
+    field="additionalLinks"
+    :label="'Additional links'">
     <list-editor
       :model-value="item.subjectOf.map((s) => s.url)"
       @update:modelValue="item.subjectOf = $event.map((url) => ({ url }))" />
   </form-row>
   <form-row
     id="field-distributions"
+    field="distributions"
     label="Distributions">
     <DistributionsEditor v-model="item.distributions" />
-    Files and publication locations where this terminology is available.
   </form-row>
   <form-row
     id="field-api"
+    field="api"
     :label="'Vocabulary services'">
     <endpoints-editor v-model="item.API" />
   </form-row>
-  <form-row :label="'Issue tracker'">
+  <form-row
+    field="issueTracker"
+    :label="'Issue tracker'">
     <list-editor
       :model-value="item.issueTracker.map((tracker) => tracker.uri)"
       @update:modelValue="item.issueTracker = $event.map((uri) => ({ uri }))" />
-    Where issues about this terminology are managed.
   </form-row>
   <form-row
     id="field-format"
+    field="formats"
     :label="'Formats'">
     <jskos-item-picker
       v-model="item.FORMAT"
       :provider="formatProvider"
       placeholder="Search format types…" />
   </form-row>
-  <form-row :label="'Access'">
+  <form-row
+    field="access"
+    :label="'Access'">
     <set-select
       v-model="item.ACCESS"
       :options="access" />
-    Do you have to register to view the KOS, is it 'hidden' in a licensed
-    database or is it free online?
   </form-row>
   <form-row
     id="field-publisher"
+    field="publisher"
     :label="'Publisher'">
     <publisher-editor v-model="item.publisher" />
-    Try to use an institution rather than a person.
   </form-row>
-  <form-row :label="'Address'">
+  <form-row
+    field="address"
+    :label="'Address'">
     <address-editor v-model="item.ADDRESS" />
   </form-row>
-  <form-row label="Contact">
+  <form-row
+    field="contact"
+    label="Contact">
     <input
       v-model="item.CONTACT"
       type="text"
       class="cc-form-control">
-    email address of anyone in charge of the vocabulary
   </form-row>
-  <form-row label="Listed In">
+  <form-row
+    field="listedIn"
+    label="Listed In">
     <jskos-item-picker
       v-model="item.partOf"
       :provider="registryProvider"
       placeholder="Search registries…"
       :show-tree="false" />
-    Which <a href="/registries">terminology registries</a> list the vocabulary?
   </form-row>
-  <form-row label="Display options">
+  <form-row
+    field="displayOptions"
+    label="Display options">
     <div class="editor-display-option">
       <input
         id="hideNotation"
@@ -228,26 +246,30 @@
         type="checkbox">
       <div>
         <label for="numericalNotation">numerical notation</label>
-        concepts of this vocabulary will be sorted numerically when displayed as
-        a list
       </div>
     </div>
   </form-row>
   <hr>
   <p>Relevant only if concept notations are mapped to concept URIs:</p>
-  <form-row :label="'namespace'">
+  <form-row
+    field="namespace"
+    :label="'namespace'">
     <input
       v-model="item.namespace"
       type="text"
       class="cc-form-control">
   </form-row>
-  <form-row :label="'notation pattern'">
+  <form-row
+    field="notationPattern"
+    :label="'notation pattern'">
     <input
       v-model="item.notationPattern"
       type="text"
       class="cc-form-control">
   </form-row>
-  <form-row :label="'URI pattern'">
+  <form-row
+    field="uriPattern"
+    :label="'URI pattern'">
     <input
       v-model="item.uriPattern"
       type="text"
@@ -255,6 +277,7 @@
   </form-row>
   <form-row
     id="field-notation-examples"
+    field="exampleNotations"
     :label="'example notations'">
     <InheritableNotationExamplesEditor
       ref="inheritableNotationExamplesEditor"

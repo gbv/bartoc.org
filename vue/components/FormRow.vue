@@ -2,7 +2,11 @@
   <div class="editor-form-row">
     <label
       v-if="hasLabel"
-      class="editor-form-label">{{ label }}</label>
+      class="editor-form-label">
+      <span
+        :class="{ 'has-help': help }"
+        :title="help || undefined">{{ label }}</span>
+    </label>
     <div class="editor-form-content">
       <slot />
     </div>
@@ -11,10 +15,14 @@
 
 <script setup>
 import { computed } from "vue"
+import { fieldHelp } from "../utils/fields.js"
 
 const props = defineProps({
   label: { type: String, default: "" },
+  field: { type: String, default: "" },
 })
+
+const help = computed(() => fieldHelp(props.field))
 
 const hasLabel = computed(() => props.label.trim().length > 0)
 </script>
@@ -36,6 +44,10 @@ const hasLabel = computed(() => props.label.trim().length > 0)
   flex: 0 0 100%;
   min-width: 0;
   font-weight: var(--cc-font-weight-light);
+}
+
+.has-help {
+  cursor: help;
 }
 
 @media (min-width: 36rem) {

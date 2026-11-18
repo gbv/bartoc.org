@@ -8,7 +8,9 @@
       <i
         v-if="icon"
         :class="`fas fa-${icon}`" />
-      {{ label }}
+      <span
+        :class="{ 'has-help': help }"
+        :title="help || undefined">{{ label }}</span>
     </td>
     <td>
       <slot />
@@ -18,6 +20,7 @@
 
 <script setup>
 import { computed, inject } from "vue"
+import { fieldHelp } from "../utils/fields.js"
 
 defineOptions({ name: "MetadataRow" })
 
@@ -25,6 +28,10 @@ const props = defineProps({
   label: {
     type: String,
     required: true,
+  },
+  field: {
+    type: String,
+    default: "",
   },
   icon: {
     type: String,
@@ -35,6 +42,8 @@ const props = defineProps({
     default: "",
   },
 })
+
+const help = computed(() => fieldHelp(props.field))
 
 // Without inheritance context from a parent, the shared row renders normally.
 const fieldInheritance = inject("field-inheritance", {
@@ -58,5 +67,9 @@ const inherited = computed(() => {
 
 .inherited-field-marker {
   color: var(--cc-color-primary);
+}
+
+.has-help {
+  cursor: help;
 }
 </style>

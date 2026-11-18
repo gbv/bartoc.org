@@ -13,7 +13,6 @@
           rows="6"
           @input="emitValue"
           @blur="pruneEmptyRow(row.id)" />
-        For copied text, use quotation marks and keep the original language.
       </div>
 
       <div

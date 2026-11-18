@@ -31,12 +31,14 @@
     <tbody>
       <MetadataListRow
         v-if="!isRegistry"
+        field="title"
         :source-field="['prefLabel', 'altLabel']"
         label="Titles"
         :items="titles" />
 
       <MetadataRow
         v-if="!isRegistry && currentVersionNumber"
+        field="version"
         source-field="version"
         label="Version">
         {{ currentVersionNumber }}
@@ -44,12 +46,14 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="abbreviation"
         source-field="notation"
         label="Abbreviation"
         :items="item.notation" />
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="kosTypes"
         source-field="type"
         label="KOS Type"
         :items="displayedKosTypeUris"
@@ -62,6 +66,7 @@
       </MetadataListRow>
 
       <MetadataListRow
+        :field="isRegistry ? '' : 'subjects'"
         source-field="subject"
         label="Subject"
         :items="isRegistry ? item.subject : manualSubjects"
@@ -76,6 +81,7 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="subjects"
         source-field="subject"
         label="Mapped Subjects"
         :items="mappedSubjects"
@@ -89,6 +95,7 @@
       </MetadataListRow>
 
       <MetadataListRow
+        :field="isRegistry ? '' : 'languages'"
         source-field="languages"
         :icon="isRegistry ? 'id' : 'language'"
         label="Languages"
@@ -108,6 +115,7 @@
 
       <MetadataRow
         v-if="!isRegistry && item.extent"
+        field="size"
         label="Size">
         {{ item.extent }}
       </MetadataRow>
@@ -149,6 +157,7 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="basedOn"
         source-field="basedOn"
         label="Based on"
         :items="item.basedOn">
@@ -169,6 +178,7 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="replacedBy"
         source-field="replacedBy"
         label="Replaced by"
         :items="item.replacedBy">

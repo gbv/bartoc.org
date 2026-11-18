@@ -2,6 +2,7 @@
   <MetadataRow
     v-if="items.length > 0"
     :label="label"
+    :field="field"
     :icon="icon"
     :source-field="sourceField">
     <ul :class="['metadata-list', { 'separated-list': listStyle === 'inline' }]">
@@ -38,6 +39,10 @@ const props = defineProps({
   label: {
     type: String,
     required: true,
+  },
+  field: {
+    type: String,
+    default: "",
   },
   icon: {
     type: String,

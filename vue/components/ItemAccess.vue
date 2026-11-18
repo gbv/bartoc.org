@@ -3,6 +3,7 @@
     <tbody>
       <MetadataRow
         v-if="item.url"
+        :field="isRegistry ? '' : 'url'"
         source-field="url"
         icon="home"
         label="Homepage">
@@ -10,6 +11,7 @@
       </MetadataRow>
 
       <MetadataListRow
+        :field="isRegistry ? '' : 'additionalLinks'"
         source-field="subjectOf"
         label="Links"
         :items="item.subjectOf">
@@ -22,6 +24,7 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="issueTracker"
         label="Issue tracker"
         :items="item.issueTracker">
         <template #item="{ item: tracker }">
@@ -31,6 +34,7 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="access"
         label="Access"
         :items="item.ACCESS"
         list-style="inline">
@@ -40,6 +44,7 @@
       </MetadataListRow>
 
       <MetadataListRow
+        :field="isRegistry ? '' : 'license'"
         label="License"
         :items="item.license"
         :list-style="isRegistry ? 'unstyled' : 'inline'">
@@ -51,6 +56,7 @@
       </MetadataListRow>
 
       <MetadataListRow
+        :field="isRegistry ? '' : 'publisher'"
         label="Publisher"
         :items="item.publisher">
         <template #item="{ item: publisher }">
@@ -62,17 +68,20 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="address"
         label="Address"
         :items="address" />
 
       <MetadataRow
         v-if="!isRegistry && item.CONTACT"
+        field="contact"
         label="Contact">
         {{ item.CONTACT }}
       </MetadataRow>
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="formats"
         label="Format"
         :items="item.FORMAT"
         list-style="inline">
@@ -83,6 +92,7 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="distributions"
         label="Downloads"
         :items="downloadDistributions"
         :preview-limit="5">
@@ -97,6 +107,7 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="distributions"
         label="Publication URLs"
         :items="accessDistributions"
         :preview-limit="5">
@@ -106,6 +117,7 @@
       </MetadataListRow>
 
       <MetadataListRow
+        :field="isRegistry ? '' : 'api'"
         :label="isRegistry ? 'Services (API)' : 'Data sources'"
         :items="item.API">
         <template #item="{ item: endpoint }">
@@ -117,6 +129,7 @@
 
       <MetadataListRow
         v-if="!isRegistry"
+        field="listedIn"
         label="Part of"
         :items="item.partOf">
         <template #item="{ item: terminology }">

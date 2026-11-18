@@ -9,6 +9,7 @@
       </MetadataRow>
 
       <MetadataListRow
+        field="identifier"
         label="Identifiers"
         :items="item.identifier">
         <template #item="{ item: identifier }">
@@ -23,23 +24,27 @@
 
       <MetadataRow
         v-if="item.namespace"
+        field="namespace"
         label="Namespace">
         <ExternalLink :url="item.namespace" />
       </MetadataRow>
 
       <MetadataRow
         v-if="item.notationPattern"
+        field="notationPattern"
         label="Notation pattern">
         {{ item.notationPattern }}
       </MetadataRow>
 
       <MetadataRow
         v-if="item.uriPattern"
+        field="uriPattern"
         label="URI pattern">
         {{ item.uriPattern }}
       </MetadataRow>
 
       <MetadataListRow
+        field="exampleNotations"
         source-field="notationExamples"
         label="Examples"
         :items="item.notationExamples" />
