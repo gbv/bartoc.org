@@ -52,7 +52,7 @@
     "express-http-proxy": "^2.1.1",
     "gbv-login-client-vue": "^1.0.0",
     "iso-639-3-to-1": "^1.0.0",
-    "jskos-cli": "^0.9.0",
+    "jskos-cli": "^0.9.1",
     "jskos-tools": "^1.0.42",
     "jskos-vue": "^0.5.2",
     "jskos-vue-tabs": "^0.1.8",
