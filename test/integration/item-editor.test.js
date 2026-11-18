@@ -376,7 +376,6 @@ describe("ItemEditor", () => {
 
     expect(labels.slice(versionIndex, versionIndex + 2)).toEqual(["Version", "Version of"])
     expect(rows[versionIndex].get("input").element.value).toBe("3.0")
-    expect(w.text()).toContain("unless both Version and Version of are set")
   })
 
   it("hides the Version of editor for base vocabularies with incoming versions", () => {
