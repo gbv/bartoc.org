@@ -4,15 +4,21 @@
     class="item-dates separated-list">
     <li
       v-if="created">
-      created <time :datetime="created">{{ formatTimestamp(created) }}</time>
+      created <time
+        :datetime="created"
+        data-allow-mismatch="text">{{ formatTimestamp(created) }}</time>
     </li>
     <li
       v-if="issued">
-      issued <time :datetime="issued">{{ formatTimestamp(issued) }}</time>
+      issued <time
+        :datetime="issued"
+        data-allow-mismatch="text">{{ formatTimestamp(issued) }}</time>
     </li>
     <li
       v-if="showModified">
-      modified <time :datetime="modified">{{ formatTimestamp(modified) }}</time>
+      modified <time
+        :datetime="modified"
+        data-allow-mismatch="text">{{ formatTimestamp(modified) }}</time>
     </li>
     <li v-if="resourceFormatLinks.length">
       <ul class="separated-list">
