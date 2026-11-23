@@ -17,12 +17,11 @@
   <p
     v-else-if="versionOfReference"
     data-testid="version-context">
-    <template v-if="currentVersionNumber">
-      This is edition <strong>{{ currentVersionNumber }}</strong> of
-    </template>
-    <template v-else>
-      This is an edition of
-    </template>
+    Edition
+    <strong v-if="currentVersionNumber">
+      {{ currentVersionNumber }}
+    </strong>
+    of
     <ItemLink :item="versionOfReference" />.
     <span
       v-if="hasInheritedFields"
@@ -32,7 +31,7 @@
       Values derived from the main record are marked with
       <i
         class="fas fa-code-branch version-inheritance-marker"
-        aria-hidden="true" />
+        aria-hidden="true" />.
     </span>
   </p>
 

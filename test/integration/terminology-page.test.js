@@ -164,7 +164,7 @@ describe("ItemPage (terminology)", () => {
     expect(editAction.text()).toBe("edit")
     expect(editAction.classes()).toContain("page-action")
     expect(wrapper.findAll("p").map(paragraph => paragraph.text())).toEqual([
-      "This is an edition of Earlier Version.",
+      "Edition  of Earlier Version.",
       "First paragraph",
       "Second paragraph",
     ])
@@ -416,7 +416,7 @@ describe("ItemPage (terminology)", () => {
   it("shows the version number next to the main record", () => {
     const context = mountPage({ version: "3.0" }).get("[data-testid='version-context']")
 
-    expect(context.text()).toBe("This is edition 3.0 of Earlier Version.")
+    expect(context.text()).toBe("Edition 3.0 of Earlier Version.")
     expect(context.get("a").attributes("href")).toBe("/en/node/122")
   })
 
