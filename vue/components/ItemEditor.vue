@@ -102,7 +102,7 @@
     v-if="showVersionOfEditor"
     id="field-version-of"
     field="versionOf"
-    :label="'Version of'">
+    :label="'Edition of'">
     <terminology-relation-editor
       v-model="item.versionOf"
       :multiple="false"

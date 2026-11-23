@@ -351,18 +351,18 @@ describe("ItemEditor", () => {
     expect(current).toEqual(original)
   })
 
-  it("shows the Version of editor by default", () => {
+  it("shows the Edition of editor by default", () => {
     const w = mountEditor({
       prefLabel: { en: ["x"] },
       definition: { en: ["English abstract"] },
       type: [conceptSchemeType],
     })
 
-    expect(formLabels(w)).toContain("Version of")
+    expect(formLabels(w)).toContain("Edition of")
     expect(w.vm.showVersionOfEditor).toBe(true)
   })
 
-  it("shows Version before Version of", () => {
+  it("shows Version before Edition of", () => {
     const w = mountEditor({
       prefLabel: { en: ["x"] },
       definition: { en: ["English abstract"] },
@@ -374,11 +374,11 @@ describe("ItemEditor", () => {
     const labels = formLabels(w)
     const versionIndex = labels.indexOf("Version")
 
-    expect(labels.slice(versionIndex, versionIndex + 2)).toEqual(["Version", "Version of"])
+    expect(labels.slice(versionIndex, versionIndex + 2)).toEqual(["Version", "Edition of"])
     expect(rows[versionIndex].get("input").element.value).toBe("3.0")
   })
 
-  it("hides the Version of editor for base vocabularies with incoming versions", () => {
+  it("hides the Edition of editor for base vocabularies with incoming versions", () => {
     const w = mountEditor(
       {
         prefLabel: { en: ["x"] },
@@ -389,13 +389,13 @@ describe("ItemEditor", () => {
     )
     const labels = formLabels(w)
 
-    expect(labels).not.toContain("Version of")
+    expect(labels).not.toContain("Edition of")
     expect(labels).toContain("Version")
     expect(labels).toContain("Based on")
     expect(w.vm.showVersionOfEditor).toBe(false)
   })
 
-  it("keeps the Version of editor visible when a direct relation already exists", () => {
+  it("keeps the Edition of editor visible when a direct relation already exists", () => {
     const w = mountEditor(
       {
         prefLabel: { en: ["x"] },
@@ -406,7 +406,7 @@ describe("ItemEditor", () => {
       { hasIncomingVersions: true },
     )
 
-    expect(formLabels(w)).toContain("Version of")
+    expect(formLabels(w)).toContain("Edition of")
     expect(w.vm.showVersionOfEditor).toBe(true)
   })
 
