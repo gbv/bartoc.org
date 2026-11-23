@@ -180,6 +180,7 @@
         v-if="!isRegistry"
         field="replacedBy"
         source-field="replacedBy"
+        icon="circle-exclamation"
         label="Replaced by"
         :items="item.replacedBy">
         <template #item="{ item: terminology }">
