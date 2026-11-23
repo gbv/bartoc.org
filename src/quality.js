@@ -30,5 +30,5 @@ export const qualityChecks = [
     title: "Missing languages", jsonpointer: "/languages", fails: item => !item.languages },
   { id: "api-but-no-examples",
     description: "API endpoints with no notation examples.",
-    title: "API provided without notation examples", jsonpointer: "/notationExamples", fails: item => Boolean(item.API) && !item.notationExamples },
+    title: "API provided without notation examples", jsonpointer: "/notationExamples", fails: item => item.API?.length && !item.notationExamples },
 ]
