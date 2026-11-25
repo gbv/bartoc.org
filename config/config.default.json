@@ -6,7 +6,7 @@
     "api": "coli-conc.gbv.de/login/",
     "ssl": true
   },
-  "name": "BARTOC.org",
+  "name": "BARTOC",
   "fullname": "Basic Register of Thesauri, Ontologies & Classifications",
   "sparql": null,
   "sparqlExamples": "https://gbv.github.io/bartoc-queries/workspace.json",
