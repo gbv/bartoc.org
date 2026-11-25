@@ -78,17 +78,20 @@ async function loadUpdatedAt() {
   }
 }
 
-function disableGeoPlugin() {
-  if (window.Yasr?.defaults?.plugins) {
-    window.Yasr.defaults.plugins.Geo = false
-  }
-}
-
 onMounted(() => {
   loadUpdatedAt()
 
   try {
-    disableGeoPlugin()
+
+    // disable Geo Plugin, we don't have geographic data yet
+    if (window.Yasr?.defaults?.plugins) {
+      window.Yasr.defaults.plugins.Geo = false
+    }
+
+    // TODO: add this prefix
+    // const prefixes = {
+    //  bartoc: "http://bartoc.org/en/node/"
+    // }
 
     matgui = new window.Yasgui(matguiElement.value, {
       ai: {
@@ -105,8 +108,11 @@ onMounted(() => {
       endpointCatalogueOptions: {
         getData: () => [{ endpoint: props.endpoint }],
       },
+      yasr: {
+        // TODO: extend predicateIcons to Graph plugin for dct:basedOn etc.
+      },
       yasqe: {
-        value: "ASK {}", // TODO: get from URL or use first example
+        value: "ASK {}", // TODO: get the first example
       },
     })
     if (props.examples) {
